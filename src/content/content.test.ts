@@ -29,20 +29,19 @@ describe('level content', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('no question repeats an option, and the right answer is not the longest by a mile in most questions', () => {
-    let giveaway = 0;
+  it('no question repeats an option, and option length does not give the answer away', () => {
+    let longer = 0;
     let total = 0;
     for (const { q } of Object.values(questionsById)) {
       expect(new Set(q.options).size, q.id).toBe(q.options.length);
       const [right, ...wrong] = q.options.map((o) => o.length);
+      const ratio = right! / Math.max(...wrong);
+      // plan's quality rule: the right answer is never far longer than every distractor
+      expect(ratio, `${q.id}: right answer is ${ratio.toFixed(2)}× the longest distractor`).toBeLessThan(1.5);
       total++;
-      if (right! > 2 * Math.max(...wrong)) giveaway++;
+      if (ratio > 1.3) longer++;
     }
-    // Quality rule from the plan: option length must not give the answer away.
-    // KNOWN DEBT (first content pass): the right answer is often much longer than the
-    // distractors (~68% of questions at 2×). This guard stops it getting worse; the
-    // distractor-rewrite pass must bring it under 0.15 and then tighten this number.
-    expect(giveaway / total).toBeLessThan(0.7);
+    expect(longer / total).toBeLessThan(0.1);
   });
 
   it('only level 1 uses the traffic simulator for now; the rest have three missions', () => {
