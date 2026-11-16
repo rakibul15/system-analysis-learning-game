@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { designPrompts, designRubric, type DesignPrompt } from '@/features/practice/prompts';
 import { followUps, mockPhases } from '@/features/mock/script';
 import { useProgress } from '@/entities/progress/store';
@@ -12,7 +12,8 @@ const RUBRIC = [...designRubric, ...EXTRA];
 
 /** A 45-minute mock interview: one prompt, five timed phases, an interviewer script, then self-scoring. */
 export function MockPage() {
-  const history = useProgress((s) => s.design.filter((d) => d.promptId.startsWith('mock:')));
+  const allDesign = useProgress((s) => s.design);
+  const history = useMemo(() => allDesign.filter((d) => d.promptId.startsWith('mock:')), [allDesign]);
   const record = useProgress((s) => s.recordDesign);
   const [prompt, setPrompt] = useState<DesignPrompt | null>(null);
   const [phase, setPhase] = useState(0);

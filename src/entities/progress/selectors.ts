@@ -1,3 +1,5 @@
+import { challenges } from '@/features/builder/model';
+import { incidents } from '@/features/incident/incidents';
 import { chapters, levelsById } from '@/content/levels';
 import { CHAPTER_GATE, DAY_MS, PASS_MARK, dayKey, type Mastery } from '@/shared/lib/scoring';
 import type { ProgressData } from './store';
@@ -39,7 +41,7 @@ export function dueCards(p: ProgressData, now = Date.now()) {
 
 export function totalXp(p: ProgressData): number {
   const levelXp = Object.values(p.levels).reduce((s, l) => s + l.best, 0);
-  return levelXp + p.reviewXp + p.estimation.correct * 3 + p.design.length * 20 + p.speak.length * 5;
+  return levelXp + p.reviewXp + p.estimation.correct * 3 + p.design.length * 20 + p.speak.length * 5 + Math.round(Object.values(p.incidents ?? {}).reduce((a, b) => a + b, 0) * 30) + Math.round(Object.values(p.builds ?? {}).reduce((a, b) => a + b, 0) * 30);
 }
 
 /** Days in a row with activity, counting today or yesterday as the latest. */
@@ -57,6 +59,9 @@ export function streak(p: ProgressData): number {
 
 export interface ReadinessPart { id: string; label: string; weight: number; score: number; available: boolean; note: string }
 
+const builderCount = challenges.length;
+const incidentCount = incidents.length;
+
 /** Interview readiness out of 100, with the plan's weights. Parts not built yet count as 0. */
 export function readiness(p: ProgressData): { total: number; parts: ReadinessPart[] } {
   const ids = Object.keys(levelsById).map(Number);
@@ -66,13 +71,16 @@ export function readiness(p: ProgressData): { total: number; parts: ReadinessPar
   const drill = p.estimation.attempts ? (p.estimation.correct / p.estimation.attempts) * drillVolume : 0;
   const recentDesign = p.design.slice(-3);
   const mock = recentDesign.length ? (recentDesign.reduce((s, d) => s + d.score / d.max, 0) / 3) : 0;
+  const avgBest = (rec: Record<string, number>, n: number) => Object.values(rec).reduce((a, b) => a + b, 0) / n;
+  const builder = avgBest(p.builds ?? {}, builderCount);
+  const incident = avgBest(p.incidents ?? {}, incidentCount);
   const parts: ReadinessPart[] = [
     { id: 'campaign', label: 'Campaign (৩০ level)', weight: 30, score: campaign, available: true, note: 'সব level-এর সেরা নম্বরের গড়' },
     { id: 'mock', label: 'Mock আর design challenge', weight: 20, score: mock, available: true, note: 'শেষ ৩টা mock বা design challenge-এর নিজের দেওয়া নম্বর' },
     { id: 'mastery', label: 'দখল', weight: 15, score: mastered, available: true, note: 'কতগুলো level "দক্ষ" বা "পাকা"' },
-    { id: 'builder', label: 'Architecture builder', weight: 15, score: 0, available: false, note: 'এখনো তৈরি হয়নি' },
+    { id: 'builder', label: 'Architecture builder', weight: 15, score: builder, available: true, note: `${toBn(builderCount)}টা challenge-এর সেরা নম্বরের গড়` },
     { id: 'drill', label: 'Estimation drill', weight: 10, score: drill, available: true, note: 'নির্ভুলতা, অন্তত ৪০টা প্রশ্নে পূর্ণ মান' },
-    { id: 'incident', label: 'Incident mode', weight: 10, score: 0, available: false, note: 'এখনো তৈরি হয়নি' },
+    { id: 'incident', label: 'Incident mode', weight: 10, score: incident, available: true, note: `${toBn(incidentCount)}টা incident-এর সেরা নম্বরের গড়` },
   ];
   const total = parts.reduce((s, x) => s + x.weight * x.score, 0);
   return { total: Math.round(total), parts };

@@ -8,6 +8,8 @@ import { play } from '@/shared/lib/sound';
 const NAV = [
   { to: '/', label: 'শহর' },
   { to: '/practice', label: 'Practice' },
+  { to: '/builder', label: 'Builder' },
+  { to: '/incident', label: 'Incident' },
   { to: '/mock', label: 'Mock' },
   { to: '/review', label: 'Review' },
   { to: '/profile', label: 'প্রোফাইল' },

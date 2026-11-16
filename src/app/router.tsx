@@ -3,6 +3,8 @@ import { levelsById } from '@/content/levels';
 import { LevelPage } from '@/pages/level/LevelPage';
 import { MapPage } from '@/pages/map/MapPage';
 import { MockPage } from '@/pages/mock/MockPage';
+import { IncidentPage } from '@/pages/incident/IncidentPage';
+import { BuilderPage } from '@/pages/builder/BuilderPage';
 import { PracticePage } from '@/pages/practice/PracticePage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
@@ -24,6 +26,8 @@ const mapRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', compo
 const reviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/review', component: ReviewPage });
 const practiceRoute = createRoute({ getParentRoute: () => rootRoute, path: '/practice', component: PracticePage });
 const mockRoute = createRoute({ getParentRoute: () => rootRoute, path: '/mock', component: MockPage });
+const incidentRoute = createRoute({ getParentRoute: () => rootRoute, path: '/incident', component: IncidentPage });
+const builderRoute = createRoute({ getParentRoute: () => rootRoute, path: '/builder', component: BuilderPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
 
 const levelRoute = createRoute({
@@ -38,7 +42,7 @@ const levelRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, profileRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, profileRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,
