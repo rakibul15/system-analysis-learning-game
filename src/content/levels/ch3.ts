@@ -41,7 +41,7 @@ export const l8 = level({
 });
 
 export const l9 = level({
-  id: 9, chapter: 3,
+  id: 9, chapter: 3, simulator: 'crawler',
   title: 'দোকানের তালিকা টানা', concept: 'Web crawler',
   story: 'Merchant-এর দোকান থেকে product টানা',
   briefing: 'হাজার merchant-এর website থেকে product তালিকা নিয়মিত টানতে হবে। কিন্তু খুব জোরে টানলে তাদের site বসে যায়, আর একই page বারবার টানা অপচয়।',
@@ -194,7 +194,7 @@ export const l12 = level({
 });
 
 export const l13 = level({
-  id: 13, chapter: 3,
+  id: 13, chapter: 3, simulator: 'autocomplete',
   title: 'ঠিকানা খোঁজা', concept: 'Search autocomplete',
   story: 'ঠিকানা খোঁজা ধীর',
   briefing: 'Customer ঠিকানা লিখতে শুরু করলেই নিচে suggestion আসার কথা। এখন প্রতি অক্ষরে পুরো database খোঁজা হয়, suggestion আসে টাইপ শেষ হওয়ার পরে।',
@@ -232,7 +232,7 @@ export const l13 = level({
 });
 
 export const l14 = level({
-  id: 14, chapter: 3,
+  id: 14, chapter: 3, simulator: 'video',
   title: 'Training video', concept: 'Video streaming (YouTube)',
   story: 'Rider training video upload',
   briefing: 'নতুন rider-দের জন্য training video। Upload হয়, কিন্তু কারো ফোনে চলে না, কারো data শেষ হয়ে যায়, আর CDN-এর bill আকাশছোঁয়া।',
@@ -269,7 +269,7 @@ export const l14 = level({
 });
 
 export const l15 = level({
-  id: 15, chapter: 3,
+  id: 15, chapter: 3, simulator: 'filesync',
   title: 'Invoice sync', concept: 'File sync (Google Drive)',
   story: 'Invoice file sync',
   briefing: 'Merchant-এর invoice file laptop-এ বদলায়, ফোনে পুরনোটা দেখায়। আবার ২০০ MB file-এ এক লাইন বদলালেও পুরোটা upload হয়।',

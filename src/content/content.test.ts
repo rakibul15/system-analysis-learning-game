@@ -48,7 +48,9 @@ describe('level content', () => {
     expect(levelList.filter((l) => l.play.kind === 'traffic').map((l) => l.id)).toEqual([1]);
   });
 
-  it('the v1 levels have an interactive simulator', () => {
-    expect(levelList.filter((l) => l.simulator).map((l) => l.id)).toEqual([2, 3, 4, 5, 6, 8, 10, 11, 12, 16, 26]);
+  it('every level after the first has an interactive simulator, each a different one', () => {
+    const sims = levelList.filter((l) => l.simulator);
+    expect(sims.map((l) => l.id)).toEqual(levelList.map((l) => l.id).filter((id) => id !== 1));
+    expect(new Set(sims.map((l) => l.simulator)).size).toBe(sims.length);
   });
 });

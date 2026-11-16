@@ -4,7 +4,7 @@ import { refs } from '../refs';
 /* Chapter ৫ · টাকা, slot আর গুদাম — Vol 2, ch 7–13 */
 
 export const l22 = level({
-  id: 22, chapter: 5,
+  id: 22, chapter: 5, simulator: 'reservation',
   title: 'একই slot দুজনকে', concept: 'Reservation · Concurrency',
   story: 'একই pickup slot দুজনকে',
   briefing: 'বিকেল ৪টার শেষ pickup slot দুজন merchant একসাথে বুক করল, দুজনেই "সফল" দেখল। Rider একজন, অপেক্ষায় দুজন। Race condition-এর সাথে প্রথম দেখা।',
@@ -42,7 +42,7 @@ export const l22 = level({
 });
 
 export const l23 = level({
-  id: 23, chapter: 5,
+  id: 23, chapter: 5, simulator: 'email',
   title: 'Receipt spam-এ', concept: 'Email service',
   story: 'Receipt spam-এ যাচ্ছে',
   briefing: 'Delivery receipt email অর্ধেক customer-এর spam folder-এ যাচ্ছে। কেউ দেখছে না, অভিযোগ বাড়ছে। Email কোন পথে যায়, আর কে ঠিক করে inbox না spam?',
@@ -80,7 +80,7 @@ export const l23 = level({
 });
 
 export const l24 = level({
-  id: 24, chapter: 5,
+  id: 24, chapter: 5, simulator: 'objectStore',
   title: 'POD ছবির খরচ', concept: 'Object storage (S3)',
   story: 'Proof-of-delivery ছবি রাখার খরচ',
   briefing: 'প্রতিটা delivery-র proof ছবি রাখা আইনত বাধ্যতামূলক, ৫ বছর। প্রতিটার তিন copy রাখায় storage bill তিনগুণ। কম খরচে সমান নিরাপদ রাখা যায়?',
@@ -118,7 +118,7 @@ export const l24 = level({
 });
 
 export const l25 = level({
-  id: 25, chapter: 5,
+  id: 25, chapter: 5, simulator: 'leaderboard',
   title: 'Rider ranking', concept: 'Leaderboard',
   story: 'Rider ranking',
   briefing: 'মাসের সেরা rider-রা bonus পাবে। App-এ live ranking চাই: প্রতিটা delivery-তে score বাড়বে, আর প্রত্যেকে নিজের rank দেখবে।',
@@ -194,7 +194,7 @@ export const l26 = level({
 });
 
 export const l27 = level({
-  id: 27, chapter: 5,
+  id: 27, chapter: 5, simulator: 'wallet',
   title: 'Payout মাঝপথে', concept: 'Digital wallet · Distributed transaction',
   story: 'Merchant payout মাঝপথে fail',
   briefing: 'Merchant-এর wallet থেকে টাকা কাটা হল, কিন্তু তার bank account-এ পৌঁছানোর আগেই সিস্টেম পড়ে গেল। টাকা কোথায়? দুই database-এর মধ্যে transaction-এর পাঠ।',
@@ -231,7 +231,7 @@ export const l27 = level({
 });
 
 export const l28 = level({
-  id: 28, chapter: 5,
+  id: 28, chapter: 5, simulator: 'exchange',
   title: 'দ্রুততম matching', concept: 'Stock exchange',
   story: 'দ্রুততম matching',
   briefing: 'নতুন feature: rider-রা delivery job-এর জন্য bid করবে, সবচেয়ে কম দাম আর আগে আসা জিতবে। লাখো bid, microsecond-এ মেলাতে হবে—ঠিক stock exchange-এর মতো।',

@@ -4,7 +4,7 @@ import { refs } from '../refs';
 /* Chapter ৬ · বড় দিনের প্রস্তুতি — architecture guide আর final */
 
 export const l29 = level({
-  id: 29, chapter: 6,
+  id: 29, chapter: 6, simulator: 'resilience',
   title: 'টিকে থাকার নিয়ম', concept: 'Outbox · Circuit breaker · Resilience',
   story: 'পুরো system টিকিয়ে রাখা',
   briefing: 'সব আলাদা অংশ এখন জোড়া লাগানো। কিন্তু একটা ধীর dependency পুরো site ধীর করে দিচ্ছে, আর DB-তে order আছে অথচ event যায়নি। Production-এ টিকে থাকার নিয়মগুলো।',
@@ -42,7 +42,7 @@ export const l29 = level({
 });
 
 export const l30 = level({
-  id: 30, chapter: 6,
+  id: 30, chapter: 6, simulator: 'interview',
   title: 'Interview-এর দিন', concept: 'Final · ৪৫ মিনিটের interview',
   story: 'Interview-এর দিন',
   briefing: 'আজ আসল দিন। ৪৫ মিনিট, একটা খোলা প্রশ্ন, একজন interviewer। ৩০ level-এর সব জ্ঞান এক জায়গায়, আর সময় ভাগের কৌশল।',

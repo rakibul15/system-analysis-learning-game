@@ -83,7 +83,7 @@ export const l6 = level({
 });
 
 export const l7 = level({
-  id: 7, chapter: 2,
+  id: 7, chapter: 2, simulator: 'snowflake',
   title: 'একই ID দুবার', concept: 'Unique ID generator',
   story: 'দুই server একই parcel ID দিল',
   briefing: 'দুটো database server আলাদাভাবে গুনছিল, আর আজ দুটো parcel একই ID পেল। একটার tracking-এ অন্যটার ঠিকানা! এমন ID চাই যা কখনো মেলে না, আর সময়ের ক্রমে সাজানো।',

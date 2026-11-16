@@ -44,7 +44,7 @@ export const l16 = level({
 });
 
 export const l17 = level({
-  id: 17, chapter: 4,
+  id: 17, chapter: 4, simulator: 'nearby',
   title: 'Live rider', concept: 'Nearby friends',
   story: 'Live rider location',
   briefing: 'Customer map-এ দেখতে চায় তার rider কোথায়, মুহূর্তে মুহূর্তে। হাজারো rider প্রতি কয়েক সেকেন্ডে location পাঠায়।',
@@ -82,7 +82,7 @@ export const l17 = level({
 });
 
 export const l18 = level({
-  id: 18, chapter: 4,
+  id: 18, chapter: 4, simulator: 'maps',
   title: 'ETA ভুল', concept: 'Maps · Routing',
   story: 'ETA ভুল দেখাচ্ছে',
   briefing: 'App বলছে ১৫ মিনিটে পৌঁছাবে, আসল সময় ৪৫ মিনিট। জ্যামের খবর পৌঁছায় না, আর পুরো দেশের রাস্তায় route খুঁজতে অনেক সময়।',
@@ -120,7 +120,7 @@ export const l18 = level({
 });
 
 export const l19 = level({
-  id: 19, chapter: 4,
+  id: 19, chapter: 4, simulator: 'mq',
   title: 'Event হারাচ্ছে', concept: 'Distributed message queue',
   story: 'Event হারাচ্ছে',
   briefing: 'Order event-গুলো মাঝে মাঝে হারায়, আবার কখনো দুবার process হয়। Service-গুলোর মাঝে একটা নির্ভরযোগ্য পাইপ দরকার।',
@@ -158,7 +158,7 @@ export const l19 = level({
 });
 
 export const l20 = level({
-  id: 20, chapter: 4,
+  id: 20, chapter: 4, simulator: 'alerting',
   title: 'কেউ জানে না site ধীর', concept: 'Metrics · Alerting',
   story: 'কেউ জানে না site ধীর',
   briefing: 'গতকাল দুই ঘণ্টা checkout ধীর ছিল, team জানল customer-এর অভিযোগে। এখন থেকে আগে জানতে চাই: সংখ্যা, graph আর সময়মতো alert।',
@@ -196,7 +196,7 @@ export const l20 = level({
 });
 
 export const l21 = level({
-  id: 21, chapter: 4,
+  id: 21, chapter: 4, simulator: 'stream',
   title: 'মিনিটে কত parcel', concept: 'Stream aggregation',
   story: 'Hub-এ মিনিটে কত parcel',
   briefing: 'প্রতিটা hub-এ মিনিটে কত parcel scan হল, dashboard-এ live দেখাতে হবে, আর মাস শেষে এই সংখ্যা দিয়েই partner-কে টাকা দেওয়া হবে। তাই গোনা নির্ভুল হতে হবে।',

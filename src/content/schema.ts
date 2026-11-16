@@ -94,7 +94,10 @@ export const missionPlaySchema = z.object({
 
 /* ---------- level ---------- */
 
-export const SIMULATOR_IDS = ['cache', 'estimation', 'ratelimit', 'hashring', 'quorum', 'shortener', 'notify', 'feed', 'chat', 'proximity', 'payment'] as const;
+export const SIMULATOR_IDS = [
+  'cache', 'estimation', 'ratelimit', 'hashring', 'quorum', 'shortener', 'notify', 'feed', 'chat', 'proximity', 'payment',
+  'snowflake', 'crawler', 'autocomplete', 'video', 'filesync', 'nearby', 'maps', 'mq', 'alerting', 'stream', 'reservation', 'email', 'objectStore', 'leaderboard', 'wallet', 'exchange', 'resilience', 'interview',
+] as const;
 export type SimulatorId = (typeof SIMULATOR_IDS)[number];
 
 export const levelSchema = z
