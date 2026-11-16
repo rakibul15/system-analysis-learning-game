@@ -1,0 +1,559 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে ১২–১৫</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <nav class="back"><a href="../#/study/p1" target="_top">← Part ১</a> · <a href="../#/study/p2" target="_top">← Part ২</a> · <a href="../#/study/p3" target="_top">← Part ৩</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Chapter ১২–১৫</h1>
+  <p class="lede">Part ৪, real-time আর বড় file। Alex Xu-র Volume 1-এর শেষ চারটা design: chat system, search autocomplete, YouTube আর Google Drive। এগুলোতে নতুন চ্যালেঞ্জ আসে: স্থায়ী connection, প্রতি keystroke-এ উত্তর, বিশাল video আর device-এর মাঝে file sync।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>Ch 12 · Chat system</h2>
+      <a href="#s-ch-scope">12.1 Scope</a>
+      <a href="#s-ch-proto">12.2 Polling, long polling, WebSocket</a>
+      <a href="#s-ch-arch">12.3 Architecture ও storage</a>
+      <a href="#s-ch-id">12.4 Message ID</a>
+      <a href="#s-ch-flow">12.5 Message flow</a>
+      <a href="#s-ch-pres">12.6 Online presence</a>
+    </div>
+    <div><h2>Ch 13 · Search autocomplete</h2>
+      <a href="#s-ac-scope">13.1 Scope ও হিসাব</a>
+      <a href="#s-ac-trie">13.2 Trie ও top-k cache</a>
+      <a href="#s-ac-pipe">13.3 Data gathering ও query service</a>
+      <a href="#s-ac-scale">13.4 Trie-র কাজ ও scaling</a>
+    </div>
+    <div><h2>Ch 14 · YouTube</h2>
+      <a href="#s-yt-scope">14.1 Scope ও খরচের হিসাব</a>
+      <a href="#s-yt-up">14.2 Upload flow</a>
+      <a href="#s-yt-tx">14.3 Transcoding ও DAG</a>
+      <a href="#s-yt-opt">14.4 Speed, safety, খরচ</a>
+    </div>
+    <div><h2>Ch 15 · Google Drive</h2>
+      <a href="#s-gd-scope">15.1 Scope ও হিসাব</a>
+      <a href="#s-gd-block">15.2 Block server ও delta sync</a>
+      <a href="#s-gd-arch">15.3 Architecture ও metadata</a>
+      <a href="#s-gd-flow">15.4 Upload, notification, conflict</a>
+      <a href="#s-gd-save">15.5 Storage বাঁচানো ও failure</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= CHAPTER 12 ================= -->
+<section class="chapter" id="ch12">
+  <div class="eyebrow">CHAPTER 12</div>
+  <h2>Chat system</h2>
+  <p>আগের design-গুলোতে client request পাঠাত, server উত্তর দিত। Chat-এ server-কেও নিজে থেকে client-কে message পাঠাতে হয়। পুরো chapter এই একটা সমস্যার চারপাশে। Rider আর merchant-এর মাঝে in-app chat বা live rider location একই ধাঁচের সমস্যা।</p>
+</section>
+
+<section class="c" id="s-ch-scope">
+  <div class="head"><span class="num">12.1</span><h3>Scope</h3></div>
+  <p>বইয়ের ধরে নেওয়া: one-on-one chat দ্রুত; ছোট group chat (সর্বোচ্চ ১০০ জন); online presence; একই account-এ একাধিক device; push notification; দিনে ৫ কোটি active user; শুধু text, ১ লাখ character-এর কম; chat history চিরকাল রাখা।</p>
+</section>
+
+<section class="c" id="s-ch-proto">
+  <div class="head"><span class="num">12.2</span><h3>Polling, long polling, WebSocket</h3></div>
+  <p>পাঠানো সহজ: client HTTP দিয়ে chat service-এ পাঠায় (keep-alive header রাখলে connection বারবার খুলতে হয় না)। গ্রহণ করাটা কঠিন, কারণ HTTP-তে client-ই শুরু করে।</p>
+  <div class="tbl"><table>
+    <tr><th>উপায়</th><th>কীভাবে</th><th>সমস্যা</th></tr>
+    <tr><td>Polling</td><td>Client কিছুক্ষণ পরপর জিজ্ঞেস করে: নতুন message আছে?</td><td>বেশিরভাগ উত্তর "না", server resource নষ্ট</td></tr>
+    <tr><td>Long polling</td><td>Client request খুলে রাখে; নতুন message এলে বা timeout হলে server উত্তর দেয়, client আবার খোলে</td><td>Sender আর receiver আলাদা server-এ থাকতে পারে (stateless HTTP); client disconnect হল কি না বোঝা কঠিন; যে user কম chat করে তার জন্যও বারবার connection</td></tr>
+    <tr><td>WebSocket</td><td>Client HTTP দিয়ে শুরু করে, handshake-এ upgrade হয়ে একটা স্থায়ী দুই-দিকের connection</td><td>প্রতিটা connection server-এ ধরে রাখতে হয়; connection সামলানো কঠিন</td></tr>
+  </table></div>
+  <p>বই WebSocket নেয়, পাঠানো আর গ্রহণ দুটোতেই। Port 80 বা 443 ব্যবহার করে বলে firewall-এও সাধারণত চলে।</p>
+  <details class="self"><summary>নিজেকে যাচাই: long polling-এ sender আর receiver আলাদা server-এ থাকলে সমস্যা কোথায়?</summary><p>Receiver-এর খোলা request যে server-এ আছে, message হয়তো এসেছে অন্য server-এ। সেই server receiver-কে সরাসরি উত্তর দিতে পারে না।</p></details>
+</section>
+
+<section class="c" id="s-ch-arch">
+  <div class="head"><span class="num">12.3</span><h3>Architecture ও storage</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="তিন ভাগ: load balancer-এর পেছনে stateless service যেমন login, signup, profile, service discovery; stateful chat service যার সাথে client WebSocket-এ যুক্ত; আর third-party push notification।">
+      <rect x="10" y="96" width="90" height="48" rx="6" class="box"/><text x="55" y="125" text-anchor="middle" class="t-h">Client</text>
+      <rect x="150" y="14" width="250" height="110" rx="10" class="soft"/>
+      <text x="275" y="32" text-anchor="middle" class="t-s mut">STATELESS · load balancer-এর পেছনে</text>
+      <rect x="164" y="44" width="70" height="30" rx="5" class="box"/><text x="199" y="63" text-anchor="middle" class="t-s">Login</text>
+      <rect x="240" y="44" width="70" height="30" rx="5" class="box"/><text x="275" y="63" text-anchor="middle" class="t-s">Signup</text>
+      <rect x="316" y="44" width="70" height="30" rx="5" class="box"/><text x="351" y="63" text-anchor="middle" class="t-s">Profile</text>
+      <rect x="164" y="82" width="222" height="30" rx="5" class="gs-bg gs-s"/><text x="275" y="101" text-anchor="middle" class="t-s">Service discovery (Zookeeper)</text>
+      <rect x="150" y="140" width="250" height="56" rx="10" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="275" y="162" text-anchor="middle" class="t-h">Chat servers</text>
+      <text x="275" y="182" text-anchor="middle" class="t-s">STATEFUL · স্থায়ী WebSocket</text>
+      <rect x="450" y="140" width="220" height="56" rx="10" class="soft"/>
+      <text x="560" y="162" text-anchor="middle" class="t-h">Push notification</text>
+      <text x="560" y="182" text-anchor="middle" class="t-s mut">THIRD-PARTY · offline user-এর জন্য</text>
+      <rect x="450" y="40" width="220" height="56" rx="10" class="soft"/>
+      <text x="560" y="62" text-anchor="middle" class="t-h">Key-value store</text>
+      <text x="560" y="82" text-anchor="middle" class="t-s mut">chat history</text>
+      <line x1="100" y1="110" x2="146" y2="70" class="ln" marker-end="url(#ar)"/><text x="122" y="80" text-anchor="end" class="t-s">HTTP</text>
+      <line x1="100" y1="130" x2="146" y2="166" class="acc-s" stroke-width="2" fill="none" marker-start="url(#ar-acc)" marker-end="url(#ar-acc)"/><text x="40" y="172" class="t-s acc-t">WebSocket</text>
+      <line x1="400" y1="168" x2="446" y2="168" class="ln" marker-end="url(#ar)"/>
+      <line x1="400" y1="150" x2="446" y2="80" class="ln" marker-end="url(#ar)"/>
+      <line x1="275" y1="124" x2="275" y2="136" class="ln-mut"/>
+      <text x="340" y="226" text-anchor="middle" class="t-s mut">Service discovery user-এর অবস্থান, server-এর ক্ষমতা দেখে সবচেয়ে ভালো chat server-টা দেয়</text>
+    </svg></div>
+    <figcaption>Stateful অংশ শুধু chat server। Client একটা chat server-এর সাথেই যুক্ত থাকে, যতক্ষণ সেটা চলছে। তাই service discovery দরকার: login-এর পর কোন server-এ connect করবে সেটা সে বলে দেয়।</figcaption>
+  </figure>
+  <p>Data দুই রকম। User profile, setting, বন্ধুর তালিকার মতো সাধারণ data relational DB-তে, replication আর sharding দিয়ে। Chat history আলাদা: পরিমাণ বিশাল (Facebook Messenger আর WhatsApp মিলে দিনে ৬০ billion message), বেশিরভাগ পড়া হয় সাম্প্রতিক message, আবার search বা jump-এর জন্য random access-ও লাগে। One-on-one-এ read-write অনুপাত প্রায় ১:১।</p>
+  <p>বই key-value store নেয়: সহজে horizontal scaling, data access-এর latency কম, আর relational DB long tail data ভালো সামলায় না (index বড় হলে random access ধীর)। Facebook Messenger HBase, Discord Cassandra ব্যবহার করে।</p>
+</section>
+
+<section class="c" id="s-ch-id">
+  <div class="head"><span class="num">12.4</span><h3>Message ID</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Table</th><th>Primary key</th><th>বাকি column</th></tr>
+    <tr><td>One-on-one message</td><td class="n">message_id</td><td><span class="mono">message_from, message_to, content, created_at</span></td></tr>
+    <tr><td>Group message</td><td class="n">(channel_id, message_id)</td><td><span class="mono">user_id, content, created_at</span>; channel_id partition key</td></tr>
+  </table></div>
+  <p>Message-এর ক্রম ঠিক করতে <span class="mono">created_at</span> যথেষ্ট নয়, কারণ দুটো message একই সময়ে তৈরি হতে পারে। তাই message ID-কে unique আর সময় অনুযায়ী sort-যোগ্য হতে হবে। নতুন message-এর ID পুরনোটার চেয়ে বড়।</p>
+  <div class="two">
+    <div><h4>Global ID</h4><p>Part ২-এর Snowflake। পুরো system-এ unique।</p></div>
+    <div><h4>Local sequence number</h4><p>ID শুধু একটা one-on-one channel বা group-এর ভেতরে unique। বানানো সহজ, আর ক্রম তো ওই channel-এর ভেতরেই দরকার।</p></div>
+  </div>
+  <details class="self"><summary>নিজেকে যাচাই: MySQL-এর auto_increment দিয়ে message ID কেন বানানো হয় না?</summary><p>Chat history আছে NoSQL key-value store-এ, সেখানে সাধারণত auto_increment নেই। আর একটা কেন্দ্রীয় counter scale-এ bottleneck।</p></details>
+</section>
+
+<section class="c" id="s-ch-flow">
+  <div class="head"><span class="num">12.5</span><h3>Message flow</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="User A chat server 1-এ message পাঠায়। Server ID generator থেকে ID নিয়ে message sync queue-তে রাখে, সেখান থেকে key-value store-এ। B online হলে chat server 2 হয়ে WebSocket-এ B-র কাছে, offline হলে push notification।">
+      <rect x="10" y="20" width="80" height="40" rx="6" class="box"/><text x="50" y="45" text-anchor="middle" class="t-h">User A</text>
+      <rect x="130" y="20" width="120" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="190" y="45" text-anchor="middle">Chat server 1</text>
+      <rect x="130" y="100" width="120" height="36" rx="6" class="soft"/><text x="190" y="123" text-anchor="middle" class="t-s">ID generator</text>
+      <rect x="290" y="20" width="140" height="40" rx="6" class="gs-bg gs-s"/><text x="360" y="45" text-anchor="middle">Message sync queue</text>
+      <rect x="290" y="100" width="140" height="36" rx="6" class="soft"/><text x="360" y="123" text-anchor="middle" class="t-s">Key-value store</text>
+      <rect x="470" y="20" width="110" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="525" y="45" text-anchor="middle">Chat server 2</text>
+      <rect x="600" y="20" width="70" height="40" rx="6" class="box"/><text x="635" y="45" text-anchor="middle" class="t-h">B</text>
+      <rect x="470" y="100" width="200" height="36" rx="6" class="soft"/><text x="570" y="123" text-anchor="middle" class="t-s">Push notification (B offline)</text>
+      <line x1="90" y1="40" x2="126" y2="40" class="ln" marker-end="url(#ar)"/><text x="108" y="74" text-anchor="middle" class="t-s">①</text>
+      <line x1="190" y1="60" x2="190" y2="96" class="ln-mut" marker-start="url(#ar-mut)" marker-end="url(#ar-mut)"/><text x="198" y="84" class="t-s mut">②</text>
+      <line x1="250" y1="40" x2="286" y2="40" class="ln" marker-end="url(#ar)"/><text x="268" y="32" text-anchor="middle" class="t-s">③</text>
+      <line x1="360" y1="60" x2="360" y2="96" class="ln" marker-end="url(#ar)"/><text x="368" y="84" class="t-s">④</text>
+      <line x1="430" y1="40" x2="466" y2="40" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/><text x="448" y="14" text-anchor="middle" class="t-s ok-t">⑤ online</text>
+      <line x1="580" y1="40" x2="596" y2="40" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="430" y1="56" x2="466" y2="110" class="ln-mut dash" marker-end="url(#ar-mut)"/><text x="456" y="90" text-anchor="end" class="t-s mut">offline</text>
+      <text x="340" y="180" text-anchor="middle" class="t-s mut">① পাঠানো ② ID নেওয়া ③ queue-তে ④ চিরস্থায়ী store-এ ⑤ B-র WebSocket-এ</text>
+      <text x="340" y="200" text-anchor="middle" class="t-s mut">B কোন chat server-এ যুক্ত, সেটা presence আর service discovery থেকে জানা যায়</text>
+    </svg></div>
+    <figcaption>একাধিক device-এ sync: প্রতিটা device নিজের <span class="mono">cur_max_message_id</span> রাখে। নতুন message মানে যার recipient বর্তমান user আর ID ওই সংখ্যার চেয়ে বড়। ফোন আর laptop আলাদাভাবে নিজের অবস্থান থেকে KV store থেকে টেনে নেয়।</figcaption>
+  </figure>
+  <p><b>ছোট group:</b> message প্রতিটা সদস্যের নিজস্ব message sync queue-তে (inbox) copy হয়। Sync সহজ, কারণ প্রতিজন শুধু নিজের inbox দেখে। সদস্য কম হলে copy খরচ কম; WeChat এভাবে group ৫০০ জনে সীমিত রাখে। হাজার হাজার সদস্যে এটা চলে না।</p>
+</section>
+
+<section class="c" id="s-ch-pres">
+  <div class="head"><span class="num">12.6</span><h3>Online presence</h3></div>
+  <p>Presence server আলাদা, client-এর সাথে WebSocket-এ। Login-এ KV store-এ <span class="mono">status = online</span> আর <span class="mono">last_active_at</span>। Logout-এ offline।</p>
+  <p>সমস্যা disconnect। Mobile-এ network হামেশাই যায়-আসে; প্রতিবার offline-online দেখালে বন্ধুদের কাছে status বারবার বদলায়। সমাধান heartbeat: client ধরা যাক প্রতি ৫ সেকেন্ডে heartbeat পাঠায়; ৩০ সেকেন্ডের মধ্যে কিছু না এলে তবেই offline।</p>
+  <p>Status বন্ধুদের জানানো হয় publish-subscribe দিয়ে: প্রতিটা বন্ধু-জোড়ার একটা channel। ছোট group-এ ভালো চলে। বড় group-এ (যেমন ১ লাখ সদস্য) প্রতি বদলে ১ লাখ event যায়, তাই সেখানে user group-এ ঢুকলে বা তালিকা refresh করলে তখন status টেনে আনা হয়।</p>
+  <details class="self"><summary>নিজেকে যাচাই: rider-এর app-এ network ১০ সেকেন্ডের জন্য গেল। Heartbeat থাকলে আর না থাকলে কী দেখাবে?</summary><p>না থাকলে disconnect-এর সাথে সাথে offline, ফিরলে online: merchant-এর কাছে status কাঁপবে। Heartbeat থাকলে ৩০ সেকেন্ড অপেক্ষা, ১০ সেকেন্ডে ফিরে এলে status online-ই থাকে।</p></details>
+</section>
+
+<!-- ================= CHAPTER 13 ================= -->
+<section class="chapter" id="ch13">
+  <div class="eyebrow">CHAPTER 13</div>
+  <h2>Search autocomplete</h2>
+  <p>Type করার সাথে সাথে সবচেয়ে জনপ্রিয় ৫টা মিলে যাওয়া query। Merchant panel-এ area, thana বা customer name খোঁজার suggestion একই সমস্যা, ছোট পরিসরে।</p>
+</section>
+
+<section class="c" id="s-ac-scope">
+  <div class="head"><span class="num">13.1</span><h3>Scope ও হিসাব</h3></div>
+  <p>বইয়ের ধরে নেওয়া: শুধু শুরু থেকে মিল (prefix), ৫টা suggestion, ক্রম historical query frequency দিয়ে, spell check নেই, শুধু ছোট হাতের ইংরেজি, দিনে ১ কোটি active user। উত্তর ১০০ ms-এর মধ্যে, নইলে type করতে আটকায়।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>QPS</td><td class="n">10M × 10 search × 20 অক্ষর ÷ 86,400</td><td class="n">≈ 24,000</td></tr>
+    <tr><td>Peak QPS</td><td class="n">2 × QPS</td><td class="n">≈ 48,000</td></tr>
+    <tr><td>দিনে নতুন data (২০% query নতুন)</td><td class="n">10M × 10 × 20 byte × 20%</td><td class="n">≈ 0.4 GB</td></tr>
+  </table></div>
+  <p>প্রতিটা অক্ষর type করলে একটা request যায়, তাই ২০ অক্ষরের query = ২০টা request।</p>
+</section>
+
+<section class="c" id="s-ac-trie">
+  <div class="head"><span class="num">13.2</span><h3>Trie ও top-k cache</h3></div>
+  <p>সহজ উপায়: frequency table-এ <span class="mono">WHERE query LIKE 'prefix%' ORDER BY frequency DESC LIMIT 5</span>। ছোট data-য় চলে, বিশাল data-য় database bottleneck। তাই trie: tree, যেখানে root খালি আর প্রতিটা node একটা অক্ষর জোড়ে। Query শেষ হওয়া node-এ frequency থাকে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 270" role="img" aria-label="Trie: root থেকে t, তারপর tr আর to। tr থেকে tre, তারপর tree আর true। to থেকে toy। প্রতিটা node-এ সেই prefix-এর top query cache করা।">
+      <circle cx="340" cy="26" r="16" class="box"/><text x="340" y="30" text-anchor="middle" class="t-m">root</text>
+      <rect x="260" y="70" width="160" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="340" y="88" text-anchor="middle" class="t-m acc-t">t</text><text x="340" y="104" text-anchor="middle" class="t-s">[tree:10, true:35, toy:14]</text>
+      <rect x="150" y="140" width="120" height="44" rx="6" class="box"/><text x="210" y="158" text-anchor="middle" class="t-m">tr</text><text x="210" y="174" text-anchor="middle" class="t-s mut">[true:35, tree:10]</text>
+      <rect x="430" y="140" width="110" height="44" rx="6" class="box"/><text x="485" y="158" text-anchor="middle" class="t-m">to</text><text x="485" y="174" text-anchor="middle" class="t-s mut">[toy:14]</text>
+      <rect x="30" y="210" width="90" height="44" rx="6" class="ok-bg ok-s"/><text x="75" y="228" text-anchor="middle" class="t-m">tree</text><text x="75" y="244" text-anchor="middle" class="t-s ok-t">freq 10</text>
+      <rect x="150" y="210" width="120" height="44" rx="6" class="box"/><text x="210" y="228" text-anchor="middle" class="t-m">tru</text><text x="210" y="244" text-anchor="middle" class="t-s mut">[true:35]</text>
+      <rect x="300" y="210" width="90" height="44" rx="6" class="ok-bg ok-s"/><text x="345" y="228" text-anchor="middle" class="t-m">true</text><text x="345" y="244" text-anchor="middle" class="t-s ok-t">freq 35</text>
+      <rect x="440" y="210" width="90" height="44" rx="6" class="ok-bg ok-s"/><text x="485" y="228" text-anchor="middle" class="t-m">toy</text><text x="485" y="244" text-anchor="middle" class="t-s ok-t">freq 14</text>
+      <line x1="340" y1="42" x2="340" y2="66" class="ln"/>
+      <line x1="310" y1="114" x2="230" y2="140" class="ln"/>
+      <line x1="370" y1="114" x2="460" y2="140" class="ln"/>
+      <line x1="180" y1="184" x2="100" y2="210" class="ln"/><text x="112" y="192" text-anchor="end" class="t-s mut">tre…</text>
+      <line x1="210" y1="184" x2="210" y2="210" class="ln"/>
+      <line x1="270" y1="232" x2="296" y2="232" class="ln"/>
+      <line x1="485" y1="184" x2="485" y2="210" class="ln"/>
+      <text x="580" y="80" class="t-s mut">ধূসর বন্ধনী =</text>
+      <text x="580" y="96" class="t-s mut">ওই node-এ cache</text>
+      <text x="580" y="112" class="t-s mut">করা top query</text>
+    </svg></div>
+    <figcaption>চিত্র সরলীকৃত (tre node বাদ)। Prefix "tr" টাইপ হলে "tr" node-এ গিয়েই cache-এ রাখা তালিকা ফেরত, subtree খুঁজতে হয় না।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>ধাপ</th><th>Optimization ছাড়া</th><th>Optimization সহ</th></tr>
+    <tr><td>Prefix node খোঁজা</td><td class="n">O(p)</td><td class="n">O(1) — prefix-এর দৈর্ঘ্যে সীমা (যেমন ৫০)</td></tr>
+    <tr><td>Subtree ঘুরে সব query</td><td class="n">O(c)</td><td rowspan="2" class="n">O(1) — প্রতিটা node-এ top-k cache</td></tr>
+    <tr><td>Sort করে top k</td><td class="n">O(c log c)</td></tr>
+  </table></div>
+  <p>দাম: প্রতিটা node-এ top query রাখতে অনেক বেশি জায়গা। কিন্তু ১০০ ms-এর শর্তে দ্রুত উত্তর জায়গার চেয়ে বেশি দামি।</p>
+  <details class="self"><summary>নিজেকে যাচাই: top-k cache থাকলে একটা query-র frequency বাড়লে কী কী update করতে হয়?</summary><p>শুধু শেষ node নয়, root পর্যন্ত প্রতিটা পূর্বপুরুষ node-এর cache, কারণ সবার top তালিকায় সেটা থাকতে পারে। এই কারণেই বই real-time update এড়িয়ে নির্দিষ্ট সময় পরপর নতুন trie বানায়।</p></details>
+</section>
+
+<section class="c" id="s-ac-pipe">
+  <div class="head"><span class="num">13.3</span><h3>Data gathering ও query service</h3></div>
+  <p>প্রতিটা query-তে real-time trie বদলানো ধীর, আর trending বাদে suggestion রোজ খুব একটা বদলায় না। তাই দুটো আলাদা পথ।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="উপরে data gathering: analytics log থেকে aggregator, aggregated data, worker, trie DB, trie cache। নিচে query service: user থেকে load balancer, API server, trie cache, miss হলে trie DB।">
+      <text x="10" y="18" class="t-s mut">DATA GATHERING · offline, যেমন সপ্তাহে একবার</text>
+      <rect x="10" y="28" width="100" height="40" rx="6" class="soft"/><text x="60" y="52" text-anchor="middle" class="t-s">Analytics log</text>
+      <rect x="140" y="28" width="100" height="40" rx="6" class="box"/><text x="190" y="52" text-anchor="middle" class="t-s">Aggregator</text>
+      <rect x="270" y="28" width="110" height="40" rx="6" class="soft"/><text x="325" y="52" text-anchor="middle" class="t-s">Aggregated data</text>
+      <rect x="410" y="28" width="90" height="40" rx="6" class="box"/><text x="455" y="52" text-anchor="middle" class="t-s">Workers</text>
+      <rect x="540" y="28" width="130" height="40" rx="6" class="soft"/><text x="605" y="52" text-anchor="middle" class="t-s">Trie DB</text>
+      <line x1="110" y1="48" x2="136" y2="48" class="ln" marker-end="url(#ar)"/>
+      <line x1="240" y1="48" x2="266" y2="48" class="ln" marker-end="url(#ar)"/>
+      <line x1="380" y1="48" x2="406" y2="48" class="ln" marker-end="url(#ar)"/>
+      <line x1="500" y1="48" x2="536" y2="48" class="ln" marker-end="url(#ar)"/>
+      <text x="10" y="112" class="t-s mut">QUERY SERVICE · প্রতি keystroke</text>
+      <rect x="10" y="122" width="80" height="40" rx="6" class="box"/><text x="50" y="146" text-anchor="middle" class="t-s">User</text>
+      <rect x="120" y="122" width="110" height="40" rx="6" class="box"/><text x="175" y="146" text-anchor="middle" class="t-s">Load balancer</text>
+      <rect x="260" y="122" width="110" height="40" rx="6" class="box"/><text x="315" y="146" text-anchor="middle" class="t-s">API servers</text>
+      <rect x="400" y="122" width="120" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="460" y="146" text-anchor="middle" class="t-s">Trie cache</text>
+      <line x1="90" y1="142" x2="116" y2="142" class="ln" marker-end="url(#ar)"/>
+      <line x1="230" y1="142" x2="256" y2="142" class="ln" marker-end="url(#ar)"/>
+      <line x1="370" y1="142" x2="396" y2="142" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <path d="M520 142 L605 142 L605 72" class="ln-mut dash" marker-end="url(#ar-mut)"/><text x="612" y="110" class="t-s mut">miss</text>
+      <text x="460" y="186" text-anchor="middle" class="t-s mut">Trie DB-র snapshot প্রতি সপ্তাহে cache-এ</text>
+    </svg></div>
+    <figcaption>Trie DB দুই রকম হতে পারে: document store (পুরো trie serialize করে snapshot, যেমন MongoDB) অথবা key-value store (প্রতিটা prefix একটা key, node-এর data value)।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>Query service optimization</th><th>কী করে</th></tr>
+    <tr><td>AJAX</td><td>পুরো page refresh ছাড়া request-response</td></tr>
+    <tr><td>Browser caching</td><td>Suggestion অল্প সময়ে বদলায় না, তাই browser-এ রাখা; Google ১ ঘণ্টা রাখে (<span class="mono">cache-control: private, max-age=3600</span>)</td></tr>
+    <tr><td>Data sampling</td><td>প্রতিটা query log না করে প্রতি N-টার একটা; processing আর storage বাঁচে</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-ac-scale">
+  <div class="head"><span class="num">13.4</span><h3>Trie-র কাজ ও scaling</h3></div>
+  <div class="tbl"><table>
+    <tr><th>কাজ</th><th>কীভাবে</th></tr>
+    <tr><td>Create</td><td>Worker aggregated data থেকে বানায়</td></tr>
+    <tr><td>Update</td><td>সপ্তাহে একবার নতুন trie দিয়ে পুরনোটা বদল (পছন্দের)। একটা একটা node update ধীর, কারণ পূর্বপুরুষ সবার cache বদলাতে হয়।</td></tr>
+    <tr><td>Delete</td><td>ঘৃণা, সহিংসতা বা বিপজ্জনক suggestion: cache-এর সামনে একটা filter layer, আর DB থেকে আলাদাভাবে মুছে ফেলা</td></tr>
+  </table></div>
+  <p>এক server-এ trie না ধরলে shard। প্রথম চিন্তা: প্রথম অক্ষর দিয়ে ভাগ (a–m এক server, n–z আরেক; দরকারে প্রথম দুই অক্ষর)। সমস্যা হল অক্ষর সমান ভাবে আসে না: 'c' দিয়ে শুরু শব্দ 'x'-এর চেয়ে অনেক বেশি। সমাধান: historical data দেখে ভাগ করা আর একটা <b>shard map manager</b> যে জানে কোন prefix কোন shard-এ। যেমন 's' একাই এক shard, আর 'u' থেকে 'z' মিলে আরেকটা।</p>
+  <details class="self"><summary>নিজেকে যাচাই: trending query (যেমন হঠাৎ কোনো খবর) সাপ্তাহিক trie-তে ধরা পড়বে না। কী করবেন?</summary><p>বই wrap up-এ এটা বলে: সাম্প্রতিক query-কে বেশি ওজন দেওয়া, streaming data নিয়ে কাজ (Kafka, Spark Streaming, Storm), আর trie-র কিছু অংশ real-time update। Weekly batch এর জন্য ধীর।</p></details>
+</section>
+
+<!-- ================= CHAPTER 14 ================= -->
+<section class="chapter" id="ch14">
+  <div class="eyebrow">CHAPTER 14</div>
+  <h2>YouTube</h2>
+  <p>Video upload আর stream। মূল কথা দুটো: video বিশাল আর দেখার জন্য অনেক format-এ বদলাতে হয়, আর CDN-এর খরচই এখানে সবচেয়ে বড় খরচ।</p>
+</section>
+
+<section class="c" id="s-yt-scope">
+  <div class="head"><span class="num">14.1</span><h3>Scope ও খরচের হিসাব</h3></div>
+  <p>বইয়ের ধরে নেওয়া: দ্রুত upload, মসৃণ streaming, video quality বদলানো যায়, infrastructure খরচ কম, high availability, scalability, reliability। Mobile, web, smart TV। দিনে ৫০ লাখ active user, প্রতিজন দিনে ৫টা video দেখে, ১০% user দিনে ১টা upload করে, গড় video 300 MB, সর্বোচ্চ ১ GB।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>দিনে নতুন storage</td><td class="n">5M × 10% × 300 MB</td><td class="n">150 TB</td></tr>
+    <tr><td>দিনে CDN খরচ (US, $0.02/GB)</td><td class="n">5M × 5 × 0.3 GB × $0.02</td><td class="n">$150,000</td></tr>
+  </table></div>
+  <p>দিনে দেড় লাখ ডলার শুধু CDN-এ। তাই deep dive-এর একটা বড় অংশ খরচ কমানো। বই নিজে কিছু বানায় না যা আগে থেকে পাওয়া যায়: blob storage আর CDN-এর জন্য cloud service (Netflix AWS, Facebook Akamai)।</p>
+</section>
+
+<section class="c" id="s-yt-up">
+  <div class="head"><span class="num">14.2</span><h3>Upload flow</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="User original storage-এ video upload করে। Transcoding server video বদলিয়ে transcoded storage-এ রাখে, সেখান থেকে CDN। Transcoding শেষে completion queue, completion handler metadata DB আর cache update করে। সমান্তরালে user API server-এ metadata পাঠায়।">
+      <rect x="10" y="90" width="80" height="50" rx="6" class="box"/><text x="50" y="120" text-anchor="middle" class="t-h">User</text>
+      <rect x="130" y="20" width="120" height="44" rx="6" class="soft"/><text x="190" y="40" text-anchor="middle" class="t-s">Original storage</text><text x="190" y="55" text-anchor="middle" class="t-s mut">blob</text>
+      <rect x="290" y="20" width="120" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="350" y="47" text-anchor="middle" class="t-s">Transcoding servers</text>
+      <rect x="450" y="20" width="110" height="44" rx="6" class="soft"/><text x="505" y="40" text-anchor="middle" class="t-s">Transcoded</text><text x="505" y="55" text-anchor="middle" class="t-s">storage</text>
+      <rect x="590" y="20" width="80" height="44" rx="6" class="box"/><text x="630" y="47" text-anchor="middle" class="t-h">CDN</text>
+      <rect x="290" y="100" width="120" height="36" rx="6" class="gs-bg gs-s"/><text x="350" y="123" text-anchor="middle" class="t-s">Completion queue</text>
+      <rect x="450" y="100" width="110" height="36" rx="6" class="box"/><text x="505" y="123" text-anchor="middle" class="t-s">Completion handler</text>
+      <rect x="450" y="176" width="220" height="40" rx="6" class="soft"/><text x="560" y="200" text-anchor="middle" class="t-s">Metadata DB + cache</text>
+      <rect x="130" y="176" width="120" height="40" rx="6" class="box"/><text x="190" y="200" text-anchor="middle" class="t-s">API servers</text>
+      <line x1="90" y1="104" x2="126" y2="50" class="ln" marker-end="url(#ar)"/><text x="98" y="70" class="t-s">video</text>
+      <line x1="250" y1="42" x2="286" y2="42" class="ln" marker-end="url(#ar)"/>
+      <line x1="410" y1="42" x2="446" y2="42" class="ln" marker-end="url(#ar)"/>
+      <line x1="560" y1="42" x2="586" y2="42" class="ln" marker-end="url(#ar)"/>
+      <line x1="350" y1="64" x2="350" y2="96" class="ln" marker-end="url(#ar)"/>
+      <line x1="410" y1="118" x2="446" y2="118" class="ln" marker-end="url(#ar)"/>
+      <line x1="505" y1="136" x2="505" y2="172" class="ln" marker-end="url(#ar)"/>
+      <line x1="90" y1="128" x2="126" y2="190" class="acc-s" stroke-width="1.6" fill="none" marker-end="url(#ar-acc)"/><text x="64" y="172" class="t-s acc-t">metadata</text>
+      <line x1="250" y1="196" x2="446" y2="196" class="ln" marker-end="url(#ar)"/>
+      <text x="340" y="232" text-anchor="middle" class="t-s mut">Video আর metadata (নাম, size, format) সমান্তরালে যায়</text>
+    </svg></div>
+    <figcaption>Streaming-এ পুরো video একবারে নামানো হয় না, অল্প অল্প করে আসে আর চলতে থাকে। Protocol-এর উদাহরণ: MPEG-DASH, Apple HLS, Microsoft Smooth Streaming, Adobe HDS। Video আসে সবচেয়ে কাছের CDN edge থেকে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-yt-tx">
+  <div class="head"><span class="num">14.3</span><h3>Transcoding ও DAG</h3></div>
+  <p>Raw video বিশাল (৬০ fps-এর HD এক ঘণ্টায় কয়েকশো GB)। অনেক device আর browser শুধু নির্দিষ্ট format চালায়। আর network ভালো হলে উঁচু quality, খারাপ হলে নিচু: এর জন্য একই video-র অনেক resolution লাগে। Encoding format-এর দুই অংশ: <b>container</b> (.avi, .mov, .mp4; video, audio, metadata রাখার বাক্স) আর <b>codec</b> (H.264, VP9, HEVC; compress আর decompress-এর algorithm)।</p>
+  <p>Creator-রা আলাদা আলাদা processing চায় (watermark, নিজের thumbnail, HD বা SD), তাই Facebook-এর streaming video engine-এর মতো DAG (directed acyclic graph): কাজগুলো ধাপে ভাগ, যাতে পরস্পর-নির্ভরহীন কাজ সমান্তরালে চলে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="Original video তিন ভাগ হয়: video, audio, metadata। Video থেকে inspection, encoding, thumbnail, watermark সমান্তরালে। Audio encoding আলাদা। শেষে সব মিলে assemble।">
+      <rect x="10" y="80" width="90" height="40" rx="6" class="box"/><text x="55" y="104" text-anchor="middle" class="t-s">Original</text>
+      <rect x="140" y="20" width="90" height="34" rx="6" class="acc-bg acc-s"/><text x="185" y="42" text-anchor="middle" class="t-s">Video</text>
+      <rect x="140" y="84" width="90" height="34" rx="6" class="gs-bg gs-s"/><text x="185" y="106" text-anchor="middle" class="t-s">Audio</text>
+      <rect x="140" y="148" width="90" height="34" rx="6" class="soft"/><text x="185" y="170" text-anchor="middle" class="t-s">Metadata</text>
+      <rect x="290" y="6" width="120" height="26" rx="5" class="box"/><text x="350" y="24" text-anchor="middle" class="t-s">Inspection</text>
+      <rect x="290" y="38" width="120" height="26" rx="5" class="box"/><text x="350" y="56" text-anchor="middle" class="t-s">Encoding (360p…4K)</text>
+      <rect x="290" y="70" width="120" height="26" rx="5" class="box"/><text x="350" y="88" text-anchor="middle" class="t-s">Thumbnail</text>
+      <rect x="290" y="102" width="120" height="26" rx="5" class="box"/><text x="350" y="120" text-anchor="middle" class="t-s">Watermark</text>
+      <rect x="290" y="148" width="120" height="34" rx="5" class="box"/><text x="350" y="170" text-anchor="middle" class="t-s">Audio encoding</text>
+      <rect x="490" y="80" width="170" height="40" rx="6" class="ok-bg ok-s"/><text x="575" y="104" text-anchor="middle" class="t-s">Assemble → encoded video</text>
+      <line x1="100" y1="94" x2="136" y2="40" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="100" x2="136" y2="100" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="108" x2="136" y2="162" class="ln" marker-end="url(#ar)"/>
+      <line x1="230" y1="34" x2="286" y2="19" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="230" y1="37" x2="286" y2="51" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="230" y1="40" x2="286" y2="83" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="230" y1="44" x2="286" y2="113" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="230" y1="106" x2="286" y2="160" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="410" y1="60" x2="486" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="410" y1="160" x2="486" y2="110" class="ln" marker-end="url(#ar)"/>
+    </svg></div>
+    <figcaption>DAG চালানোর architecture: <b>preprocessor</b> (video ভাগ করে GOP-এ, DAG তৈরি, data cache), <b>DAG scheduler</b> (graph-কে ধাপে ভাগ করে task queue-তে), <b>resource manager</b> (task, worker আর running queue মিলিয়ে সবচেয়ে উপযুক্ত worker বাছে), <b>task workers</b>, <b>temporary storage</b>, আর শেষে <b>encoded video</b>।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: GOP কী, আর video-কে GOP-এ ভাগ করার লাভ কী?</summary><p>Group of Pictures: কয়েক সেকেন্ডের একটা টুকরো যেটা নিজে স্বাধীনভাবে চালানো যায়। GOP ধরে ভাগ করলে টুকরোগুলো সমান্তরালে upload আর transcode করা যায়, আর upload মাঝপথে ভাঙলে শুধু বাকি টুকরো আবার পাঠালেই হয়।</p></details>
+</section>
+
+<section class="c" id="s-yt-opt">
+  <div class="head"><span class="num">14.4</span><h3>Speed, safety, খরচ</h3></div>
+  <div class="tbl"><table>
+    <tr><th>লক্ষ্য</th><th>কৌশল</th></tr>
+    <tr><td>Upload দ্রুত</td><td>Client-এ GOP ধরে ভাগ, সমান্তরাল upload; user-এর কাছের upload center (CDN-কে upload center হিসেবে)</td></tr>
+    <tr><td>সব জায়গায় সমান্তরাল</td><td>প্রতিটা ধাপের মাঝে message queue, যাতে কেউ আগের ধাপের শেষের জন্য বসে না থাকে</td></tr>
+    <tr><td>শুধু অনুমোদিত upload</td><td>Pre-signed URL: API server একটা অনুমতিসহ URL দেয়, client সরাসরি storage-এ upload করে</td></tr>
+    <tr><td>Video রক্ষা</td><td>DRM (FairPlay, Widevine, PlayReady), AES encryption (শুধু অনুমোদিত playback-এ decrypt), visual watermark</td></tr>
+    <tr><td>CDN খরচ কমানো</td><td>Video-র জনপ্রিয়তা long-tail: শুধু জনপ্রিয় video CDN-এ, বাকিগুলো নিজের high-capacity storage server থেকে</td></tr>
+    <tr><td>কম encode</td><td>কম জনপ্রিয় video-র কম version; ছোট video দরকারের সময় encode</td></tr>
+    <tr><td>Regional</td><td>কিছু video শুধু নির্দিষ্ট অঞ্চলে জনপ্রিয়, অন্য অঞ্চলের CDN-এ না রাখা</td></tr>
+    <tr><td>নিজের CDN</td><td>ISP-দের সাথে partnership (Netflix-এর মতো); বড় project, শুধু বিশাল scale-এ</td></tr>
+  </table></div>
+  <p>Error দুই রকম। <b>Recoverable</b> (যেমন একটা segment transcode-এ fail): কয়েকবার retry, না হলে client-কে error। <b>Non-recoverable</b> (যেমন video format নষ্ট): কাজ বন্ধ করে error। প্রতিটা component-এর জন্য বইয়ে playbook আছে: upload error-এ retry, API server stateless তাই অন্য server, metadata cache আর DB replicated।</p>
+</section>
+
+<!-- ================= CHAPTER 15 ================= -->
+<section class="chapter" id="ch15">
+  <div class="eyebrow">CHAPTER 15</div>
+  <h2>Google Drive</h2>
+  <p>File রাখা আর device-এর মাঝে sync। YouTube-এ data একবার লেখা হয় আর বহুবার পড়া হয়; এখানে একই file বারবার বদলায়, আর একাধিক device-এ। তাই নতুন প্রশ্ন: কতটুকু পাঠাব, আর দুজন একসাথে বদলালে কী হবে।</p>
+</section>
+
+<section class="c" id="s-gd-scope">
+  <div class="head"><span class="num">15.1</span><h3>Scope ও হিসাব</h3></div>
+  <p>Feature: file যোগ (drag and drop), download, device-এর মাঝে sync, revision দেখা, বন্ধুদের সাথে share, file বদলালে বা মুছলে notification। Google Docs-এর মতো একসাথে editing বাইরে। গুণ: reliability (data কখনও হারানো যাবে না), দ্রুত sync, কম bandwidth, scalability, high availability।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>মোট জায়গা (৫ কোটি user, প্রতিজন 10 GB ফ্রি)</td><td class="n">50M × 10 GB</td><td class="n">500 PB</td></tr>
+    <tr><td>Upload QPS (১ কোটি DAU, দিনে ২টা)</td><td class="n">10M × 2 ÷ 86,400</td><td class="n">≈ 240</td></tr>
+    <tr><td>Peak QPS</td><td class="n">2 × QPS</td><td class="n">≈ 480</td></tr>
+  </table></div>
+  <p>API তিনটা: <b>upload</b> (ছোট file-এ simple; বড় file বা দুর্বল network-এ resumable: আগে upload URL নেওয়া, তারপর data, ভাঙলে যেখানে থেমেছিল সেখান থেকে), <b>download</b>, আর <b>revision তালিকা</b>। সব HTTPS-এ, user authenticated।</p>
+</section>
+
+<section class="c" id="s-gd-block">
+  <div class="head"><span class="num">15.2</span><h3>Block server ও delta sync</h3></div>
+  <p>এক server থেকে শুরু, জায়গা ফুরালে Amazon S3-এর মতো cloud storage (একাধিক region-এ replication)। তারপর আসল কৌশল: file-কে block-এ ভাগ। প্রতিটা block সর্বোচ্চ 4 MB (Dropbox-এর মাপ), নিজস্ব hash দিয়ে চেনা যায়। Block server ভাগ করে, compress করে, encrypt করে, তারপর cloud storage-এ রাখে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 190" role="img" aria-label="File-এর পাঁচটা block। User block 2 আর 5 বদলাল। Delta sync-এ শুধু ওই দুটো block cloud storage-এ যায়।">
+      <text x="10" y="20" class="t-h">আগে</text>
+      <rect x="80" y="6" width="90" height="26" rx="4" class="box"/><text x="125" y="24" text-anchor="middle" class="t-m">block 1</text>
+      <rect x="176" y="6" width="90" height="26" rx="4" class="box"/><text x="221" y="24" text-anchor="middle" class="t-m">block 2</text>
+      <rect x="272" y="6" width="90" height="26" rx="4" class="box"/><text x="317" y="24" text-anchor="middle" class="t-m">block 3</text>
+      <rect x="368" y="6" width="90" height="26" rx="4" class="box"/><text x="413" y="24" text-anchor="middle" class="t-m">block 4</text>
+      <rect x="464" y="6" width="90" height="26" rx="4" class="box"/><text x="509" y="24" text-anchor="middle" class="t-m">block 5</text>
+      <text x="10" y="74" class="t-h">পরে</text>
+      <rect x="80" y="60" width="90" height="26" rx="4" class="box"/><text x="125" y="78" text-anchor="middle" class="t-m">block 1</text>
+      <rect x="176" y="60" width="90" height="26" rx="4" class="gs-bg gs-s"/><text x="221" y="78" text-anchor="middle" class="t-m gs-t">block 2 ✎</text>
+      <rect x="272" y="60" width="90" height="26" rx="4" class="box"/><text x="317" y="78" text-anchor="middle" class="t-m">block 3</text>
+      <rect x="368" y="60" width="90" height="26" rx="4" class="box"/><text x="413" y="78" text-anchor="middle" class="t-m">block 4</text>
+      <rect x="464" y="60" width="90" height="26" rx="4" class="gs-bg gs-s"/><text x="509" y="78" text-anchor="middle" class="t-m gs-t">block 5 ✎</text>
+      <rect x="250" y="140" width="200" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="350" y="164" text-anchor="middle" class="t-h">Cloud storage</text>
+      <line x1="221" y1="86" x2="300" y2="136" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="509" y1="86" x2="410" y2="136" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="570" y="160" class="t-s ok-t">শুধু ২টা block যায়</text>
+      <text x="570" y="176" class="t-s mut">বাকি ৩টা আগেই আছে</text>
+    </svg></div>
+    <figcaption><b>Delta sync:</b> file বদলালে শুধু বদলানো block পাঠানো হয়, পুরো file নয়। <b>Compression:</b> file-এর ধরন অনুযায়ী algorithm, যেমন text-এ gzip বা bzip2। দুটো মিলে bandwidth অনেক কমে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: 2 GB-র একটা file-এ একটা শব্দ বদলালে delta sync ছাড়া আর সহ কতটুকু যায়?</summary><p>ছাড়া পুরো 2 GB। সহ শুধু সেই শব্দ যে block-এ, সেই একটা block, সর্বোচ্চ 4 MB (compress-এর পর আরও কম)।</p></details>
+</section>
+
+<section class="c" id="s-gd-arch">
+  <div class="head"><span class="num">15.3</span><h3>Architecture ও metadata</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Component</th><th>কাজ</th></tr>
+    <tr><td>Block servers</td><td>File ভাগ, compress, encrypt, cloud storage-এ upload</td></tr>
+    <tr><td>Cloud storage</td><td>Block রাখা</td></tr>
+    <tr><td>Cold storage</td><td>অনেক দিন অব্যবহৃত file, কম খরচে</td></tr>
+    <tr><td>Load balancer</td><td>API server-দের মাঝে request ভাগ</td></tr>
+    <tr><td>API servers</td><td>Upload flow ছাড়া প্রায় সব: authentication, profile, file metadata update</td></tr>
+    <tr><td>Metadata DB + cache</td><td>User, file, block, version-এর metadata; file নিজে নয়</td></tr>
+    <tr><td>Notification service</td><td>File যোগ, বদল, মোছার খবর client-দের</td></tr>
+    <tr><td>Offline backup queue</td><td>Client offline থাকলে তার জন্য বদলগুলো জমা; online হলে sync</td></tr>
+  </table></div>
+  <p>Metadata-য় strong consistency লাগে: একই file দুই device-এ আলাদা দেখালে বিপদ। Cache-এ invalidate on write, আর DB relational, কারণ ACID নিজে থেকেই আসে। NoSQL-এ ACID নেই, sync logic-এ আলাদা করে বানাতে হত। Table: <span class="mono">user, device, namespace</span> (user-এর root directory)<span class="mono">, file, file_version</span> (প্রতিটা version শুধু-পড়া)<span class="mono">, block</span>।</p>
+</section>
+
+<section class="c" id="s-gd-flow">
+  <div class="head"><span class="num">15.4</span><h3>Upload, notification, conflict</h3></div>
+  <p>Upload-এ দুটো কাজ সমান্তরালে:</p>
+  <ol>
+    <li><b>Metadata:</b> client API server-কে file-এর metadata পাঠায়, DB-তে <span class="mono">status = pending</span>। Notification service অন্য client-দের জানায় একটা file আসছে।</li>
+    <li><b>Content:</b> client block server-এ পাঠায়; block server ভাগ, compress, encrypt করে cloud storage-এ। শেষ হলে cloud storage callback দেয়, API server status করে <span class="mono">uploaded</span>, আর notification যায়।</li>
+  </ol>
+  <p>Download: অন্য client notification পেয়ে API server থেকে নতুন metadata আনে, তারপর block server থেকে block নামিয়ে file জোড়া লাগায়। Offline client-এর বদল offline backup queue-তে জমা থাকে।</p>
+  <p><b>Notification-এ long polling, WebSocket নয়।</b> এখানে যোগাযোগ এক দিকের (server থেকে client) আর মাঝে মাঝে, chat-এর মতো দুই দিকের ঘন আদান-প্রদান নয়। Client long-poll connection খুলে রাখে; বদল এলে বা timeout হলে connection বন্ধ, client metadata এনে আবার খোলে।</p>
+  <p><b>Sync conflict:</b> দুজন একই file একসাথে বদলালে যার বদল আগে process হয় সেটা জেতে। পরেরজন conflict পায়: system দুটো copy রাখে (তার local copy আর server-এর সর্বশেষ), user ঠিক করে merge করবে নাকি একটা দিয়ে অন্যটা বদলাবে।</p>
+  <details class="self"><summary>নিজেকে যাচাই: chat-এ WebSocket নিলাম, drive-এ long polling। পার্থক্যটা এক লাইনে বলুন।</summary><p>Chat-এ দুই দিকে ঘন ঘন real-time message; drive-এ শুধু server থেকে মাঝে মাঝে "কিছু বদলেছে" সংকেত, যার জন্য স্থায়ী দুই-দিকের connection অপ্রয়োজনীয়।</p></details>
+</section>
+
+<section class="c" id="s-gd-save">
+  <div class="head"><span class="num">15.5</span><h3>Storage বাঁচানো ও failure</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Storage বাঁচানো</th><th>কীভাবে</th></tr>
+    <tr><td>Block dedupe</td><td>একই hash-এর block account-এর ভেতরে একবারই রাখা</td></tr>
+    <tr><td>বুদ্ধিমান backup</td><td>Version-এর সংখ্যায় সীমা (পুরনোটা বাদ); সাম্প্রতিক version বেশি গুরুত্বপূর্ণ ধরে ওজন দেওয়া</td></tr>
+    <tr><td>Cold storage</td><td>মাস বা বছর ধরে অব্যবহৃত data Amazon S3 Glacier-এর মতো সস্তা জায়গায়</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>Failure</th><th>সামলানো</th></tr>
+    <tr><td>Load balancer</td><td>Secondary active হয়ে traffic নেয়; heartbeat দিয়ে পরস্পরকে দেখে</td></tr>
+    <tr><td>Block server</td><td>অন্য server অসম্পূর্ণ বা pending কাজ নেয়</td></tr>
+    <tr><td>Cloud storage</td><td>S3 bucket বিভিন্ন region-এ replicated; এক region না পেলে অন্যটা থেকে</td></tr>
+    <tr><td>API server</td><td>Stateless, তাই load balancer অন্য server-এ পাঠায়</td></tr>
+    <tr><td>Metadata cache</td><td>Replicated; একটা পড়লে অন্যটা, তারপর নতুন server</td></tr>
+    <tr><td>Metadata DB</td><td>Master পড়লে slave promote; slave পড়লে অন্য slave থেকে read</td></tr>
+    <tr><td>Notification service</td><td>প্রতিটা server অনেক long-poll connection ধরে রাখে (Dropbox-এ প্রতি machine-এ ১০ লাখের বেশি)। Server পড়লে সব client-কে আবার connect করতে হয়, আর সেটা ধীর।</td></tr>
+    <tr><td>Offline backup queue</td><td>Replicated; একটা queue পড়লে consumer অন্য queue-তে subscribe</td></tr>
+  </table></div>
+  <p>Wrap up-এ বই একটা বিকল্প নিয়ে ভাবায়: block server বাদ দিয়ে client সরাসরি cloud storage-এ upload করলে দ্রুত হয়, কিন্তু ভাগ, compress, encrypt-এর logic প্রতিটা platform-এ (iOS, Android, web) আলাদা লিখতে হয়, আর client-এ encryption logic রাখা নিরাপদ নয়।</p>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>এই চারটা আর Part ৩-এর চারটা মিলে Volume 1-এর ৮টা design শেষ। প্রতিটা ৪৫ মিনিটে চার ধাপে মুখে বলে দেখুন।</li>
+    <li>Test দিতে চাইলে বলুন। ভুল হওয়া অংশে লাল দাগ বসবে।</li>
+    <li><a href="../#/study/p5" target="_top">Part ৫ →</a> Volume 2 (proximity service, nearby friends, Google Maps, distributed message queue, metrics monitoring, ad click aggregation, hotel reservation, email, S3, leaderboard, payment, digital wallet, stock exchange), তারপর architecture guide আর cheat sheet।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

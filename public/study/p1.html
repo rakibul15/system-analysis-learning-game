@@ -1,0 +1,1814 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে ১–৪</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:780px;margin:0 auto;padding-inline:20px;padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0}
+p{margin:0}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+.verdict{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px;margin-top:24px;display:grid;gap:14px}
+.verdict h2{font-size:1.35rem}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media (max-width:560px){.nums{grid-template-columns:repeat(2,1fr)}}
+.nums div{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--sunk)}
+.nums b{font-family:var(--mono);font-size:1.5rem;display:block;line-height:1.2}
+.nums span{font-size:.8rem;color:var(--muted)}
+.nums .g b{color:var(--right)} .nums .y b{color:var(--guess)} .nums .r b{color:var(--wrong)}
+
+.toc{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px}
+.toc a{font-size:.85rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;border-radius:999px;padding:2px 12px}
+.toc a:hover{border-color:var(--accent)}
+.toc a b{color:var(--wrong);font-family:var(--mono);font-weight:600;margin-left:4px}
+
+section.topic{margin-top:48px;scroll-margin-top:16px}
+section.topic > h2{font-size:1.5rem;display:flex;flex-wrap:wrap;gap:10px;align-items:baseline}
+section.topic > h2 small{font-family:var(--body);font-size:.85rem;color:var(--muted);font-weight:400}
+.item{margin-top:22px;display:grid;gap:12px}
+.item h3{font-size:1.08rem}
+.item h3 .qn{font-family:var(--mono);font-size:.8rem;color:var(--muted);font-weight:400;margin-right:6px}
+.vs{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.93rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.vs dt{font-weight:600;white-space:nowrap}
+.vs dd{margin:0}
+.vs .you{color:var(--wrong)} .vs .ans{color:var(--right)}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.keep{font-size:.93rem;border-left:3px solid var(--accent);padding:2px 0 2px 12px}
+.keep b{color:var(--accent)}
+
+/* svg vocabulary */
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .inv{fill:var(--surface)}
+svg .mk{fill:currentColor} svg .mk-bad{fill:var(--wrong)} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-bad"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<style>
+.wrap{max-width:860px}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+@media (max-width:460px){.toc2{grid-template-columns:1fr}}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.toc2 a .miss-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--wrong);margin-left:6px;vertical-align:2px}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.miss{font-size:.75rem;border:1px solid var(--wrong);color:var(--wrong);background:var(--wrong-soft);border-radius:999px;padding:0 9px;white-space:nowrap}
+.c > p{max-width:68ch}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px;color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two ul{margin:0;padding-left:20px;font-size:.93rem}
+.two .good h4{color:var(--right)} .two .bad h4{color:var(--wrong)}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+svg .bar-f{fill:var(--accent)}
+svg .grid{stroke:var(--line);stroke-width:1}
+</style>
+
+<div class="wrap">
+<header>
+  <nav style="font-size:.88rem;margin-bottom:14px"><a href="../#/study/hub" target="_top" style="color:var(--accent)">← সূচি ও cheat sheet</a> · <a href="../#/study/p2" target="_top" style="color:var(--accent)">Part ২ →</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Chapter ১–৪</h1>
+  <p class="lede">Alex Xu-র বইয়ের প্রথম চার chapter-এর প্রতিটা concept, figure দিয়ে। প্রতিটা অংশের শেষে একটা "নিজেকে যাচাই" প্রশ্ন আছে: উত্তর খোলার আগে মুখে বলে দেখুন। <span style="color:var(--wrong)">লাল দাগ</span> দেওয়া অংশগুলোয় আগের test-এ ভুল হয়েছিল, ওগুলোয় বেশি সময় দিন।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>Ch 1 · শূন্য থেকে লাখো user</h2>
+      <a href="#s-flow">1.1 একটা server ও request flow</a>
+      <a href="#s-tier">1.2 Web tier ও data tier</a>
+      <a href="#s-db">1.3 SQL বনাম NoSQL</a>
+      <a href="#s-scale">1.4 Vertical বনাম horizontal</a>
+      <a href="#s-lb">1.5 Load balancer<span class="miss-dot"></span></a>
+      <a href="#s-repl">1.6 Database replication<span class="miss-dot"></span></a>
+      <a href="#s-cache">1.7 Cache<span class="miss-dot"></span></a>
+      <a href="#s-cdn">1.8 CDN<span class="miss-dot"></span></a>
+      <a href="#s-state">1.9 Stateless web tier</a>
+      <a href="#s-dc">1.10 Data centers</a>
+      <a href="#s-mq">1.11 Message queue</a>
+      <a href="#s-ops">1.12 Logging, metrics, automation<span class="miss-dot"></span></a>
+      <a href="#s-shard">1.13 Database scaling ও sharding<span class="miss-dot"></span></a>
+      <a href="#s-full">1.14 পুরো architecture ও summary<span class="miss-dot"></span></a>
+    </div>
+    <div><h2>Ch 2 · মুখে মুখে হিসাব</h2>
+      <a href="#s-pow">2.1 Power of two</a>
+      <a href="#s-lat">2.2 Latency numbers</a>
+      <a href="#s-avail">2.3 Availability ও SLA</a>
+      <a href="#s-est">2.4 Twitter-এর QPS ও storage</a>
+      <a href="#s-tips">2.5 Estimation-এর নিয়ম</a>
+    </div>
+    <div><h2>Ch 3 · Interview framework</h2>
+      <a href="#s-look">3.1 Interviewer কী খোঁজেন</a>
+      <a href="#s-steps">3.2 চার ধাপ ও সময়</a>
+      <a href="#s-step1">3.3 ধাপ ১: scope ঠিক করা</a>
+      <a href="#s-step2">3.4 ধাপ ২: high-level design</a>
+      <a href="#s-step3">3.5 ধাপ ৩: deep dive</a>
+      <a href="#s-step4">3.6 ধাপ ৪: wrap up</a>
+      <a href="#s-dos">3.7 যা করবেন, যা করবেন না</a>
+    </div>
+    <div><h2>Ch 4 · Rate limiter</h2>
+      <a href="#s-rl-what">4.1 কী করে, কেন লাগে</a>
+      <a href="#s-rl-where">4.2 কোথায় বসবে</a>
+      <a href="#s-rl-token">4.3 Token bucket</a>
+      <a href="#s-rl-leak">4.4 Leaking bucket</a>
+      <a href="#s-rl-fixed">4.5 Fixed window counter</a>
+      <a href="#s-rl-log">4.6 Sliding window log</a>
+      <a href="#s-rl-slide">4.7 Sliding window counter</a>
+      <a href="#s-rl-arch">4.8 Architecture ও header</a>
+      <a href="#s-rl-dist">4.9 Distributed সমস্যা</a>
+      <a href="#s-rl-wrap">4.10 Wrap up</a>
+    </div>
+  </nav>
+</header>
+
+<section class="chapter" id="ch1">
+  <div class="eyebrow">CHAPTER 1</div>
+  <h2>শূন্য থেকে লাখো user</h2>
+  <p>পুরো chapter একটা গল্প: এক server থেকে শুরু, আর প্রতিবার একটা নতুন সমস্যা দেখা দিলে একটা নতুন component যোগ। প্রতিটা component-এর জন্য মনে রাখুন: কোন সমস্যা সমাধান করে, আর কী নতুন ঝামেলা আনে।</p>
+</section>
+
+<section class="c" id="s-flow">
+  <div class="head"><span class="num">1.1</span><h3>একটা server ও request flow</h3></div>
+  <p>শুরুতে web app, database, cache সব এক server-এ। User domain name লেখে, DNS সেটাকে IP বানায়, তারপর browser সেই IP-তে HTTP request পাঠায়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="User DNS-এর কাছে domain-এর IP চায়, DNS IP ফেরত দেয়, user সেই IP-র server-এ HTTP request পাঠায়, server HTML বা JSON ফেরত দেয়।">
+      <rect x="10" y="70" width="130" height="64" rx="6" class="box"/>
+      <text x="75" y="97" text-anchor="middle" class="t-h">User</text>
+      <text x="75" y="117" text-anchor="middle" class="t-s mut">web / mobile app</text>
+      <rect x="270" y="8" width="150" height="50" rx="6" class="box"/>
+      <text x="345" y="30" text-anchor="middle" class="t-h">DNS</text>
+      <text x="345" y="48" text-anchor="middle" class="t-s mut">third-party service</text>
+      <rect x="520" y="70" width="150" height="64" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="595" y="92" text-anchor="middle" class="t-h">Web server</text>
+      <text x="595" y="110" text-anchor="middle" class="t-s">app + DB + cache</text>
+      <text x="595" y="125" text-anchor="middle" class="t-m acc-t">15.125.23.214</text>
+      <line x1="140" y1="76" x2="266" y2="30" class="ln" marker-end="url(#ar)"/>
+      <text x="150" y="40" class="t-s">① api.mysite.com?</text>
+      <line x1="270" y1="52" x2="144" y2="92" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="260" y="86" text-anchor="end" class="t-m mut">② 15.125.23.214</text>
+      <line x1="140" y1="106" x2="516" y2="106" class="ln" marker-end="url(#ar)"/>
+      <text x="400" y="98" text-anchor="middle" class="t-s">③ HTTP request: GET /users/12</text>
+      <line x1="516" y1="126" x2="144" y2="126" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="330" y="146" text-anchor="middle" class="t-s mut">④ HTML page বা JSON response</text>
+      <text x="340" y="186" text-anchor="middle" class="t-s mut">DNS আমাদের server-এ চলে না; IP পাওয়ার পর browser সরাসরি server-এর সাথে কথা বলে</text>
+    </svg></div>
+    <figcaption>Traffic আসে দুই জায়গা থেকে: web app (server-side language-এ logic, HTML/JS-এ দেখানো) আর mobile app (HTTP দিয়ে কথা বলে, response সাধারণত JSON)।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: browser কীভাবে জানে কোন server-এ request পাঠাবে?</summary><p>DNS domain name থেকে IP address দেয়। সেই IP-তেই HTTP request যায়।</p></details>
+</section>
+
+<section class="c" id="s-tier">
+  <div class="head"><span class="num">1.2</span><h3>Web tier ও data tier আলাদা করা</h3></div>
+  <p>User বাড়লে এক server যথেষ্ট থাকে না। প্রথম পদক্ষেপ: traffic সামলানোর server আর database-এর server আলাদা করা।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="User থেকে web tier-এর web server, সেখান থেকে data tier-এর database। দুটো আলাদাভাবে scale হয়।">
+      <rect x="10" y="40" width="120" height="54" rx="6" class="box"/>
+      <text x="70" y="72" text-anchor="middle" class="t-h">User</text>
+      <rect x="230" y="30" width="170" height="74" rx="6" class="box"/>
+      <text x="315" y="22" text-anchor="middle" class="t-s mut">WEB TIER</text>
+      <text x="315" y="64" text-anchor="middle" class="t-h">Web server</text>
+      <text x="315" y="84" text-anchor="middle" class="t-s mut">request, logic</text>
+      <rect x="500" y="30" width="170" height="74" rx="6" class="box"/>
+      <text x="585" y="22" text-anchor="middle" class="t-s mut">DATA TIER</text>
+      <text x="585" y="64" text-anchor="middle" class="t-h">Database</text>
+      <text x="585" y="84" text-anchor="middle" class="t-s mut">data রাখা</text>
+      <line x1="130" y1="67" x2="226" y2="67" class="ln" marker-end="url(#ar)"/>
+      <text x="178" y="58" text-anchor="middle" class="t-s">HTTP</text>
+      <line x1="400" y1="67" x2="496" y2="67" class="ln" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text x="448" y="58" text-anchor="middle" class="t-s">read / write</text>
+      <text x="315" y="130" text-anchor="middle" class="acc-t t-s">traffic বাড়লে এটা বাড়াও</text>
+      <text x="585" y="130" text-anchor="middle" class="acc-t t-s">data বাড়লে এটা বাড়াও</text>
+    </svg></div>
+    <figcaption>আলাদা থাকার লাভ: যে অংশের চাপ বেশি, শুধু সেটাই বাড়ানো যায়। Chapter-এর বাকি সব কিছু এই দুই tier-কে আলাদাভাবে scale করার কৌশল।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-db">
+  <div class="head"><span class="num">1.3</span><h3>SQL বনাম NoSQL</h3></div>
+  <p>Relational database data রাখে table আর row-তে, আর SQL দিয়ে table join করা যায়। NoSQL চার রকম, আর সাধারণত join নেই। ৪০ বছরের পুরনো আর পরীক্ষিত বলে বেশিরভাগ ক্ষেত্রে SQL-ই ভালো default।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="বামে relational: users আর orders table user_id দিয়ে join। ডানে NoSQL-এর চার ধরন: key-value, document, column, graph।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">Relational (SQL)</text>
+      <rect x="10" y="34" width="130" height="96" rx="6" class="box"/>
+      <text x="75" y="54" text-anchor="middle" class="t-h">users</text>
+      <line x1="10" y1="62" x2="140" y2="62" class="ln-mut"/>
+      <text x="20" y="82" class="t-m">7 · Rakib</text>
+      <text x="20" y="102" class="t-m">8 · Nila</text>
+      <rect x="190" y="34" width="140" height="96" rx="6" class="box"/>
+      <text x="260" y="54" text-anchor="middle" class="t-h">orders</text>
+      <line x1="190" y1="62" x2="330" y2="62" class="ln-mut"/>
+      <text x="200" y="82" class="t-m">501 · <tspan class="acc-t">7</tspan> · ৳900</text>
+      <text x="200" y="102" class="t-m">502 · <tspan class="acc-t">8</tspan> · ৳450</text>
+      <line x1="140" y1="82" x2="186" y2="82" class="acc-s" stroke-width="1.5" fill="none" marker-start="url(#ar-acc)" marker-end="url(#ar-acc)"/>
+      <text x="165" y="158" text-anchor="middle" class="acc-t">JOIN on user_id</text>
+      <text x="165" y="180" text-anchor="middle" class="t-s mut">MySQL · PostgreSQL · Oracle</text>
+      <text x="165" y="200" text-anchor="middle" class="t-s mut">transaction, সম্পর্কযুক্ত data</text>
+
+      <line x1="350" y1="10" x2="350" y2="210" class="ln-mut dash"/>
+
+      <text x="520" y="18" text-anchor="middle" class="t-h">Non-relational (NoSQL)</text>
+      <rect x="368" y="34" width="148" height="70" rx="6" class="soft"/>
+      <text x="442" y="54" text-anchor="middle" class="t-h">Key-value</text>
+      <text x="442" y="76" text-anchor="middle" class="t-m">user:7 → {…}</text>
+      <text x="442" y="94" text-anchor="middle" class="t-s mut">DynamoDB, Redis</text>
+      <rect x="526" y="34" width="148" height="70" rx="6" class="soft"/>
+      <text x="600" y="54" text-anchor="middle" class="t-h">Document</text>
+      <text x="600" y="76" text-anchor="middle" class="t-m">{name, orders:[…]}</text>
+      <text x="600" y="94" text-anchor="middle" class="t-s mut">CouchDB, MongoDB</text>
+      <rect x="368" y="114" width="148" height="70" rx="6" class="soft"/>
+      <text x="442" y="134" text-anchor="middle" class="t-h">Column</text>
+      <text x="442" y="156" text-anchor="middle" class="t-m">row → col1 col2 …</text>
+      <text x="442" y="174" text-anchor="middle" class="t-s mut">Cassandra, HBase</text>
+      <rect x="526" y="114" width="148" height="70" rx="6" class="soft"/>
+      <text x="570" y="134" text-anchor="middle" class="t-h">Graph</text>
+      <line x1="610" y1="140" x2="648" y2="128" class="ln-mut"/><line x1="610" y1="140" x2="646" y2="164" class="ln-mut"/>
+      <circle cx="610" cy="140" r="6" class="box"/><circle cx="648" cy="128" r="6" class="box"/><circle cx="646" cy="164" r="6" class="box"/>
+      <text x="570" y="174" text-anchor="middle" class="t-s mut">Neo4j</text>
+      <text x="520" y="206" text-anchor="middle" class="t-s mut">সাধারণত JOIN নেই</text>
+    </svg></div>
+    <figcaption>বই অনুযায়ী NoSQL বিবেচনা করুন যখন: latency খুব কম লাগবে, data unstructured বা সম্পর্কহীন, শুধু JSON/XML serialize করে রাখা, অথবা data-র পরিমাণ বিশাল। টাকা, order, booking-এর মতো সম্পর্কযুক্ত আর transaction-নির্ভর data-তে SQL।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: US-Bangla-র seat booking-এ কোনটা নেবেন, কেন?</summary><p>SQL। Seat, passenger, payment একে অপরের সাথে যুক্ত, আর একই seat দুজনকে বিক্রি না হওয়ার জন্য transaction লাগে।</p></details>
+</section>
+
+<section class="c" id="s-scale">
+  <div class="head"><span class="num">1.4</span><h3>Vertical বনাম horizontal scaling</h3></div>
+  <p>Vertical (scale up): একই machine-এ বেশি CPU আর RAM। Horizontal (scale out): আরও machine। Traffic কম থাকলে vertical সহজ, কিন্তু এর দুটো শক্ত সীমা আছে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="বামে vertical: ছোট server বড় server হয়, কিন্তু সীমা আছে আর একটা পড়লে সব বন্ধ। ডানে horizontal: এক server থেকে চারটা server, একটা পড়লে বাকিরা চলে।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">Vertical · scale up</text>
+      <rect x="40" y="110" width="60" height="60" rx="5" class="box"/>
+      <text x="70" y="145" text-anchor="middle" class="t-s">4 GB</text>
+      <line x1="110" y1="140" x2="176" y2="140" class="ln" marker-end="url(#ar)"/>
+      <text x="143" y="130" text-anchor="middle" class="t-s">CPU, RAM যোগ</text>
+      <rect x="190" y="40" width="100" height="130" rx="5" class="box"/>
+      <text x="240" y="110" text-anchor="middle" class="t-s">256 GB</text>
+      <line x1="180" y1="34" x2="300" y2="34" class="bad-s" stroke-width="2" fill="none"/>
+      <text x="240" y="28" text-anchor="middle" class="t-s bad-t">hardware-এর সীমা</text>
+      <text x="165" y="196" text-anchor="middle" class="bad-t t-s">একটা পড়লে পুরো site বন্ধ (no failover)</text>
+      <text x="165" y="214" text-anchor="middle" class="t-s mut">লাভ: সহজ, code বদলাতে হয় না</text>
+
+      <line x1="340" y1="10" x2="340" y2="214" class="ln-mut dash"/>
+
+      <text x="515" y="18" text-anchor="middle" class="t-h">Horizontal · scale out</text>
+      <rect x="370" y="110" width="50" height="60" rx="5" class="box"/>
+      <line x1="428" y1="140" x2="478" y2="140" class="ln" marker-end="url(#ar)"/>
+      <text x="453" y="130" text-anchor="middle" class="t-s">machine যোগ</text>
+      <rect x="490" y="110" width="40" height="60" rx="5" class="box"/>
+      <rect x="538" y="110" width="40" height="60" rx="5" class="bad-bg bad-s dash"/>
+      <text x="558" y="145" text-anchor="middle" class="bad-t">✗</text>
+      <rect x="586" y="110" width="40" height="60" rx="5" class="box"/>
+      <rect x="634" y="110" width="40" height="60" rx="5" class="box"/>
+      <text x="582" y="96" text-anchor="middle" class="t-s ok-t">একটা পড়লেও বাকিরা চলে ✓</text>
+      <text x="515" y="196" text-anchor="middle" class="ok-t t-s">সীমা প্রায় নেই, failover আছে</text>
+      <text x="515" y="214" text-anchor="middle" class="t-s mut">দাম: load balancer আর stateless design লাগে</text>
+    </svg></div>
+    <figcaption>বড় system-এ horizontal scaling-ই পছন্দ। তবে database-কে horizontally scale করা (sharding) web server-এর চেয়ে অনেক কঠিন। সেটা 1.13-এ।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-lb">
+  <div class="head"><span class="num">1.5</span><h3>Load balancer</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>Load balancer আসা traffic কয়েকটা web server-এ ভাগ করে দেয়। User শুধু load balancer-এর public IP জানে, server-গুলো private IP-তে থাকে। দুটো সমস্যার সমাধান হয়: কোনো server পড়ে গেলে বাকিরা traffic নেয় (failover), আর traffic বাড়লে pool-এ server যোগ করলেই চলে।</p>
+  <figure><div class="scroll"><svg viewBox="0 0 680 230" role="img" aria-label="User-রা load balancer-এর public IP-তে যায়। Load balancer private network-এর ভেতরে থাকা server-দের private IP দিয়ে request পাঠায়। Internet থেকে server-এ সরাসরি যাওয়া আটকানো।">
+        <rect x="10" y="82" width="120" height="52" rx="6" class="box"/>
+        <text x="70" y="106" text-anchor="middle" class="t-h">Users</text>
+        <text x="70" y="124" text-anchor="middle" class="t-s mut">internet</text>
+        <rect x="200" y="82" width="150" height="52" rx="6" class="box"/>
+        <text x="275" y="104" text-anchor="middle" class="t-h">Load balancer</text>
+        <text x="275" y="123" text-anchor="middle" class="t-m acc-t">15.125.23.214</text>
+        <line x1="130" y1="108" x2="196" y2="108" class="ln" marker-end="url(#ar)"/>
+        <text x="163" y="98" text-anchor="middle" class="t-s">public IP</text>
+        <rect x="410" y="14" width="260" height="180" rx="12" class="acc-bg acc-s dash" stroke-width="1.3"/>
+        <text x="540" y="34" text-anchor="middle" class="t-s acc-t">Private network</text>
+        <rect x="440" y="48" width="200" height="44" rx="6" class="box"/>
+        <text x="540" y="75" text-anchor="middle">Server 1 · <tspan class="t-m">10.0.0.1</tspan></text>
+        <rect x="440" y="130" width="200" height="44" rx="6" class="box"/>
+        <text x="540" y="157" text-anchor="middle">Server 2 · <tspan class="t-m">10.0.0.2</tspan></text>
+        <line x1="350" y1="100" x2="436" y2="72" class="ln" marker-end="url(#ar)"/>
+        <line x1="350" y1="116" x2="436" y2="150" class="ln" marker-end="url(#ar)"/>
+        <text x="392" y="112" text-anchor="middle" class="t-s">private IP</text>
+        <path d="M70 136 Q70 212 400 204" class="ln bad-s dash"/>
+        <path d="M398 196 L412 210 M412 196 L398 210" class="ln bad-s" stroke-width="2.5"/>
+        <text x="200" y="198" text-anchor="middle" class="bad-t t-s">server-এ সরাসরি ঢোকা যায় না</text>
+      </svg></div>
+    <figcaption>Server 1 পড়ে গেলে load balancer সব traffic Server 2-তে পাঠায়, আর pool-এ নতুন healthy server যোগ করা হয়। Private IP-র কারণ security: internet থেকে কেউ load balancer এড়িয়ে সরাসরি server-এ পৌঁছাতে পারে না।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: load balancer বসানোর পর web tier ঠিক হল, কিন্তু কোন অংশে এখনও failover নেই?</summary><p>Data tier। Database এখনও একটাই। এর সমাধান পরের অংশের replication।</p></details>
+</section>
+
+<section class="c" id="s-repl">
+  <div class="head"><span class="num">1.6</span><h3>Database replication</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>Master database শুধু write নেয় (insert, update, delete)। Slave-রা master থেকে copy পায় আর শুধু read সামলায়। বেশিরভাগ app-এ read অনেক বেশি হয়, তাই slave সংখ্যায় বেশি থাকে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="Web server-রা write পাঠায় master-এ, read পাঠায় তিনটা slave-এ। Master slave-দের কাছে data replicate করে।">
+      <rect x="10" y="84" width="140" height="60" rx="6" class="box"/>
+      <text x="80" y="119" text-anchor="middle" class="t-h">Web servers</text>
+      <rect x="300" y="14" width="150" height="54" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="375" y="38" text-anchor="middle" class="t-h">Master</text>
+      <text x="375" y="56" text-anchor="middle" class="t-s">শুধু write</text>
+      <rect x="520" y="104" width="150" height="34" rx="6" class="box"/><text x="595" y="126" text-anchor="middle">Slave 1</text>
+      <rect x="520" y="146" width="150" height="34" rx="6" class="box"/><text x="595" y="168" text-anchor="middle">Slave 2</text>
+      <rect x="520" y="188" width="150" height="34" rx="6" class="box"/><text x="595" y="210" text-anchor="middle">Slave 3</text>
+      <line x1="150" y1="100" x2="296" y2="46" class="acc-s" stroke-width="1.8" fill="none" marker-end="url(#ar-acc)"/>
+      <text x="200" y="60" class="t-s acc-t">writes</text>
+      <line x1="150" y1="130" x2="516" y2="164" class="ln" marker-end="url(#ar)"/>
+      <text x="330" y="138" text-anchor="middle" class="t-s">reads (বেশিরভাগ traffic)</text>
+      <path d="M450 50 Q500 50 500 120 L516 120" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <path d="M500 120 L500 205 L516 205" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <line x1="500" y1="163" x2="516" y2="163" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <text x="508" y="40" class="t-s mut">replicate</text>
+    </svg></div>
+    <figcaption>তিনটা লাভ। <b>Performance:</b> read অনেক slave-এ ভাগ হয়, তাই একসাথে বেশি query চলে। <b>Reliability:</b> একটা server নষ্ট হলেও data অন্য জায়গায় থাকে। <b>High availability:</b> একটা database offline থাকলেও site চলে।</figcaption>
+  </figure>
+  <p>কোনো node পড়ে গেলে কী হয়, সেটাই interview-এর আসল প্রশ্ন:</p>
+  <figure><div class="scroll"><svg viewBox="0 0 680 200" role="img" aria-label="Web server-এর read আগে slave-এ যেত। Slave offline হলে read সাময়িকভাবে master-এ যায়, write আগের মতোই master-এ।">
+        <rect x="20" y="72" width="140" height="52" rx="6" class="box"/>
+        <text x="90" y="103" text-anchor="middle" class="t-h">Web server</text>
+        <rect x="480" y="16" width="170" height="56" rx="6" class="box"/>
+        <text x="565" y="40" text-anchor="middle" class="t-h">Master</text>
+        <text x="565" y="60" text-anchor="middle" class="t-s mut">এখন read + write</text>
+        <rect x="480" y="128" width="170" height="56" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="565" y="152" text-anchor="middle" class="t-h bad-t">Slave</text>
+        <text x="565" y="172" text-anchor="middle" class="t-s bad-t">offline ✗</text>
+        <line x1="160" y1="84" x2="476" y2="30" class="ln" marker-end="url(#ar)"/>
+        <text x="300" y="50" text-anchor="middle">writes</text>
+        <line x1="160" y1="98" x2="476" y2="58" class="acc-s" stroke-width="2" fill="none" marker-end="url(#ar-acc)"/>
+        <text x="330" y="102" text-anchor="middle" class="acc-t">reads (সাময়িক)</text>
+        <line x1="160" y1="114" x2="476" y2="156" class="ln bad-s dash"/>
+        <text x="318" y="148" text-anchor="middle" class="bad-t">reads ✗</text>
+      </svg></div>
+    <figcaption><b>Slave পড়লে:</b> একাধিক slave থাকলে read বাকি slave-গুলোতে যায়। একটাই থাকলে read সাময়িকভাবে master-এ যায়, তারপর নতুন slave বসানো হয়।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 200" role="img" aria-label="Master-এ W1, W2, W3 লেখা হল। W1 আর W2 slave-এ পৌঁছাল, W3 পৌঁছানোর আগেই master crash করল। Slave promote হল, কিন্তু তাতে W3 নেই।">
+        <text x="10" y="64" class="t-h">Master</text>
+        <text x="10" y="144" class="t-h">Slave</text>
+        <line x1="80" y1="60" x2="420" y2="60" class="ln"/>
+        <line x1="80" y1="140" x2="470" y2="140" class="ln"/>
+        <line x1="470" y1="140" x2="670" y2="140" class="acc-s" stroke-width="4"/>
+        <circle cx="140" cy="60" r="14" class="box"/><text x="140" y="64" text-anchor="middle" class="t-m">W1</text>
+        <circle cx="230" cy="60" r="14" class="box"/><text x="230" y="64" text-anchor="middle" class="t-m">W2</text>
+        <circle cx="350" cy="60" r="14" class="box"/><text x="350" y="64" text-anchor="middle" class="t-m">W3</text>
+        <line x1="148" y1="72" x2="186" y2="124" class="ln-mut" marker-end="url(#ar-mut)"/>
+        <line x1="238" y1="72" x2="276" y2="124" class="ln-mut" marker-end="url(#ar-mut)"/>
+        <line x1="358" y1="72" x2="384" y2="106" class="ln bad-s dash"/>
+        <text x="392" y="116" class="bad-t t-h">✗</text>
+        <circle cx="192" cy="140" r="14" class="box"/><text x="192" y="144" text-anchor="middle" class="t-m">W1</text>
+        <circle cx="282" cy="140" r="14" class="box"/><text x="282" y="144" text-anchor="middle" class="t-m">W2</text>
+        <text x="420" y="30" text-anchor="middle" class="bad-t t-h">crash</text>
+        <path d="M410 50 L430 70 M430 50 L410 70" class="ln bad-s" stroke-width="3"/>
+        <text x="237" y="180" text-anchor="middle" class="t-s mut">↑ replication (সামান্য দেরিতে)</text>
+        <text x="570" y="126" text-anchor="middle" class="acc-t">promote → নতুন master</text>
+        <text x="570" y="170" text-anchor="middle" class="bad-t">কিন্তু W3 এখানে নেই</text>
+        <text x="570" y="190" text-anchor="middle" class="t-s mut">recovery script চালিয়ে উদ্ধার করতে হয়</text>
+      </svg></div>
+    <figcaption><b>Master পড়লে:</b> একটা slave promote হয়ে নতুন master হয়। ঝামেলা হল, slave-এর data master-এর চেয়ে একটু পিছিয়ে থাকতে পারে, তাই হারানো write উদ্ধারে recovery script চালাতে হয়। Multi-master বা circular replication-এর মতো আরও জটিল উপায়ও আছে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: replication থাকলেও user নিজের সদ্য করা update দেখতে পাচ্ছে না, কেন?</summary><p>Write master-এ গেছে, কিন্তু read আসছে এমন slave থেকে যেখানে data এখনও পৌঁছায়নি (replication lag)। সমাধান: write-এর পর কিছুক্ষণ সেই user-এর read master থেকে দেওয়া।</p></details>
+</section>
+
+<section class="c" id="s-cache">
+  <div class="head"><span class="num">1.7</span><h3>Cache</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>Cache হল memory-তে রাখা একটা অস্থায়ী store, database-এর চেয়ে অনেক দ্রুত। প্রতিবার page load-এ database-এ না গিয়ে আগে cache দেখা হয়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="Web server আগে cache-এ খোঁজে। থাকলে সাথে সাথে ফেরত। না থাকলে database থেকে এনে cache-এ রাখে, তারপর ফেরত দেয়।">
+      <rect x="10" y="56" width="130" height="68" rx="6" class="box"/>
+      <text x="75" y="95" text-anchor="middle" class="t-h">Web server</text>
+      <rect x="275" y="56" width="130" height="68" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="340" y="86" text-anchor="middle" class="t-h">Cache</text>
+      <text x="340" y="106" text-anchor="middle" class="t-s">memory · দ্রুত</text>
+      <rect x="540" y="56" width="130" height="68" rx="6" class="box"/>
+      <text x="605" y="86" text-anchor="middle" class="t-h">Database</text>
+      <text x="605" y="106" text-anchor="middle" class="t-s mut">disk · ধীর</text>
+      <line x1="140" y1="72" x2="271" y2="72" class="ln" marker-end="url(#ar)"/>
+      <text x="206" y="62" text-anchor="middle" class="t-s">① cache-এ আছে?</text>
+      <line x1="271" y1="108" x2="144" y2="108" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="206" y="134" text-anchor="middle" class="t-s ok-t">② hit: সাথে সাথে ফেরত</text>
+      <line x1="405" y1="72" x2="536" y2="72" class="ln" marker-end="url(#ar)"/>
+      <text x="470" y="62" text-anchor="middle" class="t-s">③ miss হলে DB-তে</text>
+      <line x1="536" y1="108" x2="409" y2="108" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="470" y="134" text-anchor="middle" class="t-s mut">④ data এনে cache-এ রাখা</text>
+      <text x="340" y="182" text-anchor="middle" class="t-s mut">পরের বার একই request ② দিয়েই শেষ, database পর্যন্ত যেতে হয় না</text>
+    </svg></div>
+    <figcaption>বইয়ে এই strategy-র নাম read-through cache। Industry-তে app নিজে এভাবে cache সামলালে সেটাকে বেশি বলে cache-aside। Interview-এ দুটো নামই জানা থাকা ভালো। Separate cache tier-এর লাভ: দ্রুত response, database-এর চাপ কমে, আর cache আলাদাভাবে scale করা যায়।</figcaption>
+  </figure>
+
+  <p><b>Cache ব্যবহারের পাঁচটা বিবেচনা</b> (বইয়ের সবচেয়ে গুরুত্বপূর্ণ অংশ):</p>
+  <div class="tbl"><table>
+    <tr><th>বিবেচনা</th><th>মূল কথা</th><th>না মানলে কী ভাঙে</th></tr>
+    <tr><td>কখন ব্যবহার</td><td>Read বেশি, write কম এমন data। Memory volatile, তাই জরুরি data database-এ।</td><td>Restart-এ data হারাবে</td></tr>
+    <tr><td>Expiration (TTL)</td><td>খুব ছোটও না, খুব বড়ও না</td><td>ছোট হলে DB-তে চাপ, বড় হলে stale data</td></tr>
+    <tr><td>Consistency</td><td>DB আর cache-এ লেখা এক transaction-এ হয় না</td><td>দুই জায়গায় দুই রকম data</td></tr>
+    <tr><td>Failure</td><td>একটা cache server = SPOF; একাধিক data center-এ রাখুন, memory কিছুটা বেশি রাখুন</td><td>Cache পড়লে সব চাপ DB-তে</td></tr>
+    <tr><td>Eviction</td><td>ভরে গেলে কোনটা বাদ যাবে: LRU (সবচেয়ে জনপ্রিয়), LFU, FIFO</td><td>নতুন data জায়গা পাবে না</td></tr>
+  </table></div>
+
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 250" role="img" aria-label="উপরে TTL: খুব ছোট হলে database-এ চাপ, খুব বড় হলে পুরনো data, মাঝামাঝি ভালো। নিচে LRU: cache ভরা, নতুন item E আসলে সবচেয়ে আগে ব্যবহৃত A বাদ যায়।">
+      <text x="10" y="20" class="t-h">Expiration (TTL)</text>
+      <line x1="40" y1="60" x2="640" y2="60" class="ln-mut" stroke-width="2"/>
+      <rect x="250" y="48" width="180" height="24" rx="12" class="ok-bg ok-s" stroke-width="1.3"/>
+      <text x="340" y="65" text-anchor="middle" class="t-s ok-t">মাঝামাঝি ✓</text>
+      <circle cx="40" cy="60" r="6" class="bad-f"/><circle cx="640" cy="60" r="6" class="bad-f"/>
+      <text x="40" y="92" class="t-s bad-t">খুব ছোট: বারবার miss,</text>
+      <text x="40" y="108" class="t-s bad-t">DB-তে চাপ</text>
+      <text x="640" y="92" text-anchor="end" class="t-s bad-t">খুব বড়: data বদলে গেছে,</text>
+      <text x="640" y="108" text-anchor="end" class="t-s bad-t">cache-এ এখনও পুরনো</text>
+
+      <text x="10" y="146" class="t-h">Eviction: LRU (Least Recently Used)</text>
+      <rect x="10" y="160" width="470" height="62" rx="8" class="soft"/>
+      <text x="245" y="240" text-anchor="middle" class="t-s mut">cache ভরা (৪টা জায়গা)</text>
+      <rect x="20" y="170" width="106" height="42" rx="5" class="bad-bg bad-s dash"/>
+      <text x="73" y="188" text-anchor="middle" class="t-m bad-t">A</text>
+      <text x="73" y="204" text-anchor="middle" class="t-s bad-t">১ ঘণ্টা আগে</text>
+      <rect x="134" y="170" width="106" height="42" rx="5" class="box"/>
+      <text x="187" y="188" text-anchor="middle" class="t-m">D</text>
+      <text x="187" y="204" text-anchor="middle" class="t-s mut">১০ মিনিট আগে</text>
+      <rect x="248" y="170" width="106" height="42" rx="5" class="box"/>
+      <text x="301" y="188" text-anchor="middle" class="t-m">B</text>
+      <text x="301" y="204" text-anchor="middle" class="t-s mut">২ মিনিট আগে</text>
+      <rect x="362" y="170" width="106" height="42" rx="5" class="box"/>
+      <text x="415" y="188" text-anchor="middle" class="t-m">C</text>
+      <text x="415" y="204" text-anchor="middle" class="t-s mut">এইমাত্র</text>
+      <rect x="560" y="170" width="100" height="42" rx="5" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="610" y="188" text-anchor="middle" class="t-m acc-t">E</text>
+      <text x="610" y="204" text-anchor="middle" class="t-s acc-t">নতুন item</text>
+      <line x1="556" y1="191" x2="484" y2="191" class="acc-s" stroke-width="1.5" fill="none" marker-end="url(#ar-acc)"/>
+      <path d="M73 168 Q73 132 150 132" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+      <text x="158" y="136" class="t-s bad-t">A বাদ: সবচেয়ে বেশি সময় ব্যবহার হয়নি</text>
+    </svg></div>
+    <figcaption>LRU ধরে নেয় যে যা অনেকক্ষণ কেউ চায়নি, সেটা সম্ভবত আবার চাওয়া হবে না। LFU বাদ দেয় যেটা সবচেয়ে কম বার চাওয়া হয়েছে। FIFO বাদ দেয় যেটা সবার আগে ঢুকেছে।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 160" role="img" aria-label="Restart-এর আগে cache-এ তিনটা key ছিল, restart-এর পরে cache খালি। Database disk-এ থাকে, restart-এর পরেও সব data আছে।">
+        <rect x="10" y="30" width="200" height="104" rx="6" class="box"/>
+        <text x="110" y="52" text-anchor="middle" class="t-h">Cache (RAM)</text>
+        <text x="30" y="80" class="t-m">price:101 = 90</text>
+        <text x="30" y="100" class="t-m">user:7 = {...}</text>
+        <text x="30" y="120" class="t-m">session:ab = {...}</text>
+        <line x1="218" y1="82" x2="296" y2="82" class="ln" marker-end="url(#ar)"/>
+        <text x="257" y="72" text-anchor="middle" class="t-s">restart</text>
+        <rect x="304" y="30" width="160" height="104" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="384" y="52" text-anchor="middle" class="t-h">Cache (RAM)</text>
+        <text x="384" y="94" text-anchor="middle" class="bad-t">খালি ✗</text>
+        <line x1="488" y1="14" x2="488" y2="150" class="ln-mut dash"/>
+        <rect x="510" y="30" width="160" height="104" rx="6" class="ok-bg ok-s" stroke-width="1.3"/>
+        <text x="590" y="52" text-anchor="middle" class="t-h">Database (disk)</text>
+        <text x="590" y="88" text-anchor="middle" class="ok-t">restart-এর পরেও</text>
+        <text x="590" y="108" text-anchor="middle" class="ok-t">সব data আছে ✓</text>
+      </svg></div>
+    <figcaption><b>কখন ব্যবহার:</b> cache memory-তে থাকে, restart হলে খালি। তাই যে data হারানো চলবে না সেটা database-এ রাখতেই হবে।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 250" role="img" aria-label="App প্রথমে database-এ price 90 লিখল, সফল। তারপর cache-এ লেখার আগে crash। Database-এ 90, cache-এ এখনও পুরনো 100।">
+        <rect x="40" y="10" width="120" height="34" rx="6" class="box"/><text x="100" y="32" text-anchor="middle" class="t-h">App</text>
+        <rect x="280" y="10" width="120" height="34" rx="6" class="box"/><text x="340" y="32" text-anchor="middle" class="t-h">Database</text>
+        <rect x="520" y="10" width="120" height="34" rx="6" class="box"/><text x="580" y="32" text-anchor="middle" class="t-h">Cache</text>
+        <line x1="100" y1="44" x2="100" y2="226" class="ln-mut dash"/>
+        <line x1="340" y1="44" x2="340" y2="226" class="ln-mut dash"/>
+        <line x1="580" y1="44" x2="580" y2="226" class="ln-mut dash"/>
+        <line x1="100" y1="90" x2="336" y2="90" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+        <text x="218" y="80" text-anchor="middle" class="t-m">① UPDATE price = 90</text>
+        <text x="352" y="94" class="ok-t t-s">সফল ✓</text>
+        <line x1="100" y1="145" x2="450" y2="145" class="ln bad-s dash"/>
+        <text x="260" y="135" text-anchor="middle" class="t-m">② SET cache price = 90</text>
+        <path d="M444 137 L460 153 M460 137 L444 153" class="ln bad-s" stroke-width="2.5"/>
+        <text x="470" y="150" class="bad-t t-s">crash</text>
+        <rect x="280" y="180" width="120" height="30" rx="4" class="ok-bg"/>
+        <text x="340" y="200" text-anchor="middle" class="t-m ok-t">price = 90</text>
+        <rect x="508" y="180" width="144" height="30" rx="4" class="bad-bg"/>
+        <text x="580" y="200" text-anchor="middle" class="t-m bad-t">price = 100 (পুরনো)</text>
+        <text x="340" y="244" text-anchor="middle" class="t-s mut">দুটো আলাদা লেখা, মাঝখানে কিছু ভাঙলে দুই জায়গায় দুই রকম data</text>
+      </svg></div>
+    <figcaption><b>Consistency:</b> database-এ লেখা সফল হল, cache-এ লেখার আগে crash হল। এখন দুই জায়গায় দুই রকম data। Multi-region হলে এটা আরও কঠিন (Facebook-এর "Scaling Memcache" paper দেখুন)।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 236" role="img" aria-label="বামে একটা cache down হলে সব request সরাসরি database-এ যায়। ডানে দুই data center-এ দুটো cache, একটা পড়লে অন্যটা কাজ চালায়।">
+        <text x="160" y="18" text-anchor="middle" class="t-h">একটা cache</text>
+        <rect x="30" y="32" width="260" height="40" rx="6" class="box"/>
+        <text x="160" y="57" text-anchor="middle">Web servers</text>
+        <rect x="30" y="118" width="110" height="46" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="85" y="146" text-anchor="middle" class="bad-t">Cache ✗</text>
+        <rect x="180" y="118" width="110" height="46" rx="6" class="bad-bg bad-s" stroke-width="2"/>
+        <text x="235" y="146" text-anchor="middle" class="t-h bad-t">Database</text>
+        <line x1="85" y1="72" x2="85" y2="114" class="ln bad-s dash"/>
+        <line x1="235" y1="72" x2="235" y2="112" class="bad-s" stroke-width="5" fill="none" marker-end="url(#ar-bad)"/>
+        <text x="160" y="190" text-anchor="middle" class="bad-t">সব request সরাসরি DB-তে</text>
+        <text x="160" y="210" text-anchor="middle" class="t-s mut">DB-র উপর হঠাৎ বহুগুণ চাপ, site ধীর বা down</text>
+
+        <line x1="340" y1="10" x2="340" y2="226" class="ln-mut dash"/>
+
+        <text x="520" y="18" text-anchor="middle" class="t-h">একাধিক data center-এ cache</text>
+        <rect x="380" y="32" width="280" height="40" rx="6" class="box"/>
+        <text x="520" y="57" text-anchor="middle">Web servers</text>
+        <rect x="380" y="118" width="125" height="46" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="442" y="146" text-anchor="middle" class="bad-t">Cache A ✗</text>
+        <rect x="535" y="118" width="125" height="46" rx="6" class="ok-bg ok-s" stroke-width="1.5"/>
+        <text x="597" y="146" text-anchor="middle" class="ok-t">Cache B ✓</text>
+        <line x1="597" y1="72" x2="597" y2="114" class="ok-s" stroke-width="2" fill="none" marker-end="url(#ar-ok)"/>
+        <text x="442" y="182" text-anchor="middle" class="t-s mut">Data center 1</text>
+        <text x="597" y="182" text-anchor="middle" class="t-s mut">Data center 2</text>
+        <text x="520" y="208" text-anchor="middle" class="ok-t">একটা পড়লে অন্যটা চলে ✓</text>
+        <text x="520" y="226" text-anchor="middle" class="t-s mut">সাথে প্রয়োজনের চেয়ে কিছুটা বেশি memory</text>
+      </svg></div>
+    <figcaption><b>Failure:</b> একটামাত্র cache server single point of failure। সমাধান: কয়েকটা data center-এ cache, আর প্রয়োজনের চেয়ে কিছু শতাংশ বেশি memory রাখা।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: TTL সমস্যা আর SPOF সমস্যার পার্থক্য কী?</summary><p>TTL হল data কতক্ষণ টাটকা থাকবে সেই প্রশ্ন (stale বনাম DB-র চাপ)। SPOF হল cache server নিজেই পড়ে গেলে কী হবে সেই প্রশ্ন। আগের test-এ এই দুটো গুলিয়ে গিয়েছিল।</p></details>
+</section>
+
+<section class="c" id="s-cdn">
+  <div class="head"><span class="num">1.8</span><h3>CDN (Content Delivery Network)</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>পৃথিবীজুড়ে ছড়ানো server-এর network, যা image, video, CSS, JavaScript-এর মতো static content user-এর সবচেয়ে কাছের জায়গা থেকে দেয়। User CDN server থেকে যত দূরে, page তত ধীর।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="User A image চায়, CDN-এ নেই, CDN origin থেকে এনে TTL পর্যন্ত রাখে আর A-কে দেয়। User B একই image চাইলে CDN cache থেকে সরাসরি দেয়।">
+      <rect x="10" y="16" width="120" height="48" rx="6" class="box"/>
+      <text x="70" y="45" text-anchor="middle" class="t-h">User A</text>
+      <rect x="10" y="166" width="120" height="48" rx="6" class="box"/>
+      <text x="70" y="195" text-anchor="middle" class="t-h">User B</text>
+      <rect x="270" y="80" width="150" height="70" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="345" y="108" text-anchor="middle" class="t-h">CDN edge</text>
+      <text x="345" y="128" text-anchor="middle" class="t-s">user-এর কাছে</text>
+      <rect x="540" y="80" width="130" height="70" rx="6" class="box"/>
+      <text x="605" y="108" text-anchor="middle" class="t-h">Origin</text>
+      <text x="605" y="128" text-anchor="middle" class="t-s mut">web server / S3</text>
+      <line x1="130" y1="34" x2="266" y2="88" class="ln" marker-end="url(#ar)"/>
+      <text x="206" y="44" class="t-s">① image.png</text>
+      <line x1="266" y1="102" x2="134" y2="56" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="196" y="96" text-anchor="end" class="t-s mut">④ ফেরত</text>
+      <line x1="420" y1="102" x2="536" y2="102" class="ln" marker-end="url(#ar)"/>
+      <text x="478" y="94" text-anchor="middle" class="t-s">② miss: আনো</text>
+      <line x1="536" y1="128" x2="424" y2="128" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="480" y="146" text-anchor="middle" class="t-s mut">③ file + TTL header</text>
+      <line x1="130" y1="176" x2="266" y2="138" class="ln" marker-end="url(#ar)"/>
+      <text x="196" y="148" text-anchor="end" class="t-s">⑤ একই image</text>
+      <line x1="266" y1="148" x2="134" y2="200" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="212" y="196" class="t-s ok-t">⑥ cache থেকে সরাসরি ✓</text>
+    </svg></div>
+    <figcaption>Image URL-এর domain CDN provider-এর (যেমন mysite.cloudfront.net)। প্রথম user-এর request-এ CDN origin থেকে file এনে TTL শেষ হওয়া পর্যন্ত রেখে দেয়। তার পরের সবাই কাছের CDN থেকে সরাসরি পায়।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>বিবেচনা</th><th>মূল কথা</th></tr>
+    <tr><td>খরচ</td><td>CDN data transfer-এর জন্য টাকা নেয়; কম ব্যবহৃত file CDN থেকে সরিয়ে রাখুন</td></tr>
+    <tr><td>Cache expiry</td><td>Cache-এর মতোই: খুব বড় হলে পুরনো content, খুব ছোট হলে বারবার origin থেকে আনা</td></tr>
+    <tr><td>CDN fallback</td><td>CDN down হলে client সমস্যাটা ধরে origin থেকে আনবে</td></tr>
+    <tr><td>Invalidation</td><td>TTL শেষের আগে সরাতে: vendor-এর API, অথবা URL-এ version (image.png?v=2)</td></tr>
+  </table></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 130" role="img" aria-label="পুরনো URL logo.png?v=1 CDN-এ cache হয়ে আছে। নতুন URL logo.png?v=2 CDN-এর কাছে নতুন, তাই origin থেকে টাটকা file আসে।">
+      <text x="10" y="20" class="t-h">Versioning দিয়ে invalidation</text>
+      <rect x="10" y="36" width="190" height="36" rx="6" class="soft"/>
+      <text x="105" y="59" text-anchor="middle" class="t-m">logo.png?v=1</text>
+      <line x1="200" y1="54" x2="296" y2="54" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="310" y="58" class="t-s mut">CDN-এ পুরনো logo, TTL শেষ হয়নি</text>
+      <rect x="10" y="84" width="190" height="36" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="105" y="107" text-anchor="middle" class="t-m acc-t">logo.png?v=2</text>
+      <line x1="200" y1="102" x2="296" y2="102" class="acc-s" stroke-width="1.5" fill="none" marker-end="url(#ar-acc)"/>
+      <text x="310" y="106" class="t-s acc-t">CDN-এর কাছে নতুন URL → origin থেকে নতুন logo ✓</text>
+    </svg></div>
+    <figcaption>HTML-এ URL বদলে দিলেই হয়। React build-এ <span class="mono">main.a8f3c.js</span>-এর মতো hash-যুক্ত filename-ও ঠিক এই কৌশল।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 180" role="img" aria-label="Browser আগে CDN থেকে image চায়, CDN down। তখন browser সরাসরি origin server থেকে image আনে।">
+        <rect x="10" y="64" width="130" height="52" rx="6" class="box"/>
+        <text x="75" y="95" text-anchor="middle" class="t-h">Browser / App</text>
+        <rect x="300" y="12" width="170" height="52" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="385" y="35" text-anchor="middle" class="t-h bad-t">CDN</text>
+        <text x="385" y="53" text-anchor="middle" class="t-s bad-t">down ✗</text>
+        <rect x="300" y="116" width="170" height="52" rx="6" class="box"/>
+        <text x="385" y="139" text-anchor="middle" class="t-h">Origin</text>
+        <text x="385" y="157" text-anchor="middle" class="t-s mut">web server বা S3</text>
+        <line x1="140" y1="80" x2="296" y2="40" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+        <text x="200" y="48" text-anchor="middle" class="t-s">① image.png চাওয়া</text>
+        <line x1="140" y1="102" x2="296" y2="140" class="acc-s" stroke-width="2" fill="none" marker-end="url(#ar-acc)"/>
+        <text x="206" y="146" text-anchor="middle" class="t-s acc-t">② fallback: origin</text>
+        <text x="500" y="132" class="ok-t">ধীর হবে, কিন্তু</text>
+        <text x="500" y="152" class="ok-t">page ভাঙবে না ✓</text>
+      </svg></div>
+    <figcaption><b>Fallback:</b> CDN সাময়িকভাবে down হলে client নিজে origin থেকে আনবে। ধীর হবে, কিন্তু site ভাঙবে না।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-state">
+  <div class="head"><span class="num">1.9</span><h3>Stateless web tier</h3></div>
+  <p>Web tier horizontally scale করতে হলে state (যেমন login session) web server থেকে বের করে একটা shared store-এ রাখতে হয়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 250" role="img" aria-label="বামে stateful: User A-র session Server 1-এ, তাই request Server 2-তে গেলে login fail। ডানে stateless: সব server একটা shared session store থেকে পড়ে, request যেকোনো server-এ যেতে পারে।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">Stateful</text>
+      <rect x="10" y="40" width="90" height="40" rx="6" class="box"/><text x="55" y="65" text-anchor="middle">User A</text>
+      <rect x="10" y="160" width="90" height="40" rx="6" class="box"/><text x="55" y="185" text-anchor="middle">User B</text>
+      <rect x="190" y="32" width="130" height="56" rx="6" class="box"/>
+      <text x="255" y="54" text-anchor="middle" class="t-h">Server 1</text>
+      <text x="255" y="74" text-anchor="middle" class="t-m acc-t">session: A</text>
+      <rect x="190" y="152" width="130" height="56" rx="6" class="box"/>
+      <text x="255" y="174" text-anchor="middle" class="t-h">Server 2</text>
+      <text x="255" y="194" text-anchor="middle" class="t-m acc-t">session: B</text>
+      <line x1="100" y1="60" x2="186" y2="60" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="180" x2="186" y2="180" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="72" x2="186" y2="166" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+      <text x="150" y="128" text-anchor="middle" class="t-s bad-t">A → Server 2 ✗</text>
+      <text x="165" y="232" text-anchor="middle" class="t-s bad-t">A-কে সবসময় Server 1-এ যেতে হবে (sticky session)</text>
+
+      <line x1="340" y1="10" x2="340" y2="240" class="ln-mut dash"/>
+
+      <text x="515" y="18" text-anchor="middle" class="t-h">Stateless</text>
+      <rect x="356" y="98" width="70" height="44" rx="6" class="box"/><text x="391" y="125" text-anchor="middle">Users</text>
+      <rect x="470" y="36" width="90" height="40" rx="6" class="box"/><text x="515" y="61" text-anchor="middle">Server 1</text>
+      <rect x="470" y="100" width="90" height="40" rx="6" class="box"/><text x="515" y="125" text-anchor="middle">Server 2</text>
+      <rect x="470" y="164" width="90" height="40" rx="6" class="box"/><text x="515" y="189" text-anchor="middle">Server 3</text>
+      <rect x="596" y="70" width="80" height="100" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="636" y="106" text-anchor="middle" class="t-s acc-t">Session</text>
+      <text x="636" y="122" text-anchor="middle" class="t-s acc-t">store</text>
+      <text x="636" y="144" text-anchor="middle" class="t-s mut">Redis/NoSQL</text>
+      <line x1="426" y1="112" x2="466" y2="58" class="ln" marker-end="url(#ar)"/>
+      <line x1="426" y1="120" x2="466" y2="120" class="ln" marker-end="url(#ar)"/>
+      <line x1="426" y1="128" x2="466" y2="182" class="ln" marker-end="url(#ar)"/>
+      <line x1="560" y1="56" x2="592" y2="90" class="acc-s" fill="none"/>
+      <line x1="560" y1="120" x2="592" y2="120" class="acc-s" fill="none"/>
+      <line x1="560" y1="184" x2="592" y2="150" class="acc-s" fill="none"/>
+      <text x="515" y="232" text-anchor="middle" class="t-s ok-t">যেকোনো request যেকোনো server-এ ✓</text>
+    </svg></div>
+    <figcaption>Stateful-এ load balancer-এর sticky session দিয়ে কাজ চালানো যায়, কিন্তু server যোগ বা বাদ দেওয়া আর failure সামলানো কঠিন হয়। Stateless হলে traffic দেখে server নিজে থেকে যোগ-বাদ (autoscaling) সহজ হয়। বই session store হিসেবে NoSQL বেছেছে, কারণ scale করা সহজ।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: নতুন version deploy করতেই সব user logout হয়ে গেল, কারণ কী?</summary><p>Session web server-এর memory-তে ছিল (stateful)। Server restart হতেই session হারিয়েছে। Session shared store-এ রাখলে এটা হত না।</p></details>
+</section>
+
+<section class="c" id="s-dc">
+  <div class="head"><span class="num">1.10</span><h3>একাধিক data center</h3></div>
+  <p>User বিভিন্ন দেশে ছড়িয়ে পড়লে availability আর speed-এর জন্য একাধিক data center লাগে। geoDNS user-এর location দেখে তাকে সবচেয়ে কাছের data center-এ পাঠায়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="বামে স্বাভাবিক অবস্থা: geoDNS traffic ভাগ করে x শতাংশ US-East-এ, বাকি US-West-এ। ডানে US-West down হলে একশো শতাংশ traffic US-East-এ।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">স্বাভাবিক</text>
+      <rect x="10" y="92" width="80" height="40" rx="6" class="box"/><text x="50" y="117" text-anchor="middle">Users</text>
+      <rect x="116" y="92" width="80" height="40" rx="6" class="box"/><text x="156" y="117" text-anchor="middle">geoDNS</text>
+      <rect x="236" y="30" width="96" height="50" rx="6" class="box"/><text x="284" y="60" text-anchor="middle">US-East</text>
+      <rect x="236" y="144" width="96" height="50" rx="6" class="box"/><text x="284" y="174" text-anchor="middle">US-West</text>
+      <line x1="90" y1="112" x2="112" y2="112" class="ln" marker-end="url(#ar)"/>
+      <line x1="196" y1="104" x2="232" y2="60" class="ln" marker-end="url(#ar)"/>
+      <line x1="196" y1="120" x2="232" y2="166" class="ln" marker-end="url(#ar)"/>
+      <text x="206" y="74" text-anchor="end" class="t-m">x%</text>
+      <text x="206" y="162" text-anchor="end" class="t-m">(100−x)%</text>
+      <line x1="284" y1="80" x2="284" y2="140" class="ln-mut dash" marker-start="url(#ar-mut)" marker-end="url(#ar-mut)"/>
+      <text x="292" y="116" class="t-s mut">data sync</text>
+
+      <line x1="350" y1="10" x2="350" y2="210" class="ln-mut dash"/>
+
+      <text x="515" y="18" text-anchor="middle" class="t-h">US-West down</text>
+      <rect x="370" y="92" width="80" height="40" rx="6" class="box"/><text x="410" y="117" text-anchor="middle">Users</text>
+      <rect x="476" y="92" width="80" height="40" rx="6" class="box"/><text x="516" y="117" text-anchor="middle">geoDNS</text>
+      <rect x="590" y="30" width="86" height="50" rx="6" class="ok-bg ok-s" stroke-width="1.5"/><text x="633" y="60" text-anchor="middle" class="ok-t">US-East</text>
+      <rect x="590" y="144" width="86" height="50" rx="6" class="bad-bg bad-s dash"/><text x="633" y="174" text-anchor="middle" class="bad-t">US-West ✗</text>
+      <line x1="450" y1="112" x2="472" y2="112" class="ln" marker-end="url(#ar)"/>
+      <line x1="556" y1="104" x2="586" y2="60" class="ok-s" stroke-width="2" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="566" y="74" text-anchor="end" class="t-m ok-t">100%</text>
+    </svg></div>
+    <figcaption>তিনটা challenge। <b>Traffic redirection:</b> geoDNS দিয়ে ঠিক data center-এ পাঠানো। <b>Data synchronization:</b> failover-এ user যেন অন্য data center-এ নিজের data পায়, তাই data center-গুলোর মধ্যে replicate (Netflix asynchronous replication করে)। <b>Test ও deployment:</b> সব location-এ test, আর automated deployment যাতে সব জায়গায় একই version থাকে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-mq">
+  <div class="head"><span class="num">1.11</span><h3>Message queue</h3></div>
+  <p>Queue হল একটা durable buffer, যা asynchronous কাজ সম্ভব করে। Producer message পাঠায়, consumer নিজের সুবিধামতো তুলে নিয়ে কাজ করে। দুই পক্ষ একে অপরের জন্য অপেক্ষা করে না।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="Web server-রা photo processing job queue-তে publish করে। তিনটা worker queue থেকে job তুলে কাজ করে। Queue লম্বা হলে worker বাড়ানো হয়।">
+      <rect x="10" y="80" width="130" height="64" rx="6" class="box"/>
+      <text x="75" y="106" text-anchor="middle" class="t-h">Web servers</text>
+      <text x="75" y="126" text-anchor="middle" class="t-s mut">producer</text>
+      <rect x="210" y="84" width="240" height="56" rx="28" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="330" y="74" text-anchor="middle" class="t-h">Message queue</text>
+      <rect x="236" y="98" width="34" height="28" rx="4" class="box"/><text x="253" y="116" text-anchor="middle" class="t-s">job</text>
+      <rect x="278" y="98" width="34" height="28" rx="4" class="box"/><text x="295" y="116" text-anchor="middle" class="t-s">job</text>
+      <rect x="320" y="98" width="34" height="28" rx="4" class="box"/><text x="337" y="116" text-anchor="middle" class="t-s">job</text>
+      <rect x="362" y="98" width="34" height="28" rx="4" class="box"/><text x="379" y="116" text-anchor="middle" class="t-s">job</text>
+      <rect x="520" y="20" width="150" height="44" rx="6" class="box"/><text x="595" y="47" text-anchor="middle">Photo worker 1</text>
+      <rect x="520" y="90" width="150" height="44" rx="6" class="box"/><text x="595" y="117" text-anchor="middle">Photo worker 2</text>
+      <rect x="520" y="160" width="150" height="44" rx="6" class="ok-bg ok-s dash"/><text x="595" y="187" text-anchor="middle" class="ok-t">+ worker 3</text>
+      <line x1="140" y1="112" x2="206" y2="112" class="ln" marker-end="url(#ar)"/>
+      <text x="173" y="104" text-anchor="middle" class="t-s">publish</text>
+      <line x1="450" y1="104" x2="516" y2="44" class="ln" marker-end="url(#ar)"/>
+      <line x1="450" y1="112" x2="516" y2="112" class="ln" marker-end="url(#ar)"/>
+      <line x1="450" y1="120" x2="516" y2="180" class="ok-s" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="484" y="68" text-anchor="middle" class="t-s">consume</text>
+      <text x="595" y="222" text-anchor="middle" class="t-s mut">consumer</text>
+      <text x="330" y="170" text-anchor="middle" class="t-s">queue লম্বা হলে worker বাড়াও,</text>
+      <text x="330" y="188" text-anchor="middle" class="t-s">খালি থাকলে কমাও</text>
+    </svg></div>
+    <figcaption>বইয়ের উদাহরণ: photo crop, sharpen, blur করতে সময় লাগে, তাই user-কে অপেক্ষা না করিয়ে job queue-তে দেওয়া হয়। মূল লাভ decoupling: consumer down থাকলেও producer message পাঠাতে পারে, producer down থাকলেও consumer জমে থাকা message পড়তে পারে। আর দুই পক্ষ আলাদাভাবে scale হয়।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: কোন কাজ queue-তে দেওয়া উচিত নয়?</summary><p>যার ফল user-কে সঙ্গে সঙ্গে দিতে হবে আর যেখানে consistency জরুরি। যেমন seat খালি আছে কিনা যাচাই করে তখনই book করা।</p></details>
+</section>
+
+<section class="c" id="s-ops">
+  <div class="head"><span class="num">1.12</span><h3>Logging, metrics, automation</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>ছোট site-এ এগুলো ভালো অভ্যাস, বড় business-এ অপরিহার্য।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 250" role="img" aria-label="উপরে: তিনটা server-এর log একটা central log service-এ যায়, সেখান থেকে search আর alert। নিচে metric-এর তিন স্তর: host, aggregated, business।">
+      <text x="10" y="20" class="t-h">Logging: সব log এক জায়গায়</text>
+      <rect x="10" y="34" width="80" height="30" rx="5" class="box"/><text x="50" y="54" text-anchor="middle" class="t-s">Server 1</text>
+      <rect x="10" y="70" width="80" height="30" rx="5" class="box"/><text x="50" y="90" text-anchor="middle" class="t-s">Server 2</text>
+      <rect x="10" y="106" width="80" height="30" rx="5" class="box"/><text x="50" y="126" text-anchor="middle" class="t-s">Server 3</text>
+      <rect x="190" y="62" width="160" height="46" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="270" y="90" text-anchor="middle" class="acc-t">Central log service</text>
+      <line x1="90" y1="49" x2="186" y2="76" class="ln" marker-end="url(#ar)"/>
+      <line x1="90" y1="85" x2="186" y2="85" class="ln" marker-end="url(#ar)"/>
+      <line x1="90" y1="121" x2="186" y2="94" class="ln" marker-end="url(#ar)"/>
+      <line x1="350" y1="85" x2="396" y2="85" class="ln" marker-end="url(#ar)"/>
+      <text x="404" y="80" class="t-s">error খোঁজা, alert</text>
+      <text x="404" y="96" class="t-s mut">ELK, Loki, CloudWatch</text>
+
+      <text x="10" y="170" class="t-h">Metrics: তিন স্তর</text>
+      <rect x="10" y="182" width="215" height="58" rx="6" class="soft"/>
+      <text x="22" y="202" class="t-h" style="font-size:12.5px">Host level</text>
+      <text x="22" y="224" class="t-s">CPU · memory · disk I/O</text>
+      <rect x="235" y="182" width="215" height="58" rx="6" class="soft"/>
+      <text x="247" y="202" class="t-h" style="font-size:12.5px">Aggregated level</text>
+      <text x="247" y="224" class="t-s">পুরো DB tier, cache tier-এর performance</text>
+      <rect x="460" y="182" width="210" height="58" rx="6" class="soft"/>
+      <text x="472" y="202" class="t-h" style="font-size:12.5px">Key business</text>
+      <text x="472" y="224" class="t-s">DAU · retention · revenue</text>
+    </svg></div>
+    <figcaption>Server অনেক হলে প্রতিটায় ঢুকে log পড়া অসম্ভব, তাই কেন্দ্রীয়ভাবে জমা করা হয়। Metric-এর উপরের দুই স্তর system-এর স্বাস্থ্য দেখায়, আর business স্তর দেখায় আসল ব্যবহারকারীদের কী হচ্ছে।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 180" role="img" aria-label="Git push হলে CI নিজে থেকে build আর Playwright test চালায়। Pass হলে merge করা যায়, fail হলে merge আটকে যায়।">
+        <rect x="10" y="66" width="110" height="46" rx="6" class="box"/>
+        <text x="65" y="94" text-anchor="middle" class="t-m">git push</text>
+        <rect x="170" y="66" width="110" height="46" rx="6" class="box"/>
+        <text x="225" y="94" text-anchor="middle">Build</text>
+        <rect x="330" y="66" width="130" height="46" rx="6" class="box"/>
+        <text x="395" y="94" text-anchor="middle">Playwright test</text>
+        <line x1="120" y1="89" x2="166" y2="89" class="ln" marker-end="url(#ar)"/>
+        <line x1="280" y1="89" x2="326" y2="89" class="ln" marker-end="url(#ar)"/>
+        <rect x="160" y="18" width="310" height="112" rx="10" class="ln-mut dash"/>
+        <text x="315" y="38" text-anchor="middle" class="t-s mut">CI নিজে চালায়, কেউ হাতে চালায় না</text>
+        <rect x="520" y="20" width="150" height="46" rx="6" class="ok-bg ok-s" stroke-width="1.5"/>
+        <text x="595" y="48" text-anchor="middle" class="ok-t">✓ pass → merge</text>
+        <rect x="520" y="112" width="150" height="46" rx="6" class="bad-bg bad-s" stroke-width="1.5"/>
+        <text x="595" y="140" text-anchor="middle" class="bad-t">✗ fail → merge বন্ধ</text>
+        <line x1="460" y1="80" x2="516" y2="46" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+        <line x1="460" y1="98" x2="516" y2="132" class="bad-s" stroke-width="1.5" fill="none" marker-end="url(#ar-bad)"/>
+        <text x="315" y="160" text-anchor="middle" class="t-s mut">ভুল ধরা পড়ে production-এ যাওয়ার আগেই</text>
+      </svg></div>
+    <figcaption><b>Automation:</b> continuous integration মানে প্রতিটা code check-in automation দিয়ে verify হয়, যাতে সমস্যা আগেই ধরা পড়ে। Build, test, deploy automate করলে developer-দের সময় অনেক বাঁচে। আপনার <span class="mono">orangehrm-playwright</span>-এর <span class="mono">tests.yml</span> ঠিক এই কাজটা করে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-shard">
+  <div class="head"><span class="num">1.13</span><h3>Database scaling ও sharding</h3><span class="miss">আগের test-এ সবচেয়ে বেশি ভুল</span></div>
+  <p>Database scale করারও দুই উপায়। <b>Vertical:</b> আরও শক্তিশালী machine (AWS RDS-এ 24 TB RAM পর্যন্ত পাওয়া যায়)। কিন্তু hardware-এর সীমা আছে, SPOF-এর ঝুঁকি বেশি, আর দাম অনেক। <b>Horizontal, মানে sharding:</b> data ভাগ করে কয়েকটা database-এ রাখা।</p>
+  <figure><div class="scroll"><svg viewBox="0 0 680 250" role="img" aria-label="বামে replication: master-এর পুরো data দুটো slave-এ copy হয়। ডানে sharding: data তিন ভাগ হয়ে তিনটা shard-এ যায়, columns একই।">
+        <text x="160" y="20" text-anchor="middle" class="t-h">Replication</text>
+        <rect x="105" y="36" width="110" height="52" rx="6" class="box"/>
+        <text x="160" y="58" text-anchor="middle" class="t-h">Master</text>
+        <text x="160" y="77" text-anchor="middle" class="t-m">user 1–12</text>
+        <line x1="140" y1="88" x2="82" y2="166" class="ln" marker-end="url(#ar)"/>
+        <line x1="180" y1="88" x2="238" y2="166" class="ln" marker-end="url(#ar)"/>
+        <text x="160" y="132" text-anchor="middle" class="t-s mut">পুরো copy</text>
+        <rect x="20" y="170" width="120" height="52" rx="6" class="box"/>
+        <text x="80" y="192" text-anchor="middle">Slave 1</text>
+        <text x="80" y="211" text-anchor="middle" class="t-m">user 1–12</text>
+        <rect x="180" y="170" width="120" height="52" rx="6" class="box"/>
+        <text x="240" y="192" text-anchor="middle">Slave 2</text>
+        <text x="240" y="211" text-anchor="middle" class="t-m">user 1–12</text>
+        <text x="160" y="244" text-anchor="middle" class="t-s mut">প্রতিটা node-এ সব data</text>
+
+        <line x1="340" y1="10" x2="340" y2="240" class="ln-mut dash"/>
+
+        <text x="525" y="20" text-anchor="middle" class="t-h">Sharding</text>
+        <rect x="450" y="36" width="150" height="30" rx="15" class="soft"/>
+        <text x="525" y="56" text-anchor="middle" class="t-m">user_id % 3</text>
+        <line x1="490" y1="66" x2="420" y2="104" class="ln" marker-end="url(#ar)"/>
+        <line x1="525" y1="66" x2="525" y2="104" class="ln" marker-end="url(#ar)"/>
+        <line x1="560" y1="66" x2="630" y2="104" class="ln" marker-end="url(#ar)"/>
+        <rect x="372" y="108" width="96" height="82" rx="6" class="box"/>
+        <text x="420" y="128" text-anchor="middle">Shard 0</text>
+        <text x="420" y="150" text-anchor="middle" class="t-m acc-t">user 3,6,9,12</text>
+        <text x="420" y="176" text-anchor="middle" class="t-s mut">id · name · city</text>
+        <rect x="477" y="108" width="96" height="82" rx="6" class="box"/>
+        <text x="525" y="128" text-anchor="middle">Shard 1</text>
+        <text x="525" y="150" text-anchor="middle" class="t-m acc-t">user 1,4,7,10</text>
+        <text x="525" y="176" text-anchor="middle" class="t-s mut">id · name · city</text>
+        <rect x="582" y="108" width="96" height="82" rx="6" class="box"/>
+        <text x="630" y="128" text-anchor="middle">Shard 2</text>
+        <text x="630" y="150" text-anchor="middle" class="t-m acc-t">user 2,5,8,11</text>
+        <text x="630" y="176" text-anchor="middle" class="t-s mut">id · name · city</text>
+        <text x="525" y="222" text-anchor="middle">columns একই, rows আলাদা</text>
+        <text x="525" y="244" text-anchor="middle" class="t-s mut">কোনো একটা shard-এ সব data নেই</text>
+      </svg></div>
+    <figcaption>Sharding-এ প্রতিটা shard-এর schema একই, কিন্তু data আলাদা। Replication-এ প্রতিটা node-এ পুরো copy থাকে। দুটো একসাথেও ব্যবহার হয়: প্রতিটা shard-এর নিজের replica।</figcaption>
+  </figure>
+  <p><b>কোন row কোন shard-এ যাবে</b>, সেটা ঠিক করে hash function, যেমন <span class="mono">user_id % 4</span>। যে column দিয়ে ভাগ হয় তার নাম sharding key (বা partition key)।</p>
+  <figure><div class="scroll"><svg viewBox="0 0 680 168" role="img" aria-label="user_id 0 থেকে 11: %4 আর %5-এর shard। ১২ জনের ৮ জনের shard বদলেছে। user 11: %4-এ shard 3।"><text x="0" y="44" class="t-h">user_id</text><text x="0" y="84" class="t-m">% 4 → shard</text><text x="0" y="124" class="t-m">% 5 → shard</text><text x="133" y="44" text-anchor="middle" class="t-m " style="font-weight:600">0</text><rect x="112" y="64" width="42" height="30" rx="4" class="soft" /><text x="133" y="84" text-anchor="middle" class="t-m ">0</text><rect x="112" y="104" width="42" height="30" rx="4" class="soft" /><text x="133" y="124" text-anchor="middle" class="t-m ">0</text><text x="180" y="44" text-anchor="middle" class="t-m " style="font-weight:600">1</text><rect x="159" y="64" width="42" height="30" rx="4" class="soft" /><text x="180" y="84" text-anchor="middle" class="t-m ">1</text><rect x="159" y="104" width="42" height="30" rx="4" class="soft" /><text x="180" y="124" text-anchor="middle" class="t-m ">1</text><text x="227" y="44" text-anchor="middle" class="t-m " style="font-weight:600">2</text><rect x="206" y="64" width="42" height="30" rx="4" class="soft" /><text x="227" y="84" text-anchor="middle" class="t-m ">2</text><rect x="206" y="104" width="42" height="30" rx="4" class="soft" /><text x="227" y="124" text-anchor="middle" class="t-m ">2</text><text x="274" y="44" text-anchor="middle" class="t-m " style="font-weight:600">3</text><rect x="253" y="64" width="42" height="30" rx="4" class="soft" /><text x="274" y="84" text-anchor="middle" class="t-m ">3</text><rect x="253" y="104" width="42" height="30" rx="4" class="soft" /><text x="274" y="124" text-anchor="middle" class="t-m ">3</text><text x="321" y="44" text-anchor="middle" class="t-m " style="font-weight:600">4</text><rect x="300" y="64" width="42" height="30" rx="4" class="soft" /><text x="321" y="84" text-anchor="middle" class="t-m ">0</text><rect x="300" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="321" y="124" text-anchor="middle" class="t-m bad-t">4</text><text x="368" y="44" text-anchor="middle" class="t-m " style="font-weight:600">5</text><rect x="347" y="64" width="42" height="30" rx="4" class="soft" /><text x="368" y="84" text-anchor="middle" class="t-m ">1</text><rect x="347" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="368" y="124" text-anchor="middle" class="t-m bad-t">0</text><text x="415" y="44" text-anchor="middle" class="t-m " style="font-weight:600">6</text><rect x="394" y="64" width="42" height="30" rx="4" class="soft" /><text x="415" y="84" text-anchor="middle" class="t-m ">2</text><rect x="394" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="415" y="124" text-anchor="middle" class="t-m bad-t">1</text><text x="462" y="44" text-anchor="middle" class="t-m " style="font-weight:600">7</text><rect x="441" y="64" width="42" height="30" rx="4" class="soft" /><text x="462" y="84" text-anchor="middle" class="t-m ">3</text><rect x="441" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="462" y="124" text-anchor="middle" class="t-m bad-t">2</text><text x="509" y="44" text-anchor="middle" class="t-m " style="font-weight:600">8</text><rect x="488" y="64" width="42" height="30" rx="4" class="soft" /><text x="509" y="84" text-anchor="middle" class="t-m ">0</text><rect x="488" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="509" y="124" text-anchor="middle" class="t-m bad-t">3</text><text x="556" y="44" text-anchor="middle" class="t-m " style="font-weight:600">9</text><rect x="535" y="64" width="42" height="30" rx="4" class="soft" /><text x="556" y="84" text-anchor="middle" class="t-m ">1</text><rect x="535" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="556" y="124" text-anchor="middle" class="t-m bad-t">4</text><text x="603" y="44" text-anchor="middle" class="t-m " style="font-weight:600">10</text><rect x="582" y="64" width="42" height="30" rx="4" class="soft" /><text x="603" y="84" text-anchor="middle" class="t-m ">2</text><rect x="582" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="603" y="124" text-anchor="middle" class="t-m bad-t">0</text><text x="650" y="44" text-anchor="middle" class="t-m acc-t" style="font-weight:600">11</text><rect x="629" y="64" width="42" height="30" rx="4" class="acc-bg acc-s" stroke-width="1.5"/><text x="650" y="84" text-anchor="middle" class="t-m acc-t">3</text><rect x="629" y="104" width="42" height="30" rx="4" class="bad-bg bad-s" stroke-width="1.3"/><text x="650" y="124" text-anchor="middle" class="t-m bad-t">1</text><text x="112" y="158" class="t-s acc-t">নীল: #34-এর উত্তর, 11 % 4 = 3</text><text x="674" y="158" text-anchor="end" class="t-s bad-t">লাল: shard বদলেছে, ১২ জনের 8 জন</text></svg></div>
+    <figcaption>ভাগশেষই shard নম্বর: user 11 → 11 % 4 = 3। কিন্তু shard সংখ্যা বদলালে (৪ → ৫) বেশিরভাগ user-এর shard বদলে যায়, আর বিপুল data সরাতে হয়। একে বলে <b>resharding</b>। এটা লাগে যখন একটা shard আর data ধরতে পারে না, বা অসমান ভাগের কারণে কিছু shard আগে ভরে যায় (shard exhaustion)। সমাধান consistent hashing, যা Chapter 5-এ আসবে।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 230" role="img" aria-label="বামে user_id hash দিয়ে চারটা shard-এ সমান data। ডানে signup_date দিয়ে এই মাসের shard-এ অনেক বেশি data আর write।">
+        <text x="160" y="20" text-anchor="middle" class="t-h">key = hash(user_id)</text>
+        <line x1="20" y1="180" x2="300" y2="180" class="ln-mut"/>
+        <rect x="35" y="110" width="50" height="70" rx="3" class="ok-bg ok-s" stroke-width="1.3"/>
+        <rect x="105" y="106" width="50" height="74" rx="3" class="ok-bg ok-s" stroke-width="1.3"/>
+        <rect x="175" y="112" width="50" height="68" rx="3" class="ok-bg ok-s" stroke-width="1.3"/>
+        <rect x="245" y="108" width="50" height="72" rx="3" class="ok-bg ok-s" stroke-width="1.3"/>
+        <text x="60" y="198" text-anchor="middle" class="t-m">S0</text>
+        <text x="130" y="198" text-anchor="middle" class="t-m">S1</text>
+        <text x="200" y="198" text-anchor="middle" class="t-m">S2</text>
+        <text x="270" y="198" text-anchor="middle" class="t-m">S3</text>
+        <text x="160" y="80" text-anchor="middle" class="ok-t">প্রায় সমান ভাগ ✓</text>
+        <text x="160" y="222" text-anchor="middle" class="t-s mut">নতুন user যেকোনো shard-এ পড়ে</text>
+
+        <line x1="340" y1="10" x2="340" y2="222" class="ln-mut dash"/>
+
+        <text x="520" y="20" text-anchor="middle" class="t-h">key = signup_date</text>
+        <line x1="380" y1="180" x2="660" y2="180" class="ln-mut"/>
+        <rect x="395" y="140" width="50" height="40" rx="3" class="soft"/>
+        <rect x="465" y="134" width="50" height="46" rx="3" class="soft"/>
+        <rect x="535" y="128" width="50" height="52" rx="3" class="soft"/>
+        <rect x="605" y="40" width="50" height="140" rx="3" class="bad-bg bad-s" stroke-width="1.3"/>
+        <text x="420" y="198" text-anchor="middle" class="t-m">S0</text>
+        <text x="490" y="198" text-anchor="middle" class="t-m">S1</text>
+        <text x="560" y="198" text-anchor="middle" class="t-m">S2</text>
+        <text x="630" y="198" text-anchor="middle" class="t-m">S3</text>
+        <text x="420" y="214" text-anchor="middle" class="t-s mut">2024</text>
+        <text x="490" y="214" text-anchor="middle" class="t-s mut">2025</text>
+        <text x="560" y="214" text-anchor="middle" class="t-s mut">জানু–আগস্ট</text>
+        <text x="630" y="214" text-anchor="middle" class="t-s bad-t">সেপ্টেম্বর</text>
+        <line x1="545" y1="70" x2="598" y2="70" class="ln bad-s" marker-end="url(#ar-bad)"/>
+        <text x="540" y="66" text-anchor="end" class="bad-t">সব নতুন signup</text>
+        <text x="540" y="84" text-anchor="end" class="bad-t">আর সক্রিয় user এখানে</text>
+      </svg></div>
+    <figcaption><b>Sharding key বাছাইয়ের সবচেয়ে বড় নিয়ম:</b> data যেন সমানভাবে ছড়ায়। Key ভালো হলে query সরাসরি ঠিক database-এ যায়।</figcaption>
+  </figure>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="বামে তিনজন celebrity একই shard-এ, সেই shard-এ অসংখ্য read। ডানে প্রত্যেক celebrity-র নিজের shard, চাপ ছড়িয়ে গেছে।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">Celebrity (hotspot) সমস্যা</text>
+      <text x="165" y="40" text-anchor="middle" class="t-s mut">read request</text>
+      <line x1="55" y1="52" x2="55" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="145" y1="52" x2="145" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="230" y1="52" x2="250" y2="116" class="bad-s" stroke-width="1.4" fill="none" marker-end="url(#ar-bad)"/>
+      <line x1="250" y1="52" x2="262" y2="116" class="bad-s" stroke-width="1.4" fill="none" marker-end="url(#ar-bad)"/>
+      <line x1="270" y1="52" x2="274" y2="116" class="bad-s" stroke-width="1.4" fill="none" marker-end="url(#ar-bad)"/>
+      <line x1="290" y1="52" x2="286" y2="116" class="bad-s" stroke-width="1.4" fill="none" marker-end="url(#ar-bad)"/>
+      <line x1="310" y1="52" x2="298" y2="116" class="bad-s" stroke-width="1.4" fill="none" marker-end="url(#ar-bad)"/>
+      <rect x="10" y="120" width="90" height="50" rx="6" class="box"/><text x="55" y="150" text-anchor="middle" class="t-s">Shard 0</text>
+      <rect x="110" y="120" width="70" height="50" rx="6" class="box"/><text x="145" y="150" text-anchor="middle" class="t-s">Shard 1</text>
+      <rect x="190" y="120" width="140" height="50" rx="6" class="bad-bg bad-s" stroke-width="1.6"/>
+      <text x="260" y="140" text-anchor="middle" class="t-s bad-t">Shard 2: Shakib,</text>
+      <text x="260" y="158" text-anchor="middle" class="t-s bad-t">Mashrafe, Tahsan</text>
+      <text x="170" y="192" text-anchor="middle" class="t-s bad-t">একটা shard overload</text>
+
+      <line x1="345" y1="10" x2="345" y2="192" class="ln-mut dash"/>
+
+      <text x="512" y="18" text-anchor="middle" class="t-h">সমাধান: প্রত্যেকের নিজের shard</text>
+      <rect x="360" y="120" width="70" height="50" rx="6" class="box"/><text x="395" y="150" text-anchor="middle" class="t-s">Shard 0</text>
+      <rect x="436" y="120" width="70" height="50" rx="6" class="box"/><text x="471" y="150" text-anchor="middle" class="t-s">Shard 1</text>
+      <rect x="512" y="120" width="52" height="50" rx="6" class="ok-bg ok-s"/><text x="538" y="150" text-anchor="middle" class="t-s">Shakib</text>
+      <rect x="570" y="120" width="52" height="50" rx="6" class="ok-bg ok-s"/><text x="596" y="144" text-anchor="middle" class="t-s">Mash-</text><text x="596" y="158" text-anchor="middle" class="t-s">rafe</text>
+      <rect x="628" y="120" width="50" height="50" rx="6" class="ok-bg ok-s"/><text x="653" y="150" text-anchor="middle" class="t-s">Tahsan</text>
+      <line x1="530" y1="52" x2="536" y2="116" class="ok-s" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="590" y1="52" x2="594" y2="116" class="ok-s" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="650" y1="52" x2="652" y2="116" class="ok-s" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="395" y1="52" x2="395" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="471" y1="52" x2="471" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="512" y="192" text-anchor="middle" class="t-s ok-t">চাপ ছড়িয়ে গেল; দরকারে একটা shard-কেও আবার ভাগ</text>
+    </svg></div>
+    <figcaption>কিছু key-তে বাকিদের চেয়ে বহুগুণ বেশি access হলে সেই shard বসে যায়। Social app-এ celebrity, e-commerce-এ বড় seller, courier-এ বড় merchant: সবই একই সমস্যা।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 220" role="img" aria-label="আগে: users আর orders আলাদা shard-এ, join করতে network পার হতে হয়। পরে: orders table-এ user_name copy করে রাখা, একটা table থেকেই query।">
+        <text x="160" y="20" text-anchor="middle" class="t-h">আগে</text>
+        <rect x="10" y="40" width="130" height="92" rx="6" class="box"/>
+        <text x="75" y="60" text-anchor="middle" class="t-s mut">Shard A</text>
+        <text x="75" y="82" text-anchor="middle" class="t-h">users</text>
+        <text x="75" y="110" text-anchor="middle" class="t-m">id · name</text>
+        <rect x="172" y="40" width="160" height="92" rx="6" class="box"/>
+        <text x="252" y="60" text-anchor="middle" class="t-s mut">Shard B</text>
+        <text x="252" y="82" text-anchor="middle" class="t-h">orders</text>
+        <text x="252" y="110" text-anchor="middle" class="t-m">id · user_id · amount</text>
+        <line x1="142" y1="86" x2="170" y2="86" class="ln bad-s dash" marker-start="url(#ar-bad)" marker-end="url(#ar-bad)"/>
+        <text x="165" y="160" text-anchor="middle" class="bad-t">JOIN করতে network পার হতে হয় ✗</text>
+        <text x="165" y="180" text-anchor="middle" class="t-s mut">ধীর, আর অনেক DB-তে সম্ভবই না</text>
+
+        <line x1="340" y1="10" x2="340" y2="200" class="ln-mut dash"/>
+
+        <text x="515" y="20" text-anchor="middle" class="t-h">পরে (denormalized)</text>
+        <rect x="370" y="40" width="290" height="92" rx="6" class="box"/>
+        <text x="515" y="60" text-anchor="middle" class="t-s mut">Shard B</text>
+        <text x="515" y="82" text-anchor="middle" class="t-h">orders</text>
+        <rect x="499" y="97" width="72" height="20" rx="4" class="acc-bg"/>
+        <text x="515" y="112" text-anchor="middle" class="t-m">id · user_id · <tspan class="acc-t">user_name</tspan> · amount</text>
+        <text x="515" y="160" text-anchor="middle" class="ok-t">একটা table থেকেই query ✓</text>
+        <text x="515" y="180" text-anchor="middle" class="t-s mut">দাম: নাম বদলালে দুই জায়গায় update করতে হয়</text>
+      </svg></div>
+    <figcaption><b>Join ও denormalization:</b> shard করার পর আলাদা shard-এর table join করা কঠিন। সাধারণ সমাধান denormalize করা, যাতে query একটা table থেকেই হয়। এর দামও আছে: duplicate data sync রাখতে হয়। বইয়ের design-এ কিছু non-relational কাজ NoSQL-এ সরিয়ে database-এর চাপও কমানো হয়েছে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: sharding-এর তিনটা সমস্যা আর তাদের সমাধান মুখে বলুন।</summary><p>① Resharding: consistent hashing। ② Celebrity/hotspot: আলাদা shard, দরকারে আরও ভাগ। ③ Cross-shard join: denormalization।</p></details>
+</section>
+
+<section class="c" id="s-full">
+  <div class="head"><span class="num">1.14</span><h3>পুরো architecture ও summary</h3><span class="miss">আগের test-এ ভুল</span></div>
+  <p>সব ধাপ একসাথে বসালে system দেখতে এমন হয়। Interview-এ "Design X" প্রশ্নে high-level diagram প্রায়ই এই কাঠামো থেকেই শুরু হয়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 440" role="img" aria-label="Users DNS থেকে IP নেয়, static file CDN থেকে, বাকি request load balancer হয়ে stateless web tier-এ। Web tier cache, sharded master database, NoSQL আর message queue ব্যবহার করে। Master slave-দের কাছে replicate করে। Queue থেকে worker কাজ নেয়। নিচে logging, metrics, automation।">
+      <rect x="250" y="8" width="180" height="42" rx="6" class="box"/>
+      <text x="340" y="26" text-anchor="middle" class="t-h">Users</text>
+      <text x="340" y="43" text-anchor="middle" class="t-s mut">web · mobile</text>
+      <rect x="20" y="11" width="110" height="36" rx="6" class="box"/><text x="75" y="34" text-anchor="middle">DNS</text>
+      <rect x="550" y="11" width="120" height="36" rx="6" class="box"/><text x="610" y="34" text-anchor="middle">CDN</text>
+      <line x1="250" y1="29" x2="134" y2="29" class="ln" marker-end="url(#ar)"/>
+      <text x="192" y="22" text-anchor="middle" class="t-s">IP?</text>
+      <line x1="430" y1="29" x2="546" y2="29" class="ln" marker-end="url(#ar)"/>
+      <text x="488" y="22" text-anchor="middle" class="t-s">JS, CSS, image</text>
+
+      <rect x="6" y="64" width="668" height="318" rx="12" class="ln-mut dash"/>
+      <text x="16" y="82" class="t-s mut">Data center (একটা দেখানো হল; বাস্তবে geoDNS দিয়ে কয়েকটা)</text>
+
+      <line x1="340" y1="50" x2="340" y2="86" class="ln" marker-end="url(#ar)"/>
+      <rect x="250" y="90" width="180" height="36" rx="6" class="box"/>
+      <text x="340" y="113" text-anchor="middle" class="t-h">Load balancer</text>
+      <line x1="340" y1="126" x2="340" y2="148" class="ln" marker-end="url(#ar)"/>
+
+      <rect x="140" y="152" width="360" height="66" rx="8" class="acc-bg acc-s" stroke-width="1.3"/>
+      <text x="152" y="168" class="t-s acc-t">Web tier · stateless</text>
+      <rect x="170" y="176" width="90" height="32" rx="5" class="box"/><text x="215" y="197" text-anchor="middle" class="t-s">Web 1</text>
+      <rect x="275" y="176" width="90" height="32" rx="5" class="box"/><text x="320" y="197" text-anchor="middle" class="t-s">Web 2</text>
+      <rect x="380" y="176" width="90" height="32" rx="5" class="box"/><text x="425" y="197" text-anchor="middle" class="t-s">Web 3</text>
+
+      <rect x="532" y="158" width="136" height="44" rx="22" class="box"/>
+      <text x="600" y="185" text-anchor="middle">Message queue</text>
+      <line x1="500" y1="180" x2="528" y2="180" class="ln" marker-end="url(#ar)"/>
+      <rect x="532" y="246" width="136" height="44" rx="6" class="box"/>
+      <text x="600" y="273" text-anchor="middle">Workers</text>
+      <line x1="600" y1="202" x2="600" y2="242" class="ln" marker-end="url(#ar)"/>
+
+      <rect x="20" y="258" width="120" height="50" rx="6" class="box"/>
+      <text x="80" y="280" text-anchor="middle" class="t-h">Cache</text>
+      <text x="80" y="298" text-anchor="middle" class="t-s mut">Memcached/Redis</text>
+      <rect x="166" y="258" width="150" height="50" rx="6" class="box"/>
+      <text x="241" y="280" text-anchor="middle" class="t-h">DB master</text>
+      <text x="241" y="298" text-anchor="middle" class="t-s mut">sharded</text>
+      <rect x="166" y="330" width="150" height="40" rx="6" class="box"/>
+      <text x="241" y="355" text-anchor="middle">DB slaves</text>
+      <rect x="344" y="258" width="150" height="50" rx="6" class="box"/>
+      <text x="419" y="280" text-anchor="middle" class="t-h">NoSQL</text>
+      <text x="419" y="298" text-anchor="middle" class="t-s mut">session ইত্যাদি</text>
+
+      <line x1="190" y1="218" x2="100" y2="254" class="ln" marker-end="url(#ar)"/>
+      <line x1="260" y1="218" x2="245" y2="254" class="ln" marker-end="url(#ar)"/>
+      <line x1="400" y1="218" x2="415" y2="254" class="ln" marker-end="url(#ar)"/>
+      <line x1="241" y1="308" x2="241" y2="326" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <text x="250" y="322" class="t-s mut">replicate</text>
+
+      <rect x="6" y="396" width="668" height="36" rx="8" class="soft"/>
+      <text x="340" y="419" text-anchor="middle">Logging · Metrics · Monitoring · Automation (CI/CD)</text>
+    </svg></div>
+    <figcaption>Static file CDN থেকে আসে, web server-এর উপর থেকে চাপ কমে। Web tier stateless, তাই autoscale করা যায়। Data tier-এ cache, replication আর sharding। সময়সাপেক্ষ কাজ queue দিয়ে worker-এর কাছে যায়। পুরো system-এর উপর নজর রাখে logging, metrics আর automation।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>বইয়ের summary: লাখো user-এর জন্য</th><th>কোথায়</th></tr>
+    <tr><td>Web tier stateless রাখুন</td><td><a href="#s-state">1.9</a></td></tr>
+    <tr><td>প্রতিটা tier-এ redundancy রাখুন</td><td><a href="#s-lb">1.5</a>, <a href="#s-repl">1.6</a>, <a href="#s-dc">1.10</a></td></tr>
+    <tr><td>যত পারা যায় data cache করুন</td><td><a href="#s-cache">1.7</a></td></tr>
+    <tr><td>একাধিক data center সাপোর্ট করুন</td><td><a href="#s-dc">1.10</a></td></tr>
+    <tr><td>Static asset CDN-এ রাখুন</td><td><a href="#s-cdn">1.8</a></td></tr>
+    <tr><td>Sharding দিয়ে data tier scale করুন</td><td><a href="#s-shard">1.13</a></td></tr>
+    <tr><td>Tier ভেঙে আলাদা service বানান</td><td><a href="#s-mq">1.11</a></td></tr>
+    <tr><td>System monitor করুন, automation ব্যবহার করুন</td><td><a href="#s-ops">1.12</a></td></tr>
+  </table></div>
+  <figure><div class="scroll"><svg viewBox="0 0 680 170" role="img" aria-label="প্রতিটা tier-এ অন্তত দুটো করে: দুটো web server, দুটো cache, master আর slave database, দুটো data center।">
+        <text x="340" y="18" text-anchor="middle" class="t-h">প্রতিটা tier-এ অন্তত দুটো</text>
+        <text x="85"  y="46" text-anchor="middle" class="t-s mut">Web tier</text>
+        <text x="255" y="46" text-anchor="middle" class="t-s mut">Cache</text>
+        <text x="425" y="46" text-anchor="middle" class="t-s mut">Database</text>
+        <text x="595" y="46" text-anchor="middle" class="t-s mut">Data center</text>
+        <rect x="20"  y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="50"  y="83" text-anchor="middle" class="t-s">Web 1</text>
+        <rect x="90"  y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="120" y="83" text-anchor="middle" class="t-s">Web 2</text>
+        <rect x="190" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="220" y="83" text-anchor="middle" class="t-s">Cache A</text>
+        <rect x="260" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="290" y="83" text-anchor="middle" class="t-s">Cache B</text>
+        <rect x="360" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="390" y="83" text-anchor="middle" class="t-s">Master</text>
+        <rect x="430" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="460" y="83" text-anchor="middle" class="t-s">Slave</text>
+        <rect x="530" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="560" y="83" text-anchor="middle" class="t-s">US-East</text>
+        <rect x="600" y="58" width="60" height="40" rx="5" class="ok-bg ok-s"/><text x="630" y="83" text-anchor="middle" class="t-s">US-West</text>
+        <rect x="170" y="120" width="340" height="40" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+        <text x="340" y="145" text-anchor="middle" class="bad-t">সব এক server-এ = SPOF, তাই summary-র উল্টো</text>
+      </svg></div>
+    <figcaption>"সব data একটা শক্তিশালী server-এ" summary-র অংশ নয়, বরং উল্টো কথা। Load balancer, replication, একাধিক cache, multi data center: সবই redundancy যোগ করার উপায়।</figcaption>
+  </figure>
+  <figure><div class="scroll"><svg viewBox="0 0 680 230" role="img" aria-label="Chapter 1-এর scaling ধাপ সিঁড়ির মতো, এক server থেকে sharding পর্যন্ত। Stack Overflow ২০১৩ সালে তৃতীয় ধাপেই এক master DB দিয়ে চলত।">
+        <rect x="10"  y="180" width="88" height="30"  class="soft"/>
+        <rect x="104" y="160" width="88" height="50"  class="soft"/>
+        <rect x="198" y="140" width="88" height="70"  class="acc-bg acc-s" stroke-width="1.5"/>
+        <rect x="292" y="120" width="88" height="90"  class="soft"/>
+        <rect x="386" y="100" width="88" height="110" class="soft"/>
+        <rect x="480" y="80"  width="88" height="130" class="soft"/>
+        <rect x="574" y="60"  width="96" height="150" class="soft"/>
+        <text x="54"  y="200" text-anchor="middle" class="t-s">এক server</text>
+        <text x="148" y="180" text-anchor="middle" class="t-s">DB আলাদা</text>
+        <text x="242" y="160" text-anchor="middle" class="t-s">LB + replica</text>
+        <text x="336" y="140" text-anchor="middle" class="t-s">Cache + CDN</text>
+        <text x="430" y="120" text-anchor="middle" class="t-s">Stateless</text>
+        <text x="430" y="136" text-anchor="middle" class="t-s">+ multi-DC</text>
+        <text x="524" y="100" text-anchor="middle" class="t-s">Queue +</text>
+        <text x="524" y="116" text-anchor="middle" class="t-s">monitoring</text>
+        <text x="622" y="80" text-anchor="middle" class="t-s">Sharding</text>
+        <text x="10" y="24" class="acc-t">Stack Overflow ২০১৩: মাসে ১ কোটি+ visitor,</text>
+        <text x="10" y="42" class="acc-t">তবুও এক master DB (শক্তিশালী machine)</text>
+        <line x1="160" y1="52" x2="228" y2="134" class="acc-s" stroke-width="1.5" fill="none" marker-end="url(#ar-acc)"/>
+        <line x1="330" y1="34" x2="600" y2="34" class="ln-mut" marker-end="url(#ar-mut)"/>
+        <text x="465" y="26" text-anchor="middle" class="t-s mut">যত উপরে, তত জটিলতা আর খরচ</text>
+      </svg></div>
+    <figcaption>প্রতিটা ধাপ আগের ধাপে সমস্যা দেখা দিলে তবেই যোগ হয়। Stack Overflow ২০১৩ সালে মাসে ১ কোটির বেশি visitor নিয়েও একটা master database-এ চলত। শুরুতেই sharding-এ চলে যাওয়া over-engineering।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: খাতা বন্ধ করে উপরের পুরো architecture আঁকুন। কোন box বাদ পড়ল?</summary><p>সাধারণত যা বাদ পড়ে: DNS, CDN, slave database, আর নিচের logging/metrics স্তর। প্রতিটা box কোন সমস্যা সমাধান করে সেটাও পাশে লিখুন।</p></details>
+</section>
+
+<section class="chapter" id="ch2">
+  <div class="eyebrow">CHAPTER 2</div>
+  <h2>মুখে মুখে হিসাব (back-of-the-envelope)</h2>
+  <p>Interview-এ design টিকবে কিনা তা যাচাই করতে মোটামুটি হিসাব করতে হয়। তিনটা জিনিস মাথায় থাকলেই চলে: power of two, latency numbers, আর availability-র nine।</p>
+</section>
+
+<section class="c" id="s-pow">
+  <div class="head"><span class="num">2.1</span><h3>Power of two</h3></div>
+  <p>1 byte = 8 bit; একটা ASCII character = 1 byte। প্রতি ২<sup>১০</sup> ধাপে unit একটা করে বড় হয়, মানে মোটামুটি ১০০০ গুণ।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="2 এর power 10 হলে KB, 20 হলে MB, 30 হলে GB, 40 হলে TB, 50 হলে PB। প্রতিটা ধাপ প্রায় এক হাজার গুণ।">
+      <rect x="10"  y="40" width="104" height="56" rx="6" class="box"/>
+      <text x="62"  y="64" text-anchor="middle" class="t-m">2^10</text><text x="62"  y="86" text-anchor="middle" class="t-h">KB</text>
+      <rect x="152" y="40" width="104" height="56" rx="6" class="box"/>
+      <text x="204" y="64" text-anchor="middle" class="t-m">2^20</text><text x="204" y="86" text-anchor="middle" class="t-h">MB</text>
+      <rect x="294" y="40" width="104" height="56" rx="6" class="box"/>
+      <text x="346" y="64" text-anchor="middle" class="t-m">2^30</text><text x="346" y="86" text-anchor="middle" class="t-h">GB</text>
+      <rect x="436" y="40" width="104" height="56" rx="6" class="box"/>
+      <text x="488" y="64" text-anchor="middle" class="t-m">2^40</text><text x="488" y="86" text-anchor="middle" class="t-h">TB</text>
+      <rect x="578" y="40" width="94" height="56" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="625" y="64" text-anchor="middle" class="t-m acc-t">2^50</text><text x="625" y="86" text-anchor="middle" class="t-h acc-t">PB</text>
+      <line x1="114" y1="68" x2="148" y2="68" class="ln" marker-end="url(#ar)"/>
+      <line x1="256" y1="68" x2="290" y2="68" class="ln" marker-end="url(#ar)"/>
+      <line x1="398" y1="68" x2="432" y2="68" class="ln" marker-end="url(#ar)"/>
+      <line x1="540" y1="68" x2="574" y2="68" class="ln" marker-end="url(#ar)"/>
+      <text x="131" y="28" text-anchor="middle" class="t-s mut">×1000</text>
+      <text x="273" y="28" text-anchor="middle" class="t-s mut">×1000</text>
+      <text x="415" y="28" text-anchor="middle" class="t-s mut">×1000</text>
+      <text x="557" y="28" text-anchor="middle" class="t-s mut">×1000</text>
+      <text x="62"  y="118" text-anchor="middle" class="t-s mut">ছোট text</text>
+      <text x="204" y="118" text-anchor="middle" class="t-s mut">একটা photo</text>
+      <text x="346" y="118" text-anchor="middle" class="t-s mut">একটা movie</text>
+      <text x="488" y="118" text-anchor="middle" class="t-s mut">বড় hard disk</text>
+      <text x="625" y="118" text-anchor="middle" class="t-s mut">বড় সাইটের</text>
+      <text x="625" y="134" text-anchor="middle" class="t-s mut">কয়েক বছরের media</text>
+    </svg></div>
+    <figcaption>হিসাবের সময় এই সিঁড়িতে উঠানামা করুন: 30,000 MB = 30 GB, 54,750 TB ≈ 55 PB। বাংলা বা অন্য Unicode character UTF-8-এ সাধারণত ৩ byte নেয়, এটা বইয়ের বাইরের কিন্তু BD-র app-এ কাজে লাগে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-lat">
+  <div class="head"><span class="num">2.2</span><h3>Latency numbers</h3></div>
+  <p>Google-এর Jeff Dean-এর ২০১০ সালের সংখ্যা। Computer এখন দ্রুত হয়েছে, তাই হুবহু মুখস্থ করার দরকার নেই, কিন্তু কোনটা কোনটার চেয়ে কত গুণ ধীর, সেই অনুপাতটা আজও কাজে লাগে।</p>
+  <figure><div class="scroll"><svg viewBox="0 0 680 398" role="img" aria-label="Latency: RAM reference 100 ns, একই data center-এ round trip 500 µs, disk seek 10 ms, মহাদেশ পার হয়ে packet 150 ms। Log scale।"><line x1="288" y1="36" x2="288" y2="388" class="grid"/><text x="288" y="30" text-anchor="middle" class="t-m mut">1 ns</text><line x1="402" y1="36" x2="402" y2="388" class="grid"/><text x="402" y="30" text-anchor="middle" class="t-m mut">1 µs</text><line x1="516" y1="36" x2="516" y2="388" class="grid"/><text x="516" y="30" text-anchor="middle" class="t-m mut">1 ms</text><line x1="630" y1="36" x2="630" y2="388" class="grid"/><text x="630" y="30" text-anchor="middle" class="t-m mut">1 s</text><g><title>L1 cache reference: 0.5 ns</title><rect x="0" y="44" width="680" height="26" fill="transparent"/><text x="240" y="61" text-anchor="end" class="" style="">L1 cache reference</text><rect x="250" y="51" width="26.560860164768712" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="282.5608601647687" y="61" class="t-m">0.5 ns</text></g><g><title>Branch mispredict: 5 ns</title><rect x="0" y="70" width="680" height="26" fill="transparent"/><text x="240" y="87" text-anchor="end" class="" style="">Branch mispredict</text><rect x="250" y="77" width="64.56086016476871" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="320.5608601647687" y="87" class="t-m">5 ns</text></g><g><title>L2 cache reference: 7 ns</title><rect x="0" y="96" width="680" height="26" fill="transparent"/><text x="240" y="113" text-anchor="end" class="" style="">L2 cache reference</text><rect x="250" y="103" width="70.11372552054178" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="326.1137255205418" y="113" class="t-m">7 ns</text></g><g><title>Mutex lock/unlock: 100 ns</title><rect x="0" y="122" width="680" height="26" fill="transparent"/><text x="240" y="139" text-anchor="end" class="" style="">Mutex lock/unlock</text><rect x="250" y="129" width="114" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="370" y="139" class="t-m">100 ns</text></g><g><title>RAM reference: 100 ns</title><rect x="0" y="148" width="680" height="26" fill="transparent"/><text x="240" y="165" text-anchor="end" class="t-h" style="font-size:12.5px">RAM reference</text><rect x="250" y="155" width="114" height="12" rx="2" class="bar-f" /><text x="370" y="165" class="t-m">100 ns</text></g><g><title>1 KB compress (Zippy): 10 µs</title><rect x="0" y="174" width="680" height="26" fill="transparent"/><text x="240" y="191" text-anchor="end" class="" style="">1 KB compress (Zippy)</text><rect x="250" y="181" width="190" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="446" y="191" class="t-m">10 µs</text></g><g><title>1 Gbps-এ 2 KB পাঠানো: 20 µs</title><rect x="0" y="200" width="680" height="26" fill="transparent"/><text x="240" y="217" text-anchor="end" class="" style="">1 Gbps-এ 2 KB পাঠানো</text><rect x="250" y="207" width="201.4391398352313" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="457.4391398352313" y="217" class="t-m">20 µs</text></g><g><title>RAM থেকে 1 MB পড়া: 250 µs</title><rect x="0" y="226" width="680" height="26" fill="transparent"/><text x="240" y="243" text-anchor="end" class="" style="">RAM থেকে 1 MB পড়া</text><rect x="250" y="233" width="243.12172032953742" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="499.1217203295374" y="243" class="t-m">250 µs</text></g><g><title>একই DC-তে round trip: 500 µs</title><rect x="0" y="252" width="680" height="26" fill="transparent"/><text x="240" y="269" text-anchor="end" class="t-h" style="font-size:12.5px">একই DC-তে round trip</text><rect x="250" y="259" width="254.5608601647687" height="12" rx="2" class="bar-f" /><text x="510.5608601647687" y="269" class="t-m">500 µs</text></g><g><title>Disk seek: 10 ms</title><rect x="0" y="278" width="680" height="26" fill="transparent"/><text x="240" y="295" text-anchor="end" class="t-h" style="font-size:12.5px">Disk seek</text><rect x="250" y="285" width="304" height="12" rx="2" class="bar-f" /><text x="560" y="295" class="t-m">10 ms</text></g><g><title>Network থেকে 1 MB পড়া: 10 ms</title><rect x="0" y="304" width="680" height="26" fill="transparent"/><text x="240" y="321" text-anchor="end" class="" style="">Network থেকে 1 MB পড়া</text><rect x="250" y="311" width="304" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="560" y="321" class="t-m">10 ms</text></g><g><title>Disk থেকে 1 MB পড়া: 30 ms</title><rect x="0" y="330" width="680" height="26" fill="transparent"/><text x="240" y="347" text-anchor="end" class="" style="">Disk থেকে 1 MB পড়া</text><rect x="250" y="337" width="322.1306076793471" height="12" rx="2" class="bar-f" opacity="0.55"/><text x="578.1306076793471" y="347" class="t-m">30 ms</text></g><g><title>মহাদেশ পার হয়ে packet ফেরা: 150 ms</title><rect x="0" y="356" width="680" height="26" fill="transparent"/><text x="240" y="373" text-anchor="end" class="t-h" style="font-size:12.5px">মহাদেশ পার হয়ে packet ফেরা</text><rect x="250" y="363" width="348.6914678441159" height="12" rx="2" class="bar-f" /><text x="604.6914678441159" y="373" class="t-m">150 ms</text></g><line x1="250" y1="36" x2="250" y2="388" class="ln-mut"/></svg></div>
+    <figcaption>Scale logarithmic: প্রতিটা দাগ আগেরটার ১০০০ গুণ। মানুষের মাপে ভাবুন: RAM থেকে পড়া যদি ১ সেকেন্ড হয়, তাহলে disk seek প্রায় ২৮ ঘণ্টা, আর মহাদেশ পার হয়ে packet ঘুরে আসা প্রায় ১৭ দিন।</figcaption>
+  </figure>
+  <div class="two">
+    <div class="good"><h4>এখান থেকে যা শিখবেন</h4><ul>
+      <li>Memory দ্রুত, disk ধীর</li>
+      <li>সম্ভব হলে disk seek এড়ান</li>
+      <li>সাধারণ compression খুব দ্রুত</li>
+      <li>Internet-এ পাঠানোর আগে compress করুন</li>
+      <li>Data center-গুলো দূরে, তাদের মধ্যে data পাঠাতে সময় লাগে</li>
+    </ul></div>
+    <div><h4>Design-এ কোথায় লাগে</h4><ul>
+      <li>Hot data cache-এ রাখা (1.7)</li>
+      <li>User-এর কাছে CDN বা region (1.8, 1.10)</li>
+      <li>Response gzip/brotli করে পাঠানো</li>
+      <li>ঢাকার user-কে US region থেকে serve করলে প্রতিটা round trip-এ শত ms বাড়তি</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="c" id="s-avail">
+  <div class="head"><span class="num">2.3</span><h3>Availability ও SLA</h3></div>
+  <p>High availability মানে system দীর্ঘ সময় ধরে টানা চালু থাকা, মাপা হয় শতাংশে। SLA হল service provider আর customer-এর মধ্যে আনুষ্ঠানিক চুক্তি, কতটুকু uptime দেওয়া হবে। AWS, Google, Azure-এর SLA 99.9% বা তার বেশি। যত বেশি nine, তত কম downtime।</p>
+  <div class="tbl"><table>
+    <tr><th>Availability</th><th>দিনে</th><th>সপ্তাহে</th><th>মাসে</th><th>বছরে</th></tr>
+    <tr><td class="n">99%</td><td class="n">14.4 মিনিট</td><td class="n">1.68 ঘণ্টা</td><td class="n">7.31 ঘণ্টা</td><td class="n">3.65 দিন</td></tr>
+    <tr><td class="n"><b>99.9%</b></td><td class="n">1.44 মিনিট</td><td class="n">10.1 মিনিট</td><td class="n">43.8 মিনিট</td><td class="n"><b>8.77 ঘণ্টা</b></td></tr>
+    <tr><td class="n"><b>99.99%</b></td><td class="n"><b>8.64 সেকেন্ড</b></td><td class="n">1.01 মিনিট</td><td class="n">4.38 মিনিট</td><td class="n"><b>52.6 মিনিট</b></td></tr>
+    <tr><td class="n">99.999%</td><td class="n">864 ms</td><td class="n">6.05 সেকেন্ড</td><td class="n">26.3 সেকেন্ড</td><td class="n">5.26 মিনিট</td></tr>
+    <tr><td class="n">99.9999%</td><td class="n">86.4 ms</td><td class="n">605 ms</td><td class="n">2.63 সেকেন্ড</td><td class="n">31.6 সেকেন্ড</td></tr>
+  </table></div>
+  <p class="keep"><b>নিজে বের করার সূত্র:</b> বছরে 8,760 ঘণ্টা, দিনে 86,400 সেকেন্ড। 99.9% মানে 0.1% বন্ধ থাকার অনুমতি: 8,760 × 0.001 ≈ 8.76 ঘণ্টা। প্রতিটা বাড়তি nine-এ downtime ১০ ভাগের এক ভাগ হয়।</p>
+  <details class="self"><summary>নিজেকে যাচাই (বইয়ের একটু বাইরে): তিনটা service পরপর নির্ভরশীল, প্রতিটা 99.9%। পুরো system কত?</summary><p>গুণ হয়: 0.999 × 0.999 × 0.999 ≈ 99.7%। নির্ভরশীল অংশ যত বাড়ে, মোট availability তত কমে। এজন্যই redundancy লাগে।</p></details>
+</section>
+
+<section class="c" id="s-est">
+  <div class="head"><span class="num">2.4</span><h3>উদাহরণ: Twitter-এর QPS ও storage</h3></div>
+  <p>ধরে নেওয়া (আসল সংখ্যা নয়): মাসে 300M active user, তার 50% প্রতিদিন আসে, প্রত্যেকে দিনে গড়ে 2টা tweet করে, 10% tweet-এ media থাকে, data রাখা হয় 5 বছর।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 270" role="img" aria-label="QPS: 300M MAU গুণ 50 শতাংশ মানে 150M DAU, গুণ 2 মানে দিনে 300M tweet, ভাগ 86400 মানে প্রায় 3500 QPS, গুণ 2 মানে peak 7000। Storage: দিনে 30M media গুণ 1 MB মানে 30 TB, গুণ 365 গুণ 5 মানে প্রায় 55 PB।">
+      <text x="10" y="18" class="t-h">QPS (প্রতি সেকেন্ডে কতগুলো tweet)</text>
+      <text x="130" y="48" text-anchor="middle" class="t-m acc-t">× 50%</text>
+      <text x="270" y="48" text-anchor="middle" class="t-m acc-t">× 2 tweet</text>
+      <text x="410" y="48" text-anchor="middle" class="t-m acc-t">÷ 86,400 s</text>
+      <text x="550" y="48" text-anchor="middle" class="t-m acc-t">× 2</text>
+      <rect x="10"  y="60" width="100" height="52" rx="6" class="box"/><text x="60"  y="84" text-anchor="middle" class="t-m">300M</text><text x="60"  y="102" text-anchor="middle" class="t-s mut">MAU</text>
+      <rect x="150" y="60" width="100" height="52" rx="6" class="box"/><text x="200" y="84" text-anchor="middle" class="t-m">150M</text><text x="200" y="102" text-anchor="middle" class="t-s mut">DAU</text>
+      <rect x="290" y="60" width="100" height="52" rx="6" class="box"/><text x="340" y="84" text-anchor="middle" class="t-m">300M</text><text x="340" y="102" text-anchor="middle" class="t-s mut">tweet/দিন</text>
+      <rect x="430" y="60" width="100" height="52" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="480" y="84" text-anchor="middle" class="t-m acc-t">~3,500</text><text x="480" y="102" text-anchor="middle" class="t-s">গড় QPS</text>
+      <rect x="570" y="60" width="100" height="52" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="620" y="84" text-anchor="middle" class="t-m acc-t">~7,000</text><text x="620" y="102" text-anchor="middle" class="t-s">peak QPS</text>
+      <line x1="110" y1="86" x2="146" y2="86" class="ln" marker-end="url(#ar)"/>
+      <line x1="250" y1="86" x2="286" y2="86" class="ln" marker-end="url(#ar)"/>
+      <line x1="390" y1="86" x2="426" y2="86" class="ln" marker-end="url(#ar)"/>
+      <line x1="530" y1="86" x2="566" y2="86" class="ln" marker-end="url(#ar)"/>
+
+      <text x="10" y="160" class="t-h">Media storage</text>
+      <text x="160" y="190" text-anchor="middle" class="t-m acc-t">× 2 × 10%</text>
+      <text x="340" y="190" text-anchor="middle" class="t-m acc-t">× 1 MB</text>
+      <text x="520" y="190" text-anchor="middle" class="t-m acc-t">× 365 × 5</text>
+      <rect x="10"  y="202" width="110" height="52" rx="6" class="box"/><text x="65"  y="226" text-anchor="middle" class="t-m">150M</text><text x="65"  y="244" text-anchor="middle" class="t-s mut">DAU</text>
+      <rect x="200" y="202" width="110" height="52" rx="6" class="box"/><text x="255" y="226" text-anchor="middle" class="t-m">30M</text><text x="255" y="244" text-anchor="middle" class="t-s mut">media/দিন</text>
+      <rect x="380" y="202" width="110" height="52" rx="6" class="box"/><text x="435" y="226" text-anchor="middle" class="t-m">30 TB</text><text x="435" y="244" text-anchor="middle" class="t-s mut">প্রতিদিন</text>
+      <rect x="560" y="202" width="110" height="52" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="615" y="226" text-anchor="middle" class="t-m acc-t">~55 PB</text><text x="615" y="244" text-anchor="middle" class="t-s">৫ বছরে</text>
+      <line x1="120" y1="228" x2="196" y2="228" class="ln" marker-end="url(#ar)"/>
+      <line x1="310" y1="228" x2="376" y2="228" class="ln" marker-end="url(#ar)"/>
+      <line x1="490" y1="228" x2="556" y2="228" class="ln" marker-end="url(#ar)"/>
+    </svg></div>
+    <figcaption>প্রতিটা ধাপে একটা assumption গুণ বা ভাগ হচ্ছে। Tweet-এর tweet_id (64 byte) আর text (140 byte) media-র তুলনায় নগণ্য, তাই বই শুধু media storage হিসাব করেছে। Peak = গড়ের ২ গুণ একটা ধারণা মাত্র; ঈদের টিকিট বা flash sale-এ এটা বহুগুণ বেশি হতে পারে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: courier app-এ 2M DAU, প্রত্যেকে দিনে 5 বার parcel track করে। গড় QPS কত?</summary><p>2M × 5 = 10M request/দিন। 10M ÷ ~100,000 s ≈ 100 QPS (সঠিক ভাগে ~116)। Peak ২ গুণ ধরলে ~230।</p></details>
+</section>
+
+<section class="c" id="s-tips">
+  <div class="head"><span class="num">2.5</span><h3>Estimation-এর নিয়ম</h3></div>
+  <p>ফলের চেয়ে প্রক্রিয়া বেশি গুরুত্বপূর্ণ। Interviewer দেখেন আপনি কীভাবে সমস্যা ভাঙেন।</p>
+  <div class="tbl"><table>
+    <tr><th>নিয়ম</th><th>উদাহরণ</th></tr>
+    <tr><td>Round করুন, নির্ভুলতা লাগে না</td><td class="n">99,987 ÷ 9.1 → 100,000 ÷ 10 = 10,000</td></tr>
+    <tr><td>Assumption লিখে রাখুন</td><td>"DAU = MAU-র 50% ধরলাম", পরে reference দিতে পারবেন</td></tr>
+    <tr><td>Unit লিখুন</td><td>"5" নয়, "5 MB"। না লিখলে KB/MB/GB গুলিয়ে ১০০০ গুণ ভুল হয়</td></tr>
+    <tr><td>যা বেশি জিজ্ঞেস হয়</td><td>QPS, peak QPS, storage, cache size, server সংখ্যা</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>হাতের কাছে রাখার সংখ্যা (বইয়ের বাইরে)</th><th>মান</th></tr>
+    <tr><td>১ দিন</td><td class="n">86,400 s ≈ 10^5 s</td></tr>
+    <tr><td>১ মাস</td><td class="n">≈ 2.5M s</td></tr>
+    <tr><td>দিনে ১০ লাখ (1M) request</td><td class="n">≈ 12 QPS</td></tr>
+    <tr><td>দিনে ১০ কোটি (100M) request</td><td class="n">≈ 1,160 QPS</td></tr>
+    <tr><td>Server সংখ্যা</td><td class="n">peak QPS ÷ এক server-এর QPS, + ২০–৩০% বাড়তি</td></tr>
+  </table></div>
+</section>
+
+<section class="chapter" id="ch3">
+  <div class="eyebrow">CHAPTER 3</div>
+  <h2>System design interview-এর framework</h2>
+  <p>এক ঘণ্টায় কেউ Google বানাবে এটা কেউ আশা করে না। Interview আসলে দুজন সহকর্মীর একসাথে একটা অস্পষ্ট সমস্যা সমাধানের অনুকরণ। চূড়ান্ত design-এর চেয়ে প্রক্রিয়া বেশি গুরুত্বপূর্ণ।</p>
+</section>
+
+<section class="c" id="s-look">
+  <div class="head"><span class="num">3.1</span><h3>Interviewer কী খোঁজেন</h3></div>
+  <div class="two">
+    <div class="good"><h4>ভালো signal</h4><ul>
+      <li>একসাথে কাজ করার দক্ষতা (collaboration)</li>
+      <li>চাপের মধ্যে কাজ করা</li>
+      <li>অস্পষ্টতা গঠনমূলকভাবে দূর করা</li>
+      <li><b>ভালো প্রশ্ন করা</b>: অনেক interviewer এটা আলাদাভাবে দেখেন</li>
+      <li>নিজের design-এর পক্ষে যুক্তি, feedback গ্রহণ</li>
+    </ul></div>
+    <div class="bad"><h4>Red flag</h4><ul>
+      <li><b>Over-engineering</b>: tradeoff উপেক্ষা করে design-এর নিখুঁততা নিয়ে মেতে থাকা</li>
+      <li>সংকীর্ণ মানসিকতা</li>
+      <li>একগুঁয়েমি</li>
+      <li>Requirement না বুঝেই উত্তর দেওয়া</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="c" id="s-steps">
+  <div class="head"><span class="num">3.2</span><h3>চার ধাপ ও সময় ভাগ</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 190" role="img" aria-label="৪৫ মিনিটের interview: ধাপ ১ scope ৩ থেকে ১০ মিনিট, ধাপ ২ high-level design ১০ থেকে ১৫ মিনিট, ধাপ ৩ deep dive ১০ থেকে ২৫ মিনিট, ধাপ ৪ wrap up ৩ থেকে ৫ মিনিট।">
+      <text x="10" y="18" class="t-s mut">৪৫ মিনিট (মোটামুটি ভাগ)</text>
+      <rect x="10"  y="30" width="101" height="54" rx="4" class="soft"/>
+      <rect x="113" y="30" width="174" height="54" rx="4" class="soft"/>
+      <rect x="289" y="30" width="306" height="54" rx="4" class="acc-bg acc-s" stroke-width="1.3"/>
+      <rect x="597" y="30" width="73"  height="54" rx="4" class="soft"/>
+      <text x="60"  y="54" text-anchor="middle" class="t-h">① Scope</text>
+      <text x="60"  y="73" text-anchor="middle" class="t-m">3–10 মি</text>
+      <text x="200" y="54" text-anchor="middle" class="t-h">② High-level</text>
+      <text x="200" y="73" text-anchor="middle" class="t-m">10–15 মি</text>
+      <text x="442" y="54" text-anchor="middle" class="t-h acc-t">③ Deep dive</text>
+      <text x="442" y="73" text-anchor="middle" class="t-m acc-t">10–25 মি</text>
+      <text x="633" y="54" text-anchor="middle" class="t-h">④ Wrap</text>
+      <text x="633" y="73" text-anchor="middle" class="t-m">3–5 মি</text>
+      <text x="60"  y="108" text-anchor="middle" class="t-s">প্রশ্ন করা,</text>
+      <text x="60"  y="124" text-anchor="middle" class="t-s">assumption লেখা</text>
+      <text x="200" y="108" text-anchor="middle" class="t-s">box diagram,</text>
+      <text x="200" y="124" text-anchor="middle" class="t-s">interviewer-এর সম্মতি</text>
+      <text x="442" y="108" text-anchor="middle" class="t-s">গুরুত্বপূর্ণ component-এর বিস্তারিত,</text>
+      <text x="442" y="124" text-anchor="middle" class="t-s">bottleneck, tradeoff</text>
+      <text x="633" y="108" text-anchor="middle" class="t-s">উন্নতি,</text>
+      <text x="633" y="124" text-anchor="middle" class="t-s">recap</text>
+      <line x1="10" y1="150" x2="670" y2="150" class="ln-mut"/>
+      <text x="10" y="170" class="t-m mut">0</text>
+      <text x="111" y="170" text-anchor="middle" class="t-m mut">7</text>
+      <text x="287" y="170" text-anchor="middle" class="t-m mut">19</text>
+      <text x="595" y="170" text-anchor="middle" class="t-m mut">40</text>
+      <text x="670" y="170" text-anchor="end" class="t-m mut">45 মিনিট</text>
+    </svg></div>
+    <figcaption>বক্সের চওড়া একটা সাধারণ ভাগ দেখায়; আসল ভাগ সমস্যা আর interviewer-এর উপর নির্ভর করে। সবচেয়ে বেশি সময় যায় deep dive-এ। প্রথম ধাপে তাড়াহুড়া করাই সবচেয়ে common ভুল।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-step1">
+  <div class="head"><span class="num">3.3</span><h3>ধাপ ১: সমস্যা বোঝা ও scope ঠিক করা</h3></div>
+  <p>বইয়ের Jimmy সবার আগে হাত তোলে, প্রশ্ন বোঝার আগেই উত্তর দেয়। System design-এ Jimmy হবেন না: দ্রুত উত্তরে কোনো bonus নেই, আর requirement না বুঝে design করা বড় red flag।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 190" role="img" aria-label="উপরের পথ: প্রশ্ন শুনেই design, ফলে ভুল system। নিচের পথ: প্রশ্ন, clarifying প্রশ্ন, assumption লেখা, তারপর design, ফলে সঠিক scope।">
+      <rect x="10" y="70" width="120" height="50" rx="6" class="box"/>
+      <text x="70" y="92" text-anchor="middle" class="t-h">"Design a</text>
+      <text x="70" y="110" text-anchor="middle" class="t-h">news feed"</text>
+      <line x1="130" y1="84" x2="486" y2="36" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+      <text x="300" y="46" text-anchor="middle" class="t-s bad-t">Jimmy: সঙ্গে সঙ্গে diagram</text>
+      <rect x="490" y="14" width="180" height="44" rx="6" class="bad-bg bad-s"/>
+      <text x="580" y="41" text-anchor="middle" class="bad-t">ভুল system ✗</text>
+      <rect x="170" y="126" width="130" height="50" rx="6" class="soft"/>
+      <text x="235" y="148" text-anchor="middle" class="t-s">clarifying</text>
+      <text x="235" y="165" text-anchor="middle" class="t-s">প্রশ্ন</text>
+      <rect x="330" y="126" width="130" height="50" rx="6" class="soft"/>
+      <text x="395" y="148" text-anchor="middle" class="t-s">assumption</text>
+      <text x="395" y="165" text-anchor="middle" class="t-s">লিখে রাখা</text>
+      <rect x="490" y="126" width="180" height="50" rx="6" class="ok-bg ok-s" stroke-width="1.5"/>
+      <text x="580" y="156" text-anchor="middle" class="ok-t">সঠিক scope-এ design ✓</text>
+      <line x1="130" y1="108" x2="166" y2="146" class="ok-s" fill="none" stroke-width="1.5" marker-end="url(#ar-ok)"/>
+      <line x1="300" y1="151" x2="326" y2="151" class="ok-s" fill="none" stroke-width="1.5" marker-end="url(#ar-ok)"/>
+      <line x1="460" y1="151" x2="486" y2="151" class="ok-s" fill="none" stroke-width="1.5" marker-end="url(#ar-ok)"/>
+    </svg></div>
+    <figcaption>প্রশ্ন করলে interviewer হয় সরাসরি উত্তর দেবেন, নয়তো বলবেন "আপনি ধরে নিন"। তখন assumption লিখে রাখুন, পরে দরকার হবে।</figcaption>
+  </figure>
+  <div class="two">
+    <div><h4>সবসময় যা জিজ্ঞেস করবেন</h4><ul>
+      <li>ঠিক কোন feature-গুলো বানাতে হবে?</li>
+      <li>Product-এ কতজন user?</li>
+      <li>কত দ্রুত scale হবে: ৩ মাস, ৬ মাস, ১ বছরে?</li>
+      <li>Company-র tech stack কী, কোন existing service ব্যবহার করা যায়?</li>
+    </ul></div>
+    <div><h4>News feed-এর উদাহরণ</h4><ul>
+      <li>Mobile, web, না দুটোই? <span class="mono mut">→ দুটোই</span></li>
+      <li>মূল feature? <span class="mono mut">→ post করা, বন্ধুদের feed দেখা</span></li>
+      <li>সাজানো কীভাবে? <span class="mono mut">→ নতুন আগে (reverse chronological)</span></li>
+      <li>বন্ধু সর্বোচ্চ কত? <span class="mono mut">→ 5,000</span></li>
+      <li>Traffic? <span class="mono mut">→ 10M DAU</span></li>
+      <li>Media আছে? <span class="mono mut">→ image ও video</span></li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="c" id="s-step2">
+  <div class="head"><span class="num">3.4</span><h3>ধাপ ২: high-level design ও সম্মতি</h3></div>
+  <p>প্রথমে একটা blueprint দাঁড় করান আর interviewer-কে teammate ভেবে feedback চান। Client, API, web server, data store, cache, CDN, queue দিয়ে box diagram আঁকুন। দরকার হলে (interviewer-কে জিজ্ঞেস করে) estimation দিয়ে যাচাই করুন, আর কয়েকটা use case দিয়ে design-এর মধ্য দিয়ে হেঁটে দেখুন। News feed-এর design দুই flow-এ ভাগ হয়:</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 330" role="img" aria-label="Feed publishing: user post করে, load balancer, web servers, তারপর post service post-কে cache আর database-এ লেখে, fanout service বন্ধুদের news feed cache-এ দেয়, notification service জানায়। News feed building: user feed চায়, load balancer, web servers, news feed service, news feed cache থেকে আনে।">
+      <text x="10" y="18" class="t-h">Feed publishing</text>
+      <rect x="10" y="70" width="80" height="44" rx="6" class="box"/><text x="50" y="90" text-anchor="middle" class="t-s">User</text><text x="50" y="106" text-anchor="middle" class="t-m mut" style="font-size:10px">POST /feed</text>
+      <rect x="120" y="70" width="90" height="44" rx="6" class="box"/><text x="165" y="96" text-anchor="middle" class="t-s">Load balancer</text>
+      <rect x="240" y="70" width="90" height="44" rx="6" class="box"/><text x="285" y="96" text-anchor="middle" class="t-s">Web servers</text>
+      <rect x="380" y="24" width="120" height="36" rx="6" class="box"/><text x="440" y="47" text-anchor="middle" class="t-s">Post service</text>
+      <rect x="380" y="74" width="120" height="36" rx="6" class="acc-bg acc-s" stroke-width="1.3"/><text x="440" y="97" text-anchor="middle" class="t-s acc-t">Fanout service</text>
+      <rect x="380" y="124" width="120" height="36" rx="6" class="box"/><text x="440" y="147" text-anchor="middle" class="t-s">Notification</text>
+      <rect x="540" y="24" width="130" height="36" rx="6" class="soft"/><text x="605" y="47" text-anchor="middle" class="t-s">Post cache + DB</text>
+      <rect x="540" y="74" width="130" height="36" rx="6" class="soft"/><text x="605" y="97" text-anchor="middle" class="t-s">News feed cache</text>
+      <line x1="90" y1="92" x2="116" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="210" y1="92" x2="236" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="86" x2="376" y2="44" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="92" x2="376" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="98" x2="376" y2="140" class="ln" marker-end="url(#ar)"/>
+      <line x1="500" y1="42" x2="536" y2="42" class="ln" marker-end="url(#ar)"/>
+      <line x1="500" y1="92" x2="536" y2="92" class="ln" marker-end="url(#ar)"/>
+      <text x="605" y="130" text-anchor="middle" class="t-s mut">বন্ধুদের feed-এ post id</text>
+
+      <line x1="10" y1="178" x2="670" y2="178" class="ln-mut dash"/>
+
+      <text x="10" y="204" class="t-h">News feed building</text>
+      <rect x="10" y="250" width="80" height="44" rx="6" class="box"/><text x="50" y="270" text-anchor="middle" class="t-s">User</text><text x="50" y="286" text-anchor="middle" class="t-m mut" style="font-size:10px">GET /feed</text>
+      <rect x="120" y="250" width="90" height="44" rx="6" class="box"/><text x="165" y="276" text-anchor="middle" class="t-s">Load balancer</text>
+      <rect x="240" y="250" width="90" height="44" rx="6" class="box"/><text x="285" y="276" text-anchor="middle" class="t-s">Web servers</text>
+      <rect x="380" y="254" width="120" height="36" rx="6" class="acc-bg acc-s" stroke-width="1.3"/><text x="440" y="277" text-anchor="middle" class="t-s acc-t">News feed service</text>
+      <rect x="540" y="254" width="130" height="36" rx="6" class="soft"/><text x="605" y="277" text-anchor="middle" class="t-s">News feed cache</text>
+      <line x1="90" y1="272" x2="116" y2="272" class="ln" marker-end="url(#ar)"/>
+      <line x1="210" y1="272" x2="236" y2="272" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="272" x2="376" y2="272" class="ln" marker-end="url(#ar)"/>
+      <line x1="500" y1="272" x2="536" y2="272" class="ln" marker-end="url(#ar)"/>
+      <text x="440" y="316" text-anchor="middle" class="t-s mut">বন্ধুদের post নতুন থেকে পুরনো ক্রমে জোড়া দেওয়া</text>
+    </svg></div>
+    <figcaption>Publishing-এ post database আর cache-এ যায়, আর বন্ধুদের feed-এ ছড়িয়ে দেওয়া হয় (fanout)। Building-এ বন্ধুদের post নতুন থেকে পুরনো ক্রমে জোড়া দেওয়া হয়। বিস্তারিত Chapter 11-এ; এখানে দেখার বিষয় হল high-level design কতটা উঁচু স্তরে থাকে।</figcaption>
+  </figure>
+  <p class="keep"><b>API endpoint আর DB schema এই ধাপে দেখাবেন?</b> সমস্যার উপর নির্ভর করে। "Design Google search"-এ খুব নিচু স্তরের, কিন্তু multiplayer poker game-এর backend-এ যুক্তিসঙ্গত। Interviewer-এর সাথে কথা বলে ঠিক করুন।</p>
+</section>
+
+<section class="c" id="s-step3">
+  <div class="head"><span class="num">3.5</span><h3>ধাপ ৩: deep dive</h3></div>
+  <p>এই ধাপে আসার আগে scope-এ একমত, blueprint আঁকা আর feedback পাওয়া হয়ে গেছে। এখন interviewer-এর সাথে ঠিক করুন কোন component সবচেয়ে গুরুত্বপূর্ণ, আর সেটার গভীরে যান। Signal দেয় না এমন খুঁটিনাটিতে সময় নষ্ট করবেন না।</p>
+  <div class="tbl"><table>
+    <tr><th>সমস্যা</th><th>কোথায় গভীরে যাবেন</th></tr>
+    <tr><td>URL shortener</td><td>লম্বা URL-কে ছোট বানানোর hash function</td></tr>
+    <tr><td>Chat system</td><td>Latency কমানো; online/offline status দেখানো</td></tr>
+    <tr><td>News feed</td><td>Feed publishing আর feed retrieval</td></tr>
+    <tr><td>Senior candidate</td><td>Performance, bottleneck, resource estimation</td></tr>
+    <tr><td style="color:var(--wrong)">এড়িয়ে চলুন</td><td>Facebook-এর EdgeRank algorithm-এর বিস্তারিত: সময় যায়, scalable design-এর দক্ষতা দেখায় না</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-step4">
+  <div class="head"><span class="num">3.6</span><h3>ধাপ ৪: wrap up</h3></div>
+  <div class="two">
+    <div><h4>কী নিয়ে কথা বলবেন</h4><ul>
+      <li>Bottleneck আর সম্ভাব্য উন্নতি। <b>কখনো বলবেন না design নিখুঁত।</b></li>
+      <li>Design-এর সংক্ষিপ্ত recap, বিশেষ করে একাধিক সমাধান দিয়ে থাকলে</li>
+      <li>Error case: server failure, network loss</li>
+      <li>Operation: metric আর error log কীভাবে monitor করবেন, কীভাবে roll out করবেন</li>
+      <li>পরের scale: 1M থেকে 10M user হলে কী বদলাবেন</li>
+      <li>আরও সময় পেলে আর কী refine করতেন</li>
+    </ul></div>
+    <div><h4>Chapter 1 থেকে কোনটা কোথায় লাগবে</h4><ul>
+      <li>Bottleneck → cache (1.7), replica (1.6), sharding (1.13)</li>
+      <li>Error case → SPOF, failover, redundancy (1.5, 1.14)</li>
+      <li>Operation → logging, metrics, CI/CD (1.12)</li>
+      <li>পরের scale → data center, queue (1.10, 1.11)</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="c" id="s-dos">
+  <div class="head"><span class="num">3.7</span><h3>যা করবেন, যা করবেন না</h3></div>
+  <div class="two">
+    <div class="good"><h4>করবেন</h4><ul>
+      <li>সবসময় clarification চাইবেন; নিজের assumption ঠিক ধরে নেবেন না</li>
+      <li>Requirement বুঝবেন: startup আর প্রতিষ্ঠিত company-র সমাধান আলাদা</li>
+      <li>জোরে ভাববেন, interviewer-কে জানাবেন কী ভাবছেন</li>
+      <li>সম্ভব হলে একাধিক approach দেবেন</li>
+      <li>Blueprint-এ একমত হওয়ার পর সবচেয়ে গুরুত্বপূর্ণ component আগে</li>
+      <li>Interviewer-এর সাথে idea নিয়ে আলোচনা করবেন</li>
+      <li>হাল ছাড়বেন না</li>
+    </ul></div>
+    <div class="bad"><h4>করবেন না</h4><ul>
+      <li>সাধারণ interview প্রশ্নের জন্য অপ্রস্তুত থাকা</li>
+      <li>Requirement না বুঝে সমাধানে ঝাঁপ দেওয়া</li>
+      <li>শুরুতেই একটা component-এর গভীরে যাওয়া; আগে high-level</li>
+      <li>আটকে গিয়ে hint চাইতে দ্বিধা করা</li>
+      <li>চুপচাপ ভাবা</li>
+      <li>Design দিয়েই শেষ ভাবা। Interviewer না বলা পর্যন্ত শেষ নয়; আগেভাগে আর বারবার feedback চান</li>
+    </ul></div>
+  </div>
+</section>
+
+<section class="chapter" id="ch4">
+  <div class="eyebrow">CHAPTER 4</div>
+  <h2>Rate limiter design</h2>
+  <p>এটাই বইয়ের প্রথম পূর্ণাঙ্গ design প্রশ্ন, আর Chapter 3-এর ৪ ধাপ এখানে হাতে-কলমে দেখানো হয়েছে। মূল কাজ: নির্দিষ্ট সময়ে client কতগুলো request পাঠাতে পারবে তা ঠিক করে দেওয়া, আর সীমা ছাড়ালে বাড়তি call আটকে দেওয়া।</p>
+</section>
+
+<section class="c" id="s-rl-what">
+  <div class="head"><span class="num">4.1</span><h3>Rate limiter কী করে, আর কেন লাগে</h3></div>
+  <p>উদাহরণ: সেকেন্ডে ২টার বেশি post নয়, একই IP থেকে দিনে ১০টার বেশি account নয়, একই device থেকে সপ্তাহে ৫ বারের বেশি reward নয়। সীমা ছাড়ালে server 429 ফেরত দেয়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 210" role="img" aria-label="সীমা সেকেন্ডে দুটি। Client এক সেকেন্ডে তিনটা request পাঠাল। প্রথম দুটি API server-এ গেল, তৃতীয়টি rate limiter আটকে 429 ফেরত দিল।">
+      <rect x="10" y="60" width="120" height="70" rx="6" class="box"/>
+      <text x="70" y="88" text-anchor="middle" class="t-h">Client</text>
+      <text x="70" y="108" text-anchor="middle" class="t-s mut">১ সেকেন্ডে ৩টা</text>
+      <rect x="250" y="50" width="180" height="90" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="340" y="78" text-anchor="middle" class="t-h">Rate limiter</text>
+      <text x="340" y="97" text-anchor="middle" class="t-s">middleware</text>
+      <text x="340" y="120" text-anchor="middle" class="t-m acc-t">সীমা: ২ / সেকেন্ড</text>
+      <rect x="540" y="60" width="130" height="70" rx="6" class="box"/>
+      <text x="605" y="95" text-anchor="middle" class="t-h">API servers</text>
+      <line x1="130" y1="76" x2="246" y2="76" class="ln" marker-end="url(#ar)"/>
+      <text x="188" y="68" text-anchor="middle" class="t-s">① request</text>
+      <line x1="130" y1="96" x2="246" y2="96" class="ln" marker-end="url(#ar)"/>
+      <text x="188" y="112" text-anchor="middle" class="t-s">② request</text>
+      <line x1="130" y1="126" x2="246" y2="126" class="ln bad-s" marker-end="url(#ar-bad)"/>
+      <text x="188" y="142" text-anchor="middle" class="t-s bad-t">③ request</text>
+      <line x1="430" y1="86" x2="536" y2="86" class="ok-s" stroke-width="1.8" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="483" y="78" text-anchor="middle" class="t-s ok-t">① ② যায় ✓</text>
+      <path d="M300 140 L300 172 L136 172" class="ln bad-s" marker-end="url(#ar-bad)"/>
+      <text x="310" y="190" class="t-s bad-t">③ আটকে যায়: HTTP 429 Too Many Requests</text>
+    </svg></div>
+    <figcaption>তিনটা সুবিধা। <b>DoS ঠেকানো:</b> ইচ্ছাকৃত বা অনিচ্ছাকৃত বাড়তি call আটকে resource বাঁচানো (Twitter ৩ ঘণ্টায় ৩০০ tweet, Google Docs API ৬০ সেকেন্ডে ৩০০ read)। <b>খরচ কমানো:</b> প্রতি call-এ টাকা লাগে এমন third-party API-তে (credit check, payment) এটাই মূল নিয়ন্ত্রণ। <b>Server overload রোধ:</b> bot বা ভুল ব্যবহারের request ছেঁটে ফেলা।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: rate limiter আর load balancer-এর কাজ কীভাবে আলাদা?</summary><p>Load balancer request গুলো server-দের মধ্যে ভাগ করে দেয় (সবগুলোই যায়)। Rate limiter ঠিক করে কোন request আদৌ যাবে কিনা।</p></details>
+</section>
+
+<section class="c" id="s-rl-where">
+  <div class="head"><span class="num">4.2</span><h3>Rate limiter কোথায় বসবে</h3></div>
+  <p>Client-এ, server-এ, নাকি মাঝখানে একটা আলাদা স্তরে, এই প্রশ্নটা Step 2-এর শুরুতেই আসে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="তিনটা উপায়: client-side নির্ভরযোগ্য নয় কারণ request জাল করা যায়; server-side-এ API server নিজেই সীমা দেখে; middleware বা API gateway আলাদা স্তরে সীমা দেখে সব service-এর জন্য।">
+      <text x="110" y="18" text-anchor="middle" class="t-h">Client-side</text>
+      <rect x="20" y="40" width="180" height="60" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/>
+      <text x="110" y="64" text-anchor="middle" class="t-s">Client</text>
+      <text x="110" y="84" text-anchor="middle" class="t-m bad-t">limit এখানে</text>
+      <text x="110" y="128" text-anchor="middle" class="t-s bad-t">request জাল করা যায় ✗</text>
+      <text x="110" y="148" text-anchor="middle" class="t-s mut">client-এর code-ও</text>
+      <text x="110" y="164" text-anchor="middle" class="t-s mut">আমাদের হাতে নাও থাকতে পারে</text>
+
+      <line x1="225" y1="10" x2="225" y2="200" class="ln-mut dash"/>
+
+      <text x="335" y="18" text-anchor="middle" class="t-h">Server-side</text>
+      <rect x="248" y="40" width="80" height="44" rx="6" class="box"/><text x="288" y="67" text-anchor="middle" class="t-s">Client</text>
+      <rect x="350" y="40" width="90" height="60" rx="6" class="acc-bg acc-s" stroke-width="1.3"/>
+      <text x="395" y="62" text-anchor="middle" class="t-s">API server</text>
+      <text x="395" y="82" text-anchor="middle" class="t-m acc-t">+ limit</text>
+      <line x1="328" y1="62" x2="346" y2="62" class="ln" marker-end="url(#ar)"/>
+      <text x="345" y="128" text-anchor="middle" class="t-s">নিজের code, পূর্ণ নিয়ন্ত্রণ</text>
+      <text x="345" y="148" text-anchor="middle" class="t-s mut">প্রতিটা service-এ আলাদা করে</text>
+      <text x="345" y="164" text-anchor="middle" class="t-s mut">বসাতে হয়</text>
+
+      <line x1="455" y1="10" x2="455" y2="200" class="ln-mut dash"/>
+
+      <text x="568" y="18" text-anchor="middle" class="t-h">Middleware / API gateway</text>
+      <rect x="474" y="40" width="56" height="44" rx="6" class="box"/><text x="502" y="67" text-anchor="middle" class="t-s">Client</text>
+      <rect x="544" y="34" width="70" height="56" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="579" y="56" text-anchor="middle" class="t-s acc-t">Gateway</text>
+      <text x="579" y="74" text-anchor="middle" class="t-s acc-t">+ limit</text>
+      <rect x="628" y="34" width="46" height="26" rx="4" class="box"/><text x="651" y="51" text-anchor="middle" class="t-s">svc A</text>
+      <rect x="628" y="64" width="46" height="26" rx="4" class="box"/><text x="651" y="81" text-anchor="middle" class="t-s">svc B</text>
+      <line x1="530" y1="62" x2="540" y2="62" class="ln" marker-end="url(#ar)"/>
+      <line x1="614" y1="50" x2="624" y2="47" class="ln" marker-end="url(#ar)"/>
+      <line x1="614" y1="74" x2="624" y2="77" class="ln" marker-end="url(#ar)"/>
+      <text x="568" y="128" text-anchor="middle" class="t-s">এক জায়গায় সব service-এর সীমা</text>
+      <text x="568" y="148" text-anchor="middle" class="t-s mut">সাথে auth, SSL termination,</text>
+      <text x="568" y="164" text-anchor="middle" class="t-s mut">IP whitelisting, static content</text>
+      <text x="340" y="200" text-anchor="middle" class="t-s mut">কোনটা বেছে নেবেন তা নির্ভর করে tech stack, engineering resource আর অগ্রাধিকারের উপর</text>
+    </svg></div>
+    <figcaption>Client-side enforcement নির্ভরযোগ্য নয়। নিজে বানালে algorithm-এর পূর্ণ নিয়ন্ত্রণ পাবেন, কিন্তু সময় লাগবে; তৃতীয় পক্ষের gateway ব্যবহার করলে দ্রুত হবে কিন্তু algorithm-এর পছন্দ সীমিত। Microservice আর gateway ইতিমধ্যে থাকলে সেখানেই rate limiter যোগ করা স্বাভাবিক।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-rl-token">
+  <div class="head"><span class="num">4.3</span><h3>Token bucket</h3></div>
+  <p>সবচেয়ে বেশি ব্যবহৃত algorithm (Amazon, Stripe)। একটা বালতিতে নির্দিষ্ট হারে token জমা হয়; প্রতিটা request একটা token খরচ করে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="Refiller প্রতি সেকেন্ডে দুটি token বালতিতে ফেলে, বালতির ধারণক্ষমতা চার। Request এলে token থাকলে একটি খরচ করে request যায়, token না থাকলে request drop হয়।">
+      <text x="150" y="20" class="t-s mut">Refiller: প্রতি সেকেন্ডে ২টা token</text>
+      <line x1="150" y1="28" x2="150" y2="58" class="ln" marker-end="url(#ar)"/>
+      <path d="M90 60 L90 170 Q90 182 102 182 L198 182 Q210 182 210 170 L210 60" class="box" stroke-width="1.5"/>
+      <text x="150" y="208" text-anchor="middle" class="t-s mut">capacity 4</text>
+      <circle cx="122" cy="160" r="13" class="acc-f"/><text x="122" y="165" text-anchor="middle" class="t-m inv">T</text>
+      <circle cx="178" cy="160" r="13" class="acc-f"/><text x="178" y="165" text-anchor="middle" class="t-m inv">T</text>
+      <circle cx="122" cy="126" r="13" class="soft"/>
+      <circle cx="178" cy="126" r="13" class="soft"/>
+      <path d="M212 70 Q240 62 252 44" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <text x="258" y="42" class="t-s mut">বালতি ভরা থাকলে বাড়তি token উপচে যায়</text>
+
+      <rect x="300" y="110" width="110" height="46" rx="6" class="box"/>
+      <text x="355" y="138" text-anchor="middle" class="t-h">Request</text>
+      <line x1="298" y1="133" x2="216" y2="133" class="ln" marker-end="url(#ar)"/>
+      <text x="256" y="126" text-anchor="middle" class="t-s">token?</text>
+      <rect x="470" y="66" width="200" height="54" rx="6" class="ok-bg ok-s" stroke-width="1.3"/>
+      <text x="570" y="88" text-anchor="middle" class="ok-t">token আছে ✓</text>
+      <text x="570" y="108" text-anchor="middle" class="t-s ok-t">১টা token খরচ, request যায়</text>
+      <rect x="470" y="146" width="200" height="54" rx="6" class="bad-bg bad-s" stroke-width="1.3"/>
+      <text x="570" y="168" text-anchor="middle" class="bad-t">token নেই ✗</text>
+      <text x="570" y="188" text-anchor="middle" class="t-s bad-t">request drop</text>
+      <line x1="410" y1="124" x2="466" y2="98" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="410" y1="144" x2="466" y2="170" class="bad-s" stroke-width="1.5" fill="none" marker-end="url(#ar-bad)"/>
+      <text x="150" y="228" text-anchor="middle" class="t-s mut">parameter: bucket size + refill rate</text>
+    </svg></div>
+    <figcaption>কয়টা bucket লাগবে তা নিয়মের উপর নির্ভর করে: প্রতিটা endpoint-এর জন্য আলাদা (post, friend request, like হলে ৩টা), IP ভিত্তিক হলে প্রতি IP-তে একটা, পুরো system-এর সীমা হলে একটা global bucket। <b>লাভ:</b> সহজ, memory কম, আর জমে থাকা token দিয়ে অল্প সময়ের burst সামলায়। <b>অসুবিধা:</b> bucket size আর refill rate ঠিকমতো মেলানো কঠিন।</figcaption>
+  </figure>
+  <p class="keep"><b>মনে রাখুন:</b> token জমে থাকে, তাই চুপচাপ থাকার পর হঠাৎ কয়েকটা request একসাথে যেতে পারে। ঈদের টিকিট বা flash sale-এর মতো burst-এ এটাই সবচেয়ে ভালো।</p>
+</section>
+
+<section class="c" id="s-rl-leak">
+  <div class="head"><span class="num">4.4</span><h3>Leaking bucket</h3></div>
+  <p>Token bucket-এর মতোই, তবে এখানে request একটা FIFO queue-তে জমা হয় আর স্থির হারে বেরোয় (Shopify এটা ব্যবহার করে)।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="Request queue-তে ঢোকে। Queue ভরা থাকলে drop হয়। Queue থেকে নির্দিষ্ট হারে request বেরিয়ে process হয়।">
+      <text x="60" y="60" text-anchor="middle" class="t-s">Requests</text>
+      <line x1="20" y1="80" x2="166" y2="86" class="ln" marker-end="url(#ar)"/>
+      <line x1="20" y1="100" x2="166" y2="100" class="ln" marker-end="url(#ar)"/>
+      <line x1="20" y1="120" x2="166" y2="114" class="ln" marker-end="url(#ar)"/>
+      <rect x="170" y="66" width="240" height="70" rx="8" class="soft"/>
+      <text x="290" y="56" text-anchor="middle" class="t-h">Queue (FIFO)</text>
+      <rect x="182" y="80" width="40" height="42" rx="4" class="box"/><text x="202" y="106" text-anchor="middle" class="t-s">R1</text>
+      <rect x="230" y="80" width="40" height="42" rx="4" class="box"/><text x="250" y="106" text-anchor="middle" class="t-s">R2</text>
+      <rect x="278" y="80" width="40" height="42" rx="4" class="box"/><text x="298" y="106" text-anchor="middle" class="t-s">R3</text>
+      <rect x="326" y="80" width="40" height="42" rx="4" class="box"/><text x="346" y="106" text-anchor="middle" class="t-s">R4</text>
+      <rect x="374" y="80" width="28" height="42" rx="4" class="ln-mut dash"/>
+      <line x1="410" y1="101" x2="496" y2="101" class="ok-s" stroke-width="1.8" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="453" y="93" text-anchor="middle" class="t-s ok-t">স্থির হারে</text>
+      <text x="453" y="120" text-anchor="middle" class="t-s mut">outflow rate</text>
+      <rect x="500" y="76" width="170" height="50" rx="6" class="box"/>
+      <text x="585" y="106" text-anchor="middle" class="t-h">Processing</text>
+      <path d="M166 140 Q166 168 120 168" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+      <text x="112" y="172" text-anchor="end" class="t-s bad-t">queue ভরা → drop</text>
+      <text x="290" y="196" text-anchor="middle" class="t-s mut">parameter: bucket size (queue size) + outflow rate</text>
+      <text x="290" y="214" text-anchor="middle" class="t-s bad-t">সমস্যা: burst-এ queue পুরনো request-এ ভরে যায়, নতুন request তখন আটকে যায়</text>
+    </svg></div>
+    <figcaption>কোথায় ভালো: পেছনে এমন কিছু আছে যা একটা নির্দিষ্ট হারের বেশি নিতে পারে না, যেমন SMS gateway বা partner-এর API। কোথায় খারাপ: যেখানে সাম্প্রতিক request-ই বেশি গুরুত্বপূর্ণ, কারণ পুরনো request queue দখল করে রাখে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: token bucket আর leaking bucket-এর মূল পার্থক্য এক লাইনে?</summary><p>Token bucket burst যেতে দেয় (জমা token খরচ করে), leaking bucket সবসময় একই হারে বের করে।</p></details>
+</section>
+
+<section class="c" id="s-rl-fixed">
+  <div class="head"><span class="num">4.5</span><h3>Fixed window counter</h3></div>
+  <p>সময়কে নির্দিষ্ট মাপের window-তে ভাগ করে প্রতিটার জন্য একটা counter। প্রতিটা request counter এক বাড়ায়; threshold ছুঁলে নতুন window শুরু না হওয়া পর্যন্ত বাকি request পড়ে যায়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="সীমা মিনিটে পাঁচ। প্রথম window-এর শেষে পাঁচটা আর পরের window-এর শুরুতে পাঁচটা request এল। 2:00:30 থেকে 2:01:30-এর এক মিনিটে মোট দশটা request চলে গেল, যা সীমার দ্বিগুণ।">
+      <text x="10" y="20" class="t-s">সীমা: মিনিটে ৫টা</text>
+      <rect x="40" y="52" width="300" height="86" rx="4" class="soft"/>
+      <rect x="340" y="52" width="300" height="86" rx="4" class="soft"/>
+      <text x="190" y="46" text-anchor="middle" class="t-s mut">window 1 · counter 5/5</text>
+      <text x="490" y="46" text-anchor="middle" class="t-s mut">window 2 · counter 5/5</text>
+      <line x1="40" y1="160" x2="640" y2="160" class="ln-mut"/>
+      <text x="40" y="180" text-anchor="middle" class="t-m mut">2:00:00</text>
+      <text x="340" y="180" text-anchor="middle" class="t-m mut">2:01:00</text>
+      <text x="640" y="180" text-anchor="middle" class="t-m mut">2:02:00</text>
+      <circle cx="250" cy="110" r="8" class="acc-f"/><circle cx="270" cy="110" r="8" class="acc-f"/>
+      <circle cx="290" cy="110" r="8" class="acc-f"/><circle cx="310" cy="110" r="8" class="acc-f"/>
+      <circle cx="330" cy="110" r="8" class="acc-f"/>
+      <circle cx="350" cy="110" r="8" class="acc-f"/><circle cx="370" cy="110" r="8" class="acc-f"/>
+      <circle cx="390" cy="110" r="8" class="acc-f"/><circle cx="410" cy="110" r="8" class="acc-f"/>
+      <circle cx="430" cy="110" r="8" class="acc-f"/>
+      <rect x="190" y="72" width="300" height="70" rx="6" class="bad-s dash" fill="none" stroke-width="1.6"/>
+      <text x="340" y="204" text-anchor="middle" class="bad-t">2:00:30 – 2:01:30, এই এক মিনিটেই ১০টা request</text>
+      <text x="340" y="226" text-anchor="middle" class="t-s bad-t">সীমার দ্বিগুণ: window-এর প্রান্তে burst হলে এটাই হয়</text>
+    </svg></div>
+    <figcaption><b>লাভ:</b> memory-সাশ্রয়ী, বোঝা সহজ, আর "প্রতি ঘণ্টায় quota reset" জাতীয় নিয়মে ভালো মানায়। <b>অসুবিধা:</b> দুই window-এর সংযোগস্থলে সীমার দ্বিগুণ পর্যন্ত request ঢুকে যেতে পারে। এই সমস্যা সমাধানের জন্যই পরের দুটো algorithm।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-rl-log">
+  <div class="head"><span class="num">4.6</span><h3>Sliding window log</h3></div>
+  <p>Counter নয়, প্রতিটা request-এর timestamp জমা রাখা হয় (সাধারণত Redis-এর sorted set-এ)। নতুন request এলে পুরনো timestamp মুছে ফেলা হয়, নতুনটা যোগ হয়, তারপর log-এর আকার দেখে সিদ্ধান্ত।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 250" role="img" aria-label="সীমা মিনিটে দুটি। 1:00:01 আর 1:00:30-এর request গৃহীত। 1:00:50-এর request reject, কারণ log-এর আকার তিন। 1:01:40-এ আগের দুটি timestamp পুরনো হয়ে বাদ যায়, তাই সেটি গৃহীত।">
+      <text x="10" y="20" class="t-s">সীমা: মিনিটে ২টা</text>
+      <line x1="50" y1="120" x2="640" y2="120" class="ln-mut"/>
+      <text x="50" y="142" text-anchor="middle" class="t-m mut">1:00:00</text>
+      <text x="345" y="142" text-anchor="middle" class="t-m mut">1:01:00</text>
+      <text x="640" y="142" text-anchor="middle" class="t-m mut">1:02:00</text>
+      <line x1="55" y1="108" x2="55" y2="132" class="ok-s" stroke-width="2"/>
+      <text x="55" y="98" text-anchor="middle" class="t-s ok-t">✓</text>
+      <text x="55" y="80" text-anchor="middle" class="t-m">1:00:01</text>
+      <line x1="197" y1="108" x2="197" y2="132" class="ok-s" stroke-width="2"/>
+      <text x="197" y="98" text-anchor="middle" class="t-s ok-t">✓</text>
+      <text x="197" y="80" text-anchor="middle" class="t-m">1:00:30</text>
+      <line x1="295" y1="108" x2="295" y2="132" class="bad-s" stroke-width="2"/>
+      <text x="295" y="98" text-anchor="middle" class="t-s bad-t">✗</text>
+      <text x="295" y="80" text-anchor="middle" class="t-m bad-t">1:00:50</text>
+      <text x="295" y="62" text-anchor="middle" class="t-s bad-t">log size 3 &gt; 2</text>
+      <line x1="540" y1="108" x2="540" y2="132" class="ok-s" stroke-width="2"/>
+      <text x="540" y="98" text-anchor="middle" class="t-s ok-t">✓</text>
+      <text x="540" y="80" text-anchor="middle" class="t-m">1:01:40</text>
+      <rect x="246" y="160" width="294" height="34" rx="6" class="acc-bg acc-s" stroke-width="1.3"/>
+      <text x="393" y="182" text-anchor="middle" class="t-s acc-t">1:01:40-এর window: [1:00:40, 1:01:40)</text>
+      <line x1="246" y1="160" x2="246" y2="128" class="acc-s dash" fill="none"/>
+      <line x1="540" y1="160" x2="540" y2="128" class="acc-s dash" fill="none"/>
+      <text x="150" y="182" text-anchor="middle" class="t-s mut">এই দুটো এখন পুরনো,</text>
+      <text x="150" y="198" text-anchor="middle" class="t-s mut">log থেকে মুছে যায়</text>
+      <text x="340" y="228" text-anchor="middle" class="t-s bad-t">খেয়াল করুন: reject হওয়া 1:00:50-এর timestamp-ও log-এ থেকে যায়, তাই memory বেশি লাগে</text>
+    </svg></div>
+    <figcaption><b>লাভ:</b> সবচেয়ে নির্ভুল, যেকোনো rolling window-তে সীমা কখনো অতিক্রম হয় না। <b>অসুবিধা:</b> memory বেশি খায়, কারণ বাতিল হওয়া request-এর timestamp-ও জমা থাকে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-rl-slide">
+  <div class="head"><span class="num">4.7</span><h3>Sliding window counter</h3></div>
+  <p>আগের দুটোর মাঝামাঝি: fixed window-এর counter রাখে, কিন্তু আগের window-এর কিছু অংশ হিসাবে ধরে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="আগের মিনিটে পাঁচটা, চলতি মিনিটে তিনটা request। নতুন request চলতি মিনিটের ত্রিশ শতাংশ জায়গায়। Rolling window-তে হিসাব তিন যোগ পাঁচ গুণ শূন্য দশমিক সাত সমান ছয় দশমিক পাঁচ।">
+      <text x="10" y="20" class="t-s">সীমা: মিনিটে ৭টা</text>
+      <rect x="40" y="46" width="300" height="70" rx="4" class="soft"/>
+      <rect x="340" y="46" width="300" height="70" rx="4" class="soft"/>
+      <text x="190" y="38" text-anchor="middle" class="t-s mut">আগের মিনিট: ৫টা</text>
+      <text x="490" y="38" text-anchor="middle" class="t-s mut">চলতি মিনিট: ৩টা</text>
+      <circle cx="80" cy="82" r="7" class="acc-f"/><circle cx="130" cy="82" r="7" class="acc-f"/>
+      <circle cx="180" cy="82" r="7" class="acc-f"/><circle cx="240" cy="82" r="7" class="acc-f"/>
+      <circle cx="300" cy="82" r="7" class="acc-f"/>
+      <circle cx="360" cy="82" r="7" class="acc-f"/><circle cx="390" cy="82" r="7" class="acc-f"/>
+      <circle cx="415" cy="82" r="7" class="acc-f"/>
+      <line x1="40" y1="130" x2="640" y2="130" class="ln-mut"/>
+      <text x="340" y="150" text-anchor="middle" class="t-m mut">এই মিনিটের শুরু</text>
+      <line x1="430" y1="120" x2="430" y2="142" class="ln" stroke-width="2"/>
+      <text x="430" y="162" text-anchor="middle" class="t-m">নতুন request (৩০%)</text>
+      <rect x="130" y="40" width="300" height="82" rx="6" class="acc-s dash" fill="none" stroke-width="1.6"/>
+      <text x="230" y="188" class="t-m acc-t">rolling window: আগের window-এর ৭০% + চলতি অংশ</text>
+      <text x="340" y="212" text-anchor="middle" class="ok-t">3 + 5 × 0.7 = 6.5 → 6, সীমা ৭, তাই request যাবে ✓</text>
+    </svg></div>
+    <figcaption><b>লাভ:</b> spike মসৃণ করে, memory-সাশ্রয়ী। <b>অসুবিধা:</b> এটা আনুমানিক, ধরে নেয় আগের window-এর request সমানভাবে ছড়ানো ছিল। Cloudflare-এর পরীক্ষায় ৪০ কোটি request-এর মাত্র 0.003% ভুলভাবে allow বা block হয়েছে, তাই বাস্তবে সমস্যা কম।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>Algorithm</th><th>Memory</th><th>Burst</th><th>নির্ভুলতা</th><th>কখন বেছে নেবেন</th></tr>
+    <tr><td>Token bucket</td><td>কম</td><td>যেতে দেয়</td><td>ভালো</td><td>Burst সামলাতে হবে (flash sale)</td></tr>
+    <tr><td>Leaking bucket</td><td>কম</td><td>সমান করে দেয়</td><td>ভালো</td><td>পেছনের system-এ স্থির হার দরকার</td></tr>
+    <tr><td>Fixed window</td><td>সবচেয়ে কম</td><td>প্রান্তে ফাঁক</td><td>দুর্বল</td><td>সহজ নিয়ম, quota reset</td></tr>
+    <tr><td>Sliding window log</td><td>বেশি</td><td>আটকায়</td><td>সবচেয়ে ভালো</td><td>কড়া, নির্ভুল সীমা দরকার</td></tr>
+    <tr><td>Sliding window counter</td><td>কম</td><td>মসৃণ করে</td><td>আনুমানিক</td><td>বড় scale-এ ভারসাম্য</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: পাঁচটা algorithm-এর নাম আর এক লাইনের পার্থক্য মুখে বলুন।</summary><p>Token bucket = জমা token; leaking bucket = স্থির হারে বের হওয়া queue; fixed window = window প্রতি counter; sliding window log = timestamp-এর তালিকা; sliding window counter = আগের window-এর অংশ মিলিয়ে হিসাব।</p></details>
+</section>
+
+<section class="c" id="s-rl-arch">
+  <div class="head"><span class="num">4.8</span><h3>Architecture: counter, rule আর header</h3></div>
+  <p>মূল ধারণা সহজ: একটা counter রাখো, সীমার বেশি হলে আটকে দাও। Counter database-এ নয়, in-memory cache-এ, কারণ disk ধীর আর cache-এ সময়ভিত্তিক expiration আছে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 300" role="img" aria-label="Client request পাঠায় rate limiter middleware-এ। Middleware Redis থেকে counter নেয়। সীমার মধ্যে হলে request API server-এ যায় আর counter বাড়ে, নইলে 429 ফেরত যায়। Rule disk-এ থাকে, worker সেগুলো cache-এ আনে, middleware cache থেকে rule পড়ে।">
+      <rect x="10" y="60" width="110" height="52" rx="6" class="box"/>
+      <text x="65" y="92" text-anchor="middle" class="t-h">Client</text>
+      <rect x="190" y="46" width="180" height="80" rx="6" class="acc-bg acc-s" stroke-width="1.5"/>
+      <text x="280" y="74" text-anchor="middle" class="t-h">Rate limiter</text>
+      <text x="280" y="94" text-anchor="middle" class="t-s">middleware</text>
+      <text x="280" y="114" text-anchor="middle" class="t-s mut">rule + counter দেখে সিদ্ধান্ত</text>
+      <rect x="540" y="46" width="130" height="56" rx="6" class="box"/>
+      <text x="605" y="80" text-anchor="middle" class="t-h">API servers</text>
+      <line x1="120" y1="78" x2="186" y2="78" class="ln" marker-end="url(#ar)"/>
+      <line x1="370" y1="72" x2="536" y2="72" class="ok-s" stroke-width="1.8" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="453" y="64" text-anchor="middle" class="t-s ok-t">সীমার মধ্যে ✓</text>
+      <path d="M240 126 L240 150 L124 150 L124 118" class="ln bad-s" marker-end="url(#ar-bad)"/>
+      <text x="248" y="154" class="t-s bad-t">429 + X-Ratelimit-Retry-After</text>
+      <rect x="440" y="190" width="200" height="60" rx="6" class="box"/>
+      <text x="540" y="214" text-anchor="middle" class="t-h">Redis</text>
+      <text x="540" y="234" text-anchor="middle" class="t-m">INCR · EXPIRE</text>
+      <line x1="340" y1="126" x2="470" y2="186" class="ln" marker-start="url(#ar)" marker-end="url(#ar)"/>
+      <text x="360" y="176" class="t-s">counter পড়া ও বাড়ানো</text>
+      <rect x="10" y="190" width="110" height="60" rx="6" class="soft"/>
+      <text x="65" y="214" text-anchor="middle" class="t-s">Rules</text>
+      <text x="65" y="232" text-anchor="middle" class="t-s mut">disk, config</text>
+      <rect x="150" y="190" width="100" height="60" rx="6" class="soft"/>
+      <text x="200" y="226" text-anchor="middle" class="t-s">Workers</text>
+      <rect x="280" y="190" width="110" height="60" rx="6" class="soft"/>
+      <text x="335" y="214" text-anchor="middle" class="t-s">Rules cache</text>
+      <line x1="120" y1="220" x2="146" y2="220" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="250" y1="220" x2="276" y2="220" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="320" y1="188" x2="290" y2="130" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="150" y="272" class="t-s mut">rule নিয়মিত টেনে আনা হয় (yaml: domain, unit, requests_per_unit)</text>
+      <text x="540" y="272" text-anchor="middle" class="t-s mut">DB নয়, কারণ disk ধীর</text>
+    </svg></div>
+    <figcaption>Redis-এর <span class="mono">INCR</span> counter এক বাড়ায়, <span class="mono">EXPIRE</span> মেয়াদ শেষে counter নিজে মুছে দেয়। Rule থাকে disk-এ config file-এ (Lyft-এর open-source component-এর মতো), worker সেগুলো cache-এ আনে। Rate limited request হয় বাদ যায়, নয়তো queue-তে রেখে পরে process করা হয়, যেমন order।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>Response header</th><th>মানে</th></tr>
+    <tr><td class="mono">X-Ratelimit-Limit</td><td>এই window-তে সর্বোচ্চ কতগুলো call করা যাবে</td></tr>
+    <tr><td class="mono">X-Ratelimit-Remaining</td><td>আর কতগুলো বাকি আছে</td></tr>
+    <tr><td class="mono">X-Ratelimit-Retry-After</td><td>কত সেকেন্ড পর আবার চেষ্টা করা যাবে (429-এর সাথে আসে)</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-rl-dist">
+  <div class="head"><span class="num">4.9</span><h3>Distributed পরিবেশে দুটো সমস্যা</h3></div>
+  <p>এক server-এ rate limiter বানানো কঠিন নয়। কঠিন হয় যখন অনেক server আর অনেক thread একসাথে কাজ করে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="Redis-এ counter তিন। দুটি request একই সাথে তিন পড়ে, দুজনেই এক বাড়িয়ে চার লেখে। ফল চার, অথচ হওয়ার কথা পাঁচ।">
+      <text x="10" y="20" class="t-h">① Race condition</text>
+      <rect x="250" y="34" width="180" height="40" rx="6" class="box"/>
+      <text x="340" y="60" text-anchor="middle" class="t-m">Redis counter = 3</text>
+      <rect x="60" y="120" width="150" height="46" rx="6" class="soft"/>
+      <text x="135" y="148" text-anchor="middle" class="t-s">Request A</text>
+      <rect x="250" y="120" width="150" height="46" rx="6" class="soft"/>
+      <text x="325" y="148" text-anchor="middle" class="t-s">Request B</text>
+      <line x1="280" y1="76" x2="160" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="330" y1="76" x2="325" y2="116" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="180" y="100" text-anchor="middle" class="t-s mut">read 3</text>
+      <text x="352" y="100" class="t-s mut">read 3</text>
+      <line x1="210" y1="143" x2="440" y2="143" class="ln bad-s" marker-end="url(#ar-bad)"/>
+      <line x1="400" y1="150" x2="440" y2="150" class="ln bad-s" marker-end="url(#ar-bad)"/>
+      <text x="300" y="136" text-anchor="middle" class="t-s bad-t">দুজনেই write 4</text>
+      <rect x="450" y="112" width="220" height="62" rx="6" class="bad-bg bad-s" stroke-width="1.3"/>
+      <text x="560" y="136" text-anchor="middle" class="bad-t">counter = 4 ✗</text>
+      <text x="560" y="158" text-anchor="middle" class="t-s bad-t">হওয়ার কথা ছিল 5</text>
+      <text x="340" y="200" text-anchor="middle" class="t-s mut">সমাধান: Lua script বা Redis sorted set। Lock কাজ করে, কিন্তু system ধীর করে দেয়।</text>
+    </svg></div>
+    <figcaption>Counter পড়া, যাচাই আর লেখা আলাদা তিনটা ধাপ। মাঝখানে অন্য request ঢুকে পড়লে গণনা হারিয়ে যায়, আর সীমার বেশি request ঢুকে যায়।</figcaption>
+  </figure>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="বামে: দুটি rate limiter নিজের নিজের counter রাখে, client এদিক-ওদিক গেলে গণনা ভুল হয়। ডানে: দুটি rate limiter একই কেন্দ্রীয় Redis ব্যবহার করে, তাই গণনা ঠিক থাকে।">
+      <text x="10" y="20" class="t-h">② Synchronization</text>
+      <text x="165" y="44" text-anchor="middle" class="t-s bad-t">আলাদা counter ✗</text>
+      <rect x="20" y="60" width="80" height="40" rx="6" class="box"/><text x="60" y="85" text-anchor="middle" class="t-s">Client</text>
+      <rect x="150" y="56" width="120" height="44" rx="6" class="soft"/>
+      <text x="210" y="74" text-anchor="middle" class="t-s">Rate limiter 1</text>
+      <text x="210" y="92" text-anchor="middle" class="t-m mut">count: 3</text>
+      <rect x="150" y="120" width="120" height="44" rx="6" class="soft"/>
+      <text x="210" y="138" text-anchor="middle" class="t-s">Rate limiter 2</text>
+      <text x="210" y="156" text-anchor="middle" class="t-m mut">count: 0</text>
+      <line x1="100" y1="76" x2="146" y2="76" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="88" x2="146" y2="138" class="ln bad-s dash" marker-end="url(#ar-bad)"/>
+      <text x="165" y="192" text-anchor="middle" class="t-s bad-t">অন্য limiter-এ গেলে</text>
+      <text x="165" y="208" text-anchor="middle" class="t-s bad-t">আগের গণনা জানা নেই</text>
+
+      <line x1="330" y1="36" x2="330" y2="212" class="ln-mut dash"/>
+
+      <text x="510" y="44" text-anchor="middle" class="t-s ok-t">কেন্দ্রীয় store ✓</text>
+      <rect x="350" y="60" width="80" height="40" rx="6" class="box"/><text x="390" y="85" text-anchor="middle" class="t-s">Client</text>
+      <rect x="465" y="56" width="110" height="40" rx="6" class="soft"/>
+      <text x="520" y="81" text-anchor="middle" class="t-s">Limiter 1</text>
+      <rect x="465" y="120" width="110" height="40" rx="6" class="soft"/>
+      <text x="520" y="145" text-anchor="middle" class="t-s">Limiter 2</text>
+      <line x1="430" y1="74" x2="461" y2="74" class="ln" marker-end="url(#ar)"/>
+      <line x1="430" y1="88" x2="461" y2="136" class="ln" marker-end="url(#ar)"/>
+      <rect x="600" y="84" width="70" height="52" rx="6" class="ok-bg ok-s" stroke-width="1.5"/>
+      <text x="635" y="106" text-anchor="middle" class="t-s ok-t">Redis</text>
+      <text x="635" y="124" text-anchor="middle" class="t-m ok-t">count: 3</text>
+      <line x1="575" y1="80" x2="596" y2="98" class="ok-s" fill="none"/>
+      <line x1="575" y1="136" x2="596" y2="122" class="ok-s" fill="none"/>
+      <text x="510" y="192" text-anchor="middle" class="t-s mut">সব limiter একই সংখ্যা দেখে</text>
+      <text x="510" y="208" text-anchor="middle" class="t-s mut">Sticky session সমাধান নয়: scalable বা flexible নয়</text>
+    </svg></div>
+    <figcaption>Web tier stateless, তাই client যেকোনো rate limiter-এ পৌঁছাতে পারে। Performance-এর জন্য দুটো কথা: user-এর কাছের edge server (Cloudflare-এর ১৯৪টা location-এর উদাহরণ) আর data center-গুলোর মধ্যে eventual consistency-তে sync।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: rate limiter-এর Redis down হলে API-র কী করা উচিত?</summary><p>বইয়ের requirement: rate limiter-এর সমস্যা যেন পুরো system না ফেলে। বাস্তবে আগেই ঠিক করে রাখতে হয়: সাধারণ API-তে fail open (সীমা ছাড়াই চলতে দেওয়া), আর login বা payment-এ fail closed (আটকে দেওয়া)। নাম দুটো বইয়ের বাইরে, কিন্তু interview-এ কাজে লাগে।</p></details>
+</section>
+
+<section class="c" id="s-rl-wrap">
+  <div class="head"><span class="num">4.10</span><h3>Wrap up: আর যা বলা যায়</h3></div>
+  <div class="two">
+    <div><h4>বাড়তি আলোচনার বিষয়</h4><ul>
+      <li><b>Hard বনাম soft:</b> hard-এ সীমা কখনো ছাড়ানো যায় না; soft-এ অল্প সময়ের জন্য ছাড় দেওয়া হয়</li>
+      <li><b>ভিন্ন layer:</b> এই chapter application level (HTTP, layer 7); Iptables দিয়ে IP ধরে সীমা layer 3-এ</li>
+      <li><b>Monitoring:</b> নিয়ম বেশি কড়া হলে বৈধ request পড়ে যাচ্ছে কিনা; হঠাৎ traffic-এ algorithm বদলানো দরকার কিনা</li>
+    </ul></div>
+    <div class="good"><h4>Client-এর best practice</h4><ul>
+      <li>Client cache ব্যবহার করে অপ্রয়োজনীয় call কমানো</li>
+      <li>সীমা জেনে সেই অনুযায়ী request পাঠানো</li>
+      <li>Exception বা error ধরে সামলানো</li>
+      <li>Retry-তে যথেষ্ট back off সময় (আর jitter) রাখা</li>
+    </ul></div>
+  </div>
+  <p class="keep"><b>Interview-এ পুরো উত্তরের কাঠামো:</b> scope (client না server, কীসের ভিত্তিতে সীমা, scale, distributed কিনা) → high-level (middleware + Redis counter) → algorithm বেছে তার কারণ → deep dive (rule, 429 ও header, race condition, synchronization) → wrap up (fault tolerance, monitoring, hard/soft)।</p>
+</section>
+
+<section class="next">
+  <h2>এই page দিয়ে কীভাবে প্রস্তুতি নেবেন</h2>
+  <ol>
+    <li><b>প্রথম দিন:</b> লাল দাগের অংশগুলো (1.5–1.8, 1.12–1.14) পড়ুন। প্রতিটা figure দেখে, তারপর চোখ বন্ধ করে মুখে ব্যাখ্যা করুন।</li>
+    <li><b>দ্বিতীয় দিন:</b> 1.14-এর পুরো architecture খাতায় নিজে আঁকুন, প্রতিটা box-এর পাশে লিখুন কোন সমস্যা সমাধান করে। তারপর Chapter 2-এর estimation দুটো কাগজে-কলমে নিজে করুন।</li>
+    <li><b>তৃতীয় দিন:</b> Chapter 3 পড়ে "Design a URL shortener" বা "Design a courier tracking app" নিয়ে নিজে ৪ ধাপে ৪৫ মিনিট practice করুন, timer চালিয়ে।</li>
+    <li><b>তারপর:</b> Checkpoint test আবার দিন। লক্ষ্য: "নিশ্চিত + ঠিক" ১২ থেকে ৩০-এর উপরে।</li>
+    <li><b>Chapter 4:</b> পাঁচটা algorithm কাগজে নিজে এঁকে পাশে লিখুন memory, burst আর নির্ভুলতা। তারপর Checkpoint-এর Chapter 4 test দিন।</li>
+    <li><a href="../#/study/p2" target="_top" style="color:var(--accent)">Part ২ →</a> consistent hashing, key-value store, unique ID generator। সব part-এর সূচি <a href="../#/study/hub" target="_top" style="color:var(--accent)">hub-এ</a>।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

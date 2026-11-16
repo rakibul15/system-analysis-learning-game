@@ -1,0 +1,380 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন Architecture Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <nav class="back"><a href="../#/study/p1" target="_top">← Part ১</a> · <a href="../#/study/p2" target="_top">← Part ২</a> · <a href="../#/study/p3" target="_top">← Part ৩</a> · <a href="../#/study/p4" target="_top">← Part ৪</a> · <a href="../#/study/p5" target="_top">← Part ৫</a> · <a href="../#/study/p6" target="_top">← Part ৬</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Architecture guide</h1>
+  <p class="lede">Part ৭, বইয়ের বাইরে। Alex Xu-র বই প্রতিটা design আলাদা করে দেখায়; এই page সেগুলোর পেছনের সাধারণ নিয়ম একসাথে করে: কখন কোন pattern, আর তার দাম কী। Interview-এ deep dive আর বাস্তবে architecture সিদ্ধান্ত, দুই জায়গাতেই লাগবে। শেষ অংশটা frontend lead হিসেবে আপনার নিজের মাঠ।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>Data ও consistency</h2>
+      <a href="#s-pacelc">7.1 CAP থেকে PACELC</a>
+      <a href="#s-models">7.2 Consistency model</a>
+      <a href="#s-cachep">7.3 Cache pattern ও stampede</a>
+    </div>
+    <div><h2>Service-এর গঠন</h2>
+      <a href="#s-mono">7.4 Monolith, modular, microservice</a>
+      <a href="#s-comm">7.5 Sync বনাম async</a>
+      <a href="#s-outbox">7.6 Event-driven ও outbox</a>
+    </div>
+    <div><h2>টিকে থাকা</h2>
+      <a href="#s-resil">7.7 Timeout, retry, circuit breaker</a>
+      <a href="#s-obs">7.8 Observability ও SLO</a>
+      <a href="#s-deploy">7.9 Deploy ও migration</a>
+    </div>
+    <div><h2>Interface</h2>
+      <a href="#s-api">7.10 API design</a>
+      <a href="#s-sec">7.11 Security-র মূল কথা</a>
+      <a href="#s-fe">7.12 Frontend system design</a>
+    </div>
+  </nav>
+</header>
+
+<section class="chapter" id="g1">
+  <div class="eyebrow">ভাগ ১</div>
+  <h2>Data ও consistency</h2>
+  <p>প্রায় প্রতিটা design সিদ্ধান্তের নিচে একটাই প্রশ্ন: কতটা পুরনো data দেখানো চলবে, আর তার বিনিময়ে কতটা গতি বা availability পাব।</p>
+</section>
+
+<section class="c" id="s-pacelc">
+  <div class="head"><span class="num">7.1</span><h3>CAP থেকে PACELC</h3></div>
+  <p>CAP শুধু partition-এর সময়ের কথা বলে। কিন্তু network বেশিরভাগ সময় ঠিকই থাকে। PACELC বাকি অর্ধেকটা যোগ করে: <b>P</b>artition হলে <b>A</b> নাকি <b>C</b>; <b>E</b>lse (স্বাভাবিক সময়ে) <b>L</b>atency নাকি <b>C</b>onsistency।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 190" role="img" aria-label="PACELC সিদ্ধান্ত-গাছ। Partition হলে availability নাকি consistency। স্বাভাবিক সময়ে latency নাকি consistency। উদাহরণ: Cassandra ও DynamoDB PA/EL, ঐতিহ্যবাহী relational DB ও Spanner PC/EC।">
+      <rect x="260" y="10" width="160" height="40" rx="6" class="box"/><text x="340" y="35" text-anchor="middle" class="t-h">Network partition?</text>
+      <rect x="40" y="90" width="260" height="40" rx="6" class="bad-bg bad-s"/><text x="170" y="115" text-anchor="middle">হ্যাঁ: Availability ↔ Consistency</text>
+      <rect x="380" y="90" width="260" height="40" rx="6" class="ok-bg ok-s"/><text x="510" y="115" text-anchor="middle">না: Latency ↔ Consistency</text>
+      <line x1="300" y1="50" x2="200" y2="86" class="ln" marker-end="url(#ar)"/>
+      <line x1="380" y1="50" x2="480" y2="86" class="ln" marker-end="url(#ar)"/>
+      <text x="340" y="158" text-anchor="middle" class="t-m acc-t">PA/EL: Cassandra, DynamoDB (default)</text>
+      <text x="340" y="180" text-anchor="middle" class="t-m gs-t">PC/EC: সাধারণ relational DB, Spanner</text>
+    </svg></div>
+    <figcaption>দ্বিতীয় অর্ধেকটা বেশি বাস্তব: প্রতিটা write-এ সব replica-র জন্য অপেক্ষা (consistency) নাকি একটার ack পেয়েই উত্তর (latency)। Part ২-এর quorum-এর W আর R ঠিক এই জায়গাটাই tune করে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-models">
+  <div class="head"><span class="num">7.2</span><h3>Consistency model</h3></div>
+  <p>"Strong" আর "eventual"-এর মাঝে কয়েকটা কাজের স্তর আছে। বেশিরভাগ product-এ পুরো strong লাগে না, এর একটা লাগে:</p>
+  <div class="tbl"><table>
+    <tr><th>Model</th><th>নিশ্চয়তা</th><th>কোথায় লাগে</th></tr>
+    <tr><td>Linearizable (strong)</td><td>Write শেষ হলে সবাই সাথে সাথে নতুন মান দেখে</td><td>টাকার balance, inventory-র শেষ item, lock</td></tr>
+    <tr><td>Read-your-writes</td><td>অন্যরা না দেখুক, আমি নিজে আমার লেখা সাথে সাথে দেখি</td><td>Profile বা parcel-এর ঠিকানা edit করার পর page reload</td></tr>
+    <tr><td>Monotonic reads</td><td>একবার নতুন মান দেখলে আর কখনও পুরনোটা দেখব না</td><td>Parcel status: "delivered" দেখার পর "in transit" ফিরে আসা চলবে না</td></tr>
+    <tr><td>Causal</td><td>কারণ আগে, ফল পরে: comment-এর আগে post দেখা যাবে</td><td>Chat, comment thread</td></tr>
+    <tr><td>Eventual</td><td>যথেষ্ট সময় পেলে সবাই একই মান দেখবে</td><td>Like count, view count, analytics</td></tr>
+  </table></div>
+  <p>Read-your-writes সহজে পাওয়ার কৌশল: write-এর পর কিছুক্ষণ সেই user-এর read primary থেকে, অথবা client শেষ write-এর version মনে রাখে আর replica সেই version পর্যন্ত না পৌঁছালে primary-তে যায়। Monotonic reads: একজন user-কে সবসময় একই replica-য় পাঠানো (sticky)।</p>
+  <details class="self"><summary>নিজেকে যাচাই: merchant parcel-এর ঠিকানা বদলাল, save হল, কিন্তু list page-এ পুরনো ঠিকানা। কোন model ভাঙছে, সমাধান কী?</summary><p>Read-your-writes। Write গেছে primary-তে, list পড়ছে পিছিয়ে থাকা replica থেকে। সমাধান: save-এর পর কয়েক সেকেন্ড ওই merchant-এর read primary থেকে, অথবা frontend-এ optimistic update দিয়ে নতুন মান দেখানো আর query invalidate (TanStack Query-তে ঠিক এটাই করেন)।</p></details>
+</section>
+
+<section class="c" id="s-cachep">
+  <div class="head"><span class="num">7.3</span><h3>Cache pattern ও stampede</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Pattern</th><th>কীভাবে</th><th>ভালো</th><th>ঝুঁকি</th></tr>
+    <tr><td>Cache-aside</td><td>App আগে cache দেখে, miss হলে DB থেকে এনে cache-এ রাখে; write-এ DB update আর cache মোছা</td><td>সবচেয়ে প্রচলিত, cache পড়লেও চলে</td><td>প্রথম read ধীর; অল্প সময়ের অমিল</td></tr>
+    <tr><td>Write-through</td><td>প্রতিটা write cache আর DB দুটোতে একসাথে</td><td>Cache সবসময় টাটকা</td><td>Write ধীর; কখনও পড়া হয় না এমন data-ও cache-এ</td></tr>
+    <tr><td>Write-behind</td><td>Write শুধু cache-এ, পরে batch-এ DB-তে</td><td>Write খুব দ্রুত</td><td>Cache পড়লে data হারায়</td></tr>
+  </table></div>
+  <p>Cache-aside-এ write-এর সময় cache update না করে <b>মুছে ফেলা</b> নিরাপদ: দুটো write একসাথে এলে update-এর ক্রম উল্টে পুরনো মান cache-এ থেকে যেতে পারে, মুছলে পরের read DB থেকে ঠিক মানটা আনে।</p>
+  <p><b>Cache stampede:</b> একটা খুব জনপ্রিয় key-র TTL শেষ হল, আর সেই মুহূর্তে হাজার request একসাথে miss করে DB-তে গেল। প্রতিকার: একজনকেই DB-তে যেতে দেওয়া, বাকিরা তার ফলের অপেক্ষা (request coalescing বা lock); TTL-এ একটু random যোগ (jitter), যাতে সব key একসাথে শেষ না হয়; আর মেয়াদ শেষের একটু আগেই background-এ refresh।</p>
+</section>
+
+<section class="chapter" id="g2">
+  <div class="eyebrow">ভাগ ২</div>
+  <h2>Service-এর গঠন</h2>
+  <p>কতগুলো service, তারা কীভাবে কথা বলে, আর একটা কাজ কয়েকটা service-এ ছড়ালে সেটা কীভাবে ঠিক থাকে।</p>
+</section>
+
+<section class="c" id="s-mono">
+  <div class="head"><span class="num">7.4</span><h3>Monolith, modular monolith, microservice</h3></div>
+  <div class="tbl"><table>
+    <tr><th></th><th>Monolith</th><th>Modular monolith</th><th>Microservice</th></tr>
+    <tr><td>Deploy</td><td>একটা</td><td>একটা</td><td>প্রতিটা service আলাদা</td></tr>
+    <tr><td>Boundary</td><td>দুর্বল, সবাই সবাইকে ছোঁয়</td><td>Module-এর মাঝে স্পষ্ট interface, code-এ enforce</td><td>Network দিয়ে বাধ্যতামূলক</td></tr>
+    <tr><td>Transaction</td><td>সহজ, একটা DB</td><td>সহজ</td><td>Saga, outbox, eventual consistency</td></tr>
+    <tr><td>Team</td><td>ছোট team-এ দ্রুত</td><td>মাঝারি team</td><td>অনেক স্বাধীন team</td></tr>
+    <tr><td>Operation খরচ</td><td>কম</td><td>কম</td><td>বেশি: service discovery, tracing, অনেক pipeline</td></tr>
+  </table></div>
+  <p>বাস্তব পরামর্শ: modular monolith দিয়ে শুরু, boundary পরিষ্কার রাখুন (frontend-এ Feature Sliced Design যা করে, backend-এ NestJS module একই কাজ করে)। একটা module আলাদা হওয়ার কারণ দেখা দিলে তবেই বের করুন: আলাদা scale লাগে (যেমন tracking-এর write চাপ), আলাদা team, বা আলাদা release-এর গতি। <b>Conway's law:</b> system-এর গঠন শেষ পর্যন্ত organization-এর যোগাযোগের গঠনের মতো হয়, তাই service-এর boundary team-এর boundary-র সাথে মেলালে ঘর্ষণ কম।</p>
+  <p>পুরনো monolith থেকে বের হওয়ার নিরাপদ পথ <b>strangler fig</b>: সামনে একটা routing layer, নতুন feature নতুন service-এ, পুরনো feature একটা একটা করে সরানো, শেষে monolith খালি হয়ে বন্ধ।</p>
+  <details class="self"><summary>নিজেকে যাচাই: "microservice মানে প্রতিটা service-এর আলাদা DB" — এটা না মানলে কী সমস্যা?</summary><p>দুই service একই table ছুঁলে একজনের schema বদল অন্যজনকে ভাঙে, আর কে data-র মালিক বোঝা যায় না। ফলে "distributed monolith": microservice-এর সব খরচ, কিন্তু স্বাধীনতা নেই। তবে Part ৬-এর hotel chapter মনে রাখুন: একসাথে বদলাতে হয় এমন data এক service-এ রাখাই প্রায়ই ঠিক boundary।</p></details>
+</section>
+
+<section class="c" id="s-comm">
+  <div class="head"><span class="num">7.5</span><h3>Sync বনাম async</h3></div>
+  <div class="two">
+    <div><h4>Synchronous (REST, gRPC)</h4><p>Caller উত্তরের অপেক্ষা করে। সহজ, debug সহজ, সাথে সাথে ফল। কিন্তু chain-এর একটা service ধীর বা বন্ধ হলে পুরোটা আটকায়; availability গুণ হয়: ৩টা ৯৯.৯% service পরপর = প্রায় ৯৯.৭%।</p></div>
+    <div><h4>Asynchronous (queue, event)</h4><p>Caller message রেখে চলে যায়। Service-রা আলাদা থাকে, চাপ queue শুষে নেয়। কিন্তু ফল পরে আসে, ক্রম আর duplicate সামলাতে হয়, আর একটা request কোথায় আটকাল খুঁজতে tracing লাগে।</p></div>
+  </div>
+  <p>নিয়ম: user এখনই যার উত্তর চায় (parcel তৈরি হল কি না, দাম কত) সেটা sync; যার ফল পরে হলেও চলে (SMS পাঠানো, invoice বানানো, analytics, search index) সেটা async।</p>
+  <div class="tbl"><table>
+    <tr><th>Protocol</th><th>কোথায় মানায়</th></tr>
+    <tr><td>REST (JSON over HTTP)</td><td>Public API, browser, সহজ CRUD; cache আর tooling সবচেয়ে ভালো</td></tr>
+    <tr><td>gRPC (Protobuf over HTTP/2)</td><td>Service থেকে service; দ্রুত, typed contract, streaming; browser-এ সরাসরি কম চলে</td></tr>
+    <tr><td>GraphQL</td><td>অনেক রকম client যাদের আলাদা আলাদা data লাগে; over-fetching কমে। দাম: HTTP cache কঠিন, query-র খরচ নিয়ন্ত্রণ লাগে</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-outbox">
+  <div class="head"><span class="num">7.6</span><h3>Event-driven ও transactional outbox</h3></div>
+  <p>Event তিন রকমভাবে ব্যবহার হয়: <b>notification</b> (শুধু "parcel 123 delivered হয়েছে", বিস্তারিত চাইলে API call), <b>event-carried state transfer</b> (event-এই দরকারি সব data, consumer নিজের copy রাখে, API call লাগে না), আর <b>event sourcing</b> (event-ই আসল data, Part ৬-এ দেখেছি)।</p>
+  <p>সবচেয়ে সাধারণ bug: service DB-তে লিখল, তারপর Kafka-য় event পাঠানোর আগে crash। DB-তে parcel delivered, কিন্তু কেউ জানল না: SMS গেল না, COD settlement শুরু হল না। উল্টো ক্রমে করলে event গেল কিন্তু DB-তে লেখা হল না। দুটো আলাদা system-এ একসাথে লেখা যায় না (dual write সমস্যা)।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 190" role="img" aria-label="Service একটা DB transaction-এ business table আর outbox table দুটোতেই লেখে। আলাদা relay process outbox পড়ে Kafka-য় publish করে, তারপর row-কে sent চিহ্নিত করে।">
+      <rect x="10" y="70" width="110" height="50" rx="6" class="box"/><text x="65" y="92" text-anchor="middle" class="t-h">Parcel</text><text x="65" y="110" text-anchor="middle" class="t-h">service</text>
+      <rect x="170" y="20" width="250" height="150" rx="10" class="acc-bg acc-s dash" stroke-width="1.2"/>
+      <text x="295" y="40" text-anchor="middle" class="t-s acc-t">একটা DB transaction</text>
+      <rect x="190" y="54" width="210" height="44" rx="6" class="box"/><text x="295" y="74" text-anchor="middle" class="t-m">parcels</text><text x="295" y="90" text-anchor="middle" class="t-s mut">status = delivered</text>
+      <rect x="190" y="110" width="210" height="44" rx="6" class="gs-bg gs-s"/><text x="295" y="130" text-anchor="middle" class="t-m">outbox</text><text x="295" y="146" text-anchor="middle" class="t-s">ParcelDelivered event</text>
+      <rect x="460" y="110" width="90" height="44" rx="6" class="box"/><text x="505" y="130" text-anchor="middle" class="t-s">Relay</text><text x="505" y="145" text-anchor="middle" class="t-s mut">poll বা CDC</text>
+      <rect x="580" y="110" width="90" height="44" rx="6" class="soft"/><text x="625" y="137" text-anchor="middle" class="t-s">Kafka</text>
+      <line x1="120" y1="88" x2="186" y2="76" class="ln" marker-end="url(#ar)"/>
+      <line x1="120" y1="102" x2="186" y2="128" class="ln" marker-end="url(#ar)"/>
+      <line x1="400" y1="132" x2="456" y2="132" class="ln" marker-end="url(#ar)"/>
+      <line x1="550" y1="132" x2="576" y2="132" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="565" y="90" text-anchor="middle" class="t-s mut">publish হলে row → sent</text>
+    </svg></div>
+    <figcaption><b>Transactional outbox:</b> event Kafka-য় নয়, একই DB-র outbox table-এ, business data-র সাথে একই transaction-এ। দুটোই হবে বা কোনোটাই না। আলাদা relay পরে outbox থেকে Kafka-য় পাঠায়। Relay crash করলে আবার পাঠাবে, তাই এটা at-least-once: consumer-কে idempotent হতে হবে (event_id দেখে আগে process হয়েছে কি না)। Relay-এর বদলে CDC (Debezium-এর মতো, DB-র log পড়ে) দিয়েও হয়।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: outbox থাকলে consumer-এ idempotency আবার কেন লাগে?</summary><p>Relay Kafka-য় পাঠাল, row-কে "sent" করার আগে crash। ফিরে এসে আবার পাঠাবে। Outbox হারানো ঠেকায়, duplicate ঠেকায় না। Duplicate ঠেকানো consumer-এর কাজ।</p></details>
+</section>
+
+<section class="chapter" id="g3">
+  <div class="eyebrow">ভাগ ৩</div>
+  <h2>টিকে থাকা</h2>
+  <p>Distributed system-এ কিছু না কিছু সবসময় ভাঙা থাকে। প্রশ্ন হল একটা অংশের ভাঙন বাকিদের কাছে ছড়ায় কি না, আর ভাঙলে আমরা কত দ্রুত জানি।</p>
+</section>
+
+<section class="c" id="s-resil">
+  <div class="head"><span class="num">7.7</span><h3>Timeout, retry, circuit breaker</h3></div>
+  <div class="tbl"><table>
+    <tr><th>কৌশল</th><th>কী করে</th><th>ভুল করলে</th></tr>
+    <tr><td>Timeout</td><td>প্রতিটা network call-এর সর্বোচ্চ অপেক্ষা</td><td>Timeout না থাকলে একটা ধীর service সব thread আটকে দেয়</td></tr>
+    <tr><td>Retry + backoff + jitter</td><td>Fail হলে আবার, প্রতিবার বেশি অপেক্ষা, সাথে random অংশ</td><td>Jitter ছাড়া সব client একসাথে retry করে (thundering herd); non-idempotent কাজে retry মানে duplicate</td></tr>
+    <tr><td>Circuit breaker</td><td>Downstream বারবার fail করলে কিছুক্ষণ call বন্ধ, সাথে সাথে fallback</td><td>না থাকলে মরা service-কে retry দিয়ে আরও মারা</td></tr>
+    <tr><td>Bulkhead</td><td>প্রতিটা downstream-এর জন্য আলাদা connection pool বা thread pool</td><td>না থাকলে একটা ধীর dependency সব resource খেয়ে ফেলে</td></tr>
+    <tr><td>Load shedding</td><td>অতিরিক্ত চাপে কম জরুরি request সাথে সাথে বাদ (429, 503)</td><td>সবাইকে ধীরে সেবা দিতে গিয়ে কাউকেই না</td></tr>
+    <tr><td>Graceful degradation</td><td>অংশ ভাঙলে কম feature নিয়ে চলা</td><td>Recommendation service পড়লে পুরো page error</td></tr>
+  </table></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 170" role="img" aria-label="Circuit breaker-এর তিন অবস্থা। Closed: call যায়; fail সীমা পেরোলে Open। Open: call যায় না, সাথে সাথে fallback; কিছু সময় পর Half-open। Half-open: কয়েকটা পরীক্ষামূলক call; সফল হলে Closed, fail হলে আবার Open।">
+      <rect x="20" y="60" width="160" height="56" rx="28" class="ok-bg ok-s" stroke-width="1.5"/><text x="100" y="84" text-anchor="middle" class="t-h">Closed</text><text x="100" y="102" text-anchor="middle" class="t-s">call যায়</text>
+      <rect x="260" y="60" width="160" height="56" rx="28" class="bad-bg bad-s" stroke-width="1.5"/><text x="340" y="84" text-anchor="middle" class="t-h">Open</text><text x="340" y="102" text-anchor="middle" class="t-s">সাথে সাথে fallback</text>
+      <rect x="500" y="60" width="160" height="56" rx="28" class="gs-bg gs-s" stroke-width="1.5"/><text x="580" y="84" text-anchor="middle" class="t-h">Half-open</text><text x="580" y="102" text-anchor="middle" class="t-s">কয়েকটা পরীক্ষা</text>
+      <path d="M180 76 L256 76" class="ln" marker-end="url(#ar)"/><text x="218" y="66" text-anchor="middle" class="t-s">fail সীমা পার</text>
+      <path d="M420 76 L496 76" class="ln" marker-end="url(#ar)"/><text x="458" y="66" text-anchor="middle" class="t-s">cool-down শেষ</text>
+      <path d="M500 106 Q420 150 420 106" class="ln bad-s" marker-end="url(#ar)"/><text x="456" y="150" text-anchor="middle" class="t-s bad-t">fail</text>
+      <path d="M580 116 Q580 160 340 160 Q100 160 100 120" class="ok-s" stroke-width="1.4" fill="none" marker-end="url(#ar-ok)"/><text x="340" y="154" text-anchor="middle" class="t-s ok-t">সফল</text>
+    </svg></div>
+    <figcaption>উদাহরণ: SMS provider বারবার timeout দিচ্ছে। Breaker open হলে parcel service আর অপেক্ষা করে না, SMS queue-তে রেখে এগিয়ে যায়; provider সুস্থ হলে half-open-এ পরীক্ষা করে আবার চালু।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-obs">
+  <div class="head"><span class="num">7.8</span><h3>Observability ও SLO</h3></div>
+  <div class="tbl"><table>
+    <tr><th>স্তম্ভ</th><th>উত্তর দেয়</th><th>উদাহরণ</th></tr>
+    <tr><td>Metrics</td><td>কিছু কি ভুল হচ্ছে? কতটা?</td><td>Error rate, p99 latency, queue-তে জমা</td></tr>
+    <tr><td>Logs</td><td>ঠিক কী ঘটেছিল?</td><td>Structured JSON log, সাথে request_id</td></tr>
+    <tr><td>Traces</td><td>সময়টা কোন service-এ গেল?</td><td>একটা request-এর পুরো পথ, প্রতিটা hop-এর সময় (OpenTelemetry)</td></tr>
+  </table></div>
+  <p>কী মাপবেন: request-চালিত service-এ <b>RED</b> (Rate, Errors, Duration); resource-এ (CPU, disk, queue) <b>USE</b> (Utilization, Saturation, Errors)। Latency-তে গড় নয়, percentile: গড় ১০০ ms হলেও p99 ৩ সেকেন্ড হতে পারে, আর সবচেয়ে সক্রিয় user-রাই সেই ধীর ১%-এ বেশি পড়ে।</p>
+  <div class="tbl"><table>
+    <tr><th>শব্দ</th><th>মানে</th><th>উদাহরণ</th></tr>
+    <tr><td>SLI</td><td>যা মাপা হয়</td><td>সফল tracking request-এর শতাংশ</td></tr>
+    <tr><td>SLO</td><td>নিজেদের লক্ষ্য</td><td>৩০ দিনে ৯৯.৯% সফল</td></tr>
+    <tr><td>SLA</td><td>Customer-এর সাথে চুক্তি, ভাঙলে ক্ষতিপূরণ</td><td>৯৯.৫%, SLO-র চেয়ে ঢিলা</td></tr>
+    <tr><td>Error budget</td><td>১০০% − SLO: কতটা ভুল চলবে</td><td>৩০ দিনে ~৪৩ মিনিট; ফুরালে নতুন feature থামিয়ে stability-তে কাজ</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-deploy">
+  <div class="head"><span class="num">7.9</span><h3>Deploy ও migration</h3></div>
+  <div class="tbl"><table>
+    <tr><th>কৌশল</th><th>কীভাবে</th><th>কখন</th></tr>
+    <tr><td>Rolling</td><td>Server একটা একটা করে নতুন version-এ</td><td>Default; কিছু সময় দুই version একসাথে চলে</td></tr>
+    <tr><td>Blue-green</td><td>পুরো নতুন environment পাশে, traffic এক ধাক্কায় সরানো</td><td>দ্রুত rollback দরকার; খরচ দ্বিগুণ</td></tr>
+    <tr><td>Canary</td><td>প্রথমে ১–৫% traffic নতুন version-এ, metric দেখে ধীরে বাড়ানো</td><td>ঝুঁকিপূর্ণ পরিবর্তন</td></tr>
+    <tr><td>Feature flag</td><td>Code deploy হয় বন্ধ অবস্থায়, পরে চালু</td><td>Deploy আর release আলাদা করা; নির্দিষ্ট merchant-দের জন্য আগে চালু</td></tr>
+  </table></div>
+  <p>Rolling বা canary-তে কিছু সময় পুরনো আর নতুন code একই database-এ চলে। তাই schema বদল হয় <b>expand / contract</b>-এ: (১) নতুন column যোগ, পুরনোটা রাখা; (২) code দুই জায়গাতেই লেখে; (৩) পুরনো data নতুন column-এ copy; (৪) code শুধু নতুনটা পড়ে; (৫) সব ঠিক থাকলে পুরনো column মোছা। প্রতিটা ধাপ আলাদা deploy, আর প্রতিটা ধাপে rollback সম্ভব।</p>
+  <details class="self"><summary>নিজেকে যাচাই: column-এর নাম <span class="mono">phone</span> থেকে <span class="mono">msisdn</span> করতে একটা migration-এ rename করলে কী ভাঙবে?</summary><p>Rolling deploy-এর সময় পুরনো server-রা এখনও <span class="mono">phone</span> খুঁজবে, পাবে না, error। আর rollback করলে নতুন column নামে data, পুরনো code পড়তে পারে না। Expand/contract-এ দুই নাম কিছু সময় পাশাপাশি থাকে।</p></details>
+</section>
+
+<section class="chapter" id="g4">
+  <div class="eyebrow">ভাগ ৪</div>
+  <h2>Interface</h2>
+  <p>Service-এর বাইরের মুখ: API, কে ঢুকতে পারবে, আর user-এর screen পর্যন্ত data কীভাবে পৌঁছায়।</p>
+</section>
+
+<section class="c" id="s-api">
+  <div class="head"><span class="num">7.10</span><h3>API design</h3></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>ভালো চর্চা</th></tr>
+    <tr><td>Resource নাম</td><td>বিশেষ্য, বহুবচন: <span class="mono">GET /parcels/123</span>, <span class="mono">POST /parcels</span>; কাজের জন্য sub-resource: <span class="mono">POST /parcels/123/cancellation</span></td></tr>
+    <tr><td>Status code</td><td>200, 201 (তৈরি), 400 (ভুল input), 401 (কে আপনি?), 403 (অনুমতি নেই), 404, 409 (সংঘাত), 422, 429 (rate limit), 5xx (আমাদের দোষ)</td></tr>
+    <tr><td>Error body</td><td>স্থির গঠন: machine-readable code, মানুষের পড়ার মতো বার্তা, কোন field ভুল</td></tr>
+    <tr><td>Idempotency</td><td>POST-এ <span class="mono">Idempotency-Key</span> header; GET, PUT, DELETE স্বভাবতই idempotent হওয়া উচিত</td></tr>
+    <tr><td>Versioning</td><td>URL-এ (<span class="mono">/v1/</span>) বা header-এ; field যোগ করা ভাঙে না, মোছা বা মানে বদলানো ভাঙে</td></tr>
+    <tr><td>Rate limit</td><td>Part ১-এর Chapter ৪; response header-এ বাকি কোটা জানানো</td></tr>
+  </table></div>
+  <div class="two">
+    <div><h4>Offset pagination</h4><p><span class="mono">?page=50&amp;size=20</span>। সহজ, যেকোনো page-এ লাফ দেওয়া যায়। কিন্তু অনেক গভীরে DB-কে আগের সব row গুনতে হয় (ধীর), আর মাঝে নতুন row ঢুকলে item বাদ পড়ে বা দুবার আসে।</p></div>
+    <div><h4>Cursor pagination</h4><p><span class="mono">?after=parcel_98231&amp;size=20</span>। Index ধরে সরাসরি পরের অংশ, যত গভীরেই হোক দ্রুত, আর নতুন row-এ ক্রম ভাঙে না। দাম: নির্দিষ্ট page নম্বরে লাফ দেওয়া যায় না। Infinite scroll আর বড় list-এ এটাই।</p></div>
+  </div>
+</section>
+
+<section class="c" id="s-sec">
+  <div class="head"><span class="num">7.11</span><h3>Security-র মূল কথা</h3></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>মূল কথা</th></tr>
+    <tr><td>Authentication বনাম authorization</td><td>প্রথমটা "আপনি কে", দ্বিতীয়টা "আপনি এটা করতে পারেন কি না"। দ্বিতীয়টা প্রতিটা resource-এ server-এ যাচাই: merchant A যেন merchant B-র parcel না দেখে (IDOR)</td></tr>
+    <tr><td>Session বনাম JWT</td><td>Session: server-এ state, সাথে সাথে বাতিল করা যায়। JWT: stateless, যাচাই দ্রুত, কিন্তু মেয়াদের আগে বাতিল কঠিন। তাই ছোট মেয়াদের access token + লম্বা মেয়াদের refresh token</td></tr>
+    <tr><td>OAuth 2.0 / OIDC</td><td>OAuth অনুমতি দেওয়ার জন্য (তৃতীয় পক্ষ আমার data পড়বে), OIDC তার উপর login। SPA আর mobile-এ PKCE সহ authorization code flow</td></tr>
+    <tr><td>Token রাখা (browser)</td><td>httpOnly, Secure, SameSite cookie: JavaScript পড়তে পারে না, তাই XSS-এ চুরি কঠিন। localStorage-এ রাখলে যেকোনো XSS token নিয়ে যায়</td></tr>
+    <tr><td>Least privilege</td><td>প্রতিটা service আর মানুষ শুধু যতটুকু দরকার ততটুকু অনুমতি</td></tr>
+    <tr><td>Secrets</td><td>Code বা repo-তে নয়; secret manager-এ, নিয়মিত বদলানো</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-fe">
+  <div class="head"><span class="num">7.12</span><h3>Frontend system design</h3></div>
+  <p>Frontend interview-এর system design round-এ (Toptal, FAANG) backend box কম, কিন্তু একই চিন্তা: requirement, data flow, trade-off। চারটা বড় সিদ্ধান্ত:</p>
+  <div class="tbl"><table>
+    <tr><th>Rendering</th><th>কখন HTML তৈরি</th><th>ভালো</th><th>কোথায়</th></tr>
+    <tr><td>CSR</td><td>Browser-এ, JS load হওয়ার পর</td><td>Server সহজ, পরের navigation দ্রুত</td><td>Login-এর পেছনের dashboard (merchant panel)</td></tr>
+    <tr><td>SSR</td><td>প্রতিটা request-এ server-এ</td><td>প্রথম paint দ্রুত, SEO, টাটকা data</td><td>Personalized কিন্তু SEO-জরুরি page</td></tr>
+    <tr><td>SSG</td><td>Build-এর সময়</td><td>CDN থেকে সবচেয়ে দ্রুত, সস্তা</td><td>Marketing, docs</td></tr>
+    <tr><td>ISR / revalidate</td><td>Build-এ, তারপর নির্দিষ্ট সময় পরপর background-এ নতুন</td><td>SSG-র গতি, প্রায়-টাটকা data</td><td>Public tracking page, pricing page</td></tr>
+    <tr><td>Streaming + RSC</td><td>Server-এ, অংশ অংশ করে পাঠানো</td><td>ধীর অংশের জন্য পুরো page আটকায় না; client JS কম</td><td>Next.js App Router-এর ভারী page</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>সিদ্ধান্তের প্রশ্ন</th></tr>
+    <tr><td>Server state বনাম client state</td><td>Server-এর data-র copy (TanStack Query: cache, dedupe, stale-while-revalidate, invalidation) আর UI-এর নিজের state (Zustand: filter, modal, selection) আলাদা রাখা। দুটো এক store-এ মেশালে cache invalidation-এর সব সমস্যা হাতে লিখতে হয়</td></tr>
+    <tr><td>BFF (backend for frontend)</td><td>প্রতিটা client-এর (web, rider app) জন্য একটা পাতলা layer যা কয়েকটা service-এর data জোড়া লাগিয়ে screen-এর মাপে দেয়। Next.js-এর route handler বা server action প্রায়ই এই কাজ করে</td></tr>
+    <tr><td>Real-time</td><td>Polling (সহজ, মাঝে মাঝে বদলায়), SSE (শুধু server থেকে, যেমন parcel status), WebSocket (দুই দিকে, যেমন chat বা live rider map); Part ৪-এর chat বনাম drive-এর যুক্তি</td></tr>
+    <tr><td>বড় list</td><td>Cursor pagination + virtualization (@tanstack/react-virtual): DOM-এ শুধু দেখা যাওয়া row; ১০,০০০ parcel-এর list-এও স্থির memory</td></tr>
+    <tr><td>Performance বাজেট</td><td>Core Web Vitals: LCP (প্রধান content কখন), INP (click-এর পর সাড়া), CLS (layout লাফানো)। Code splitting, image optimization, CDN, edge cache</td></tr>
+    <tr><td>Optimistic update</td><td>Server-এর উত্তরের আগেই UI বদল, fail হলে rollback; idempotency key সহ, যাতে retry-তে duplicate না হয়</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: customer-দের জন্য public parcel tracking page (লাখো hit, status কয়েক মিনিটে বদলায়)। Rendering আর update কীভাবে করবেন?</summary><p>Page-এর কাঠামো SSG বা ISR, CDN থেকে। Status অংশ ছোট TTL-এর edge cache-ওয়ালা API থেকে, অথবা ISR revalidate কয়েক মিনিটে। Page খোলা থাকলে SSE বা ৩০–৬০ সেকেন্ডের polling; WebSocket অপ্রয়োজনীয়, কারণ যোগাযোগ এক দিকের আর মাঝে মাঝে। Origin server-এ চাপ প্রায় পড়ে না।</p></details>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>এই page-এর প্রতিটা অংশ আগের কোনো chapter-এর সাথে মিলিয়ে নিন: outbox → notification system, circuit breaker → payment-এর PSP call, cursor pagination → news feed।</li>
+    <li><a href="../#/study/hub" target="_top">Hub ও cheat sheet →</a> সব part-এর সূচি আর এক page-এর cheat sheet।</li>
+    <li>Test দিতে চাইলে বলুন।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

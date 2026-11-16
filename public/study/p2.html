@@ -1,0 +1,507 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে ৫–৭</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <a class="back" href="../#/study/p1" target="_top">← Part ১: Chapter ১–৪</a>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Chapter ৫–৭</h1>
+  <p class="lede">Part ২, building blocks। Alex Xu-র বইয়ের consistent hashing, key-value store আর unique ID generator, নিজের ভাষায় আর নিজের figure-এ। পরের সব design chapter এই তিনটার উপর দাঁড়ায়। প্রতিটা অংশের শেষে "নিজেকে যাচাই": উত্তর খোলার আগে মুখে বলে দেখুন।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>Ch 5 · Consistent hashing</h2>
+      <a href="#s-rehash">5.1 Rehashing সমস্যা</a>
+      <a href="#s-ring">5.2 Hash ring</a>
+      <a href="#s-move">5.3 Server যোগ ও বাদ</a>
+      <a href="#s-vnode">5.4 দুই সমস্যা ও virtual node</a>
+      <a href="#s-ch-wrap">5.5 Wrap up</a>
+    </div>
+    <div><h2>Ch 6 · Key-value store</h2>
+      <a href="#s-kv-req">6.1 Requirement ও এক server-এর সীমা</a>
+      <a href="#s-cap">6.2 CAP theorem</a>
+      <a href="#s-kv-repl">6.3 Partition ও replication</a>
+      <a href="#s-quorum">6.4 Quorum: N, W, R</a>
+      <a href="#s-vclock">6.5 Versioning ও vector clock</a>
+      <a href="#s-fail">6.6 Failure সামলানো</a>
+      <a href="#s-path">6.7 Write path ও read path</a>
+      <a href="#s-kv-sum">6.8 Summary</a>
+    </div>
+    <div><h2>Ch 7 · Unique ID generator</h2>
+      <a href="#s-id-req">7.1 Requirement</a>
+      <a href="#s-id-opt">7.2 চারটা উপায়</a>
+      <a href="#s-snow">7.3 Snowflake</a>
+      <a href="#s-id-wrap">7.4 Wrap up</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= CHAPTER 5 ================= -->
+<section class="chapter" id="ch5">
+  <div class="eyebrow">CHAPTER 5</div>
+  <h2>Consistent hashing</h2>
+  <p>Horizontal scaling-এ data আর request অনেক server-এ সমানভাবে ভাগ করতে হয়। প্রশ্ন হল: server-এর সংখ্যা বদলালে কত key-কে জায়গা বদলাতে হবে? Consistent hashing সেই সংখ্যাটা ছোট রাখে।</p>
+</section>
+
+<section class="c" id="s-rehash">
+  <div class="head"><span class="num">5.1</span><h3>Rehashing সমস্যা</h3></div>
+  <p>সবচেয়ে সহজ উপায়: <span style="font-family:var(--mono)">serverIndex = hash(key) % N</span>, যেখানে N হল server-এর সংখ্যা। N স্থির থাকলে এটা ভালো চলে। কিন্তু একটা server পড়ে গেলে N বদলায়, আর প্রায় সব key-র index বদলে যায়।</p>
+  <div class="tbl"><table>
+    <tr><th>key-র hash</th><th>% 4 (চার server)</th><th>% 3 (server 3 পড়ে গেল)</th><th>ফল</th></tr>
+    <tr><td class="n">10</td><td class="n">2</td><td class="n">1</td><td class="bad">সরল</td></tr>
+    <tr><td class="n">15</td><td class="n">3</td><td class="n">0</td><td class="bad">সরল (server 3-এ ছিল)</td></tr>
+    <tr><td class="n">22</td><td class="n">2</td><td class="n">1</td><td class="bad">সরল</td></tr>
+    <tr><td class="n">27</td><td class="n">3</td><td class="n">0</td><td class="bad">সরল (server 3-এ ছিল)</td></tr>
+    <tr><td class="n">33</td><td class="n">1</td><td class="n">0</td><td class="bad">সরল</td></tr>
+    <tr><td class="n">36</td><td class="n">0</td><td class="n">0</td><td class="ok">একই</td></tr>
+    <tr><td class="n">41</td><td class="n">1</td><td class="n">2</td><td class="bad">সরল</td></tr>
+    <tr><td class="n">48</td><td class="n">0</td><td class="n">0</td><td class="ok">একই</td></tr>
+  </table></div>
+  <p>পড়ে যাওয়া server-এ ছিল মাত্র ২টা key, কিন্তু সরল ৮টার মধ্যে ৬টা। Cache server হলে এর মানে: client ভুল server-এ খুঁজছে, একসাথে প্রচুর cache miss, আর সব চাপ database-এ।</p>
+  <details class="self"><summary>নিজেকে যাচাই: modulo hashing কখন ঠিকঠাক কাজ করে?</summary><p>যখন server pool-এর আকার স্থির আর data সমানভাবে ছড়ানো। Server যোগ বা বাদ হলেই সমস্যা।</p></details>
+</section>
+
+<section class="c" id="s-ring">
+  <div class="head"><span class="num">5.2</span><h3>Hash ring</h3></div>
+  <p>Hash function-এর পুরো output range-কে (যেমন SHA-1-এ 0 থেকে 2<sup>160</sup>−1) দুই মাথা জুড়ে একটা বৃত্ত ভাবুন। Server-এর নাম বা IP hash করে তাকে বৃত্তে বসান। Key-কেও একই function দিয়ে বসান। এখানে modulo নেই। নিয়ম একটাই: key থেকে ঘড়ির কাঁটার দিকে গিয়ে প্রথম যে server পাবেন, key সেখানে থাকে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 240" role="img" aria-label="বামে চার server-এর hash ring: k0 যায় s1-এ, k1 যায় s2-এ, k2 যায় s3-এ, k3 যায় s0-এ। ডানে নতুন server s4 যোগ হল k3 আর s0-র মাঝে, শুধু k3 সরে s4-এ গেল।">
+      <text x="170" y="16" text-anchor="middle" class="t-h">চার server</text>
+      <circle cx="170" cy="125" r="85" class="ring"/>
+      <path d="M 250 60 A 100 100 0 0 1 268 100" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <text x="290" y="72" class="t-s mut">clockwise</text>
+      <circle cx="170" cy="40" r="9" class="ink-f"/><text x="170" y="30" text-anchor="middle" class="t-m" dy="-4">s0</text>
+      <circle cx="255" cy="125" r="9" class="ink-f"/><text x="272" y="129" class="t-m">s1</text>
+      <circle cx="170" cy="210" r="9" class="ink-f"/><text x="170" y="234" text-anchor="middle" class="t-m">s2</text>
+      <circle cx="85" cy="125" r="9" class="ink-f"/><text x="68" y="129" text-anchor="end" class="t-m">s3</text>
+      <circle cx="230" cy="65" r="5" class="acc-f"/><text x="222" y="80" text-anchor="end" class="t-m acc-t">k0→s1</text>
+      <circle cx="230" cy="185" r="5" class="acc-f"/><text x="222" y="180" text-anchor="end" class="t-m acc-t">k1→s2</text>
+      <circle cx="110" cy="185" r="5" class="acc-f"/><text x="118" y="180" class="t-m acc-t">k2→s3</text>
+      <circle cx="110" cy="65" r="5" class="acc-f"/><text x="118" y="80" class="t-m acc-t">k3→s0</text>
+
+      <line x1="340" y1="10" x2="340" y2="232" class="ln-mut dash"/>
+
+      <text x="510" y="16" text-anchor="middle" class="t-h">s4 যোগ হল</text>
+      <circle cx="510" cy="125" r="85" class="ring"/>
+      <circle cx="510" cy="40" r="9" class="ink-f"/><text x="510" y="26" text-anchor="middle" class="t-m">s0</text>
+      <circle cx="595" cy="125" r="9" class="ink-f"/><text x="612" y="129" class="t-m">s1</text>
+      <circle cx="510" cy="210" r="9" class="ink-f"/><text x="510" y="234" text-anchor="middle" class="t-m">s2</text>
+      <circle cx="425" cy="125" r="9" class="ink-f"/><text x="408" y="129" text-anchor="end" class="t-m">s3</text>
+      <circle cx="477" cy="46" r="9" class="ok-f"/><text x="462" y="38" text-anchor="end" class="t-m ok-t">s4 (নতুন)</text>
+      <circle cx="570" cy="65" r="5" class="acc-f"/><text x="562" y="80" text-anchor="end" class="t-m mut">k0→s1</text>
+      <circle cx="570" cy="185" r="5" class="acc-f"/><text x="562" y="180" text-anchor="end" class="t-m mut">k1→s2</text>
+      <circle cx="450" cy="185" r="5" class="acc-f"/><text x="458" y="180" class="t-m mut">k2→s3</text>
+      <circle cx="450" cy="65" r="5" class="ok-f"/><text x="458" y="84" class="t-m ok-t">k3→s4 ✓</text>
+    </svg></div>
+    <figcaption>বামে lookup-এর নিয়ম। ডানে নতুন server আসার ফল: শুধু s3 আর s4-এর মাঝের key-গুলো সরে, বাকি সব যেখানে ছিল সেখানেই।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-move">
+  <div class="head"><span class="num">5.3</span><h3>Server যোগ ও বাদ</h3></div>
+  <div class="two">
+    <div><h4>Server যোগ হলে</h4><p>নতুন server থেকে ঘড়ির উল্টো দিকে আগের server পর্যন্ত যে key-গুলো আছে, শুধু সেগুলো নতুন server-এ আসে।</p></div>
+    <div><h4>Server বাদ গেলে</h4><p>বাদ যাওয়া server-এর key-গুলো ঘড়ির কাঁটার দিকে পরের server-এ যায়। অন্য কারও key নড়ে না।</p></div>
+  </div>
+  <p>সংজ্ঞাটা মুখস্থ রাখার মতো: hash table-এর আকার বদলালে গড়ে মাত্র <b>k/n</b>টা key সরাতে হয় (k = মোট key, n = slot বা server-এর সংখ্যা)। Modulo hashing-এ সরে প্রায় সব।</p>
+  <details class="self"><summary>নিজেকে যাচাই: ১০ লাখ key আর ১০টা server। একটা server যোগ হলে মোটামুটি কত key সরবে?</summary><p>প্রায় k/n, অর্থাৎ ১ লাখের কাছাকাছি। Modulo hashing-এ সরত প্রায় ৯ লাখ।</p></details>
+</section>
+
+<section class="c" id="s-vnode">
+  <div class="head"><span class="num">5.4</span><h3>দুই সমস্যা ও virtual node</h3></div>
+  <p>সাধারণ ring-এ দুটো সমস্যা থাকে। এক, server যোগ-বাদ হলে ring-এর ভাগগুলো সমান রাখা যায় না: কারও ভাগ খুব বড়, কারও খুব ছোট। দুই, key-গুলো সমানভাবে পড়ে না: একটা server-এ প্রচুর, অন্যটায় প্রায় কিছুই না।</p>
+  <p>সমাধান virtual node। প্রতিটা server ring-এ একবার নয়, অনেকবার বসে (s0_0, s0_1, s0_2 …)। ফলে প্রতিটা server অনেকগুলো ছোট ছোট ভাগের মালিক হয়, আর গড়ে সবার ভাগ কাছাকাছি আসে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="দুই server, প্রতিটার তিনটা করে virtual node ring-এ পালা করে বসানো। ডানে: virtual node বাড়লে ভাগ বেশি সমান হয়, কিন্তু মনে রাখার data বাড়ে।">
+      <circle cx="170" cy="115" r="80" class="ring"/>
+      <circle cx="197" cy="40" r="8" class="acc-f"/><text x="210" y="34" class="t-m acc-t">s0_0</text>
+      <circle cx="249" cy="101" r="8" class="gs-f"/><text x="263" y="105" class="t-m gs-t">s1_0</text>
+      <circle cx="221" cy="176" r="8" class="acc-f"/><text x="235" y="190" class="t-m acc-t">s0_1</text>
+      <circle cx="143" cy="190" r="8" class="gs-f"/><text x="130" y="208" text-anchor="end" class="t-m gs-t">s1_1</text>
+      <circle cx="91" cy="129" r="8" class="acc-f"/><text x="77" y="133" text-anchor="end" class="t-m acc-t">s0_2</text>
+      <circle cx="119" cy="54" r="8" class="gs-f"/><text x="106" y="46" text-anchor="end" class="t-m gs-t">s1_2</text>
+      <text x="170" y="111" text-anchor="middle" class="t-s mut">২টা server</text>
+      <text x="170" y="127" text-anchor="middle" class="t-s mut">৬টা virtual node</text>
+
+      <text x="350" y="40" class="t-h">Virtual node বাড়ালে</text>
+      <text x="350" y="72" class="t-m">100 vnode</text><rect x="440" y="62" width="60" height="12" rx="2" class="gs-bg gs-s"/><text x="508" y="72" class="t-s">ভাগের ওঠানামা গড়ের ~10%</text>
+      <text x="350" y="98" class="t-m">200 vnode</text><rect x="440" y="88" width="30" height="12" rx="2" class="ok-bg ok-s"/><text x="508" y="98" class="t-s">ভাগের ওঠানামা গড়ের ~5%</text>
+      <text x="350" y="138" class="ok-t">লাভ: load বেশি সমান</text>
+      <text x="350" y="160" class="bad-t">দাম: vnode-এর তালিকা রাখতে বেশি জায়গা</text>
+      <text x="350" y="192" class="t-s mut">বইয়ের উদ্ধৃত পরীক্ষার সংখ্যা। কতগুলো vnode নেবেন</text>
+      <text x="350" y="208" class="t-s mut">সেটা system অনুযায়ী tune করার trade-off।</text>
+    </svg></div>
+    <figcaption>Key খোঁজার নিয়ম আগের মতোই: ঘড়ির কাঁটার দিকে প্রথম virtual node, আর সেই node যে আসল server-এর, key সেখানে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: একটা server অন্যগুলোর চেয়ে দ্বিগুণ শক্তিশালী হলে কী করবেন?</summary><p>তাকে বেশি virtual node দিন। Ring-এ তার ভাগ বাড়বে, তাই key-ও বেশি পাবে।</p></details>
+</section>
+
+<section class="c" id="s-ch-wrap">
+  <div class="head"><span class="num">5.5</span><h3>Wrap up</h3></div>
+  <div class="tbl"><table>
+    <tr><th>লাভ</th><th>কারণ</th></tr>
+    <tr><td>Server যোগ-বাদে কম key সরে</td><td>শুধু পাশের ভাগটা প্রভাবিত হয়</td></tr>
+    <tr><td>Horizontal scaling সহজ</td><td>Data মোটামুটি সমানভাবে ছড়ায়</td></tr>
+    <tr><td>Hotspot সমস্যা কমে</td><td>জনপ্রিয় key সব এক shard-এ জমে না</td></tr>
+  </table></div>
+  <p>বইয়ে যেসব ব্যবহার উল্লেখ আছে: Amazon Dynamo আর Apache Cassandra-র data partitioning, Discord chat, Akamai CDN, Google-এর Maglev load balancer।</p>
+</section>
+
+<!-- ================= CHAPTER 6 ================= -->
+<section class="chapter" id="ch6">
+  <div class="eyebrow">CHAPTER 6</div>
+  <h2>Key-value store</h2>
+  <p>একটা distributed key-value store বানানো মানে distributed system-এর প্রায় সব বড় trade-off একসাথে দেখা। এই chapter-এর প্রতিটা অংশ একটা লক্ষ্য আর তার কৌশল।</p>
+</section>
+
+<section class="c" id="s-kv-req">
+  <div class="head"><span class="num">6.1</span><h3>Requirement ও এক server-এর সীমা</h3></div>
+  <p>API মাত্র দুটো: <span style="font-family:var(--mono)">put(key, value)</span> আর <span style="font-family:var(--mono)">get(key)</span>। বইয়ের লক্ষ্য: ছোট key-value pair (10 KB-র নিচে), বিশাল data, high availability, high scalability, automatic scaling, tunable consistency, আর low latency।</p>
+  <p>এক server-এ সব memory-র hash table-এ রাখা সহজ, কিন্তু memory ফুরায়। Data compress করা আর শুধু বেশি ব্যবহৃত data memory-তে রেখে বাকিটা disk-এ রাখা কিছুটা সময় কেনে। তারপরও এক server একসময় ভরে যায়, তখন distributed হতেই হয়।</p>
+</section>
+
+<section class="c" id="s-cap">
+  <div class="head"><span class="num">6.2</span><h3>CAP theorem</h3></div>
+  <p>তিনটা গুণ: <b>Consistency</b> (সব client একই সময়ে একই data দেখে), <b>Availability</b> (কিছু node পড়ে গেলেও প্রতিটা request উত্তর পায়), <b>Partition tolerance</b> (node-দের মাঝে network ছিঁড়ে গেলেও system চলে)। একসাথে তিনটা পাওয়া যায় না।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 180" role="img" aria-label="তিন node n1, n2, n3। n3-এর সাথে network ছিঁড়ে গেছে। n1-এ নতুন লেখা n3-তে পৌঁছায় না, n3-তে পুরনো data।">
+      <rect x="60" y="20" width="130" height="46" rx="6" class="box"/><text x="125" y="40" text-anchor="middle" class="t-h">n1</text><text x="125" y="57" text-anchor="middle" class="t-m ok-t">x = 2 (নতুন)</text>
+      <rect x="60" y="114" width="130" height="46" rx="6" class="box"/><text x="125" y="134" text-anchor="middle" class="t-h">n2</text><text x="125" y="151" text-anchor="middle" class="t-m ok-t">x = 2 (নতুন)</text>
+      <rect x="470" y="67" width="150" height="46" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/><text x="545" y="87" text-anchor="middle" class="t-h">n3</text><text x="545" y="104" text-anchor="middle" class="t-m bad-t">x = 1 (পুরনো)</text>
+      <line x1="125" y1="66" x2="125" y2="110" class="ok-s" stroke-width="1.6" fill="none" marker-start="url(#ar-ok)" marker-end="url(#ar-ok)"/>
+      <line x1="190" y1="46" x2="330" y2="76" class="ln bad-s dash"/>
+      <line x1="190" y1="134" x2="330" y2="104" class="ln bad-s dash"/>
+      <path d="M322 80 L342 100 M342 80 L322 100" class="ln bad-s" stroke-width="3"/>
+      <text x="400" y="82" text-anchor="middle" class="bad-t">network</text>
+      <text x="400" y="100" text-anchor="middle" class="bad-t">partition</text>
+    </svg></div>
+    <figcaption>বাস্তবে network ছেঁড়া এড়ানো যায় না, তাই P ছাড়া চলে না। অর্থাৎ CA system বাস্তবে নেই। আসল সিদ্ধান্ত: partition-এর সময় C রাখবেন, না A।</figcaption>
+  </figure>
+  <div class="two">
+    <div><h4>CP: consistency রাখি</h4><p>n3 না ফেরা পর্যন্ত n1 আর n2-তে write বন্ধ, দরকারে error। Bank-এর balance-এর মতো জায়গায় এটাই লাগে: ভুল সংখ্যা দেখানোর চেয়ে অপেক্ষা ভালো।</p></div>
+    <div><h4>AP: availability রাখি</h4><p>সব node read-write নিতে থাকে, n3 পুরনো data দিতে পারে। Partition সারলে data মিলিয়ে নেওয়া হয়। Feed বা cart-এ এটা মানানসই।</p></div>
+  </div>
+  <details class="self"><summary>নিজেকে যাচাই: parcel-এর live status দেখানোর service আর COD payment-এর হিসাব, কোনটায় কী নেবেন?</summary><p>Status দেখানোয় AP চলে: কয়েক সেকেন্ড পুরনো status ক্ষতি করে না, কিন্তু page না খোলা করে। টাকার হিসাবে CP: ভুল balance দেখানোর চেয়ে সাময়িক error ভালো।</p></details>
+</section>
+
+<section class="c" id="s-kv-repl">
+  <div class="head"><span class="num">6.3</span><h3>Partition ও replication</h3></div>
+  <p>Data ভাগ হয় Chapter 5-এর consistent hashing দিয়ে। এতে server যোগ-বাদ হলে নিজে থেকেই ভাগ বদলায়, আর শক্তিশালী server বেশি virtual node পায় (heterogeneity)।</p>
+  <p>Replication-এর নিয়ম: key ring-এ যেখানে পড়ে, সেখান থেকে ঘড়ির কাঁটার দিকে প্রথম <b>N</b>টা server-এ copy থাকে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="Ring-এ k0 থেকে clockwise প্রথম তিন server s1, s2, s3-এ copy থাকে যখন N তিন। s0-তে থাকে না।">
+      <circle cx="170" cy="118" r="85" class="ring"/>
+      <circle cx="170" cy="33" r="9" class="ink-f"/><text x="170" y="18" text-anchor="middle" class="t-m mut">s0</text>
+      <circle cx="255" cy="118" r="10" class="ok-f"/><text x="272" y="122" class="t-m ok-t">s1 · copy ১</text>
+      <circle cx="170" cy="203" r="10" class="ok-f"/><text x="170" y="226" text-anchor="middle" class="t-m ok-t">s2 · copy ২</text>
+      <circle cx="85" cy="118" r="10" class="ok-f"/><text x="70" y="108" text-anchor="end" class="t-m ok-t">s3</text><text x="70" y="124" text-anchor="end" class="t-m ok-t">copy ৩</text>
+      <circle cx="230" cy="58" r="5" class="acc-f"/><text x="240" y="52" class="t-m acc-t">k0</text>
+      <text x="400" y="60" class="t-h">N = 3</text>
+      <text x="400" y="88">k0 থেকে clockwise প্রথম ৩টা server:</text>
+      <text x="400" y="110" class="ok-t">s1, s2, s3</text>
+      <text x="400" y="146" class="t-s mut">Virtual node থাকলে পরপর কয়েকটা vnode একই</text>
+      <text x="400" y="162" class="t-s mut">আসল server-এর হতে পারে। তাই গোনা হয় শুধু</text>
+      <text x="400" y="178" class="t-s mut">আলাদা আলাদা physical server।</text>
+    </svg></div>
+    <figcaption>একই data center-এর সব node একসাথে পড়তে পারে (বিদ্যুৎ, network, দুর্যোগ)। তাই replica আলাদা data center-এ রাখা হয়, দ্রুত network দিয়ে যুক্ত।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-quorum">
+  <div class="head"><span class="num">6.4</span><h3>Quorum: N, W, R</h3></div>
+  <p><b>N</b> = replica-র সংখ্যা। <b>W</b> = write সফল ধরতে কতগুলো replica-র ack লাগবে। <b>R</b> = read সফল ধরতে কতগুলো replica-র উত্তর লাগবে। Coordinator client আর replica-দের মাঝে proxy হিসেবে কাজ করে।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 210" role="img" aria-label="Client coordinator-কে put পাঠায়। Coordinator তিন replica-য় লেখে। W দুই হলে দুটো ack পেলেই write সফল, তৃতীয়টা পরে পৌঁছালেও চলে।">
+      <rect x="10" y="78" width="100" height="50" rx="6" class="box"/><text x="60" y="108" text-anchor="middle" class="t-h">Client</text>
+      <rect x="190" y="78" width="140" height="50" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="260" y="108" text-anchor="middle" class="t-h">Coordinator</text>
+      <line x1="110" y1="103" x2="186" y2="103" class="ln" marker-end="url(#ar)"/><text x="148" y="94" text-anchor="middle" class="t-m">put</text>
+      <rect x="500" y="14" width="150" height="40" rx="6" class="ok-bg ok-s" stroke-width="1.3"/><text x="575" y="39" text-anchor="middle">s0 · ack ✓</text>
+      <rect x="500" y="83" width="150" height="40" rx="6" class="ok-bg ok-s" stroke-width="1.3"/><text x="575" y="108" text-anchor="middle">s1 · ack ✓</text>
+      <rect x="500" y="152" width="150" height="40" rx="6" class="soft"/><text x="575" y="177" text-anchor="middle" class="mut">s2 · এখনও আসেনি</text>
+      <line x1="330" y1="92" x2="496" y2="36" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="330" y1="103" x2="496" y2="103" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="330" y1="114" x2="496" y2="170" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <text x="260" y="160" text-anchor="middle" class="ok-t">N = 3, W = 2</text>
+      <text x="260" y="180" text-anchor="middle" class="t-s mut">দুটো ack পেলেই write সফল</text>
+    </svg></div>
+    <figcaption>W বা R যত বড়, consistency তত ভালো, কিন্তু সবচেয়ে ধীর replica-র জন্য অপেক্ষা করতে হয় বলে latency বাড়ে।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>Setting</th><th>ফল</th></tr>
+    <tr><td class="n">R = 1, W = N</td><td>দ্রুত read</td></tr>
+    <tr><td class="n">W = 1, R = N</td><td>দ্রুত write</td></tr>
+    <tr><td class="n">W + R &gt; N</td><td>Strong consistency নিশ্চিত (সাধারণত N = 3, W = R = 2)</td></tr>
+    <tr><td class="n">W + R ≤ N</td><td>Strong consistency নিশ্চিত নয়</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: W + R &gt; N হলে কেন সর্বশেষ data পাওয়া নিশ্চিত?</summary><p>যে W-টা node-এ লেখা হয়েছে আর যে R-টা node থেকে পড়া হচ্ছে, তাদের মধ্যে অন্তত একটা node দুই দলেই থাকে। সেই node-এ সর্বশেষ লেখাটা আছে।</p></details>
+</section>
+
+<section class="c" id="s-vclock">
+  <div class="head"><span class="num">6.5</span><h3>Versioning ও vector clock</h3></div>
+  <p>Consistency model তিন রকম: <b>strong</b> (কোনো read কখনও পুরনো data পায় না), <b>weak</b> (পরের read নতুন মান না-ও পেতে পারে), <b>eventual</b> (যথেষ্ট সময় পেলে সব replica একই মানে পৌঁছায়)। Dynamo আর Cassandra eventual নেয়। তাতে দুই client একই key একসাথে বদলালে দুটো আলাদা version তৈরি হতে পারে।</p>
+  <p>Vector clock হল data-র সাথে জোড়া <span style="font-family:var(--mono)">[server, version]</span> pair-এর তালিকা। এটা দেখে বোঝা যায় একটা version অন্যটার পরে এসেছে, নাকি দুটো সমান্তরালে তৈরি (conflict)।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 210" role="img" aria-label="D1 Sx লিখল। D2 Sx আবার লিখল। তারপর দুই client আলাদাভাবে লিখল: D3 Sy-তে আর D4 Sz-তে, এরা conflict। Client মিলিয়ে D5 লিখল Sx-এ।">
+      <rect x="10" y="85" width="110" height="40" rx="6" class="box"/><text x="65" y="102" text-anchor="middle" class="t-h">D1</text><text x="65" y="118" text-anchor="middle" class="t-m">[Sx,1]</text>
+      <rect x="160" y="85" width="110" height="40" rx="6" class="box"/><text x="215" y="102" text-anchor="middle" class="t-h">D2</text><text x="215" y="118" text-anchor="middle" class="t-m">[Sx,2]</text>
+      <rect x="320" y="18" width="160" height="40" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="400" y="35" text-anchor="middle" class="t-h">D3</text><text x="400" y="51" text-anchor="middle" class="t-m">[Sx,2] [Sy,1]</text>
+      <rect x="320" y="152" width="160" height="40" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="400" y="169" text-anchor="middle" class="t-h">D4</text><text x="400" y="185" text-anchor="middle" class="t-m">[Sx,2] [Sz,1]</text>
+      <rect x="520" y="78" width="150" height="54" rx="6" class="ok-bg ok-s" stroke-width="1.3"/><text x="595" y="96" text-anchor="middle" class="t-h">D5</text><text x="595" y="111" text-anchor="middle" class="t-m">[Sx,3]</text><text x="595" y="125" text-anchor="middle" class="t-m">[Sy,1] [Sz,1]</text>
+      <line x1="120" y1="105" x2="156" y2="105" class="ln" marker-end="url(#ar)"/>
+      <line x1="270" y1="96" x2="316" y2="50" class="ln" marker-end="url(#ar)"/>
+      <line x1="270" y1="114" x2="316" y2="160" class="ln" marker-end="url(#ar)"/>
+      <line x1="480" y1="46" x2="530" y2="76" class="ln" marker-end="url(#ar)"/>
+      <line x1="480" y1="164" x2="530" y2="134" class="ln" marker-end="url(#ar)"/>
+      <text x="400" y="100" text-anchor="middle" class="gs-t">conflict: কেউ কারও</text>
+      <text x="400" y="116" text-anchor="middle" class="gs-t">পূর্বপুরুষ নয়</text>
+      <text x="595" y="158" text-anchor="middle" class="t-s mut">client মিলিয়ে আবার লিখল</text>
+    </svg></div>
+    <figcaption>নিয়ম: X-এর প্রতিটা counter যদি Y-এর counter-এর সমান বা কম হয়, X হল Y-এর পূর্বপুরুষ, conflict নেই। কোনো counter একদিকে বড় আর অন্যটা অন্যদিকে বড় হলে দুটো sibling, অর্থাৎ conflict।</figcaption>
+  </figure>
+  <p>দুটো দাম আছে। Conflict মেলানোর logic client-কে লিখতে হয়। আর pair-এর তালিকা দ্রুত বড় হতে পারে, তাই একটা সীমা পেরোলে সবচেয়ে পুরনো pair বাদ দেওয়া হয়।</p>
+</section>
+
+<section class="c" id="s-fail">
+  <div class="head"><span class="num">6.6</span><h3>Failure সামলানো</h3></div>
+  <p>আগে জানতে হবে node সত্যিই পড়েছে কি না। একজনের কথায় ভরসা নেই, কমপক্ষে দুটো স্বাধীন উৎস লাগে। সবাই সবাইকে heartbeat পাঠালে (all-to-all) server বেশি হলে খরচ অনেক। তাই gossip protocol।</p>
+  <div class="tbl"><table>
+    <tr><th>সমস্যা</th><th>কৌশল</th><th>কীভাবে কাজ করে</th></tr>
+    <tr><td>Failure ধরা</td><td>Gossip protocol</td><td>প্রতিটা node নিজের heartbeat counter বাড়ায় আর কয়েকটা random node-কে তালিকা পাঠায়। কারও counter অনেকক্ষণ না বাড়লে তাকে offline ধরা হয়।</td></tr>
+    <tr><td>সাময়িক failure</td><td>Sloppy quorum + hinted handoff</td><td>Ring-এ প্রথম W বা R সংখ্যক healthy server নিয়ে কাজ চলে। পড়ে থাকা server-এর লেখা অন্য একটা server সাময়িকভাবে রাখে, সে ফিরলে ফেরত দেয়।</td></tr>
+    <tr><td>স্থায়ী failure</td><td>Anti-entropy + Merkle tree</td><td>Replica-দের data মেলানো হয়। Hash-এর tree তুলনা করে শুধু যে bucket আলাদা সেটাই sync হয়, পুরো data নয়।</td></tr>
+    <tr><td>Data center বিভ্রাট</td><td>Multi-data-center replication</td><td>একটা data center পুরো বন্ধ হলেও user অন্যটা থেকে data পায়।</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: Merkle tree কেন, সরাসরি সব key তুলনা করলে সমস্যা কী?</summary><p>কোটি কোটি key একটা একটা করে তুলনা খুব ধীর আর network-খরুচে। Merkle tree-তে root hash মিললে সব ঠিক। না মিললে শুধু যে শাখা আলাদা, সেদিকে নামলেই হয়। Sync-এর data পার্থক্যের সমানুপাতিক হয়, মোট data-র নয়।</p></details>
+</section>
+
+<section class="c" id="s-path">
+  <div class="head"><span class="num">6.7</span><h3>Write path ও read path</h3></div>
+  <p>Architecture-এ কোনো master নেই। প্রতিটা node-এর দায়িত্ব একই (client API, failure detection, conflict resolution, replication), তাই single point of failure নেই। একটা node-এর ভেতরে write এভাবে চলে (Cassandra-র ধাঁচে):</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="Write request প্রথমে disk-এর commit log-এ লেখা হয়, তারপর memory-র memtable-এ। Memtable ভরে গেলে disk-এর SSTable-এ flush হয়।">
+      <rect x="150" y="10" width="520" height="92" rx="10" class="soft"/><text x="660" y="28" text-anchor="end" class="t-s mut">MEMORY</text>
+      <rect x="150" y="118" width="520" height="92" rx="10" class="soft"/><text x="660" y="136" text-anchor="end" class="t-s mut">DISK</text>
+      <rect x="10" y="84" width="100" height="50" rx="6" class="box"/><text x="60" y="114" text-anchor="middle" class="t-h">Write</text>
+      <rect x="200" y="142" width="150" height="50" rx="6" class="box"/><text x="275" y="164" text-anchor="middle" class="t-h">Commit log</text><text x="275" y="182" text-anchor="middle" class="t-s mut">crash হলে উদ্ধার</text>
+      <rect x="200" y="30" width="150" height="50" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="275" y="52" text-anchor="middle" class="t-h">Memtable</text><text x="275" y="70" text-anchor="middle" class="t-s">memory cache</text>
+      <rect x="480" y="142" width="150" height="50" rx="6" class="box"/><text x="555" y="164" text-anchor="middle" class="t-h">SSTable</text><text x="555" y="182" text-anchor="middle" class="t-s mut">sorted, বদলায় না</text>
+      <line x1="110" y1="120" x2="196" y2="160" class="ln" marker-end="url(#ar)"/><text x="134" y="158" class="t-s">①</text>
+      <line x1="110" y1="98" x2="196" y2="58" class="ln" marker-end="url(#ar)"/><text x="134" y="68" class="t-s">②</text>
+      <line x1="350" y1="64" x2="490" y2="138" class="ln" marker-end="url(#ar)"/><text x="436" y="88" class="t-s">③ ভরে গেলে flush</text>
+    </svg></div>
+    <figcaption>আগে commit log কারণ memory-র data crash-এ হারায়। Log disk-এ থাকায় restart-এর পর memtable আবার গড়া যায়।</figcaption>
+  </figure>
+  <p>Read path:</p>
+  <ol>
+    <li>আগে memtable দেখা হয়। থাকলে সেখান থেকেই উত্তর।</li>
+    <li>না থাকলে bloom filter জিজ্ঞেস করা হয়: কোন SSTable-এ key থাকতে পারে।</li>
+    <li>সেই SSTable থেকে data পড়ে client-কে ফেরত।</li>
+  </ol>
+  <details class="self"><summary>নিজেকে যাচাই: bloom filter না থাকলে কী হত?</summary><p>Key কোন SSTable-এ আছে জানতে সবগুলো disk file একে একে খুঁজতে হত। Bloom filter "নিশ্চিত নেই" বলে দিতে পারে, তাই বেশিরভাগ file ছোঁয়াই লাগে না।</p></details>
+</section>
+
+<section class="c" id="s-kv-sum">
+  <div class="head"><span class="num">6.8</span><h3>Summary: লক্ষ্য ও কৌশল</h3></div>
+  <div class="tbl"><table>
+    <tr><th>লক্ষ্য বা সমস্যা</th><th>কৌশল</th></tr>
+    <tr><td>বিশাল data রাখা</td><td>Consistent hashing দিয়ে server-এ ভাগ</td></tr>
+    <tr><td>Read-এ high availability</td><td>Replication, multi-data-center</td></tr>
+    <tr><td>Write-এ high availability</td><td>Versioning আর vector clock দিয়ে conflict resolution</td></tr>
+    <tr><td>Data ভাগ করা</td><td>Consistent hashing</td></tr>
+    <tr><td>ধাপে ধাপে scale</td><td>Consistent hashing</td></tr>
+    <tr><td>ভিন্ন ক্ষমতার server</td><td>Consistent hashing (virtual node)</td></tr>
+    <tr><td>Tunable consistency</td><td>Quorum consensus</td></tr>
+    <tr><td>সাময়িক failure</td><td>Sloppy quorum, hinted handoff</td></tr>
+    <tr><td>স্থায়ী failure</td><td>Merkle tree</td></tr>
+    <tr><td>Data center বিভ্রাট</td><td>Cross-data-center replication</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= CHAPTER 7 ================= -->
+<section class="chapter" id="ch7">
+  <div class="eyebrow">CHAPTER 7</div>
+  <h2>Distributed unique ID generator</h2>
+  <p>এক database-এ <span style="font-family:var(--mono)">auto_increment</span> যথেষ্ট। অনেক server হলে সেটা চলে না: এক database বড় হতে পারে না, আর অনেক database-এ একসাথে ID বানালে মিলে যেতে পারে।</p>
+</section>
+
+<section class="c" id="s-id-req">
+  <div class="head"><span class="num">7.1</span><h3>Requirement</h3></div>
+  <div class="tbl"><table>
+    <tr><th>শর্ত</th><th>কেন জরুরি</th></tr>
+    <tr><td>ID unique</td><td>দুটো record একই ID পেলে data নষ্ট</td></tr>
+    <tr><td>শুধু সংখ্যা</td><td>Index আর তুলনা সহজ</td></tr>
+    <tr><td>64-bit-এ ধরে</td><td>এক <span style="font-family:var(--mono)">bigint</span> column-এ জায়গা হয়</td></tr>
+    <tr><td>সময় অনুযায়ী sort করা যায়</td><td>পরে তৈরি ID আগেরটার চেয়ে বড়</td></tr>
+    <tr><td>সেকেন্ডে ১০,০০০-এর বেশি ID</td><td>বড় system-এর write-এর গতি</td></tr>
+  </table></div>
+  <p>Delivery platform-এ ভাবলে: প্রতিটা parcel বা consignment-এর ID অনেক server থেকে একসাথে তৈরি হয়, আর ID দেখে মোটামুটি কোনটা আগে booking হয়েছে বোঝা গেলে query আর debugging দুটোই সহজ।</p>
+</section>
+
+<section class="c" id="s-id-opt">
+  <div class="head"><span class="num">7.2</span><h3>চারটা উপায়</h3></div>
+  <div class="tbl"><table>
+    <tr><th>উপায়</th><th>কীভাবে</th><th>ভালো দিক</th><th>সমস্যা</th></tr>
+    <tr><td>Multi-master replication</td><td>k-টা database, প্রতিটা ID বাড়ায় k করে</td><td>চেনা database feature</td><td>অনেক data center-এ scale কঠিন; ID সময়ের ক্রমে বাড়ে না; server যোগ-বাদে ভাঙে</td></tr>
+    <tr><td>UUID</td><td>প্রতিটা server নিজে 128-bit ID বানায়</td><td>সমন্বয় লাগে না, scale সহজ</td><td>128-bit (64 নয়); সময়ের ক্রম নেই; সংখ্যা ছাড়া অক্ষরও থাকে</td></tr>
+    <tr><td>Ticket server</td><td>একটা কেন্দ্রীয় database auto_increment দেয় (Flickr)</td><td>সংখ্যার ID, বানানো সহজ</td><td>Single point of failure; একাধিক করলে sync-এর ঝামেলা</td></tr>
+    <tr><td>Snowflake (Twitter)</td><td>64 bit-কে কয়েক ভাগে ভাগ</td><td>সব শর্ত পূরণ করে</td><td>ঘড়ি মিলিয়ে রাখতে হয়</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: UUID তো সহজেই unique। এখানে বাদ কেন?</summary><p>Requirement-এর তিনটা শর্ত ভাঙে: 64-bit-এ ধরে না, শুধু সংখ্যা নয়, আর সময় অনুযায়ী sort হয় না।</p></details>
+</section>
+
+<section class="c" id="s-snow">
+  <div class="head"><span class="num">7.3</span><h3>Snowflake</h3></div>
+  <p>কৌশলটা divide and conquer: 64 bit-কে ভাগ করে প্রতিটা ভাগকে আলাদা দায়িত্ব দেওয়া।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="64 bit-এর ভাগ: 1 bit sign, 41 bit timestamp, 5 bit datacenter ID, 5 bit machine ID, 12 bit sequence number।">
+      <rect x="20" y="30" width="10" height="46" class="soft"/>
+      <rect x="30" y="30" width="410" height="46" class="acc-bg acc-s" stroke-width="1.3"/>
+      <rect x="440" y="30" width="50" height="46" class="gs-bg gs-s" stroke-width="1.3"/>
+      <rect x="490" y="30" width="50" height="46" class="gs-bg gs-s" stroke-width="1.3"/>
+      <rect x="540" y="30" width="120" height="46" class="ok-bg ok-s" stroke-width="1.3"/>
+      <text x="235" y="50" text-anchor="middle" class="t-h">timestamp</text><text x="235" y="67" text-anchor="middle" class="t-m">41 bit</text>
+      <text x="465" y="58" text-anchor="middle" class="t-m">5</text>
+      <text x="515" y="58" text-anchor="middle" class="t-m">5</text>
+      <text x="600" y="50" text-anchor="middle" class="t-h">sequence</text><text x="600" y="67" text-anchor="middle" class="t-m">12 bit</text>
+      <line x1="25" y1="76" x2="25" y2="96" class="ln-mut"/><text x="20" y="110" class="t-s mut">sign · 1 bit, সবসময় 0</text>
+      <line x1="465" y1="76" x2="465" y2="96" class="ln-mut"/><text x="470" y="110" text-anchor="end" class="t-s gs-t">datacenter ID</text>
+      <line x1="515" y1="76" x2="515" y2="118" class="ln-mut"/><text x="512" y="132" text-anchor="middle" class="t-s gs-t">machine ID</text>
+      <text x="340" y="18" text-anchor="middle" class="t-s mut">64 bit, বাম থেকে ডানে গুরুত্ব কমে</text>
+    </svg></div>
+    <figcaption>Timestamp সবচেয়ে বাঁয়ে বলে পরে তৈরি ID সংখ্যায় বড় হয়, তাই sort করলেই সময়ের ক্রম পাওয়া যায়।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>ভাগ</th><th>Bit</th><th>কী ধারণ করে</th><th>সীমা</th></tr>
+    <tr><td>Sign</td><td class="n">1</td><td>ভবিষ্যতের জন্য রাখা, সবসময় 0</td><td>—</td></tr>
+    <tr><td>Timestamp</td><td class="n">41</td><td>একটা custom epoch থেকে কত millisecond গেছে</td><td class="n">2<sup>41</sup> ms ≈ ৬৯ বছর</td></tr>
+    <tr><td>Datacenter ID</td><td class="n">5</td><td>কোন data center</td><td class="n">2<sup>5</sup> = 32</td></tr>
+    <tr><td>Machine ID</td><td class="n">5</td><td>data center-এর কোন machine</td><td class="n">32 (প্রতি data center-এ)</td></tr>
+    <tr><td>Sequence</td><td class="n">12</td><td>একই millisecond-এ একই machine-এর কততম ID; প্রতি ms-এ 0 থেকে শুরু</td><td class="n">2<sup>12</sup> = 4096 / ms</td></tr>
+  </table></div>
+  <p>Datacenter আর machine ID startup-এ ঠিক হয় আর সাধারণত বদলায় না; বদলালে ID মিলে যাওয়ার ঝুঁকি। Timestamp আর sequence তৈরি হয় ID generator চলার সময়। তাত্ত্বিকভাবে একটা machine সেকেন্ডে ৪০ লাখের বেশি ID দিতে পারে (4096 × 1000), requirement-এর ১০,০০০-এর চেয়ে অনেক বেশি।</p>
+  <details class="self"><summary>নিজেকে যাচাই: ৬৯ বছর পর কী হবে, আর সেটা কীভাবে পেছানো যায়?</summary><p>41 bit ভরে গেলে timestamp আবার শূন্য থেকে শুরু হবে, ID-র ক্রম আর uniqueness ভাঙবে। Custom epoch যত সাম্প্রতিক নেবেন (১৯৭০ নয়, আপনার system চালুর তারিখ), তত দেরিতে ফুরাবে। ফুরানোর আগে নতুন epoch বা নতুন scheme-এ যেতে হয়।</p></details>
+</section>
+
+<section class="c" id="s-id-wrap">
+  <div class="head"><span class="num">7.4</span><h3>Wrap up: আরও যা বলা যায়</h3></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>মূল কথা</th></tr>
+    <tr><td>Clock synchronization</td><td>Design ধরে নেয় সব server-এর ঘড়ি এক। বাস্তবে তা হয় না, বিশেষ করে একাধিক core বা machine-এ। সাধারণ সমাধান NTP। ঘড়ি পিছিয়ে গেলে একই ID আবার তৈরি হতে পারে।</td></tr>
+    <tr><td>ভাগের দৈর্ঘ্য tune করা</td><td>Concurrency কম কিন্তু system অনেক দিন চলবে? Sequence থেকে bit কমিয়ে timestamp-এ দিন।</td></tr>
+    <tr><td>High availability</td><td>ID generator না চললে কোনো write হয় না। এটা mission-critical, তাই কখনও পুরো বন্ধ হওয়া চলবে না।</td></tr>
+  </table></div>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>এই তিন chapter-এর "নিজেকে যাচাই" প্রশ্নগুলো মুখে উত্তর দিন। যেগুলো আটকায় সেগুলো টুকে রাখুন।</li>
+    <li>Test দিতে চাইলে বলুন। ভুল হওয়া অংশে Part ১-এর মতো লাল দাগ বসবে।</li>
+    <li><a href="../#/study/p3" target="_top">Part ৩ →</a> URL shortener, web crawler, notification system, news feed। এখানে Chapter ৩-এর চার ধাপের framework প্রথমবার পুরো কাজে লাগবে।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

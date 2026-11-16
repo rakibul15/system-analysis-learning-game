@@ -8,6 +8,7 @@ import { isEn, switchLang, tr } from '@/shared/lib/i18n';
 
 const NAV = [
   { to: '/', label: tr('শহর', 'City') },
+  { to: '/study', label: tr('পড়া', 'Study') },
   { to: '/practice', label: 'Practice' },
   { to: '/builder', label: 'Builder' },
   { to: '/incident', label: 'Incident' },

@@ -1,0 +1,293 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<style>
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:22px}
+.part{display:grid;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--ink);min-width:0}
+.part:hover{border-color:var(--accent)}
+.part .pn{font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;color:var(--muted)}
+.part h3{font-size:1.08rem;color:var(--accent)}
+.part p{font-size:.88rem;color:var(--muted);line-height:1.55}
+.part.extra{background:var(--accent-soft);border-color:var(--accent);grid-column:1/-1}
+</style>
+<div class="wrap">
+<header>
+  <h1>সিস্টেম ডিজাইন ছবিতে</h1>
+  <p class="lede">Alex Xu-র System Design Interview, Volume 1 ও 2-এর সব chapter বাংলায়, নিজের figure আর "নিজেকে যাচাই" প্রশ্ন সহ, সাথে বইয়ের বাইরের একটা architecture guide। উপরে পড়ার ক্রম, নিচে পুরো সিরিজের এক page-এর cheat sheet: interview-এর আগের রাতে শুধু এটুকু।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>এই page</h2>
+      <a href="#parts">পড়ার ক্রম</a>
+      <a href="#cs-frame">Interview framework</a>
+      <a href="#cs-num">সংখ্যা যা মুখস্থ রাখতে হয়</a>
+      <a href="#cs-blocks">Building block → সমস্যা</a>
+      <a href="#cs-designs">২৫টা design, এক লাইনে</a>
+      <a href="#cs-trade">বড় trade-off</a>
+      <a href="#cs-traps">সাধারণ ফাঁদ</a>
+    </div>
+  </nav>
+</header>
+
+<section class="chapter" id="parts">
+  <div class="eyebrow">পড়ার ক্রম</div>
+  <h2>সাত part</h2>
+  <p>ক্রমেই পড়ুন: পরের part আগের part-এর building block ধরে নেয়। লাল দাগওয়ালা অংশগুলোয় আগের test-এ ভুল হয়েছিল (এখন পর্যন্ত শুধু Part ১-এ)।</p>
+  <div class="parts">
+    <a class="part" href="../#/study/p1" target="_top"><span class="pn">PART ১ · V1 CH 1–4</span><h3>ভিত্তি</h3><p>শূন্য থেকে লাখো user, মুখে মুখে হিসাব, interview framework, rate limiter</p></a>
+    <a class="part" href="../#/study/p2" target="_top"><span class="pn">PART ২ · V1 CH 5–7</span><h3>Building blocks</h3><p>Consistent hashing, key-value store, unique ID generator</p></a>
+    <a class="part" href="../#/study/p3" target="_top"><span class="pn">PART ৩ · V1 CH 8–11</span><h3>প্রথম design</h3><p>URL shortener, web crawler, notification system, news feed</p></a>
+    <a class="part" href="../#/study/p4" target="_top"><span class="pn">PART ৪ · V1 CH 12–15</span><h3>Real-time ও বড় file</h3><p>Chat, search autocomplete, YouTube, Google Drive</p></a>
+    <a class="part" href="../#/study/p5" target="_top"><span class="pn">PART ৫ · V2 CH 1–6</span><h3>Location ও data pipeline</h3><p>Proximity, nearby friends, Google Maps, message queue, metrics, ad click aggregation</p></a>
+    <a class="part" href="../#/study/p6" target="_top"><span class="pn">PART ৬ · V2 CH 7–13</span><h3>টাকা ও সঠিকতা</h3><p>Hotel reservation, email, S3, leaderboard, payment, digital wallet, stock exchange</p></a>
+    <a class="part extra" href="../#/study/p7" target="_top"><span class="pn">PART ৭ · বইয়ের বাইরে</span><h3>Architecture guide</h3><p>PACELC, consistency model, outbox, resilience, observability, API, security, frontend system design</p></a>
+  </div>
+</section>
+
+<section class="chapter" id="cheat">
+  <div class="eyebrow">CHEAT SHEET</div>
+  <h2>এক page-এ পুরো সিরিজ</h2>
+  <p>প্রতিটা লাইন কোনো একটা chapter-এর সারাংশ। কোনোটা মনে না পড়লে সেই part-এ ফিরে যান।</p>
+</section>
+
+<section class="c" id="cs-frame">
+  <div class="head"><span class="num">১</span><h3>Interview framework (৪৫ মিনিট)</h3></div>
+  <div class="tbl"><table>
+    <tr><th>ধাপ</th><th>সময়</th><th>যা করবেন</th></tr>
+    <tr><td>১. Scope</td><td class="n">৩–১০ মিনিট</td><td>Feature, user সংখ্যা, scale, read-write অনুপাত, latency আর consistency-র শর্ত জিজ্ঞেস করুন। ধরে নেওয়া কথা লিখে রাখুন</td></tr>
+    <tr><td>২. High-level design</td><td class="n">১০–১৫ মিনিট</td><td>API, data model, box-arrow diagram; interviewer-এর সম্মতি নিন। দরকার হলে মুখে মুখে হিসাব</td></tr>
+    <tr><td>৩. Deep dive</td><td class="n">১০–২৫ মিনিট</td><td>সবচেয়ে কঠিন বা interviewer-এর আগ্রহের ১–২টা component; trade-off বলুন</td></tr>
+    <tr><td>৪. Wrap up</td><td class="n">৩–৫ মিনিট</td><td>Bottleneck, failure, monitoring, ১০ গুণ scale হলে কী বদলাবে</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="cs-num">
+  <div class="head"><span class="num">২</span><h3>সংখ্যা যা মুখস্থ রাখতে হয়</h3></div>
+  <div class="two">
+    <div><h4>হিসাবের shortcut</h4><p>
+      এক দিন ≈ 10<sup>5</sup> সেকেন্ড (86,400)<br>
+      QPS = DAU × প্রতিজনের request ÷ 10<sup>5</sup><br>
+      Peak ≈ গড়ের ২–৫ গুণ<br>
+      2<sup>10</sup> ≈ হাজার (KB), 2<sup>20</sup> ≈ million (MB), 2<sup>30</sup> ≈ billion (GB), 2<sup>40</sup> TB, 2<sup>50</sup> PB<br>
+      ASCII অক্ষর 1 byte; ID 8 byte; ছোট text row ~100 byte–1 KB
+    </p></div>
+    <div><h4>Availability (বছরে downtime)</h4><p>
+      ৯৯% → ৩.৬৫ দিন<br>
+      ৯৯.৯% → ~৮.৮ ঘণ্টা<br>
+      ৯৯.৯৯% → ~৫৩ মিনিট<br>
+      ৯৯.৯৯৯% → ~৫ মিনিট<br>
+      পরপর নির্ভরশীল service: availability গুণ হয়
+    </p></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>Latency (মাত্রাটা মনে রাখুন, হুবহু সংখ্যা নয়)</th><th>মোটামুটি</th></tr>
+    <tr><td>L1 cache</td><td class="n">~1 ns</td></tr>
+    <tr><td>Main memory reference</td><td class="n">~100 ns</td></tr>
+    <tr><td>Memory থেকে 1 MB sequential পড়া</td><td class="n">~250 µs</td></tr>
+    <tr><td>একই data center-এ round trip</td><td class="n">~500 µs</td></tr>
+    <tr><td>Disk seek</td><td class="n">~10 ms</td></tr>
+    <tr><td>Disk থেকে 1 MB sequential</td><td class="n">~30 ms</td></tr>
+    <tr><td>মহাদেশ পার হয়ে round trip</td><td class="n">~150 ms</td></tr>
+  </table></div>
+  <p>শিক্ষা: memory দ্রুত, disk ধীর; disk seek এড়ান, sequential পড়ুন; compress করে পাঠানো সস্তা; data center-এর বাইরে যাওয়া দামি।</p>
+</section>
+
+<section class="c" id="cs-blocks">
+  <div class="head"><span class="num">৩</span><h3>Building block → কোন সমস্যার সমাধান</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Block</th><th>সমাধান করে</th><th>নতুন যে সমস্যা আনে</th></tr>
+    <tr><td>Load balancer</td><td>Web tier-এর failover আর scale</td><td>নিজেই SPOF হতে পারে (তাই জোড়ায়); stateless server লাগে</td></tr>
+    <tr><td>DB replication</td><td>Read scale, data-র নিরাপত্তা</td><td>Replication lag; master failover-এ data হারানো</td></tr>
+    <tr><td>Cache</td><td>Read latency, DB-র চাপ</td><td>Stale data, consistency, stampede, eviction</td></tr>
+    <tr><td>CDN</td><td>Static content-এর দূরত্ব</td><td>খরচ, invalidation</td></tr>
+    <tr><td>Message queue</td><td>Component আলাদা করা, চাপ শোষণ</td><td>Eventual consistency, duplicate, ক্রম</td></tr>
+    <tr><td>Sharding</td><td>Write আর data-র আকার</td><td>Resharding, hotspot, join আর transaction কঠিন</td></tr>
+    <tr><td>Consistent hashing</td><td>Server যোগ-বাদে কম data সরানো</td><td>অসম ভাগ (virtual node দিয়ে সারানো)</td></tr>
+    <tr><td>Rate limiter</td><td>Abuse, খরচ, overload</td><td>Distributed counter-এ race আর sync</td></tr>
+    <tr><td>Unique ID (Snowflake)</td><td>অনেক server-এ সময়ক্রমিক unique ID</td><td>ঘড়ি মেলানো</td></tr>
+    <tr><td>Bloom filter</td><td>"নিশ্চিত নেই" দ্রুত বলা</td><td>False positive</td></tr>
+    <tr><td>Quorum (N, W, R)</td><td>Consistency আর latency tune</td><td>W + R বেশি হলে ধীর</td></tr>
+    <tr><td>Idempotency key</td><td>Retry-তে duplicate কাজ</td><td>Key রাখার storage আর মেয়াদ</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="cs-designs">
+  <div class="head"><span class="num">৪</span><h3>২৫টা design, এক লাইনে</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Design</th><th>মূল কৌশল</th></tr>
+    <tr><td>Rate limiter</td><td>Token bucket বা sliding window counter, Redis-এ counter, Lua script দিয়ে atomic</td></tr>
+    <tr><td>Consistent hashing</td><td>Hash ring, clockwise প্রথম server, virtual node</td></tr>
+    <tr><td>Key-value store</td><td>Consistent hashing + N replica + quorum + vector clock + gossip + Merkle tree</td></tr>
+    <tr><td>Unique ID</td><td>Snowflake: timestamp 41 · datacenter 5 · machine 5 · sequence 12</td></tr>
+    <tr><td>URL shortener</td><td>ID generator → base 62 (৭ অক্ষর); redirect-এ cache; analytics চাইলে 302</td></tr>
+    <tr><td>Web crawler</td><td>BFS; URL frontier = priority front queue + host-ভিত্তিক politeness back queue; content আর URL seen check</td></tr>
+    <tr><td>Notification</td><td>ধরন অনুযায়ী আলাদা queue আর worker; log DB + retry; event_id দিয়ে dedupe</td></tr>
+    <tr><td>News feed</td><td>Hybrid fanout: সাধারণ user push, celebrity pull; feed cache-এ শুধু ID</td></tr>
+    <tr><td>Chat</td><td>WebSocket stateful server, service discovery, channel-ভিত্তিক message ID, KV store, heartbeat presence</td></tr>
+    <tr><td>Autocomplete</td><td>প্রতিটা node-এ top-k cache-ওয়ালা trie; সাপ্তাহিক rebuild; browser cache</td></tr>
+    <tr><td>YouTube</td><td>Blob storage → DAG transcoding → CDN; শুধু জনপ্রিয় video CDN-এ; pre-signed URL</td></tr>
+    <tr><td>Google Drive</td><td>4 MB block + delta sync + dedupe; relational metadata (strong consistency); long polling notification</td></tr>
+    <tr><td>Proximity</td><td>Geohash (৪–৬ অক্ষর) + ৮ প্রতিবেশী ঘর; read replica, sharding নয়</td></tr>
+    <tr><td>Nearby friends</td><td>প্রতি user-এর Redis pub/sub channel; location cache TTL দিয়ে; দূরত্ব subscriber-এর দিকে</td></tr>
+    <tr><td>Google Maps</td><td>Hierarchical routing tile + shortest path + ML ETA; pre-rendered tile CDN-এ; batch location update</td></tr>
+    <tr><td>Message queue</td><td>Partitioned append-only log; consumer group; pull; ISR + ACK; at-most/least/exactly-once</td></tr>
+    <tr><td>Metrics</td><td>Time-series DB; pull বা push; Kafka বাফার; downsampling; alert manager dedupe</td></tr>
+    <tr><td>Ad click aggregation</td><td>Kappa streaming; event time + watermark; tumbling/sliding window; দিনশেষে reconciliation</td></tr>
+    <tr><td>Hotel reservation</td><td>Room type × তারিখের inventory row; idempotency key; optimistic lock; একই DB-তে reservation আর inventory</td></tr>
+    <tr><td>Email</td><td>SMTP দুই পাশে queue; user_id-ভিত্তিক partition; read/unread denormalize; SPF, DKIM, DMARC</td></tr>
+    <tr><td>S3</td><td>Metadata আর data আলাদা; ছোট object বড় file-এ জোড়া; replication বা erasure coding; checksum</td></tr>
+    <tr><td>Leaderboard</td><td>Redis sorted set (skip list), ZINCRBY / ZREVRANK; scale-এ score range দিয়ে shard</td></tr>
+    <tr><td>Payment</td><td>PSP hosted page; double-entry ledger; retry + idempotency = exactly-once; reconciliation</td></tr>
+    <tr><td>Digital wallet</td><td>Shard জুড়ে TC/C বা Saga; event sourcing + CQRS + snapshot; Raft</td></tr>
+    <tr><td>Stock exchange</td><td>Sequencer + deterministic matching engine; এক server, mmap, single thread; hot-warm</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="cs-trade">
+  <div class="head"><span class="num">৫</span><h3>বড় trade-off</h3></div>
+  <div class="tbl"><table>
+    <tr><th>এটা</th><th>নাকি এটা</th><th>বাছাইয়ের প্রশ্ন</th></tr>
+    <tr><td>SQL</td><td>NoSQL</td><td>Transaction আর join লাগে? নাকি বিশাল write, সহজ access pattern?</td></tr>
+    <tr><td>Consistency</td><td>Availability / latency</td><td>পুরনো data দেখালে ক্ষতি কতটা? (টাকা বনাম like count)</td></tr>
+    <tr><td>Push (fanout on write)</td><td>Pull (fanout on read)</td><td>লেখা বেশি নাকি পড়া? Celebrity আছে?</td></tr>
+    <tr><td>Sync</td><td>Async</td><td>User কি এখনই ফল চায়?</td></tr>
+    <tr><td>Polling / long polling</td><td>WebSocket / SSE</td><td>কত ঘনঘন আর কোন দিকে data যায়?</td></tr>
+    <tr><td>Pessimistic lock</td><td>Optimistic lock</td><td>একই row নিয়ে কতজন একসাথে লড়ে?</td></tr>
+    <tr><td>Replication</td><td>Erasure coding</td><td>দ্রুত পড়া নাকি কম জায়গা?</td></tr>
+    <tr><td>Batch বড়</td><td>Batch ছোট</td><td>Throughput নাকি latency?</td></tr>
+    <tr><td>Monolith</td><td>Microservice</td><td>Team কত বড়? আলাদা scale বা release লাগে?</td></tr>
+    <tr><td>Build</td><td>Buy</td><td>এটা কি আমাদের মূল ব্যবসা? (metrics, CDN, PSP প্রায়ই buy)</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="cs-traps">
+  <div class="head"><span class="num">৬</span><h3>সাধারণ ফাঁদ</h3></div>
+  <div class="tbl"><table>
+    <tr><th>ফাঁদ</th><th>বদলে</th></tr>
+    <tr><td>প্রশ্ন না করেই design শুরু</td><td>প্রথম ৫ মিনিট শুধু scope; ধরে নেওয়া কথা জোরে বলুন</td></tr>
+    <tr><td>শুরুতেই microservice, Kafka, Kubernetes</td><td>সহজ design থেকে শুরু, সমস্যা দেখিয়ে তবে component যোগ (Part ১-এর গল্প)</td></tr>
+    <tr><td>"Cache দেব" বলে থেমে যাওয়া</td><td>কী cache, key কী, TTL কত, invalidation কীভাবে, cache পড়লে কী</td></tr>
+    <tr><td>Single point of failure চোখ এড়ানো</td><td>প্রতিটা box-এর জন্য জিজ্ঞেস করুন: এটা পড়লে কী হয়?</td></tr>
+    <tr><td>Retry আছে কিন্তু idempotency নেই</td><td>প্রতিটা retry-যোগ্য write-এ idempotency key বা dedupe</td></tr>
+    <tr><td>DB আর queue-তে আলাদা আলাদা লেখা</td><td>Transactional outbox</td></tr>
+    <tr><td>গড় latency দেখা</td><td>p99 দেখুন</td></tr>
+    <tr><td>টাকা float-এ</td><td>Integer (পয়সায়) বা decimal string</td></tr>
+    <tr><td>একটা সঠিক উত্তর খোঁজা</td><td>দুটো বিকল্প, প্রতিটার দাম, তারপর এই requirement-এ কেন এটা</td></tr>
+  </table></div>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>প্রতি সপ্তাহে ৩–৪টা design ফাঁকা কাগজে ৪৫ মিনিটে, framework মেনে। তারপর এই cheat sheet-এর লাইনের সাথে মেলান।</li>
+    <li>যেকোনো part-এর test চাইলে বলুন; ভুল অংশে লাল দাগ বসবে।</li>
+    <li>NestJS dispatch system-এ এখান থেকে পরের যে block বানাবেন (geohash rider search, outbox, idempotent COD), সেটার code review-এ ডাকুন।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

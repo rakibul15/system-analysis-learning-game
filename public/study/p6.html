@@ -1,0 +1,592 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে V2 ৭–১৩</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <nav class="back"><a href="../#/study/p1" target="_top">← Part ১</a> · <a href="../#/study/p2" target="_top">← Part ২</a> · <a href="../#/study/p3" target="_top">← Part ৩</a> · <a href="../#/study/p4" target="_top">← Part ৪</a> · <a href="../#/study/p5" target="_top">← Part ৫</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Volume 2, ভাগ ২</h1>
+  <p class="lede">Part ৬। Volume 2-এর শেষ সাত chapter: hotel reservation, email, S3, leaderboard, payment, digital wallet, stock exchange। এখানে মূল চ্যালেঞ্জ টাকা আর সঠিকতা: একই জিনিস দুবার বিক্রি না হওয়া, একই টাকা দুবার না কাটা, আর কিছু ভুল হলে হিসাব মেলানো। COD settlement আর merchant payout-এর design এখান থেকেই আসে।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>V2-7 · Hotel reservation</h2>
+      <a href="#s-ht-scope">7.1 Scope ও data</a>
+      <a href="#s-ht-race">7.2 Double booking ও concurrency</a>
+      <a href="#s-ht-scale">7.3 Scale ও microservice</a>
+    </div>
+    <div><h2>V2-8 · Email service</h2>
+      <a href="#s-em-proto">8.1 Protocol</a>
+      <a href="#s-em-flow">8.2 Send ও receive flow</a>
+      <a href="#s-em-data">8.3 Metadata ও deliverability</a>
+    </div>
+    <div><h2>V2-9 · S3-ধাঁচের object storage</h2>
+      <a href="#s-s3-basic">9.1 Object storage কী</a>
+      <a href="#s-s3-arch">9.2 Data ও metadata আলাদা</a>
+      <a href="#s-s3-dur">9.3 Durability: replication বনাম erasure coding</a>
+      <a href="#s-s3-more">9.4 Listing, versioning, বড় file</a>
+    </div>
+    <div><h2>V2-10 · Leaderboard</h2>
+      <a href="#s-lb-scope">10.1 Scope ও SQL-এর সমস্যা</a>
+      <a href="#s-lb-redis">10.2 Redis sorted set</a>
+      <a href="#s-lb-scale">10.3 ৫০ কোটি user-এ scale</a>
+    </div>
+    <div><h2>V2-11 · Payment system</h2>
+      <a href="#s-pay-flow">11.1 Pay-in flow</a>
+      <a href="#s-pay-ledger">11.2 Ledger ও double-entry</a>
+      <a href="#s-pay-exact">11.3 Retry, idempotency, exactly-once</a>
+      <a href="#s-pay-recon">11.4 Reconciliation ও security</a>
+    </div>
+    <div><h2>V2-12 · Digital wallet</h2>
+      <a href="#s-wl-scope">12.1 Scope ও সমস্যা</a>
+      <a href="#s-wl-dt">12.2 2PC, TC/C, Saga</a>
+      <a href="#s-wl-es">12.3 Event sourcing ও CQRS</a>
+    </div>
+    <div><h2>V2-13 · Stock exchange</h2>
+      <a href="#s-ex-scope">13.1 Scope ও শব্দ</a>
+      <a href="#s-ex-flow">13.2 Critical path</a>
+      <a href="#s-ex-perf">13.3 Order book ও latency</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= V2 CH 7 ================= -->
+<section class="chapter" id="v2c7">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 7</div>
+  <h2>Hotel reservation system</h2>
+  <p>Marriott-এর মতো hotel chain। QPS খুব কম, কিন্তু একটা ভুলে একই room দুজনকে বিক্রি। তাই এই chapter scale নিয়ে নয়, concurrency নিয়ে। একই সমস্যা: একটা delivery slot বা rider-এর capacity দুজন merchant-কে একসাথে দেওয়া।</p>
+</section>
+
+<section class="c" id="s-ht-scope">
+  <div class="head"><span class="num">7.1</span><h3>Scope ও data</h3></div>
+  <p>বইয়ের ধরে নেওয়া: ৫,০০০ hotel, ১০ লাখ room; booking-এর সময়ই পুরো payment; booking হয় room type ধরে (যেমন "deluxe king"), নির্দিষ্ট room নম্বর নয়; ১০% overbooking চলে (কেউ কেউ cancel করে); দাম দিনে দিনে বদলায়।</p>
+  <div class="tbl"><table>
+    <tr><th>Funnel</th><th>QPS</th></tr>
+    <tr><td>Hotel আর room-এর page দেখা</td><td class="n">≈ 300</td></tr>
+    <tr><td>Booking page</td><td class="n">≈ 30</td></tr>
+    <tr><td>Reservation সম্পন্ন</td><td class="n">≈ 3</td></tr>
+  </table></div>
+  <p>Read বেশি, write কম, আর data-র গঠন পরিষ্কার; সবচেয়ে বড় কথা ACID লাগে। তাই relational DB। Inventory রাখা হয় room type আর তারিখ ধরে: <span class="mono">room_type_inventory(hotel_id, room_type_id, date, total_inventory, total_reserved)</span>। প্রতিটা তারিখের প্রতিটা room type-এর একটা row; ভবিষ্যতের ২ বছরের row আগেই বানিয়ে রাখা।</p>
+</section>
+
+<section class="c" id="s-ht-race">
+  <div class="head"><span class="num">7.2</span><h3>Double booking ও concurrency</h3></div>
+  <p>দুই রকম double booking। <b>একই user দুবার click করল:</b> সমাধান idempotency key। Booking page load হওয়ার সময়ই একটা <span class="mono">reservation_id</span> তৈরি হয়; সেটাই primary key, তাই দ্বিতীয় submit unique constraint-এ আটকায়। <b>দুই user একই শেষ room নিতে চায়:</b> race condition।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="শেষ একটা room। User 1 আর User 2 দুজনেই reserved 99 পড়ে, দুজনেই দেখে room আছে, দুজনেই 100 লেখে। দুটো booking সফল কিন্তু room একটাই।">
+      <rect x="10" y="10" width="120" height="34" rx="6" class="box"/><text x="70" y="32" text-anchor="middle" class="t-h">User 1</text>
+      <rect x="280" y="10" width="120" height="34" rx="6" class="soft"/><text x="340" y="32" text-anchor="middle" class="t-h">Database</text>
+      <rect x="550" y="10" width="120" height="34" rx="6" class="box"/><text x="610" y="32" text-anchor="middle" class="t-h">User 2</text>
+      <line x1="70" y1="44" x2="70" y2="200" class="ln-mut dash"/><line x1="340" y1="44" x2="340" y2="200" class="ln-mut dash"/><line x1="610" y1="44" x2="610" y2="200" class="ln-mut dash"/>
+      <rect x="262" y="50" width="156" height="18" rx="3" class="soft"/><text x="340" y="63" text-anchor="middle" class="t-m">total 100 · reserved 99</text>
+      <line x1="70" y1="82" x2="336" y2="82" class="ln" marker-end="url(#ar)"/><text x="200" y="76" text-anchor="middle" class="t-s">① পড়ল: 99, জায়গা আছে</text>
+      <line x1="610" y1="104" x2="344" y2="104" class="ln" marker-end="url(#ar)"/><text x="480" y="98" text-anchor="middle" class="t-s">② পড়ল: 99, জায়গা আছে</text>
+      <line x1="70" y1="136" x2="336" y2="136" class="ln" marker-end="url(#ar)"/><text x="200" y="130" text-anchor="middle" class="t-s">③ লিখল: 100 ✓</text>
+      <line x1="610" y1="158" x2="344" y2="158" class="bad-s" stroke-width="1.6" fill="none" marker-end="url(#ar)"/><text x="480" y="152" text-anchor="middle" class="t-s bad-t">④ লিখল: 100 ✓ (!)</text>
+      <rect x="250" y="181" width="180" height="22" rx="3" class="bad-bg"/><text x="340" y="196" text-anchor="middle" class="bad-t">দুটো booking সফল, room একটাই</text>
+    </svg></div>
+    <figcaption>দুটো transaction-ই পুরনো মান পড়ে সিদ্ধান্ত নিয়েছে। Isolation level serializable না হলে database এটা নিজে থেকে আটকায় না।</figcaption>
+  </figure>
+  <div class="tbl"><table>
+    <tr><th>উপায়</th><th>কীভাবে</th><th>ভালো</th><th>সমস্যা</th></tr>
+    <tr><td>Pessimistic lock</td><td><span class="mono">SELECT … FOR UPDATE</span>: পড়ার সময়ই row lock, অন্যরা অপেক্ষা করে</td><td>সহজ, update-এ সংঘাত নেই</td><td>Deadlock হতে পারে; লম্বা lock-এ scale হয় না</td></tr>
+    <tr><td>Optimistic lock</td><td><span class="mono">version</span> column; লেখার সময় <span class="mono">WHERE version = পড়া_মান</span>, না মিললে retry</td><td>Lock নেই, দ্রুত</td><td>অনেকে একসাথে চাইলে বারবার fail আর retry</td></tr>
+    <tr><td>DB constraint</td><td><span class="mono">CHECK (total_reserved &lt;= total_inventory)</span></td><td>সবচেয়ে সহজ</td><td>সব DB সমর্থন করে না; code থেকে logic আলাদা হয়ে যায়</td></tr>
+  </table></div>
+  <p>বই optimistic lock নেয়, কারণ hotel-এ QPS কম আর একই room type-এ একসাথে অনেকে খুব কম চায়। Flash sale-এর মতো জায়গায় যেখানে হাজারজন একসাথে একটা জিনিস চায়, সেখানে optimistic lock-এ বারবার fail হয়।</p>
+  <details class="self"><summary>নিজেকে যাচাই: ঈদের আগে একটা hub-এর pickup slot-এ একসাথে ৫০০ merchant booking দিচ্ছে। Optimistic lock কেন খারাপ হবে?</summary><p>একজন ছাড়া সবার version মিলবে না, সবাই retry করবে, আবার একজন জিতবে। Retry-এর ঝড়ে DB-র চাপ আর latency দুটোই বাড়বে। এখানে pessimistic lock, অথবা slot-কে queue-তে সাজিয়ে একে একে দেওয়া ভালো।</p></details>
+</section>
+
+<section class="c" id="s-ht-scale">
+  <div class="head"><span class="num">7.3</span><h3>Scale ও microservice</h3></div>
+  <p>যদি QPS হাজার গুণ হয় (যেমন Booking.com): DB shard করুন <span class="mono">hotel_id</span> দিয়ে, কারণ প্রায় সব query একটা hotel-এর ভেতরে। Inventory Redis-এ cache করুন: বেশিরভাগ "room আছে?" প্রশ্ন cache থেকে উত্তর পায়। Cache আর DB একটু অমিল হতে পারে, কিন্তু চূড়ান্ত যাচাই DB-তে হয়, তাই ভুল booking হয় না।</p>
+  <p>Microservice-এ reservation আর inventory আলাদা service আর আলাদা DB হলে একটা transaction-এ দুটো বদলানো যায় না। উপায় 2PC বা Saga (Chapter 12-এ বিস্তারিত)। বইয়ের বাস্তববাদী পরামর্শ: reservation আর inventory একই relational DB-তে রাখুন, যাতে একটা ACID transaction-এই কাজ হয়। সব microservice-এর আলাদা DB থাকতেই হবে, এমন কোনো নিয়ম নেই।</p>
+</section>
+
+<!-- ================= V2 CH 8 ================= -->
+<section class="chapter" id="v2c8">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 8</div>
+  <h2>Distributed email service</h2>
+  <p>Gmail-এর মতো: ১০০ কোটি user, email পাঠানো-পাওয়া, সব email দেখা, read-unread দিয়ে filter, search, spam আর virus থেকে রক্ষা।</p>
+</section>
+
+<section class="c" id="s-em-proto">
+  <div class="head"><span class="num">8.1</span><h3>Protocol</h3></div>
+  <div class="tbl"><table>
+    <tr><th>Protocol</th><th>কাজ</th></tr>
+    <tr><td>SMTP</td><td>এক mail server থেকে আরেক mail server-এ পাঠানো</td></tr>
+    <tr><td>POP</td><td>Client email নামায় আর server থেকে মুছে দেয়; একাধিক device-এ চলে না</td></tr>
+    <tr><td>IMAP</td><td>Email server-এ থাকে, client শুধু দেখে; একাধিক device-এ চলে</td></tr>
+    <tr><td>HTTPS (বা JMAP)</td><td>Web-ভিত্তিক client-এর জন্য</td></tr>
+  </table></div>
+  <p>কোন domain-এর email কোন server-এ যাবে সেটা DNS-এর MX record বলে। Attachment MIME দিয়ে base64-encode হয়ে email-এর সাথে যায়। পুরনো mail server-এ প্রতিটা email আলাদা file (Maildir); কোটি user আর billion email-এ disk I/O bottleneck হয়।</p>
+</section>
+
+<section class="c" id="s-em-flow">
+  <div class="head"><span class="num">8.2</span><h3>Send ও receive flow</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="Send: web server validate করে outgoing queue-তে রাখে, SMTP outgoing worker spam আর virus যাচাই করে পাঠায়। Receive: SMTP server email নেয়, incoming queue-তে রাখে, processing worker spam virus filter করে storage-এ রাখে আর online user-কে WebSocket-এ জানায়।">
+      <text x="10" y="18" class="t-s mut">SEND</text>
+      <rect x="10" y="26" width="90" height="40" rx="6" class="box"/><text x="55" y="50" text-anchor="middle" class="t-s">Webmail</text>
+      <rect x="125" y="26" width="110" height="40" rx="6" class="box"/><text x="180" y="44" text-anchor="middle" class="t-s">Web server</text><text x="180" y="59" text-anchor="middle" class="t-s mut">validate, size</text>
+      <rect x="260" y="26" width="100" height="40" rx="6" class="gs-bg gs-s"/><text x="310" y="50" text-anchor="middle" class="t-s">Outgoing queue</text>
+      <rect x="385" y="26" width="150" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="460" y="44" text-anchor="middle" class="t-s">SMTP outgoing worker</text><text x="460" y="59" text-anchor="middle" class="t-s">spam, virus check</text>
+      <rect x="560" y="26" width="110" height="40" rx="6" class="soft"/><text x="615" y="50" text-anchor="middle" class="t-s">অন্য mail server</text>
+      <line x1="100" y1="46" x2="121" y2="46" class="ln" marker-end="url(#ar)"/>
+      <line x1="235" y1="46" x2="256" y2="46" class="ln" marker-end="url(#ar)"/>
+      <line x1="360" y1="46" x2="381" y2="46" class="ln" marker-end="url(#ar)"/>
+      <line x1="535" y1="46" x2="556" y2="46" class="ln" marker-end="url(#ar)"/>
+
+      <text x="10" y="112" class="t-s mut">RECEIVE</text>
+      <rect x="10" y="120" width="90" height="40" rx="6" class="soft"/><text x="55" y="144" text-anchor="middle" class="t-s">অন্য server</text>
+      <rect x="125" y="120" width="110" height="40" rx="6" class="box"/><text x="180" y="138" text-anchor="middle" class="t-s">SMTP servers</text><text x="180" y="153" text-anchor="middle" class="t-s mut">acceptance policy</text>
+      <rect x="260" y="120" width="100" height="40" rx="6" class="gs-bg gs-s"/><text x="310" y="144" text-anchor="middle" class="t-s">Incoming queue</text>
+      <rect x="385" y="120" width="150" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="460" y="138" text-anchor="middle" class="t-s">Processing worker</text><text x="460" y="153" text-anchor="middle" class="t-s">spam, virus filter</text>
+      <rect x="560" y="102" width="110" height="34" rx="6" class="soft"/><text x="615" y="123" text-anchor="middle" class="t-s">Metadata DB, cache</text>
+      <rect x="560" y="144" width="110" height="34" rx="6" class="soft"/><text x="615" y="165" text-anchor="middle" class="t-s">Attachment store</text>
+      <rect x="385" y="186" width="150" height="34" rx="6" class="box"/><text x="460" y="207" text-anchor="middle" class="t-s">Real-time server</text>
+      <rect x="560" y="186" width="110" height="34" rx="6" class="box"/><text x="615" y="207" text-anchor="middle" class="t-s">Online user</text>
+      <line x1="100" y1="140" x2="121" y2="140" class="ln" marker-end="url(#ar)"/>
+      <line x1="235" y1="140" x2="256" y2="140" class="ln" marker-end="url(#ar)"/>
+      <line x1="360" y1="140" x2="381" y2="140" class="ln" marker-end="url(#ar)"/>
+      <line x1="535" y1="132" x2="556" y2="120" class="ln" marker-end="url(#ar)"/>
+      <line x1="535" y1="150" x2="556" y2="160" class="ln" marker-end="url(#ar)"/>
+      <line x1="460" y1="160" x2="460" y2="182" class="ln" marker-end="url(#ar)"/>
+      <line x1="535" y1="203" x2="556" y2="203" class="acc-s" stroke-width="1.5" fill="none" marker-end="url(#ar-acc)"/>
+    </svg></div>
+    <figcaption>Queue দুই পাশেই: mail server-গুলো আলাদা আর নিজের গতিতে scale হয়, আর বাইরের server ধীর হলেও email হারায় না। একই domain-এর ভেতরে পাঠানো হলে বাইরে না গিয়ে সরাসরি পৌঁছায়। Real-time server online user-কে WebSocket-এ নতুন email জানায়; offline user পরে খুললে আনে।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-em-data">
+  <div class="head"><span class="num">8.3</span><h3>Metadata ও deliverability</h3></div>
+  <p>Email metadata-র access pattern: প্রায় সব query এক user-এর নিজের email নিয়ে, আর বেশিরভাগ সাম্প্রতিক। তাই data partition হয় <span class="mono">user_id</span> দিয়ে। Relational DB-তে বড় email body ভালো চলে না, তাই Bigtable-ধাঁচের NoSQL। Table <span class="mono">emails_by_folder</span>: partition key <span class="mono">(user_id, folder_id)</span>, clustering key <span class="mono">email_id</span> (TIMEUUID, নতুন আগে)।</p>
+  <p>NoSQL-এ "unread দেখাও" filter ভালো চলে না। সমাধান denormalize: <span class="mono">read_emails</span> আর <span class="mono">unread_emails</span> দুই table; email পড়া হলে এক table থেকে মুছে অন্যটায় লেখা। Thread জোড়া লাগে header দিয়ে: <span class="mono">Message-Id, In-Reply-To, References</span>। Mailbox-এ availability-র চেয়ে consistency আগে: একই email দুই device-এ আলাদা অবস্থায় দেখানো চলবে না।</p>
+  <div class="tbl"><table>
+    <tr><th>Deliverability (spam-এ না পড়া)</th><th>কীভাবে</th></tr>
+    <tr><td>Dedicated IP</td><td>Email পাঠানোর জন্য আলাদা IP</td></tr>
+    <tr><td>IP warm-up</td><td>নতুন IP থেকে ধীরে ধীরে পাঠানোর পরিমাণ বাড়ানো, যাতে সুনাম তৈরি হয়</td></tr>
+    <tr><td>ধরন আলাদা</td><td>Marketing আর জরুরি (OTP, receipt) email আলাদা IP থেকে</td></tr>
+    <tr><td>Spammer বাদ</td><td>দ্রুত ধরে ban, যাতে IP-র সুনাম নষ্ট না হয়</td></tr>
+    <tr><td>Authentication</td><td>SPF, DKIM, DMARC: প্রমাণ যে email সত্যিই এই domain থেকে</td></tr>
+  </table></div>
+  <p>Search: email system-এ write অনেক বেশি (প্রতিটা নতুন email-এ index), আর search শুধু নিজের mailbox-এ। Elasticsearch সহজ পথ; বড় scale-এ LSM tree-ভিত্তিক নিজস্ব index।</p>
+</section>
+
+<!-- ================= V2 CH 9 ================= -->
+<section class="chapter" id="v2c9">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 9</div>
+  <h2>S3-ধাঁচের object storage</h2>
+  <p>Part ৪-এ YouTube আর Google Drive-এ "blob storage" box এঁকেছি। এবার সেই box-এর ভেতর। Parcel-এর POD (proof of delivery) ছবি, invoice PDF সব এখানেই যায়।</p>
+</section>
+
+<section class="c" id="s-s3-basic">
+  <div class="head"><span class="num">9.1</span><h3>Object storage কী</h3></div>
+  <div class="tbl"><table>
+    <tr><th>ধরন</th><th>কীভাবে রাখে</th><th>উদাহরণ</th></tr>
+    <tr><td>Block</td><td>Raw block, server-এ disk হিসেবে লাগানো; সবচেয়ে দ্রুত</td><td>Database-এর disk, VM-এর volume</td></tr>
+    <tr><td>File</td><td>Folder আর file-এর hierarchy</td><td>Shared network drive</td></tr>
+    <tr><td>Object</td><td>Flat: প্রতিটা object-এর একটা নাম, data আর metadata; HTTP REST API দিয়ে; বদলানো যায় না, শুধু নতুন version</td><td>Amazon S3, ছবি, video, backup</td></tr>
+  </table></div>
+  <p>শব্দ: <b>bucket</b> (object রাখার পাত্র, নাম পৃথিবীজুড়ে unique), <b>object</b>, <b>versioning</b>, <b>URI</b>। বইয়ের লক্ষ্য: ১০০ PB data, durability ছয় ৯ (99.9999%), availability চার ৯ (99.99%)।</p>
+</section>
+
+<section class="c" id="s-s3-arch">
+  <div class="head"><span class="num">9.2</span><h3>Data ও metadata আলাদা</h3></div>
+  <p>মূল চিন্তাটা UNIX file system থেকে: file-এর নাম আর তথ্য (inode) এক জায়গায়, file-এর data আরেক জায়গায়। Object storage-এ metadata বদলায়, data বদলায় না। তাই দুটোকে আলাদা store-এ রেখে আলাদাভাবে scale।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="Client থেকে load balancer, API service। API service IAM দিয়ে যাচাই করে। Object data store-এ যায়, data store একটা UUID ফেরত দেয়। Metadata store-এ bucket, object name আর UUID-এর সম্পর্ক রাখা হয়।">
+      <rect x="10" y="90" width="80" height="44" rx="6" class="box"/><text x="50" y="117" text-anchor="middle" class="t-h">Client</text>
+      <rect x="120" y="90" width="110" height="44" rx="6" class="box"/><text x="175" y="117" text-anchor="middle" class="t-s">Load balancer</text>
+      <rect x="260" y="90" width="120" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="320" y="110" text-anchor="middle" class="t-s">API service</text><text x="320" y="125" text-anchor="middle" class="t-s">stateless</text>
+      <rect x="260" y="14" width="120" height="36" rx="6" class="soft"/><text x="320" y="37" text-anchor="middle" class="t-s">IAM</text>
+      <rect x="430" y="14" width="240" height="96" rx="10" class="soft"/>
+      <text x="550" y="32" text-anchor="middle" class="t-h">Data store</text>
+      <text x="550" y="52" text-anchor="middle" class="t-s">data routing · placement service</text>
+      <text x="550" y="70" text-anchor="middle" class="t-s">data node (primary + replica)</text>
+      <text x="550" y="96" text-anchor="middle" class="t-s mut">immutable: শুধু লেখা, পড়া, মোছা</text>
+      <rect x="430" y="130" width="240" height="86" rx="10" class="gs-bg gs-s" stroke-width="1.3"/>
+      <text x="550" y="150" text-anchor="middle" class="t-h">Metadata store</text>
+      <text x="550" y="172" text-anchor="middle" class="t-m">bucket · object_name</text>
+      <text x="550" y="190" text-anchor="middle" class="t-m">→ object_id (UUID)</text>
+      <text x="550" y="208" text-anchor="middle" class="t-s mut">mutable</text>
+      <line x1="90" y1="112" x2="116" y2="112" class="ln" marker-end="url(#ar)"/>
+      <line x1="230" y1="112" x2="256" y2="112" class="ln" marker-end="url(#ar)"/>
+      <line x1="320" y1="90" x2="320" y2="54" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="380" y1="104" x2="426" y2="70" class="ln" marker-end="url(#ar)"/><text x="402" y="78" text-anchor="end" class="t-s">① data</text>
+      <line x1="380" y1="122" x2="426" y2="160" class="ln" marker-end="url(#ar)"/><text x="402" y="160" text-anchor="end" class="t-s">② metadata</text>
+    </svg></div>
+    <figcaption>Upload: IAM যাচাই → object data store-এ, যা একটা UUID ফেরত দেয় → metadata store-এ bucket আর নামের সাথে সেই UUID। Download উল্টো: নাম থেকে metadata-য় UUID, তারপর data store থেকে data।</figcaption>
+  </figure>
+  <p>Data store-এর ভেতরে: <b>placement service</b> ঠিক করে কোন data node-এ রাখবে (cluster-এর map রাখে, heartbeat নেয়, নিজে Paxos বা Raft-এ replicated)। <b>Data routing service</b> stateless, request ঠিক node-এ পাঠায়। একটা primary আর দুটো replica। সব replica লিখলে তবে সফল ধরলে consistency ভালো কিন্তু latency বেশি; শুধু primary লিখলে উল্টো।</p>
+  <p>ছোট object প্রতিটা আলাদা file হলে inode ফুরায় আর disk block অপচয় হয়। তাই অনেক ছোট object একটা বড় file-এ পরপর জোড়া (WAL-এর মতো), আর একটা lookup table: <span class="mono">object_id → file_name, start_offset, size</span>। প্রতিটা data node-এ এই table আলাদা RocksDB বা SQLite-এ।</p>
+</section>
+
+<section class="c" id="s-s3-dur">
+  <div class="head"><span class="num">9.3</span><h3>Durability: replication বনাম erasure coding</h3></div>
+  <p>Hard disk বছরে প্রায় 0.81% হারে নষ্ট হয়। তিনটা copy রাখলে durability প্রায় ছয় ৯। Copy আলাদা failure domain-এ (আলাদা availability zone) রাখতে হয়, যাতে একটা বিদ্যুৎ বিভ্রাটে সব না যায়।</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>৩ গুণ replication</th><th>Erasure coding (8+4)</th></tr>
+    <tr><td>কীভাবে</td><td>পুরো data-র তিনটা copy</td><td>Data ৮ টুকরো, তা থেকে ৪টা parity টুকরো; যেকোনো ৪টা হারালেও বাকি ৮টা থেকে পুরো data</td></tr>
+    <tr><td>বাড়তি জায়গা</td><td class="n">200%</td><td class="n">50%</td></tr>
+    <tr><td>Durability</td><td>প্রায় ছয় ৯</td><td>আরও বেশি (প্রায় এগারো ৯)</td></tr>
+    <tr><td>পড়ার গতি</td><td>দ্রুত, একটা copy থেকেই</td><td>ধীর, কয়েকটা node থেকে টুকরো জোড়া</td></tr>
+    <tr><td>জটিলতা</td><td>সহজ</td><td>হিসাব আর recovery জটিল</td></tr>
+  </table></div>
+  <p>Disk নষ্ট না হয়েও data নীরবে বদলে যেতে পারে (bit rot)। তাই প্রতিটা object আর প্রতিটা file-এর শেষে checksum (MD5, SHA1); পড়ার সময় মিলিয়ে দেখা, না মিললে অন্য replica থেকে।</p>
+  <details class="self"><summary>নিজেকে যাচাই: ৫ বছরের পুরনো POD ছবি কেউ প্রায় দেখে না, কিন্তু রাখতেই হবে। কোনটা নেবেন?</summary><p>Erasure coding। জায়গা অনেক কম লাগে আর durability বেশি; পড়া একটু ধীর হলেও ক্ষতি নেই, কারণ কেউ প্রায় পড়েই না। সাম্প্রতিক, ঘনঘন দেখা ছবিতে replication।</p></details>
+</section>
+
+<section class="c" id="s-s3-more">
+  <div class="head"><span class="num">9.4</span><h3>Listing, versioning, বড় file</h3></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>কৌশল</th></tr>
+    <tr><td>Metadata scale</td><td><span class="mono">hash(bucket_name, object_name)</span> দিয়ে shard</td></tr>
+    <tr><td>Prefix দিয়ে listing</td><td>Shard করলে এক bucket-এর object সব shard-এ ছড়ানো, তাই সব shard-এ query (scatter-gather) অথবা bucket দিয়ে shard করা আলাদা listing table (denormalize)</td></tr>
+    <tr><td>Versioning</td><td>পুরনোটা মুছে না, নতুন row নতুন <span class="mono">object_version</span> (TIMEUUID) দিয়ে। Delete মানে একটা delete marker যোগ</td></tr>
+    <tr><td>বড় file</td><td>Multipart upload: টুকরো করে সমান্তরালে পাঠানো, ভাঙলে শুধু সেই টুকরো আবার; শেষে জোড়া</td></tr>
+    <tr><td>Garbage collection</td><td>Delete হলে সাথে সাথে মোছে না (lazy); পরে compaction ব্যবহার না হওয়া জায়গা ফেরত আনে</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= V2 CH 10 ================= -->
+<section class="chapter" id="v2c10">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 10</div>
+  <h2>Real-time gaming leaderboard</h2>
+  <p>Online game-এর top 10 player আর নিজের rank। ছোট chapter, কিন্তু একটা জরুরি শিক্ষা: সঠিক data structure বাছলে জটিল distributed design লাগে না। Rider-দের মাসিক performance বা delivery সংখ্যার ranking একই সমস্যা।</p>
+</section>
+
+<section class="c" id="s-lb-scope">
+  <div class="head"><span class="num">10.1</span><h3>Scope ও SQL-এর সমস্যা</h3></div>
+  <p>বইয়ের ধরে নেওয়া: top 10 দেখানো, user-এর নিজের rank আর তার উপরে-নিচে ৪ জন; প্রতিটা জেতা match-এ ১ point; প্রতি মাসে নতুন leaderboard; ৫০ লাখ DAU, আড়াই কোটি MAU, প্রতিজন দিনে ১০টা match। Score update QPS গড়ে ~৫০০, peak ~২,৫০০।</p>
+  <p>SQL-এ: <span class="mono">SELECT … ORDER BY score DESC</span>। Top 10 index দিয়ে চলে, কিন্তু "আমি কততম?" প্রশ্নে পুরো table sort বা আমার উপরের সবাইকে গুনতে হয়: লাখো row-এ কয়েক সেকেন্ড, আর score প্রতি মুহূর্তে বদলায় বলে cache-ও কাজে আসে না।</p>
+</section>
+
+<section class="c" id="s-lb-redis">
+  <div class="head"><span class="num">10.2</span><h3>Redis sorted set</h3></div>
+  <p>Sorted set প্রতিটা member-এর সাথে একটা score রাখে, সবসময় score অনুযায়ী সাজানো। ভেতরে দুটো জিনিস: member থেকে score খোঁজার hash table, আর সাজানো ক্রম রাখার <b>skip list</b> (linked list-এর উপর কয়েক স্তরের index, তাই খোঁজা O(log n))।</p>
+  <div class="tbl"><table>
+    <tr><th>কাজ</th><th>Command</th><th>খরচ</th></tr>
+    <tr><td>জিতলে point যোগ</td><td class="n">ZINCRBY leaderboard_2026_11 1 user42</td><td class="n">O(log n)</td></tr>
+    <tr><td>Top 10</td><td class="n">ZREVRANGE leaderboard_2026_11 0 9 WITHSCORES</td><td class="n">O(log n + 10)</td></tr>
+    <tr><td>আমার rank</td><td class="n">ZREVRANK leaderboard_2026_11 user42</td><td class="n">O(log n)</td></tr>
+    <tr><td>আমার আশপাশে</td><td>Rank জেনে <span class="mono">ZREVRANGE</span> rank−4 থেকে rank+4</td><td class="n">O(log n)</td></tr>
+  </table></div>
+  <p>আড়াই কোটি user × ~২৬ byte (২৪ অক্ষরের user ID + 16-bit score) ≈ 650 MB; skip list-এর বাড়তি খরচে দ্বিগুণ হলেও একটা Redis server-এ সহজে ধরে, CPU-ও যথেষ্ট। Redis পড়লে data যাতে না হারায়: persistence আর replica, আর MySQL-এ প্রতিটা point-এর ইতিহাস রাখা, যাতে দরকারে leaderboard আবার বানানো যায়। Score update সবসময় game server থেকে, client থেকে সরাসরি নয়, নইলে কেউ নিজের score বাড়িয়ে নেবে। একই score হলে যে আগে পৌঁছেছে সে আগে (timestamp দিয়ে)।</p>
+</section>
+
+<section class="c" id="s-lb-scale">
+  <div class="head"><span class="num">10.3</span><h3>৫০ কোটি user-এ scale</h3></div>
+  <div class="tbl"><table>
+    <tr><th></th><th>Fixed partition (score range দিয়ে)</th><th>Hash partition (Redis cluster)</th></tr>
+    <tr><td>কীভাবে</td><td>Score 1–100 এক shard, 101–200 আরেক …; user-এর score কোন shard-এ সেটা আলাদা cache-এ</td><td>User-এর key-র hash দিয়ে shard</td></tr>
+    <tr><td>Top 10</td><td>সবচেয়ে বেশি score-এর shard থেকেই</td><td>সব shard থেকে top 10 এনে মেলানো (scatter-gather)</td></tr>
+    <tr><td>আমার rank</td><td>আমার shard-এ আমার rank + উপরের সব shard-এর মোট সংখ্যা</td><td>প্রায় অসম্ভব দ্রুত বের করা</td></tr>
+    <tr><td>দাম</td><td>Score বাড়লে user shard বদলায়; shard-এর আকার অসমান</td><td>সমানভাবে ছড়ানো</td></tr>
+  </table></div>
+  <p>৫০ লাখ থেকে ৫০ কোটি DAU-তে (১০০ গুণ) memory ~65 GB আর score update QPS ~২.৫ লাখ: এক Redis server-এ আর চলে না, তাই shard। বই fixed partition নেয়। বিকল্প: DynamoDB-র মতো NoSQL, global secondary index আর write sharding দিয়ে।</p>
+  <details class="self"><summary>নিজেকে যাচাই: rank জানতে "উপরের সব shard-এর মোট সংখ্যা" কীভাবে দ্রুত পাওয়া যায়?</summary><p>প্রতিটা shard-এর আকার (ZCARD) O(1)। Shard সংখ্যা কম (যেমন ১০টা), তাই উপরের shard-গুলোর ZCARD যোগ করা প্রায় তাৎক্ষণিক।</p></details>
+</section>
+
+<!-- ================= V2 CH 11 ================= -->
+<section class="chapter" id="v2c11">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 11</div>
+  <h2>Payment system</h2>
+  <p>Amazon-এর মতো e-commerce-এর checkout। দুই দিক: <b>pay-in</b> (buyer থেকে টাকা কোম্পানির কাছে) আর <b>pay-out</b> (কোম্পানি থেকে seller-কে)। Delivery-তে: COD সংগ্রহ হল pay-in, merchant payout হল pay-out। QPS কম (দিনে ১০ লাখ transaction ≈ ১০ TPS), কিন্তু সঠিকতা আর reliability সবার আগে।</p>
+</section>
+
+<section class="c" id="s-pay-flow">
+  <div class="head"><span class="num">11.1</span><h3>Pay-in flow</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="Checkout থেকে payment event payment service-এ। Payment service risk check করে, প্রতিটা payment order payment executor-এ পাঠায়। Executor PSP-তে পাঠায়, PSP card scheme-এ। সফল হলে payment service wallet আর ledger update করে।">
+      <rect x="10" y="80" width="90" height="44" rx="6" class="box"/><text x="55" y="100" text-anchor="middle" class="t-s">Checkout</text><text x="55" y="115" text-anchor="middle" class="t-s mut">payment event</text>
+      <rect x="130" y="80" width="120" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="190" y="100" text-anchor="middle" class="t-s">Payment service</text><text x="190" y="115" text-anchor="middle" class="t-s">risk check</text>
+      <rect x="280" y="80" width="120" height="44" rx="6" class="box"/><text x="340" y="100" text-anchor="middle" class="t-s">Payment executor</text><text x="340" y="115" text-anchor="middle" class="t-s mut">প্রতিটা order</text>
+      <rect x="430" y="80" width="100" height="44" rx="6" class="soft"/><text x="480" y="100" text-anchor="middle" class="t-s">PSP</text><text x="480" y="115" text-anchor="middle" class="t-s mut">Stripe ইত্যাদি</text>
+      <rect x="560" y="80" width="110" height="44" rx="6" class="soft"/><text x="615" y="100" text-anchor="middle" class="t-s">Card scheme</text><text x="615" y="115" text-anchor="middle" class="t-s mut">Visa, Mastercard</text>
+      <rect x="130" y="166" width="120" height="40" rx="6" class="ok-bg ok-s"/><text x="190" y="190" text-anchor="middle" class="t-s">Wallet</text>
+      <rect x="280" y="166" width="120" height="40" rx="6" class="ok-bg ok-s"/><text x="340" y="190" text-anchor="middle" class="t-s">Ledger</text>
+      <line x1="100" y1="102" x2="126" y2="102" class="ln" marker-end="url(#ar)"/>
+      <line x1="250" y1="102" x2="276" y2="102" class="ln" marker-end="url(#ar)"/>
+      <line x1="400" y1="102" x2="426" y2="102" class="ln" marker-end="url(#ar)"/>
+      <line x1="530" y1="102" x2="556" y2="102" class="ln" marker-end="url(#ar)"/>
+      <line x1="190" y1="124" x2="190" y2="162" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="220" y1="124" x2="310" y2="162" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="420" y="190" class="t-s ok-t">সফল হলে: seller-এর balance আর হিসাবের খাতা</text>
+      <text x="340" y="40" text-anchor="middle" class="t-s mut">একটা payment event-এ কয়েকটা payment order (একেক seller-এর একটা)</text>
+    </svg></div>
+    <figcaption>Risk check: AML (money laundering) আর CFT (সন্ত্রাসে অর্থায়ন) যাচাই, সাধারণত third-party দিয়ে। Card-এর তথ্য কোম্পানি নিজে রাখে না: PSP-র hosted payment page-এ user card দেয়, তাই PCI DSS-এর কঠিন নিয়মের বেশিরভাগ PSP সামলায়। PSP কাজ শেষে redirect URL আর webhook দিয়ে ফল জানায়।</figcaption>
+  </figure>
+  <p>API: <span class="mono">POST /v1/payments</span> (buyer info, checkout_id, payment orders; প্রতিটা order-এ seller, amount, currency, payment_order_id) আর <span class="mono">GET /v1/payments/{id}</span>। Amount <b>string</b> হিসেবে, floating point নয়: 0.1 + 0.2 ≠ 0.3 টাকার হিসাবে চলবে না। Database: relational, ACID সহ, আর বছরের পর বছর পরীক্ষিত; এখানে performance-এর চেয়ে নির্ভরযোগ্যতা বেশি দামি। প্রতিটা payment order-এর status: <span class="mono">NOT_STARTED → EXECUTING → SUCCESS / FAILED</span>।</p>
+</section>
+
+<section class="c" id="s-pay-ledger">
+  <div class="head"><span class="num">11.2</span><h3>Ledger ও double-entry</h3></div>
+  <p>প্রতিটা transaction দুটো entry: একটা account থেকে debit, আরেকটায় সমান credit। সব entry-র যোগফল সবসময় শূন্য। কোথাও যোগফল না মিললে বোঝা যায় কিছু ভুল হয়েছে, আর প্রতিটা টাকার উৎস আর গন্তব্য শেষ পর্যন্ত খুঁজে পাওয়া যায়।</p>
+  <div class="tbl"><table>
+    <tr><th>Account</th><th>Debit</th><th>Credit</th></tr>
+    <tr><td>Buyer</td><td class="n">৳1,000</td><td></td></tr>
+    <tr><td>Seller</td><td></td><td class="n">৳1,000</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: rider ৳৫,০০০ COD তুলে hub-এ জমা দিল। Double-entry-তে কী লেখা হবে?</summary><p>Rider-এর হাতে থাকা টাকার account থেকে debit ৳৫,০০০, hub-এর cash account-এ credit ৳৫,০০০। পরে merchant payout হলে hub থেকে debit, merchant-এ credit। প্রতিটা ধাপে যোগফল শূন্য, তাই কোথায় টাকা আটকে আছে সবসময় জানা যায়।</p></details>
+</section>
+
+<section class="c" id="s-pay-exact">
+  <div class="head"><span class="num">11.3</span><h3>Retry, idempotency, exactly-once</h3></div>
+  <p>টাকা ঠিক একবার কাটতে হবে। বই exactly-once-কে দুই ভাগে ভাঙে:</p>
+  <div class="two">
+    <div><h4>At-least-once = retry</h4><p>Network-এ fail হলে আবার চেষ্টা। প্রতিবার অপেক্ষা বাড়ে (exponential backoff: ১, ২, ৪, ৮ সেকেন্ড …), যাতে বিপদগ্রস্ত server-এ আরও চাপ না পড়ে। বারবার fail হলে retry queue, শেষে dead letter queue-তে যায় হাতে দেখার জন্য।</p></div>
+    <div><h4>At-most-once = idempotency</h4><p>প্রতিটা request-এ একটা idempotency key (header-এ, সাধারণত UUID)। Server একই key আগে দেখলে নতুন করে কাটে না, আগের ফল ফেরত দেয়। DB-তে key-টা unique constraint, তাই দুটো একসাথে এলেও একটাই ঢোকে।</p></div>
+  </div>
+  <p>দুটো মিলে exactly-once। Service-দের মাঝে যোগাযোগ: synchronous HTTP সহজ, কিন্তু একটা service ধীর হলে পুরো chain আটকায়। বড় scale-এ asynchronous (Kafka): ledger, wallet, analytics নিজের গতিতে payment event পড়ে। Replication lag-এর কারণে replica থেকে পুরনো status পড়লে ভুল সিদ্ধান্ত, তাই payment status primary থেকে পড়া বা consensus-ভিত্তিক DB।</p>
+  <details class="self"><summary>নিজেকে যাচাই: user "Pay" দুবার চাপল। Idempotency key না থাকলে আর থাকলে কী হবে?</summary><p>না থাকলে server দুটো আলাদা payment ভেবে দুবার কাটবে। থাকলে দুটো request-এ একই key (key তৈরি হয় checkout-এর সময়, click-এর সময় নয়), দ্বিতীয়টা unique constraint-এ আটকায় আর প্রথমটার ফল ফেরত পায়।</p></details>
+</section>
+
+<section class="c" id="s-pay-recon">
+  <div class="head"><span class="num">11.4</span><h3>Reconciliation ও security</h3></div>
+  <p>সব ঠিকঠাক design করার পরও system-গুলো আলাদা, তাই অমিল হবেই: webhook হারায়, timeout-এ জানা যায় না টাকা কাটা হল কি না। শেষ রক্ষাকবচ <b>reconciliation</b>: PSP প্রতিদিন একটা settlement file পাঠায়; system নিজের ledger-এর সাথে মেলায়। অমিল তিন রকম: নিজে থেকে ঠিক করা যায় (কারণ আর সমাধান জানা, script চালাও), হাতে ঠিক করতে হয় (finance team-এর queue), আর অজানা (তদন্ত)।</p>
+  <div class="tbl"><table>
+    <tr><th>ঝুঁকি</th><th>সমাধান</th></tr>
+    <tr><td>আড়ি পাতা</td><td>HTTPS</td></tr>
+    <tr><td>Data বদলে দেওয়া</td><td>Encryption আর integrity monitoring</td></tr>
+    <tr><td>DDoS</td><td>Rate limiting, firewall</td></tr>
+    <tr><td>Card চুরি</td><td>Tokenization: আসল card নম্বরের বদলে token</td></tr>
+    <tr><td>PCI নিয়ম</td><td>PCI DSS মানা (বেশিরভাগ PSP-র hosted page দিয়ে)</td></tr>
+    <tr><td>Fraud</td><td>Address verification, CVV, user behavior বিশ্লেষণ</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= V2 CH 12 ================= -->
+<section class="chapter" id="v2c12">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 12</div>
+  <h2>Digital wallet</h2>
+  <p>bKash বা Nagad-এর মতো: এক wallet থেকে আরেক wallet-এ টাকা পাঠানো। বইয়ের লক্ষ্য সেকেন্ডে ১০ লাখ transfer, ৯৯.৯৯% reliability, আর <b>reproducibility</b>: যেকোনো সময়ের balance শুরু থেকে আবার হিসাব করে বের করা যায়। এই chapter-এর তিনটা ধারণা (distributed transaction, event sourcing, CQRS) microservice architecture-এর প্রায় সব জায়গায় লাগে।</p>
+</section>
+
+<section class="c" id="s-wl-scope">
+  <div class="head"><span class="num">12.1</span><h3>Scope ও সমস্যা</h3></div>
+  <p>প্রতিটা transfer দুটো কাজ: A-র balance কমানো আর B-র বাড়ানো। সেকেন্ডে ১০ লাখ transfer এক database-এ সম্ভব নয়: প্রতিটা transfer-এ দুটো লেখা (debit, credit), তাই আসলে সেকেন্ডে ২০ লাখ operation। একটা সাধারণ relational DB node ~১,০০০ TPS ধরলে প্রায় ২,০০০টা node লাগে। তাই balance অনেক shard-এ ভাগ। এখন A আর B প্রায়ই আলাদা shard-এ। দুটো আলাদা database-এ একসাথে, হয় দুটোই হবে নয়তো কোনোটাই না: এটাই distributed transaction।</p>
+  <p>প্রথম চিন্তা Redis-এ in-memory balance: দ্রুত, কিন্তু durable নয়, আর দুই shard-এ atomic update নেই। মাঝপথে crash হলে A-র টাকা কাটল, B পেল না।</p>
+</section>
+
+<section class="c" id="s-wl-dt">
+  <div class="head"><span class="num">12.2</span><h3>2PC, TC/C, Saga</h3></div>
+  <div class="tbl"><table>
+    <tr><th></th><th>2PC (two-phase commit)</th><th>TC/C (try-confirm/cancel)</th><th>Saga</th></tr>
+    <tr><td>স্তর</td><td>Database</td><td>Application</td><td>Application</td></tr>
+    <tr><td>কীভাবে</td><td>Coordinator সবাইকে "prepare" বলে (lock নেয়), সবাই হ্যাঁ বললে "commit"</td><td>Try: সবাই নিজের অংশ সংরক্ষণ করে (যেমন A-র টাকা আটকে রাখা)। সব সফল হলে confirm, কেউ fail হলে cancel (উল্টো কাজ)</td><td>ধাপগুলো পরপর; কোনো ধাপ fail হলে আগের ধাপগুলোর compensating কাজ উল্টো ক্রমে</td></tr>
+    <tr><td>Lock</td><td>পুরো সময় lock, ধীর</td><td>নেই; প্রতিটা ধাপ নিজে commit</td><td>নেই</td></tr>
+    <tr><td>সমস্যা</td><td>Coordinator single point of failure; সব DB-কে XA সমর্থন করতে হয়</td><td>প্রতিটা কাজের উল্টো কাজ লিখতে হয়; মাঝের অবস্থা বাইরে দেখা যায়</td><td>Latency বেশি (ধাপ পরপর); মাঝের অবস্থা দেখা যায়</td></tr>
+    <tr><td>সমান্তরাল?</td><td>হ্যাঁ</td><td>হ্যাঁ</td><td>না, ক্রমানুসারে</td></tr>
+  </table></div>
+  <p>Saga দুইভাবে চলে: <b>choreography</b> (প্রতিটা service event শুনে নিজে পরের কাজ করে; কেন্দ্র নেই, কিন্তু ধাপ বেশি হলে বোঝা কঠিন) আর <b>orchestration</b> (একটা coordinator ধাপগুলো চালায়; বেশিরভাগ ক্ষেত্রে পছন্দের)। Latency জরুরি না হলে, বা microservice কম হলে, Saga। অনেক service আর latency জরুরি হলে TC/C।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="Saga: A থেকে ৳১০০ কাটা সফল, B-তে যোগ fail। তাই compensation: A-তে ৳১০০ ফেরত।">
+      <rect x="10" y="20" width="150" height="44" rx="6" class="ok-bg ok-s"/><text x="85" y="40" text-anchor="middle" class="t-s">① A − ৳100</text><text x="85" y="56" text-anchor="middle" class="t-s ok-t">সফল ✓</text>
+      <rect x="230" y="20" width="150" height="44" rx="6" class="bad-bg bad-s dash" stroke-width="1.3"/><text x="305" y="40" text-anchor="middle" class="t-s">② B + ৳100</text><text x="305" y="56" text-anchor="middle" class="t-s bad-t">fail ✗</text>
+      <rect x="10" y="96" width="150" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="85" y="116" text-anchor="middle" class="t-s">③ compensation</text><text x="85" y="132" text-anchor="middle" class="t-s acc-t">A + ৳100 ফেরত</text>
+      <line x1="160" y1="42" x2="226" y2="42" class="ln" marker-end="url(#ar)"/>
+      <path d="M305 64 L305 118 L164 118" class="acc-s" stroke-width="1.5" fill="none" marker-end="url(#ar-acc)"/>
+      <text x="440" y="40" class="t-s">মাঝখানে কিছুক্ষণ A-র টাকা কাটা,</text>
+      <text x="440" y="58" class="t-s">B-ও পায়নি: এই অবস্থা বাইরে দেখা যায়।</text>
+      <text x="440" y="96" class="t-s mut">তাই compensation নিজেও idempotent</text>
+      <text x="440" y="114" class="t-s mut">হতে হবে আর retry করতে হবে,</text>
+      <text x="440" y="132" class="t-s mut">যতক্ষণ না সফল হয়।</text>
+    </svg></div>
+    <figcaption>Delivery-তে: parcel cancel হলে merchant-এর wallet থেকে কাটা delivery charge ফেরত, rider-এর assignment বাতিল, hub-এর slot মুক্ত। প্রতিটা আলাদা service; একটা fail হলে আগেরগুলো উল্টাতে হয়।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: 2PC-তে prepare-এর পর coordinator crash করলে কী হয়?</summary><p>সব participant lock ধরে বসে থাকে, জানে না commit করবে নাকি abort। Coordinator ফিরে না আসা পর্যন্ত ওই row-গুলো আটকানো। এটাই 2PC-র বড় দুর্বলতা।</p></details>
+</section>
+
+<section class="c" id="s-wl-es">
+  <div class="head"><span class="num">12.3</span><h3>Event sourcing ও CQRS</h3></div>
+  <p>Reproducibility-র প্রশ্ন: শুধু বর্তমান balance রাখলে, balance ভুল হলে কেন ভুল তা জানা যায় না। <b>Event sourcing</b>-এ state নয়, ঘটনাগুলো রাখা হয়।</p>
+  <div class="tbl"><table>
+    <tr><th>শব্দ</th><th>মানে</th><th>উদাহরণ</th></tr>
+    <tr><td>Command</td><td>বাইরে থেকে আসা অনুরোধ; বাতিল হতে পারে</td><td>"A থেকে B-কে ৳১০০ পাঠাও"</td></tr>
+    <tr><td>Event</td><td>যাচাইয়ের পর ঘটে যাওয়া সত্য; অতীত কালে; কখনও বদলায় না, শুধু যোগ হয়</td><td>"A থেকে ৳১০০ কাটা হয়েছে", "B-তে ৳১০০ যোগ হয়েছে"</td></tr>
+    <tr><td>State</td><td>Event গুলো পরপর প্রয়োগ করার ফল</td><td>A-র balance ৳৪০০</td></tr>
+    <tr><td>State machine</td><td>Command যাচাই করে event বানায়, event প্রয়োগ করে state বদলায়; deterministic</td><td>—</td></tr>
+  </table></div>
+  <p>যেহেতু event কখনও বদলায় না আর state machine deterministic, শুরু থেকে সব event আবার চালালে যেকোনো মুহূর্তের balance হুবহু পাওয়া যায়। Audit-এর জন্য এটা সোনা। প্রতিবার শুরু থেকে চালানো ধীর, তাই নিয়মিত <b>snapshot</b>।</p>
+  <p><b>CQRS</b> (command query responsibility segregation): লেখার পথ (command → event) আর পড়ার পথ আলাদা। Event stream থেকে এক বা একাধিক read-only view বানানো হয় (যেমন balance দেখার view, মাসিক statement-এর view), প্রতিটা নিজের কাজের মতো করে। পড়ার view একটু পিছিয়ে থাকতে পারে (eventual consistency)।</p>
+  <p>Performance-এর জন্য বই command আর event local disk-এর file-এ (mmap), state RocksDB-তে রাখে, network hop এড়াতে। Reliability-র জন্য event list Raft দিয়ে কয়েকটা node-এ replicate। একাধিক Raft group-এ ভাগ করলে, group-দের মাঝে আবার TC/C বা Saga।</p>
+  <details class="self"><summary>নিজেকে যাচাই: event sourcing-এ একটা ভুল transfer হয়ে গেলে event মুছে দেওয়া যায়?</summary><p>না, event কখনও বদলায় বা মোছে না। ভুল ঠিক করতে একটা নতুন উল্টো event যোগ হয় (reversal)। ফলে ভুল আর সংশোধন দুটোই ইতিহাসে থাকে, ঠিক accounting-এর মতো।</p></details>
+</section>
+
+<!-- ================= V2 CH 13 ================= -->
+<section class="chapter" id="v2c13">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 13</div>
+  <h2>Stock exchange</h2>
+  <p>বইয়ের শেষ আর সবচেয়ে চরম design: latency মাপা হয় microsecond-এ, আর একটা order-এর ক্রম ভুল হলে আইনি সমস্যা। এখানে "আরও server যোগ করো" কাজ করে না; উল্টো, সব এক machine-এ আনা হয়।</p>
+</section>
+
+<section class="c" id="s-ex-scope">
+  <div class="head"><span class="num">13.1</span><h3>Scope ও শব্দ</h3></div>
+  <p>বইয়ের ধরে নেওয়া: limit order দেওয়া আর cancel; real-time matching; market data (order book); risk check (যেমন একজন দিনে কত share কিনতে পারবে); ১০০টা symbol; দিনে ১০০ কোটি order; latency millisecond-এর ঘরে, বিশেষ করে p99 স্থির থাকা; availability ৯৯.৯৯% (দিনে মাত্র ~৮.৬ সেকেন্ড downtime)।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব বা শব্দ</th><th>মানে</th></tr>
+    <tr><td>QPS</td><td class="n">1B ÷ 6.5 ঘণ্টা (বাজার খোলা) ≈ 43,000; peak ৫ গুণ ≈ 215,000</td></tr>
+    <tr><td>Limit order</td><td>নির্দিষ্ট দামে বা তার চেয়ে ভালো দামে কেনা বা বেচা</td></tr>
+    <tr><td>Market order</td><td>এখনকার বাজার দামে সাথে সাথে</td></tr>
+    <tr><td>Order book</td><td>প্রতিটা symbol-এর জন্য দাম অনুযায়ী সাজানো কেনা আর বেচার order-এর তালিকা</td></tr>
+    <tr><td>L1 / L2 / L3 data</td><td>L1: সেরা bid আর ask; L2: কয়েক দামের স্তর আর পরিমাণ; L3: প্রতিটা স্তরে আলাদা আলাদা order</td></tr>
+    <tr><td>FIX</td><td>Broker আর exchange-এর মাঝে order আদান-প্রদানের protocol</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-ex-flow">
+  <div class="head"><span class="num">13.2</span><h3>Critical path</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 210" role="img" aria-label="Trading flow: client gateway থেকে order manager, risk check আর wallet যাচাই, sequencer, matching engine, তারপর আবার sequencer হয়ে order manager আর client। Matching engine থেকে market data publisher আর reporter আলাদা পথে।">
+      <rect x="10" y="40" width="90" height="44" rx="6" class="box"/><text x="55" y="60" text-anchor="middle" class="t-s">Client</text><text x="55" y="75" text-anchor="middle" class="t-s">gateway</text>
+      <rect x="130" y="40" width="110" height="44" rx="6" class="box"/><text x="185" y="60" text-anchor="middle" class="t-s">Order manager</text><text x="185" y="75" text-anchor="middle" class="t-s mut">risk, wallet</text>
+      <rect x="270" y="40" width="100" height="44" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="320" y="60" text-anchor="middle" class="t-s">Sequencer</text><text x="320" y="75" text-anchor="middle" class="t-s">ক্রম নম্বর</text>
+      <rect x="400" y="40" width="130" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.8"/><text x="465" y="60" text-anchor="middle" class="t-h">Matching</text><text x="465" y="76" text-anchor="middle" class="t-h">engine</text>
+      <rect x="560" y="40" width="110" height="44" rx="6" class="soft"/><text x="615" y="60" text-anchor="middle" class="t-s">Order book</text><text x="615" y="75" text-anchor="middle" class="t-s mut">প্রতি symbol</text>
+      <line x1="100" y1="62" x2="126" y2="62" class="ln" marker-end="url(#ar)"/>
+      <line x1="240" y1="62" x2="266" y2="62" class="ln" marker-end="url(#ar)"/>
+      <line x1="370" y1="62" x2="396" y2="62" class="ln" marker-end="url(#ar)"/>
+      <line x1="530" y1="62" x2="556" y2="62" class="ln-mut" marker-start="url(#ar-mut)"/>
+      <path d="M465 84 L465 110 L55 110 L55 88" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="260" y="104" text-anchor="middle" class="t-s ok-t">execution: sequencer → order manager → client</text>
+      <rect x="10" y="12" width="530" height="110" rx="10" class="acc-s dash" fill="none" stroke-width="1"/>
+      <text x="530" y="28" text-anchor="end" class="t-s acc-t">CRITICAL PATH</text>
+      <rect x="300" y="150" width="160" height="40" rx="6" class="box"/><text x="380" y="174" text-anchor="middle" class="t-s">Market data publisher</text>
+      <rect x="490" y="150" width="180" height="40" rx="6" class="box"/><text x="580" y="174" text-anchor="middle" class="t-s">Reporter (ইতিহাস, হিসাব)</text>
+      <line x1="450" y1="122" x2="400" y2="146" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <line x1="490" y1="122" x2="550" y2="146" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+      <text x="150" y="174" text-anchor="middle" class="t-s mut">critical path-এর বাইরে, latency কম জরুরি</text>
+    </svg></div>
+    <figcaption>Matching engine প্রতিটা symbol-এর order book রাখে, কেনা-বেচা মেলায়, আর ফল (execution) প্রকাশ করে। এটা অবশ্যই deterministic: একই ক্রমে একই order দিলে প্রতিবার হুবহু একই ফল। Sequencer আসা আর যাওয়া প্রতিটা message-এ ক্রম নম্বর দেয়, যাতে replay করে একই অবস্থা আবার তৈরি করা যায় আর কোনো message দুবার বা বাদ না যায়।</figcaption>
+  </figure>
+</section>
+
+<section class="c" id="s-ex-perf">
+  <div class="head"><span class="num">13.3</span><h3>Order book ও latency</h3></div>
+  <p><b>Order book-এর data structure:</b> প্রতিটা দামের স্তরে order-গুলোর doubly linked list (আগে আসা আগে মেলে), আর order_id থেকে list-এর node-এ সরাসরি যাওয়ার hash map। ফলে নতুন order যোগ, মেলানো আর cancel সব O(1)।</p>
+  <div class="tbl"><table>
+    <tr><th>Latency কমানোর কৌশল</th><th>কেন</th></tr>
+    <tr><td>Critical path-এর সব component এক server-এ</td><td>Network hop-এ প্রতিবার microsecond থেকে millisecond যায়</td></tr>
+    <tr><td>mmap-এর shared memory দিয়ে event bus</td><td>Disk আর network ছাড়াই process-দের মাঝে message</td></tr>
+    <tr><td>Single-threaded application loop, একটা CPU core-এ বাঁধা</td><td>Lock নেই, context switch নেই, তাই latency স্থির (p99 কম)</td></tr>
+    <tr><td>Event sourcing</td><td>সব অবস্থা event থেকে আবার তৈরি করা যায়; recovery আর audit</td></tr>
+  </table></div>
+  <p><b>High availability:</b> একটা hot matching engine আর একটা warm; দুটো একই event stream পায়, warm শুধু ফল প্রকাশ করে না। Hot পড়লে warm সাথে সাথে দায়িত্ব নেয়। আরও শক্ত হলে Raft দিয়ে কয়েকটা server-এর cluster, যাতে leader পড়লে বাকিরা নিজেরাই নতুন leader বেছে নেয়। <b>Fairness:</b> market data সবাই একই সময়ে পায় তা নিশ্চিত করতে multicast; কিছু client exchange-এর পাশে নিজের server রাখে (colocation), যা আইনত অনুমোদিত সুবিধা। DDoS থেকে রক্ষায় public আর private service আলাদা, আর বারবার চাওয়া data cache।</p>
+  <details class="self"><summary>নিজেকে যাচাই: বাকি সব chapter-এ horizontal scaling বলা হল। এখানে সব এক server-এ কেন?</summary><p>লক্ষ্য throughput নয়, latency আর তার স্থিরতা। প্রতিটা network hop latency যোগ করে আর অনিশ্চয়তা বাড়ায়। আর ১০০টা symbol, প্রতিটার order book স্বাধীন, তাই symbol দিয়ে ভাগ করেই scale হয়, প্রতিটা symbol-এর ভেতরে নয়।</p></details>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>এটা দিয়ে দুই volume-এর সব design chapter শেষ। Payment, wallet আর hotel chapter একসাথে মিলিয়ে CarryBee-র COD collection থেকে merchant payout পর্যন্ত পুরো flow আঁকুন: idempotency, ledger, saga, reconciliation কোথায় কোথায় বসবে।</li>
+    <li>Test দিতে চাইলে বলুন। ভুল হওয়া অংশে লাল দাগ বসবে।</li>
+    <li><a href="../#/study/p7" target="_top">Architecture guide →</a> বাকি আছে: architecture guide (বইয়ের বাইরে: CAP-এর পরে PACELC, monolith বনাম microservice, event-driven, API design, observability) আর সব part-এর এক page-এর cheat sheet।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

@@ -1,0 +1,588 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে V2 ১–৬</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <nav class="back"><a href="../#/study/p1" target="_top">← Part ১</a> · <a href="../#/study/p2" target="_top">← Part ২</a> · <a href="../#/study/p3" target="_top">← Part ৩</a> · <a href="../#/study/p4" target="_top">← Part ৪</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Volume 2, ভাগ ১</h1>
+  <p class="lede">Part ৫। Alex Xu ও Sahn Lam-এর Volume 2-এর প্রথম ছয় chapter: location আর data pipeline। Proximity service, nearby friends আর Google Maps সরাসরি delivery platform-এর সমস্যা: কাছের rider খোঁজা, live location, ETA। বাকি তিনটা (message queue, metrics, ad click aggregation) বড় system-এর ভেতরের যন্ত্রপাতি।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>V2-1 · Proximity service</h2>
+      <a href="#s-px-scope">1.1 Scope ও API</a>
+      <a href="#s-px-algo">1.2 Grid থেকে geohash</a>
+      <a href="#s-px-qt">1.3 Quadtree ও তুলনা</a>
+      <a href="#s-px-scale">1.4 Storage, cache, scale</a>
+    </div>
+    <div><h2>V2-2 · Nearby friends</h2>
+      <a href="#s-nb-scope">2.1 Scope ও হিসাব</a>
+      <a href="#s-nb-arch">2.2 WebSocket + Redis pub/sub</a>
+      <a href="#s-nb-scale">2.3 Scale ও সমস্যা</a>
+    </div>
+    <div><h2>V2-3 · Google Maps</h2>
+      <a href="#s-gm-101">3.1 Map 101</a>
+      <a href="#s-gm-arch">3.2 তিন service</a>
+      <a href="#s-gm-eta">3.3 Adaptive ETA ও rerouting</a>
+    </div>
+    <div><h2>V2-4 · Distributed message queue</h2>
+      <a href="#s-mq-model">4.1 Model ও শব্দ</a>
+      <a href="#s-mq-store">4.2 Storage ও batching</a>
+      <a href="#s-mq-cons">4.3 Producer, consumer, rebalance</a>
+      <a href="#s-mq-repl">4.4 Replication ও delivery semantics</a>
+    </div>
+    <div><h2>V2-5 · Metrics ও alerting</h2>
+      <a href="#s-mt-scope">5.1 Scope ও data model</a>
+      <a href="#s-mt-pull">5.2 Pull বনাম push</a>
+      <a href="#s-mt-store">5.3 Storage ও alerting</a>
+    </div>
+    <div><h2>V2-6 · Ad click aggregation</h2>
+      <a href="#s-ad-scope">6.1 Scope ও data</a>
+      <a href="#s-ad-arch">6.2 Pipeline</a>
+      <a href="#s-ad-time">6.3 Time, window, watermark</a>
+      <a href="#s-ad-exact">6.4 Exactly-once ও সঠিকতা</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= V2 CH 1 ================= -->
+<section class="chapter" id="v2c1">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 1</div>
+  <h2>Proximity service</h2>
+  <p>"আমার ৫ km-এর মধ্যে কোন কোন restaurant" (Yelp)। একই প্রশ্ন delivery-তে: pickup point-এর কাছের rider বা hub কোনগুলো। মূল সমস্যা: দুই dimension-এর (latitude, longitude) data-কে দ্রুত খোঁজার index।</p>
+</section>
+
+<section class="c" id="s-px-scope">
+  <div class="head"><span class="num">1.1</span><h3>Scope ও API</h3></div>
+  <p>বইয়ের ধরে নেওয়া: user-এর location আর radius দিলে কাছের business; business owner যোগ, বদল, মুছতে পারে, কিন্তু সেটা real-time দেখানো লাগে না (পরের দিন চলে); latency কম; ১০ কোটি DAU, ২০ কোটি business।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব বা API</th><th>মান</th></tr>
+    <tr><td>Search QPS (দিনে প্রতিজন ৫ বার)</td><td class="n">100M × 5 ÷ 10<sup>5</sup> ≈ 5,000</td></tr>
+    <tr><td class="n">GET /v1/search/nearby</td><td>latitude, longitude, radius (default 5 km)</td></tr>
+    <tr><td class="n">/v1/businesses/{id}</td><td>GET, POST, PUT, DELETE: business-এর তথ্য</td></tr>
+  </table></div>
+  <p>Architecture-এ দুই service: <b>location-based service (LBS)</b>, যা শুধু পড়ে, stateless, QPS বেশি; আর <b>business service</b>, যেখানে write কম আর বেশিরভাগ read business-এর page দেখা। Database primary-secondary: write primary-তে, read replica-য়। Replica-য় একটু দেরিতে পৌঁছানো চলে, কারণ business-এর তথ্য real-time লাগে না।</p>
+</section>
+
+<section class="c" id="s-px-algo">
+  <div class="head"><span class="num">1.2</span><h3>Grid থেকে geohash</h3></div>
+  <p>সবচেয়ে সরল: <span class="mono">WHERE lat BETWEEN … AND long BETWEEN …</span>। Latitude আর longitude-এ আলাদা index থাকলেও প্রতিটা index একটা বিশাল set ফেরত দেয়, তারপর দুটোর intersection: ধীর। সমাধান হল দুই dimension-কে এক dimension-এ আনা।</p>
+  <div class="tbl"><table>
+    <tr><th>উপায়</th><th>কীভাবে</th><th>সমস্যা</th></tr>
+    <tr><td>সমান grid</td><td>পৃথিবীকে সমান মাপের ঘরে ভাগ</td><td>Business সমানভাবে ছড়ানো নয়: ঢাকার এক ঘরে হাজার, সমুদ্রের ঘরে শূন্য</td></tr>
+    <tr><td>Geohash</td><td>পৃথিবীকে বারবার চার ভাগ; প্রতিটা ভাগ দুই bit; শেষে base32 string</td><td>Boundary সমস্যা (নিচে)</td></tr>
+  </table></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="বামে পৃথিবী চার ভাগ, প্রতিটা দুই bit। একটা ভাগ আবার চার ভাগ। ডানে geohash-এর দৈর্ঘ্য অনুযায়ী ঘরের মাপ।">
+      <rect x="20" y="20" width="200" height="180" class="soft"/>
+      <line x1="120" y1="20" x2="120" y2="200" class="ln-mut"/><line x1="20" y1="110" x2="220" y2="110" class="ln-mut"/>
+      <text x="70" y="70" text-anchor="middle" class="t-m">01</text>
+      <text x="70" y="160" text-anchor="middle" class="t-m">00</text>
+      <text x="170" y="160" text-anchor="middle" class="t-m">10</text>
+      <rect x="120" y="20" width="100" height="90" class="acc-bg acc-s" stroke-width="1.5"/>
+      <line x1="170" y1="20" x2="170" y2="110" class="acc-s" fill="none"/><line x1="120" y1="65" x2="220" y2="65" class="acc-s" fill="none"/>
+      <text x="145" y="47" text-anchor="middle" class="t-m acc-t">1101</text><text x="195" y="47" text-anchor="middle" class="t-m acc-t">1111</text>
+      <text x="145" y="92" text-anchor="middle" class="t-m acc-t">1100</text><text x="195" y="92" text-anchor="middle" class="t-m acc-t">1110</text>
+      <text x="120" y="222" text-anchor="middle" class="t-s mut">ভাগ যত গভীর, string তত লম্বা, ঘর তত ছোট</text>
+
+      <text x="290" y="34" class="t-h">দৈর্ঘ্য অনুযায়ী ঘর</text>
+      <text x="290" y="64" class="t-m">4 অক্ষর</text><text x="400" y="64" class="t-s">≈ 39 km × 19.5 km</text><text x="560" y="64" class="t-s mut">radius 5–20 km</text>
+      <text x="290" y="94" class="t-m">5 অক্ষর</text><text x="400" y="94" class="t-s">≈ 4.9 km × 4.9 km</text><text x="560" y="94" class="t-s mut">radius 1–2 km</text>
+      <text x="290" y="124" class="t-m">6 অক্ষর</text><text x="400" y="124" class="t-s">≈ 1.2 km × 0.6 km</text><text x="560" y="124" class="t-s mut">radius ~0.5 km</text>
+      <text x="290" y="168" class="t-s">বেশিরভাগ ক্ষেত্রে 4 থেকে 6-এর মধ্যে।</text>
+      <text x="290" y="188" class="t-s">Prefix যত বেশি মেলে, দুই জায়গা সাধারণত তত কাছে।</text>
+    </svg></div>
+    <figcaption>Radius থেকে দৈর্ঘ্য ঠিক হয়। তারপর search মানে শুধু ওই geohash prefix-এর business খোঁজা: সাধারণ string index-এ <span class="mono">LIKE '9q9hv%'</span>।</figcaption>
+  </figure>
+  <p><b>Boundary সমস্যা:</b> খুব কাছের দুই জায়গার geohash-এ একটুও মিল না-ও থাকতে পারে (যেমন equator বা prime meridian-এর দুই পাশে), আবার একই prefix-এর দুই জায়গা আলাদা ঘরের ঠিক কিনারে থাকতে পারে। সমাধান: শুধু নিজের ঘর নয়, চারপাশের ৮টা ঘরও খোঁজা। যথেষ্ট business না পেলে geohash-এর শেষ অক্ষর বাদ দিয়ে বড় ঘরে খোঁজা।</p>
+  <details class="self"><summary>নিজেকে যাচাই: user ঘরের একদম কোণে দাঁড়ানো। শুধু তার ঘর খুঁজলে কী ভুল হবে?</summary><p>পাশের ঘরে ১০০ মিটার দূরের business বাদ পড়বে, অথচ নিজের ঘরের উল্টো কোণের ১ km দূরেরটা আসবে। তাই ৯টা ঘর (নিজের + ৮ প্রতিবেশী) খুঁজে তারপর দূরত্ব হিসাব করে ছাঁকা।</p></details>
+</section>
+
+<section class="c" id="s-px-qt">
+  <div class="head"><span class="num">1.3</span><h3>Quadtree ও তুলনা</h3></div>
+  <p>Quadtree একটা in-memory tree: একটা ঘরে business বেশি হলে (যেমন ১০০-র বেশি) সেটাকে চার ভাগ, যতক্ষণ না প্রতিটা leaf-এ ১০০ বা কম। ফলে ঘন এলাকায় ঘর ছোট, ফাঁকা এলাকায় বড়। Database নয়: প্রতিটা LBS server startup-এ পুরো tree বানায়। ২০ কোটি business-এ memory লাগে প্রায় 1.7 GB, বানাতে কয়েক মিনিট।</p>
+  <p>আরেকটা উপায় Google S2: পৃথিবীর গোলককে Hilbert curve দিয়ে এক dimension-এ আনা; geofence-এর মতো কাজে ভালো, তবে interview-এ ব্যাখ্যা করা কঠিন।</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>Geohash</th><th>Quadtree</th></tr>
+    <tr><td>বানানো ও ব্যবহার</td><td>সহজ, tree লাগে না</td><td>Tree বানাতে হয়, একটু জটিল</td></tr>
+    <tr><td>Radius দিয়ে search</td><td>ভালো</td><td>কম সরাসরি</td></tr>
+    <tr><td>কাছের k-টা ("৫টা rider দাও")</td><td>কঠিন</td><td>ভালো, কারণ ঘন এলাকায় ঘর ছোট</td></tr>
+    <tr><td>Grid-এর মাপ</td><td>স্থির (precision দিয়ে)</td><td>Density অনুযায়ী নিজে বদলায়</td></tr>
+    <tr><td>Business যোগ-বাদ</td><td>একটা row যোগ বা মোছা</td><td>Tree update জটিল; server restart বা ধাপে ধাপে deploy</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: rider-দের location প্রতি কয়েক সেকেন্ডে বদলায়। Quadtree ভালো নাকি geohash?</summary><p>Geohash। Location বদলানো মানে শুধু একটা row-এর geohash বদলানো। Quadtree-তে প্রতিটা বদলে tree update জটিল আর ব্যয়বহুল। Quadtree মানায় স্থির data-য় (restaurant, hub)।</p></details>
+</section>
+
+<section class="c" id="s-px-scale">
+  <div class="head"><span class="num">1.4</span><h3>Storage, cache, scale</h3></div>
+  <p>Geospatial index table: প্রতিটা row <span class="mono">(geohash, business_id)</span>, compound key। এক geohash-এর সব business একটা JSON list-এ রাখলে update-এ পুরো list পড়তে-লিখতে হয় আর lock লাগে; আলাদা row-এ সহজ। পুরো table মাত্র কয়েক GB, এক server-এর memory-তে ধরে, তাই sharding নয়, শুধু read replica বাড়ানো।</p>
+  <div class="tbl"><table>
+    <tr><th>Cache</th><th>Key → value</th></tr>
+    <tr><td>Geohash</td><td><span class="mono">geohash → [business_id…]</span>, তিন precision-এর (4, 5, 6) জন্য আগেই হিসাব করা</td></tr>
+    <tr><td>Business</td><td><span class="mono">business_id → business object</span></td></tr>
+  </table></div>
+  <p>LBS বিভিন্ন region আর availability zone-এ, যাতে user কাছের server পায় আর কোনো দেশের data-নিয়ম মানা যায়। সময় বা ধরন দিয়ে filter (যেমন "এখন খোলা") পরে করা হয়, কারণ কয়েকটা geohash-এর business সংখ্যায় অল্প।</p>
+</section>
+
+<!-- ================= V2 CH 2 ================= -->
+<section class="chapter" id="v2c2">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 2</div>
+  <h2>Nearby friends</h2>
+  <p>Proximity service-এ business নড়ে না; এখানে সবাই নড়ে, আর location কয়েক সেকেন্ডে বদলায়। প্রশ্ন বদলে যায়: কাকে খুঁজব না, কাকে কখন জানাব। Merchant-এর app-এ assigned rider-এর live location দেখানো ঠিক এই সমস্যা।</p>
+</section>
+
+<section class="c" id="s-nb-scope">
+  <div class="head"><span class="num">2.1</span><h3>Scope ও হিসাব</h3></div>
+  <p>বইয়ের ধরে নেওয়া: যে বন্ধুরা অনুমতি দিয়েছে, ৫ মাইলের মধ্যে থাকলে তাদের দূরত্ব আর শেষ update-এর সময়; তালিকা কয়েক সেকেন্ড পরপর update; ১০ মিনিট inactive হলে তালিকা থেকে বাদ; location history রাখা। ১০ কোটি DAU, একসাথে ১০% অর্থাৎ ১ কোটি, প্রতি ৩০ সেকেন্ডে location।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>Location update QPS</td><td class="n">10M ÷ 30</td><td class="n">≈ 334,000</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-nb-arch">
+  <div class="head"><span class="num">2.2</span><h3>WebSocket + Redis pub/sub</h3></div>
+  <p>প্রতিটা user-এর একটা Redis pub/sub channel। User নিজের channel-এ location publish করে। তার প্রতিটা online বন্ধুর WebSocket connection-এর handler সেই channel-এ subscribe করা। Channel খুব সস্তা: subscriber না থাকলে প্রায় কোনো খরচ নেই।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="User 1 WebSocket server-এ location পাঠায়। Server location history DB-তে লেখে, location cache update করে, আর user 1-এর channel-এ publish করে। Channel-এর subscriber user 2, 3, 4-এর handler দূরত্ব হিসাব করে, radius-এর মধ্যে হলে push করে।">
+      <rect x="10" y="90" width="80" height="44" rx="6" class="box"/><text x="50" y="117" text-anchor="middle" class="t-h">User 1</text>
+      <rect x="130" y="90" width="130" height="44" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="195" y="110" text-anchor="middle" class="t-s">WebSocket server</text><text x="195" y="126" text-anchor="middle" class="t-s">stateful</text>
+      <rect x="130" y="14" width="130" height="36" rx="6" class="soft"/><text x="195" y="37" text-anchor="middle" class="t-s">Location history DB</text>
+      <rect x="130" y="176" width="130" height="36" rx="6" class="soft"/><text x="195" y="199" text-anchor="middle" class="t-s">Location cache (TTL)</text>
+      <rect x="300" y="90" width="140" height="44" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="370" y="110" text-anchor="middle" class="t-s">Redis pub/sub</text><text x="370" y="126" text-anchor="middle" class="t-m">channel: user1</text>
+      <rect x="480" y="30" width="190" height="34" rx="6" class="box"/><text x="575" y="52" text-anchor="middle" class="t-s">User 2-র handler · 2 km ✓ push</text>
+      <rect x="480" y="95" width="190" height="34" rx="6" class="box"/><text x="575" y="117" text-anchor="middle" class="t-s">User 3-র handler · 3 km ✓ push</text>
+      <rect x="480" y="160" width="190" height="34" rx="6" class="soft"/><text x="575" y="182" text-anchor="middle" class="t-s mut">User 4-র handler · 12 km, বাদ</text>
+      <line x1="90" y1="112" x2="126" y2="112" class="acc-s" stroke-width="1.6" fill="none" marker-end="url(#ar-acc)"/>
+      <line x1="195" y1="90" x2="195" y2="54" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="195" y1="134" x2="195" y2="172" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="260" y1="112" x2="296" y2="112" class="ln" marker-end="url(#ar)"/><text x="278" y="84" text-anchor="middle" class="t-s">publish</text>
+      <line x1="440" y1="104" x2="476" y2="50" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="440" y1="112" x2="476" y2="112" class="ok-s" stroke-width="1.5" fill="none" marker-end="url(#ar-ok)"/>
+      <line x1="440" y1="120" x2="476" y2="172" class="ln-mut dash" marker-end="url(#ar-mut)"/>
+    </svg></div>
+    <figcaption>Location cache-এ প্রতিটা user-এর শুধু সর্বশেষ location, TTL দিয়ে: update না এলে TTL শেষে নিজে থেকে মুছে যায়, তাই inactive user আপনা আপনি তালিকা থেকে বাদ। History যায় write-heavy DB-তে (Cassandra)। Client app খুললে প্রথমবার cache থেকে বন্ধুদের location এনে তালিকা বানায়।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: দূরত্ব হিসাব publisher-এর server-এ না করে subscriber-এর handler-এ কেন?</summary><p>প্রতিটা subscriber-এর নিজের সর্বশেষ location তার নিজের handler-এর কাছে আছে। Publisher-এর server-কে সব বন্ধুর location জানতে হলে প্রতিবার cache থেকে আনতে হত।</p></details>
+</section>
+
+<section class="c" id="s-nb-scale">
+  <div class="head"><span class="num">2.3</span><h3>Scale ও সমস্যা</h3></div>
+  <div class="tbl"><table>
+    <tr><th>অংশ</th><th>Bottleneck</th><th>সমাধান</th></tr>
+    <tr><td>Redis pub/sub</td><td>Memory নয় (~200 GB, দুটো 100 GB-এর server-এই ধরে); আসল চাপ CPU: প্রতিটা update গড়ে ~৪০ জন online বন্ধুকে (৪০০ বন্ধুর ১০%), অর্থাৎ সেকেন্ডে ~১৪ million push</td><td>এক server সেকেন্ডে ~১ লাখ push ধরলে অন্তত ~১৪০টা Redis server; channel ভাগ consistent hashing দিয়ে; hash ring থাকে service discovery-তে (etcd, Zookeeper)</td></tr>
+    <tr><td>Pub/sub resize</td><td>Server যোগ-বাদে অনেক channel সরে, subscriber-দের আবার subscribe করতে হয়, CPU spike</td><td>কম traffic-এর সময় resize; শুরু থেকেই কিছু বেশি ক্ষমতা</td></tr>
+    <tr><td>WebSocket server</td><td>Stateful; server সরালে connection কাটে</td><td>সরানোর আগে "draining": নতুন connection বন্ধ, পুরনোগুলো ধীরে ধীরে সরে গেলে তবে বন্ধ</td></tr>
+    <tr><td>অনেক বন্ধুর user</td><td>Hotspot</td><td>বন্ধুর সংখ্যায় সীমা (যেমন ৫,০০০); subscriber-রা বিভিন্ন server-এ ছড়ানো</td></tr>
+  </table></div>
+  <p>বন্ধু যোগ হলে নতুন channel-এ subscribe, বাদ দিলে unsubscribe। অচেনা কাছের মানুষ দেখানোর feature চাইলে user-এর বদলে প্রতিটা geohash-এর একটা channel, আর user নিজের ও আশপাশের ঘরের channel-এ subscribe।</p>
+</section>
+
+<!-- ================= V2 CH 3 ================= -->
+<section class="chapter" id="v2c3">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 3</div>
+  <h2>Google Maps</h2>
+  <p>তিনটা feature: user-এর location update, navigation (ETA সহ), আর map দেখানো। Rider-এর route, delivery-র ETA আর traffic-এ পথ বদলানো সব এখানে।</p>
+</section>
+
+<section class="c" id="s-gm-101">
+  <div class="head"><span class="num">3.1</span><h3>Map 101</h3></div>
+  <div class="tbl"><table>
+    <tr><th>ধারণা</th><th>মানে</th></tr>
+    <tr><td>Projection</td><td>গোল পৃথিবীকে সমতলে আঁকা; Google Maps Web Mercator ব্যবহার করে</td></tr>
+    <tr><td>Geocoding</td><td>ঠিকানা থেকে latitude-longitude; উল্টোটা reverse geocoding</td></tr>
+    <tr><td>Tile</td><td>পুরো map-কে ছোট ছোট ছবিতে ভাগ, প্রতিটা zoom level-এর জন্য আলাদা set; client শুধু দরকারি tile নামায়</td></tr>
+    <tr><td>Road graph</td><td>মোড় হল node, রাস্তা হল edge। পুরো পৃথিবীর graph এক টুকরোয় রাখা অসম্ভব</td></tr>
+    <tr><td>Routing tile</td><td>Graph-কে geohash-এর মতো ঘরে ভাগ; প্রতিটা tile-এ ওই এলাকার node-edge আর পাশের tile-এর reference। Route হিসাবের সময় দরকারমতো tile load</td></tr>
+    <tr><td>Hierarchical routing tile</td><td>তিন স্তর: local রাস্তার ছোট tile, জেলার arterial রাস্তার মাঝারি, highway-র বড় tile। দূরের route-এ বড় স্তর দিয়ে অনেক কম node</td></tr>
+  </table></div>
+  <p>Location update-এ client প্রতিটা বদল সাথে সাথে পাঠায় না, কিছুক্ষণ (যেমন ১৫ বা ৩০ সেকেন্ড) জমিয়ে batch-এ পাঠায়। এতে QPS অনেক কমে।</p>
+  <div class="tbl"><table>
+    <tr><th>বইয়ের হিসাব</th><th>মান</th></tr>
+    <tr><td>DAU</td><td class="n">১০০ কোটি (1B)</td></tr>
+    <tr><td>Navigation-এর ব্যবহার</td><td class="n">সপ্তাহে ৩৫ মিনিট/user → দিনে ~5B মিনিট</td></tr>
+    <tr><td>Location update QPS (batch সহ)</td><td class="n">≈ 200K; peak (৫ গুণ) ≈ 1M</td></tr>
+    <tr><td>Map tile storage (সব zoom, compression ধরে)</td><td class="n">≈ 67 PB; বই গোল করে ~100 PB ধরে</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-gm-arch">
+  <div class="head"><span class="num">3.2</span><h3>তিন service</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 250" role="img" aria-label="Location service: user-এর location batch-এ আসে, database-এ আর Kafka-য় যায়; Kafka থেকে traffic, ETA, map update। Navigation service: geocoding, route planner, shortest path, ETA, ranker। Map rendering: pre-rendered tile CDN থেকে।">
+      <rect x="10" y="10" width="660" height="66" rx="10" class="soft"/>
+      <text x="22" y="28" class="t-s mut">LOCATION SERVICE</text>
+      <rect x="22" y="36" width="110" height="30" rx="5" class="box"/><text x="77" y="56" text-anchor="middle" class="t-s">Batch location</text>
+      <rect x="160" y="36" width="140" height="30" rx="5" class="box"/><text x="230" y="56" text-anchor="middle" class="t-s">Location DB (Cassandra)</text>
+      <rect x="330" y="36" width="80" height="30" rx="5" class="gs-bg gs-s"/><text x="370" y="56" text-anchor="middle" class="t-s">Kafka</text>
+      <rect x="440" y="36" width="220" height="30" rx="5" class="box"/><text x="550" y="56" text-anchor="middle" class="t-s">Traffic · ETA model · map update</text>
+      <line x1="132" y1="51" x2="156" y2="51" class="ln" marker-end="url(#ar)"/>
+      <line x1="300" y1="51" x2="326" y2="51" class="ln" marker-end="url(#ar)"/>
+      <line x1="410" y1="51" x2="436" y2="51" class="ln" marker-end="url(#ar)"/>
+
+      <rect x="10" y="90" width="660" height="90" rx="10" class="acc-bg acc-s dash" stroke-width="1.2"/>
+      <text x="22" y="108" class="t-s acc-t">NAVIGATION SERVICE</text>
+      <rect x="22" y="118" width="90" height="48" rx="5" class="box"/><text x="67" y="139" text-anchor="middle" class="t-s">Geocoding</text><text x="67" y="155" text-anchor="middle" class="t-s mut">ঠিকানা → বিন্দু</text>
+      <rect x="132" y="118" width="100" height="48" rx="5" class="box"/><text x="182" y="139" text-anchor="middle" class="t-s">Route planner</text>
+      <rect x="252" y="118" width="120" height="48" rx="5" class="box"/><text x="312" y="139" text-anchor="middle" class="t-s">Shortest path</text><text x="312" y="155" text-anchor="middle" class="t-s mut">routing tile, A*</text>
+      <rect x="392" y="118" width="110" height="48" rx="5" class="box"/><text x="447" y="139" text-anchor="middle" class="t-s">ETA service</text><text x="447" y="155" text-anchor="middle" class="t-s mut">traffic + ML</text>
+      <rect x="522" y="118" width="138" height="48" rx="5" class="box"/><text x="591" y="139" text-anchor="middle" class="t-s">Ranker</text><text x="591" y="155" text-anchor="middle" class="t-s mut">toll, highway এড়ানো</text>
+      <line x1="112" y1="142" x2="128" y2="142" class="ln" marker-end="url(#ar)"/>
+      <line x1="232" y1="142" x2="248" y2="142" class="ln" marker-end="url(#ar)"/>
+      <line x1="372" y1="142" x2="388" y2="142" class="ln" marker-end="url(#ar)"/>
+      <line x1="502" y1="142" x2="518" y2="142" class="ln" marker-end="url(#ar)"/>
+
+      <rect x="10" y="194" width="660" height="46" rx="10" class="soft"/>
+      <text x="22" y="212" class="t-s mut">MAP RENDERING</text>
+      <text x="22" y="230" class="t-s">আগে থেকে বানানো tile, CDN থেকে। Client নিজেই zoom আর অবস্থান থেকে tile-এর URL হিসাব করে।</text>
+    </svg></div>
+    <figcaption>Shortest path service শুধু রাস্তার graph দেখে, traffic নয়। Traffic আসে ETA service-এ। Ranker user-এর filter দিয়ে ছেঁকে route সাজায়। Traffic আর রাস্তার বদল Kafka থেকে updater service-রা routing tile আর traffic DB-তে লেখে।</figcaption>
+  </figure>
+  <p>Tile দুই রকম: <b>raster</b> (ছবি) আর <b>vector</b> (path আর polygon, client আঁকে)। Vector compress ভালো হয়, আর zoom করার সময় মসৃণ, কারণ ছবি টেনে বড় করা হয় না।</p>
+  <details class="self"><summary>নিজেকে যাচাই: map tile কেন CDN-এ, server-এ বানিয়ে পাঠানো হয় না?</summary><p>একই এলাকার একই zoom-এর tile সবার জন্য এক, আর খুব কম বদলায়। আগে বানিয়ে CDN-এ রাখলে কাছের edge থেকে দ্রুত আসে, server-এ কোনো হিসাব লাগে না।</p></details>
+</section>
+
+<section class="c" id="s-gm-eta">
+  <div class="head"><span class="num">3.3</span><h3>Adaptive ETA ও rerouting</h3></div>
+  <p>Navigation চলাকালীন traffic বদলালে চলমান user-দের ETA আর route update করতে হয়। সমস্যা: কোন traffic বদল কোন কোন user-কে প্রভাবিত করে, সেটা দ্রুত বের করা। Server প্রতিটা চলমান user-এর route-এর routing tile-গুলো রাখে, ছোট থেকে বড় স্তর পর্যন্ত। কোনো tile-এ traffic বদলালে শুধু যাদের route ওই tile ছুঁয়েছে তাদের update হয়।</p>
+  <p>Client-কে জানানোর উপায়: mobile push notification-এর payload ছোট আর web-এ চলে না, তাই WebSocket (অথবা server-sent events)। বই WebSocket নেয়।</p>
+  <details class="self"><summary>নিজেকে যাচাই: rider-এর ETA শুধু রাস্তার দূরত্ব ÷ গড় গতি দিয়ে হিসাব করলে কী ভুল হবে?</summary><p>Traffic, সময় (অফিস টাইম বনাম রাত), আর আগের দিনের একই সময়ের pattern বাদ যায়। এই কারণে ETA service আলাদা: real-time traffic আর historical data নিয়ে ML model।</p></details>
+</section>
+
+<!-- ================= V2 CH 4 ================= -->
+<section class="chapter" id="v2c4">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 4</div>
+  <h2>Distributed message queue</h2>
+  <p>Part ১ থেকে বারবার "message queue" box এঁকেছি। এবার box-এর ভেতরটা: Kafka-র মতো একটা system। বইয়ের লক্ষ্য: data দুই সপ্তাহ রাখা, একই message বারবার পড়া যায়, partition-এর ভেতরে ক্রম ঠিক, delivery semantics বেছে নেওয়া যায়, throughput বা latency কোনটা বেশি দরকার সেটা tune করা যায়, data disk-এ আর replicated।</p>
+</section>
+
+<section class="c" id="s-mq-model">
+  <div class="head"><span class="num">4.1</span><h3>Model ও শব্দ</h3></div>
+  <div class="two">
+    <div><h4>Point-to-point</h4><p>একটা message শুধু একজন consumer পড়ে, পড়া হলে queue থেকে মুছে যায়।</p></div>
+    <div><h4>Publish-subscribe</h4><p>Message একটা topic-এ যায়, topic-এর সব subscriber পড়ে। Kafka-ধাঁচের system দুটোই দেয় consumer group দিয়ে।</p></div>
+  </div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="Topic-এর তিনটা partition, তিনটা broker-এ। Consumer group A-তে দুই consumer: একজন partition 0 আর 1, অন্যজন partition 2। Consumer group B-তে একজন consumer তিনটাই পড়ে।">
+      <rect x="10" y="80" width="90" height="50" rx="6" class="box"/><text x="55" y="102" text-anchor="middle" class="t-h">Producer</text><text x="55" y="120" text-anchor="middle" class="t-s mut">key দিয়ে</text>
+      <text x="290" y="20" text-anchor="middle" class="t-s mut">TOPIC: parcel-events</text>
+      <rect x="160" y="32" width="260" height="40" rx="6" class="soft"/><text x="172" y="57" class="t-m">P0</text>
+      <rect x="160" y="88" width="260" height="40" rx="6" class="soft"/><text x="172" y="113" class="t-m">P1</text>
+      <rect x="160" y="144" width="260" height="40" rx="6" class="soft"/><text x="172" y="169" class="t-m">P2</text>
+      <g class="t-m">
+        <rect x="200" y="40" width="26" height="24" rx="3" class="box"/><text x="213" y="57" text-anchor="middle">0</text>
+        <rect x="230" y="40" width="26" height="24" rx="3" class="box"/><text x="243" y="57" text-anchor="middle">1</text>
+        <rect x="260" y="40" width="26" height="24" rx="3" class="box"/><text x="273" y="57" text-anchor="middle">2</text>
+        <rect x="290" y="40" width="26" height="24" rx="3" class="acc-bg acc-s"/><text x="303" y="57" text-anchor="middle">3</text>
+        <rect x="200" y="96" width="26" height="24" rx="3" class="box"/><text x="213" y="113" text-anchor="middle">0</text>
+        <rect x="230" y="96" width="26" height="24" rx="3" class="acc-bg acc-s"/><text x="243" y="113" text-anchor="middle">1</text>
+        <rect x="200" y="152" width="26" height="24" rx="3" class="box"/><text x="213" y="169" text-anchor="middle">0</text>
+        <rect x="230" y="152" width="26" height="24" rx="3" class="box"/><text x="243" y="169" text-anchor="middle">1</text>
+        <rect x="260" y="152" width="26" height="24" rx="3" class="acc-bg acc-s"/><text x="273" y="169" text-anchor="middle">2</text>
+      </g>
+      <text x="372" y="57" class="t-s mut">offset →</text>
+      <line x1="100" y1="100" x2="156" y2="56" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="106" x2="156" y2="108" class="ln" marker-end="url(#ar)"/>
+      <line x1="100" y1="112" x2="156" y2="160" class="ln" marker-end="url(#ar)"/>
+      <rect x="470" y="20" width="200" height="104" rx="8" class="ok-bg ok-s dash" stroke-width="1.2"/>
+      <text x="570" y="38" text-anchor="middle" class="t-s ok-t">Consumer group A</text>
+      <rect x="485" y="48" width="170" height="30" rx="5" class="box"/><text x="570" y="68" text-anchor="middle" class="t-s">Consumer 1 · P0, P1</text>
+      <rect x="485" y="86" width="170" height="30" rx="5" class="box"/><text x="570" y="106" text-anchor="middle" class="t-s">Consumer 2 · P2</text>
+      <rect x="470" y="140" width="200" height="66" rx="8" class="gs-bg gs-s dash" stroke-width="1.2"/>
+      <text x="570" y="158" text-anchor="middle" class="t-s gs-t">Consumer group B</text>
+      <rect x="485" y="166" width="170" height="30" rx="5" class="box"/><text x="570" y="186" text-anchor="middle" class="t-s">Consumer 3 · P0, P1, P2</text>
+      <line x1="420" y1="70" x2="466" y2="70" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="420" y1="170" x2="466" y2="176" class="ln-mut" marker-end="url(#ar-mut)"/>
+    </svg></div>
+    <figcaption><b>Topic</b> হল message-এর নামওয়ালা ধারা। <b>Partition</b> হল topic-এর ভাগ, প্রতিটা আলাদা <b>broker</b>-এ থাকতে পারে। <b>Offset</b> হল partition-এর ভেতরে message-এর অবস্থান। Message-এর key (যেমন parcel_id) দিয়ে partition ঠিক হয়, তাই একই parcel-এর সব event একই partition-এ, ঠিক ক্রমে। এক group-এর ভেতরে একটা partition শুধু একজন consumer পড়ে।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: একটা group-এ partition ৩টা কিন্তু consumer ৫ জন। কী হবে?</summary><p>৩ জন একটা করে partition পাবে, ২ জন বসে থাকবে। এক group-এর ভেতরে partition-এর সংখ্যাই parallelism-এর সীমা। তাই বেশি consumer চাইলে আগে partition বাড়াতে হয়।</p></details>
+</section>
+
+<section class="c" id="s-mq-store">
+  <div class="head"><span class="num">4.2</span><h3>Storage ও batching</h3></div>
+  <p>Message queue-তে read আর write দুটোই ভারী, update বা delete প্রায় নেই, আর access sequential। তাই database নয়, <b>write-ahead log (WAL)</b>: শুধু শেষে যোগ করা একটা file। Partition-এর log segment-এ ভাগ: নতুন message শুধু active segment-এ যায়, ভরা segment শুধু পড়া হয়, retention শেষে মুছে যায়। Disk-এ sequential পড়া-লেখা খুব দ্রুত, random access-এর চেয়ে অনেক বেশি, তাই disk-ভিত্তিক হয়েও throughput বেশি।</p>
+  <p>Message-এর গঠন: key, value, topic, partition, offset, timestamp, size, CRC (data নষ্ট হয়নি যাচাই)। Producer থেকে broker থেকে consumer পর্যন্ত message একই format-এ থাকে, তাই মাঝে copy বা রূপান্তর লাগে না।</p>
+  <p><b>Batching</b> সব জায়গায়: producer কয়েকটা message জমিয়ে একসাথে পাঠায়, broker একসাথে disk-এ লেখে, consumer একসাথে আনে। Batch বড় হলে throughput বাড়ে, কিন্তু latency-ও বাড়ে, কারণ প্রথম message batch ভরার জন্য অপেক্ষা করে। এটাই tune করার জায়গা।</p>
+</section>
+
+<section class="c" id="s-mq-cons">
+  <div class="head"><span class="num">4.3</span><h3>Producer, consumer, rebalance</h3></div>
+  <p>Producer-এর ভেতরে একটা routing layer থাকে: কোন partition-এর leader কোন broker-এ, সেটা জেনে সরাসরি সেখানে পাঠায়, আর buffer-এ batch বানায়। আলাদা proxy server রাখলে একটা network hop আর latency বাড়ত।</p>
+  <div class="two">
+    <div><h4>Push (broker পাঠায়)</h4><p>Latency কম। কিন্তু consumer ধীর হলে চাপে পড়ে যায়, আর broker-কে প্রতিটা consumer-এর গতি জানতে হয়।</p></div>
+    <div><h4>Pull (consumer আনে) · বইয়ের পছন্দ</h4><p>Consumer নিজের গতিতে আনে, পিছিয়ে পড়লে ধরে ফেলতে পারে, batch-এ আনা সহজ। দাম: message না থাকলে খালি ঘোরা, তাই long polling।</p></div>
+  </div>
+  <p><b>Rebalance:</b> প্রতিটা group-এর একটা coordinator (একটা broker) থাকে। Consumer heartbeat পাঠায়। কেউ যোগ হলে, চলে গেলে বা heartbeat বন্ধ হলে coordinator partition আবার ভাগ করে। কতদূর পড়া হয়েছে (committed offset) সেটা একটা state store-এ থাকে, যাতে নতুন consumer ঠিক সেখান থেকে শুরু করে। Broker আর topic-এর metadata থাকে Zookeeper-এর মতো জায়গায়।</p>
+</section>
+
+<section class="c" id="s-mq-repl">
+  <div class="head"><span class="num">4.4</span><h3>Replication ও delivery semantics</h3></div>
+  <p>প্রতিটা partition-এর কয়েকটা replica আলাদা broker-এ: একটা leader (সব read-write এখানে), বাকিরা follower। <b>In-sync replica (ISR)</b> হল যে follower-রা leader-এর সাথে তাল রেখে চলছে। Producer-এর ACK setting ঠিক করে কতটা নিরাপদ:</p>
+  <div class="tbl"><table>
+    <tr><th>ACK</th><th>কখন সফল</th><th>ফল</th></tr>
+    <tr><td class="n">all</td><td>সব ISR লিখলে</td><td>সবচেয়ে নিরাপদ, সবচেয়ে ধীর</td></tr>
+    <tr><td class="n">1</td><td>Leader লিখলে</td><td>মাঝামাঝি; follower copy করার আগে leader পড়লে data হারায়</td></tr>
+    <tr><td class="n">0</td><td>অপেক্ষাই নেই</td><td>দ্রুততম; metrics বা log-এর মতো data, যেখানে কিছু হারালে চলে</td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>Semantics</th><th>কীভাবে</th><th>কোথায় মানায়</th></tr>
+    <tr><td>At-most-once</td><td>ACK 0; consumer process-এর আগে offset commit</td><td>Monitoring metrics: কিছু হারালে চলে, duplicate চলে না</td></tr>
+    <tr><td>At-least-once</td><td>ACK 1 বা all; consumer process-এর পরে offset commit</td><td>বেশিরভাগ ক্ষেত্রে; duplicate হতে পারে, তাই consumer-কে dedupe করতে হয়</td></tr>
+    <tr><td>Exactly-once</td><td>Idempotent producer, transaction; সবচেয়ে জটিল আর ধীর</td><td>Payment, trading, হিসাব</td></tr>
+  </table></div>
+  <p>Scale: partition বাড়ালে নতুন message সবগুলোতে ভাগ হয়, পুরনো data যেখানে ছিল সেখানেই থাকে। Partition কমানো কঠিন: বাদ দেওয়া partition-এ আর লেখা হয় না, retention শেষ হলে তবে মোছা যায়।</p>
+  <details class="self"><summary>নিজেকে যাচাই: consumer message process করল, offset commit করার আগে crash। At-least-once-এ কী হবে?</summary><p>Commit হয়নি, তাই নতুন consumer একই message আবার পাবে আর আবার process করবে। এই কারণে consumer idempotent হওয়া দরকার, যেমন "parcel X delivered" দুবার এলেও status একবারই বদলায়।</p></details>
+</section>
+
+<!-- ================= V2 CH 5 ================= -->
+<section class="chapter" id="v2c5">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 5</div>
+  <h2>Metrics monitoring ও alerting</h2>
+  <p>CPU, memory, request rate, error rate দেখা আর গোলমালে alert। Part ১-এর logging-metrics অংশের ভেতরের design। বইয়ের লক্ষ্য: কোম্পানির ভেতরের system, হাজার server pool, প্রতিটায় ১০০ machine, প্রতিটা machine-এ ~১০০ metric, অর্থাৎ প্রায় ১ কোটি metric।</p>
+</section>
+
+<section class="c" id="s-mt-scope">
+  <div class="head"><span class="num">5.1</span><h3>Scope ও data model</h3></div>
+  <p>Retention: raw data ৭ দিন, তারপর ১ মিনিটের resolution-এ ৩০ দিন, তারপর ১ ঘণ্টার resolution-এ ১ বছর। পাঁচ অংশ: data collection, transmission, storage, alerting, visualization।</p>
+  <p>Data model হল <b>time series</b>: একটা metric-এর নাম, কয়েকটা label (key-value), আর (timestamp, value)-এর ধারা। যেমন <span class="mono">cpu.load host=web-01,region=dhaka 1730000000 0.42</span>। Write খুব ভারী আর স্থির; read হঠাৎ হঠাৎ (dashboard খোলা বা alert-এর query)।</p>
+  <p>General-purpose database এই চাপে ভালো চলে না আর time-series query (moving average, এক মিনিটের গড়) লেখাও কঠিন। তাই time-series database: InfluxDB, Prometheus, OpenTSDB। এগুলো label দিয়ে index করে, তাই label-এর মানের সংখ্যা (cardinality) কম রাখা জরুরি।</p>
+</section>
+
+<section class="c" id="s-mt-pull">
+  <div class="head"><span class="num">5.2</span><h3>Pull বনাম push</h3></div>
+  <div class="tbl"><table>
+    <tr><th></th><th>Pull (Prometheus)</th><th>Push (CloudWatch, Graphite)</th></tr>
+    <tr><td>কীভাবে</td><td>Collector নির্দিষ্ট সময় পরপর প্রতিটা server-এর <span class="mono">/metrics</span> endpoint থেকে আনে</td><td>প্রতিটা server-এ agent, নিজে collector-এ পাঠায়</td></tr>
+    <tr><td>Debug</td><td>সহজ: যে কেউ endpoint খুলে দেখতে পারে</td><td>কঠিন</td></tr>
+    <tr><td>Server বেঁচে আছে কি না</td><td>সাড়া না দিলেই বোঝা যায়</td><td>Data না আসা মানে network সমস্যাও হতে পারে</td></tr>
+    <tr><td>ক্ষণস্থায়ী job</td><td>Pull-এর আগেই শেষ হয়ে যেতে পারে</td><td>ভালো</td></tr>
+    <tr><td>Firewall, জটিল network</td><td>প্রতিটা server reachable হতে হয়</td><td>ভালো</td></tr>
+    <tr><td>কোন server আছে জানা</td><td>Service discovery লাগে (etcd, Zookeeper)</td><td>লাগে না</td></tr>
+  </table></div>
+  <p>দুটোই চলে; বড় কোম্পানিতে প্রায়ই দুটো মিশিয়ে। Collector আর time-series DB-র মাঝে Kafka রাখলে DB সাময়িক বন্ধ হলেও data হারায় না, আর দুই পাশ আলাদাভাবে scale হয়।</p>
+</section>
+
+<section class="c" id="s-mt-store">
+  <div class="head"><span class="num">5.3</span><h3>Storage ও alerting</h3></div>
+  <p>Facebook-এর হিসাবে ৮৫% query গত ২৬ ঘণ্টার data নিয়ে। তাই সাম্প্রতিক data দ্রুত জায়গায় (memory), পুরনোটা সস্তা জায়গায়।</p>
+  <div class="tbl"><table>
+    <tr><th>জায়গা বাঁচানো</th><th>কীভাবে</th></tr>
+    <tr><td>Encoding ও compression</td><td>Timestamp পুরো না রেখে আগেরটার থেকে পার্থক্য: 1730000000, +10, +10, +10 …</td></tr>
+    <tr><td>Downsampling</td><td>পুরনো data-র resolution কমানো: ১০ সেকেন্ডের data ১ মিনিটের গড়ে</td></tr>
+    <tr><td>Cold storage</td><td>খুব কম পড়া পুরনো data সস্তা storage-এ</td></tr>
+  </table></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 140" role="img" aria-label="Alert rule config থেকে alert manager, time-series DB query করে, শর্ত মিললে alert store আর Kafka-তে, তারপর alert consumer-রা email, SMS, PagerDuty, webhook-এ পাঠায়।">
+      <rect x="10" y="50" width="90" height="40" rx="6" class="soft"/><text x="55" y="68" text-anchor="middle" class="t-s">Rule config</text><text x="55" y="83" text-anchor="middle" class="t-s mut">YAML</text>
+      <rect x="130" y="50" width="110" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="185" y="75" text-anchor="middle" class="t-s">Alert manager</text>
+      <rect x="130" y="4" width="110" height="30" rx="5" class="soft"/><text x="185" y="24" text-anchor="middle" class="t-s">Time-series DB</text>
+      <rect x="270" y="50" width="90" height="40" rx="6" class="soft"/><text x="315" y="75" text-anchor="middle" class="t-s">Alert store</text>
+      <rect x="390" y="50" width="70" height="40" rx="6" class="gs-bg gs-s"/><text x="425" y="75" text-anchor="middle" class="t-s">Kafka</text>
+      <rect x="490" y="50" width="80" height="40" rx="6" class="box"/><text x="530" y="75" text-anchor="middle" class="t-s">Consumers</text>
+      <text x="590" y="44" class="t-s">Email</text><text x="590" y="62" class="t-s">SMS</text><text x="590" y="80" class="t-s">PagerDuty</text><text x="590" y="98" class="t-s">Webhook</text>
+      <line x1="100" y1="70" x2="126" y2="70" class="ln" marker-end="url(#ar)"/>
+      <line x1="185" y1="50" x2="185" y2="38" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="240" y1="70" x2="266" y2="70" class="ln" marker-end="url(#ar)"/>
+      <line x1="360" y1="70" x2="386" y2="70" class="ln" marker-end="url(#ar)"/>
+      <line x1="460" y1="70" x2="486" y2="70" class="ln" marker-end="url(#ar)"/>
+      <line x1="570" y1="70" x2="584" y2="70" class="ln" marker-end="url(#ar)"/>
+      <text x="340" y="126" text-anchor="middle" class="t-s mut">Alert manager একই ঘটনার অনেক alert মিলিয়ে একটা করে (dedupe, merge), পাঠাতে fail হলে retry</text>
+    </svg></div>
+    <figcaption>Visualization-এর জন্য সাধারণত Grafana। বইয়ের শেষ কথা: এগুলো নিজে বানানোর আগে ভাবুন। Prometheus, Grafana, Datadog-এর মতো ভালো tool আছে; interview-এ "build" করতে বলা হয়, কিন্তু বাস্তবে প্রায়ই "buy"।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: label হিসেবে user_id রাখলে কী সমস্যা?</summary><p>লাখো user মানে লাখো আলাদা time series (high cardinality)। Index ফুলে যায়, memory ফুরায়, query ধীর। Label-এ host, region, endpoint-এর মতো সীমিত মান রাখুন; user-ভিত্তিক তথ্য log বা analytics-এ।</p></details>
+</section>
+
+<!-- ================= V2 CH 6 ================= -->
+<section class="chapter" id="v2c6">
+  <div class="eyebrow">VOLUME 2 · CHAPTER 6</div>
+  <h2>Ad click event aggregation</h2>
+  <p>প্রতিটা ad click গোনা, প্রতি মিনিটে। এই সংখ্যা দিয়ে advertiser-কে bill করা হয়, তাই সঠিকতা সবচেয়ে বড় শর্ত। একই ধাঁচ: প্রতি মিনিটে কোন hub-এ কত parcel ঢুকল, বা merchant-ভিত্তিক COD-র হিসাব।</p>
+</section>
+
+<section class="c" id="s-ad-scope">
+  <div class="head"><span class="num">6.1</span><h3>Scope ও data</h3></div>
+  <p>Query তিনটা: গত M মিনিটে একটা ad-এ কত click; প্রতি মিনিটে সবচেয়ে বেশি click পাওয়া ১০০টা ad; দেশ, IP, user_id-র মতো attribute দিয়ে filter। দিনে ১০০ কোটি click, ২০ লাখ ad। দেরিতে আসা আর duplicate event সামলাতে হবে। End-to-end latency কয়েক মিনিট চলে।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>ফল</th></tr>
+    <tr><td>গড় QPS</td><td class="n">≈ 10,000</td></tr>
+    <tr><td>Peak QPS (৫ গুণ ধরে)</td><td class="n">≈ 50,000</td></tr>
+    <tr><td>Raw data, দিনে (প্রতিটা 0.1 KB)</td><td class="n">≈ 100 GB</td></tr>
+  </table></div>
+  <p>Raw data নাকি aggregated, কোনটা রাখব? দুটোই। Raw থাকে backup হিসেবে: কোনো bug হলে বা হিসাব নতুন করে করতে হলে। Query চলে aggregated data-য়, কারণ raw-এ query খুব ধীর। Write-heavy আর সময়-ভিত্তিক, তাই Cassandra বা InfluxDB।</p>
+</section>
+
+<section class="c" id="s-ad-arch">
+  <div class="head"><span class="num">6.2</span><h3>Pipeline</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 200" role="img" aria-label="Log watcher click event message queue-তে পাঠায়। সেখান থেকে raw data DB-তে, আর aggregation service-এ। Aggregation service map, aggregate, reduce করে দ্বিতীয় message queue-তে পাঠায়, সেখান থেকে aggregated DB। Query service aggregated DB থেকে পড়ে।">
+      <rect x="10" y="70" width="80" height="44" rx="6" class="soft"/><text x="50" y="96" text-anchor="middle" class="t-s">Log watcher</text>
+      <rect x="120" y="70" width="80" height="44" rx="6" class="gs-bg gs-s"/><text x="160" y="90" text-anchor="middle" class="t-s">Message</text><text x="160" y="104" text-anchor="middle" class="t-s">queue 1</text>
+      <rect x="120" y="150" width="80" height="36" rx="6" class="soft"/><text x="160" y="172" text-anchor="middle" class="t-s">Raw DB</text>
+      <rect x="230" y="40" width="210" height="104" rx="8" class="acc-bg acc-s dash" stroke-width="1.2"/>
+      <text x="335" y="58" text-anchor="middle" class="t-s acc-t">Aggregation service (MapReduce DAG)</text>
+      <rect x="244" y="72" width="54" height="30" rx="5" class="box"/><text x="271" y="92" text-anchor="middle" class="t-s">Map</text>
+      <rect x="308" y="72" width="62" height="30" rx="5" class="box"/><text x="339" y="92" text-anchor="middle" class="t-s">Aggregate</text>
+      <rect x="380" y="72" width="50" height="30" rx="5" class="box"/><text x="405" y="92" text-anchor="middle" class="t-s">Reduce</text>
+      <text x="335" y="128" text-anchor="middle" class="t-s mut">ad_id ধরে ভাগ, গোনা, top 100</text>
+      <line x1="298" y1="87" x2="304" y2="87" class="ln"/><line x1="370" y1="87" x2="376" y2="87" class="ln"/>
+      <rect x="470" y="70" width="80" height="44" rx="6" class="gs-bg gs-s"/><text x="510" y="90" text-anchor="middle" class="t-s">Message</text><text x="510" y="104" text-anchor="middle" class="t-s">queue 2</text>
+      <rect x="580" y="70" width="90" height="44" rx="6" class="soft"/><text x="625" y="90" text-anchor="middle" class="t-s">Aggregated</text><text x="625" y="104" text-anchor="middle" class="t-s">DB</text>
+      <rect x="580" y="150" width="90" height="36" rx="6" class="box"/><text x="625" y="172" text-anchor="middle" class="t-s">Query service</text>
+      <line x1="90" y1="92" x2="116" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="160" y1="114" x2="160" y2="146" class="ln" marker-end="url(#ar)"/>
+      <line x1="200" y1="92" x2="226" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="440" y1="92" x2="466" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="550" y1="92" x2="576" y2="92" class="ln" marker-end="url(#ar)"/>
+      <line x1="625" y1="146" x2="625" y2="118" class="ln-mut" marker-end="url(#ar-mut)"/>
+    </svg></div>
+    <figcaption>দ্বিতীয় message queue কেন? Aggregated ফল লেখা আর upstream-এ offset commit একসাথে (atomically) করতে, যাতে exactly-once পাওয়া যায় (6.4)। Map node ad_id-এর hash দিয়ে event ভাগ করে, aggregate node প্রতি মিনিটে গোনে, reduce node সব মিলিয়ে চূড়ান্ত ফল আর top 100 বানায়।</figcaption>
+  </figure>
+  <p>Batch আর streaming আলাদা করে চালানোর নাম <b>lambda architecture</b>: দুটো codebase রাখতে হয়। বই <b>kappa architecture</b> নেয়: একটাই streaming pipeline, আর হিসাব নতুন করে করতে হলে raw data একই pipeline দিয়ে আবার চালানো।</p>
+</section>
+
+<section class="c" id="s-ad-time">
+  <div class="head"><span class="num">6.3</span><h3>Time, window, watermark</h3></div>
+  <div class="two">
+    <div><h4>Event time</h4><p>Click যখন হয়েছিল (client-এর সময়)। হিসাব বেশি সঠিক, কিন্তু client-এর ঘড়ি ভুল হতে পারে, আর event দেরিতে আসে। বইয়ের পছন্দ।</p></div>
+    <div><h4>Processing time</h4><p>Server যখন event পেল। সহজ আর নির্ভরযোগ্য ঘড়ি, কিন্তু দেরিতে আসা event ভুল মিনিটে গোনা হয়।</p></div>
+  </div>
+  <p><b>Watermark:</b> window শেষ হওয়ার পরও কিছুক্ষণ (যেমন ১৫ সেকেন্ড) খোলা রাখা, যাতে একটু দেরিতে আসা event ধরা পড়ে। লম্বা watermark বেশি সঠিক কিন্তু latency বাড়ায়। খুব দেরিতে আসা অল্প কিছু event তবুও বাদ যায়; সেগুলো দিনের শেষে reconciliation-এ ঠিক হয়।</p>
+  <div class="tbl"><table>
+    <tr><th>Window</th><th>কীভাবে</th><th>কোন query</th></tr>
+    <tr><td>Tumbling (fixed)</td><td>সময়কে পাশাপাশি, না-মেলানো টুকরোয় ভাগ: 10:00–10:01, 10:01–10:02</td><td>প্রতি মিনিটে প্রতিটা ad-এর click</td></tr>
+    <tr><td>Sliding</td><td>নির্দিষ্ট দৈর্ঘ্যের window সময়ের সাথে সরে, টুকরোগুলো মেলে</td><td>গত M মিনিটের top 100</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-ad-exact">
+  <div class="head"><span class="num">6.4</span><h3>Exactly-once ও সঠিকতা</h3></div>
+  <p>এখানে duplicate মানে advertiser-কে বেশি bill, আর হারানো মানে কম। তাই at-least-once যথেষ্ট নয়। Duplicate আসে দুই জায়গা থেকে: client একই event দুবার পাঠায় (fraud বা retry), আর server crash হলে offset commit-এর আগের event আবার আসে।</p>
+  <p>সমাধান: aggregation node offset বাইরের storage-এ (HDFS, S3) রাখে। Downstream (queue 2) ack দিলে তবেই offset এগোয়। "ফল পাঠানো" আর "offset সংরক্ষণ" একই distributed transaction-এ, যাতে দুটোই হয় বা কোনোটাই না।</p>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>কৌশল</th></tr>
+    <tr><td>Scale</td><td>Queue-র partition ad_id দিয়ে; aggregation node বাড়ানো; DB Cassandra (consistent hashing)</td></tr>
+    <tr><td>Hotspot (খুব জনপ্রিয় ad)</td><td>সেই ad-এর জন্য বেশি aggregation node</td></tr>
+    <tr><td>Fault tolerance</td><td>Aggregation state (upstream offset, চলমান top 100) নিয়মিত snapshot; node পড়লে snapshot থেকে শুরু, তারপর বাকি event replay</td></tr>
+    <tr><td>Monitoring</td><td>Event-এর latency, queue-তে জমা, CPU-memory</td></tr>
+    <tr><td>Reconciliation</td><td>দিনের শেষে batch job raw data থেকে আবার গোনে, streaming-এর ফলের সাথে মেলায়</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: streaming pipeline সঠিক হলে দিনের শেষে আবার batch-এ গোনা কেন?</summary><p>Watermark-এর পরে আসা event, code-এর bug, বা কোনো অজানা failure streaming-এর ফল সামান্য ভুল করতে পারে। টাকার হিসাবে "সামান্য" চলে না। Raw data থেকে আলাদা পথে গুনে মেলালে ভুল ধরা পড়ে। COD settlement-এ ঠিক এই কারণে দিনের শেষে reconciliation হয়।</p></details>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>Proximity, nearby friends আর maps একসাথে মিলিয়ে একটা "কাছের rider খুঁজে assign আর live tracking" design আঁকুন। এটা আপনার NestJS dispatch system-এর সরাসরি blueprint।</li>
+    <li>Test দিতে চাইলে বলুন। ভুল হওয়া অংশে লাল দাগ বসবে।</li>
+    <li><a href="../#/study/p6" target="_top">Part ৬ →</a> Volume 2-এর বাকি সাতটা: hotel reservation, email, S3-ধাঁচের object storage, real-time leaderboard, payment system, digital wallet, stock exchange।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

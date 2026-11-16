@@ -109,7 +109,7 @@ export const levelSchema = z
     story: z.string().min(1),
     minutes: z.number().int().positive(),
     briefing: z.string().min(1),
-    ref: z.object({ label: z.string(), url: z.string().url() }),
+    ref: z.object({ label: z.string(), url: z.string().min(1) }),
     predict: questionSchema,
     nodes: z.array(diagramNodeSchema).min(1),
     steps: z.array(lessonStepSchema).min(4).max(10),

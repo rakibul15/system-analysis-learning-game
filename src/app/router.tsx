@@ -5,6 +5,7 @@ import { MapPage } from '@/pages/map/MapPage';
 import { MockPage } from '@/pages/mock/MockPage';
 import { IncidentPage } from '@/pages/incident/IncidentPage';
 import { BuilderPage } from '@/pages/builder/BuilderPage';
+import { PARTS, StudyPage, StudyReader, type Part } from '@/pages/study/StudyPage';
 import { PracticePage } from '@/pages/practice/PracticePage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
@@ -29,6 +30,15 @@ const practiceRoute = createRoute({ getParentRoute: () => rootRoute, path: '/pra
 const mockRoute = createRoute({ getParentRoute: () => rootRoute, path: '/mock', component: MockPage });
 const incidentRoute = createRoute({ getParentRoute: () => rootRoute, path: '/incident', component: IncidentPage });
 const builderRoute = createRoute({ getParentRoute: () => rootRoute, path: '/builder', component: BuilderPage });
+const studyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/study', component: StudyPage });
+const studyPartRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/study/$part',
+  component: function StudyPartView() {
+    const { part } = studyPartRoute.useParams();
+    return (PARTS as readonly string[]).includes(part) ? <StudyReader part={part as Part} /> : <NotFound />;
+  },
+});
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
 
 const levelRoute = createRoute({
@@ -43,7 +53,7 @@ const levelRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, profileRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, profileRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,

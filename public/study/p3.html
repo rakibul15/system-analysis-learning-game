@@ -1,0 +1,532 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>সিস্টেম ডিজাইন ছবিতে ৮–১১</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: এক column-এর পড়ার page; প্রতিটা concept = ব্যাখ্যা + figure + নিজেকে যাচাই (Part ১-এর একই ভাষা) */
+:root{
+  --ground:#EEF2F1; --surface:#FFFFFF; --sunk:#F6F8F8; --ink:#15233A; --muted:#566476;
+  --line:#C9D2D4; --accent:#2350B8; --accent-soft:#E3EAF9;
+  --right:#1D7F4B; --right-soft:#E1F3E8; --wrong:#BF3A30; --wrong-soft:#FBE6E3;
+  --guess:#9A6512; --guess-soft:#FAEFD9;
+  --display:"Anek Bangla","Hind Siliguri",system-ui,sans-serif;
+  --body:"Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+    --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+    --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+    --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F151C; --surface:#17202A; --sunk:#131B24; --ink:#E4EAF1; --muted:#95A3B4;
+  --line:#34414F; --accent:#86A8FF; --accent-soft:#1E2B4A;
+  --right:#55C68E; --right-soft:#16302A; --wrong:#F2786E; --wrong-soft:#3A1F1F;
+  --guess:#E2B461; --guess-soft:#352A17; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));padding-block:32px 72px}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,4vw,2.3rem)}
+.lede{color:var(--muted);margin:6px 0 0;max-width:68ch}
+p{margin:0}
+a{color:var(--accent)}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.back{font-size:.88rem;margin-bottom:14px;display:block}
+.mono{font-family:var(--mono)}
+.toc2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:22px}
+.toc2 div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.toc2 h2{font-size:1rem;margin-bottom:6px}
+.toc2 a{display:block;color:var(--ink);text-decoration:none;font-size:.9rem;line-height:1.6}
+.toc2 a:hover{color:var(--accent)}
+.chapter{margin-top:64px;padding-top:20px;border-top:2px solid var(--ink);scroll-margin-top:12px}
+.chapter > .eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;color:var(--muted)}
+.chapter > h2{font-size:clamp(1.5rem,3.4vw,2rem);margin-top:4px}
+.chapter > p{color:var(--muted);margin-top:6px;max-width:65ch}
+.c{margin-top:40px;display:grid;gap:12px;scroll-margin-top:12px}
+.c > *{min-width:0}
+.c .head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.c .head .num{font-family:var(--mono);font-size:.85rem;color:var(--muted)}
+.c .head h3{font-size:1.3rem}
+.c > p,.c > ol{max-width:68ch}
+.c > ol{margin:0;padding-left:22px}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 16px 12px}
+.scroll{overflow-x:auto}
+figure svg{display:block;width:100%;min-width:540px;height:auto;color:var(--ink)}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.self{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:8px 14px;font-size:.94rem}
+details.self summary{cursor:pointer;font-weight:600}
+details.self summary::marker{color:var(--accent)}
+details.self p{margin-top:6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:620px){.two{grid-template-columns:1fr}}
+.two > div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.two h4{font-family:var(--display);font-size:.95rem;margin:0 0 4px}
+.two p{font-size:.93rem}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.tbl table{border-collapse:collapse;width:100%;min-width:480px;font-size:.92rem}
+.tbl th,.tbl td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font-family:var(--display);font-weight:600;background:var(--sunk)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tbl td.bad{color:var(--wrong);font-weight:600} .tbl td.ok{color:var(--right);font-weight:600}
+.next{margin-top:56px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.next h2{font-size:1.3rem;margin-bottom:10px}
+.next ol{margin:0;padding-left:22px;display:grid;gap:6px}
+svg text{fill:currentColor;font-family:var(--body);font-size:12.5px}
+svg .t-s{font-size:11px}
+svg .t-h{font-family:var(--display);font-weight:600;font-size:14px}
+svg .t-m{font-family:var(--mono);font-size:11.5px}
+svg .mut{fill:var(--muted)}
+svg .box{fill:var(--surface);stroke:currentColor;stroke-width:1.3}
+svg .soft{fill:var(--sunk);stroke:var(--line);stroke-width:1.2}
+svg .ring{fill:none;stroke:var(--line);stroke-width:2}
+svg .ln{stroke:currentColor;stroke-width:1.4;fill:none}
+svg .ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+svg .dash{stroke-dasharray:5 4}
+svg .bad-s{stroke:var(--wrong)} svg .bad-f{fill:var(--wrong)} svg .bad-t{fill:var(--wrong)} svg .bad-bg{fill:var(--wrong-soft)}
+svg .ok-s{stroke:var(--right)} svg .ok-f{fill:var(--right)} svg .ok-t{fill:var(--right)} svg .ok-bg{fill:var(--right-soft)}
+svg .acc-s{stroke:var(--accent)} svg .acc-f{fill:var(--accent)} svg .acc-t{fill:var(--accent)} svg .acc-bg{fill:var(--accent-soft)}
+svg .gs-s{stroke:var(--guess)} svg .gs-f{fill:var(--guess)} svg .gs-t{fill:var(--guess)} svg .gs-bg{fill:var(--guess-soft)}
+svg .ink-f{fill:currentColor}
+svg .mk{fill:currentColor} svg .mk-ok{fill:var(--right)} svg .mk-acc{fill:var(--accent)} svg .mk-mut{fill:var(--muted)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk"/></marker>
+    <marker id="ar-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-ok"/></marker>
+    <marker id="ar-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-acc"/></marker>
+    <marker id="ar-mut" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="mk-mut"/></marker>
+  </defs>
+</svg>
+
+<div class="wrap">
+<header>
+  <nav class="back"><a href="../#/study/p1" target="_top">← Part ১: Ch ১–৪</a> · <a href="../#/study/p2" target="_top">← Part ২: Ch ৫–৭</a></nav>
+  <h1>সিস্টেম ডিজাইন ছবিতে: Chapter ৮–১১</h1>
+  <p class="lede">Part ৩, প্রথম পুরো design সমস্যা। Alex Xu-র বই থেকে URL shortener, web crawler, notification system আর news feed। প্রতিটা Chapter ৩-এর চার ধাপে সাজানো: scope, estimation, high-level design, deep dive। Part ২-এর building block এখানে কাজে লাগবে।</p>
+  <nav class="toc2" aria-label="সূচি">
+    <div><h2>Ch 8 · URL shortener</h2>
+      <a href="#s-url-scope">8.1 Scope ও হিসাব</a>
+      <a href="#s-url-api">8.2 API ও 301 বনাম 302</a>
+      <a href="#s-url-len">8.3 Short URL কত লম্বা</a>
+      <a href="#s-url-hash">8.4 Hash বনাম base 62</a>
+      <a href="#s-url-flow">8.5 পুরো flow</a>
+    </div>
+    <div><h2>Ch 9 · Web crawler</h2>
+      <a href="#s-wc-scope">9.1 Scope ও হিসাব</a>
+      <a href="#s-wc-flow">9.2 Component ও flow</a>
+      <a href="#s-wc-bfs">9.3 BFS ও URL frontier</a>
+      <a href="#s-wc-more">9.4 Performance ও robustness</a>
+      <a href="#s-wc-bad">9.5 সমস্যার content</a>
+    </div>
+    <div><h2>Ch 10 · Notification system</h2>
+      <a href="#s-nt-scope">10.1 Scope ও ধরন</a>
+      <a href="#s-nt-v1">10.2 প্রথম design ও তার সমস্যা</a>
+      <a href="#s-nt-v2">10.3 উন্নত design</a>
+      <a href="#s-nt-deep">10.4 Reliability ও বাকি অংশ</a>
+    </div>
+    <div><h2>Ch 11 · News feed</h2>
+      <a href="#s-nf-scope">11.1 Scope ও API</a>
+      <a href="#s-nf-fan">11.2 Fanout: push বনাম pull</a>
+      <a href="#s-nf-pub">11.3 Publish flow</a>
+      <a href="#s-nf-read">11.4 Retrieval ও cache layer</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ================= CHAPTER 8 ================= -->
+<section class="chapter" id="ch8">
+  <div class="eyebrow">CHAPTER 8</div>
+  <h2>URL shortener</h2>
+  <p>লম্বা URL দিলে ছোট একটা alias ফেরত, আর সেই alias-এ click করলে আসল URL-এ redirect। SMS-এ parcel tracking link পাঠানোর সময় প্রতিটা character-এর দাম আছে, তাই এই সমস্যা delivery platform-এও আসল।</p>
+</section>
+
+<section class="c" id="s-url-scope">
+  <div class="head"><span class="num">8.1</span><h3>Scope ও হিসাব</h3></div>
+  <p>বইয়ের ধরে নেওয়া: দিনে ১০ কোটি নতুন URL, short URL যত ছোট সম্ভব, শুধু সংখ্যা আর ইংরেজি অক্ষর, মুছে ফেলা বা update নেই, high availability আর fault tolerance। Read-write অনুপাত ১০:১।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>Write / সেকেন্ড</td><td class="n">100M ÷ 24 ÷ 3600</td><td class="n">≈ 1,160</td></tr>
+    <tr><td>Read / সেকেন্ড</td><td class="n">1,160 × 10</td><td class="n">≈ 11,600</td></tr>
+    <tr><td>১০ বছরে record</td><td class="n">100M × 365 × 10</td><td class="n">365 billion</td></tr>
+    <tr><td>Storage (গড় URL 100 byte)</td><td class="n">365B × 100 byte</td><td class="n">≈ 365 TB</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-url-api">
+  <div class="head"><span class="num">8.2</span><h3>API ও 301 বনাম 302</h3></div>
+  <p>দুটো endpoint। <span class="mono">POST api/v1/data/shorten</span> body-তে <span class="mono">longUrl</span> নিয়ে <span class="mono">shortURL</span> ফেরত দেয়। <span class="mono">GET api/v1/shortUrl</span> redirect-এর জন্য <span class="mono">longURL</span> ফেরত দেয়। Redirect-এর status code-টাই এখানে আসল সিদ্ধান্ত।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 220" role="img" aria-label="301-এ browser প্রথমবারের পর redirect মনে রাখে, পরের request সরাসরি long URL-এ যায়। 302-এ প্রতিটা request shortener server হয়ে যায়।">
+      <text x="165" y="18" text-anchor="middle" class="t-h">301 · Moved Permanently</text>
+      <rect x="10" y="40" width="90" height="40" rx="6" class="box"/><text x="55" y="65" text-anchor="middle">Browser</text>
+      <rect x="220" y="40" width="110" height="40" rx="6" class="box"/><text x="275" y="65" text-anchor="middle">Shortener</text>
+      <line x1="100" y1="56" x2="216" y2="56" class="ln" marker-end="url(#ar)"/><text x="158" y="48" text-anchor="middle" class="t-s">১ম বার</text>
+      <rect x="220" y="130" width="110" height="40" rx="6" class="box"/><text x="275" y="155" text-anchor="middle">Long URL</text>
+      <path d="M55 80 L55 150 L216 150" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/>
+      <text x="62" y="120" class="t-s ok-t">পরের বার সরাসরি</text>
+      <text x="165" y="196" text-anchor="middle" class="ok-t t-s">browser cache করে, server-এ চাপ কম</text>
+      <text x="165" y="212" text-anchor="middle" class="bad-t t-s">কিন্তু click গোনা যায় না</text>
+
+      <line x1="345" y1="10" x2="345" y2="214" class="ln-mut dash"/>
+
+      <text x="515" y="18" text-anchor="middle" class="t-h">302 · Found (temporary)</text>
+      <rect x="360" y="40" width="90" height="40" rx="6" class="box"/><text x="405" y="65" text-anchor="middle">Browser</text>
+      <rect x="560" y="40" width="110" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="615" y="65" text-anchor="middle">Shortener</text>
+      <line x1="450" y1="56" x2="556" y2="56" class="acc-s" stroke-width="1.6" fill="none" marker-end="url(#ar-acc)"/><text x="503" y="48" text-anchor="middle" class="t-s acc-t">প্রতিবার</text>
+      <rect x="560" y="130" width="110" height="40" rx="6" class="box"/><text x="615" y="155" text-anchor="middle">Long URL</text>
+      <line x1="615" y1="80" x2="615" y2="126" class="ln" marker-end="url(#ar)"/>
+      <text x="515" y="196" text-anchor="middle" class="ok-t t-s">প্রতিটা click server দেখে, analytics সম্ভব</text>
+      <text x="515" y="212" text-anchor="middle" class="bad-t t-s">server-এ চাপ বেশি</text>
+    </svg></div>
+    <figcaption>দুটোতেই response-এর <span class="mono">Location</span> header-এ long URL থাকে। পার্থক্য শুধু browser সেটা মনে রাখে কি না।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: merchant জানতে চায় তার tracking link কতবার click হয়েছে। কোনটা নেবেন?</summary><p>302। 301-এ দ্বিতীয় click থেকে browser আর server-এ আসে না, তাই গোনা যায় না।</p></details>
+</section>
+
+<section class="c" id="s-url-len">
+  <div class="head"><span class="num">8.3</span><h3>Short URL কত লম্বা</h3></div>
+  <p>অক্ষর পাওয়া যায় ৬২টা: 0–9 (১০টা), a–z (২৬টা), A–Z (২৬টা)। দৈর্ঘ্য n হলে মোট সম্ভাব্য URL 62<sup>n</sup>। লাগবে এমন সবচেয়ে ছোট n, যেখানে 62<sup>n</sup> ≥ 365 billion।</p>
+  <div class="tbl"><table>
+    <tr><th>n</th><th>62<sup>n</sup></th><th>365 billion-এর জন্য যথেষ্ট?</th></tr>
+    <tr><td class="n">5</td><td class="n">≈ 916 million</td><td class="bad">না</td></tr>
+    <tr><td class="n">6</td><td class="n">≈ 56.8 billion</td><td class="bad">না</td></tr>
+    <tr><td class="n">7</td><td class="n">≈ 3.5 trillion</td><td class="ok">হ্যাঁ</td></tr>
+  </table></div>
+  <p>তাই n = 7। Data model খুব সাধারণ: একটা table, তিন column: <span class="mono">id</span>, <span class="mono">shortURL</span>, <span class="mono">longURL</span>।</p>
+</section>
+
+<section class="c" id="s-url-hash">
+  <div class="head"><span class="num">8.4</span><h3>Hash + collision বনাম base 62</h3></div>
+  <div class="two">
+    <div><h4>Hash + collision resolution</h4><p>Long URL-কে CRC32, MD5 বা SHA-1 দিয়ে hash করে প্রথম ৭ অক্ষর নিন। DB-তে আগে থেকে থাকলে (collision) long URL-এর সাথে একটা নির্দিষ্ট string জুড়ে আবার hash। প্রতিবার DB-তে খোঁজা ধীর, তাই আগে bloom filter।</p></div>
+    <div><h4>Base 62 conversion</h4><p>Part ২-এর unique ID generator থেকে একটা সংখ্যার ID নিন, সেটাকে base 62-এ লিখুন। যেমন 11157 = 2×62² + 55×62 + 59, অক্ষরে <span class="mono">2TX</span>। ID unique, তাই collision হয় না।</p></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th></th><th>Hash + collision</th><th>Base 62</th></tr>
+    <tr><td>দৈর্ঘ্য</td><td>স্থির ৭</td><td>ID বাড়লে বাড়ে</td></tr>
+    <tr><td>Unique ID generator লাগে?</td><td>না</td><td>হ্যাঁ</td></tr>
+    <tr><td>Collision</td><td>সম্ভব, সামলাতে হয়</td><td>অসম্ভব</td></tr>
+    <tr><td>পরের URL অনুমান করা যায়?</td><td>না</td><td>যায় (ID বাড়ে ১ করে) — security ঝুঁকি</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: base 62-এ পরের URL অনুমান করা গেলে সমস্যা কী?</summary><p>কেউ একের পর এক short URL চালিয়ে অন্যদের link বের করে ফেলতে পারে। Tracking link-এ customer-এর ঠিকানা বা ফোন নম্বর থাকলে সেটা data leak।</p></details>
+</section>
+
+<section class="c" id="s-url-flow">
+  <div class="head"><span class="num">8.5</span><h3>পুরো flow</h3></div>
+  <p>বই base 62 বেছে নেয়। Shorten-এর ধাপ:</p>
+  <ol>
+    <li>Long URL এল। DB-তে আগে থেকে আছে? থাকলে সেই short URL ফেরত।</li>
+    <li>না থাকলে unique ID generator থেকে নতুন ID।</li>
+    <li>ID-কে base 62-এ রূপান্তর করে short URL।</li>
+    <li>ID, short URL, long URL দিয়ে DB-তে নতুন row।</li>
+  </ol>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="Redirect-এর flow: user থেকে load balancer, web server, তারপর cache। Cache-এ না থাকলে database।">
+      <rect x="10" y="50" width="90" height="46" rx="6" class="box"/><text x="55" y="78" text-anchor="middle" class="t-h">User</text>
+      <rect x="150" y="50" width="120" height="46" rx="6" class="box"/><text x="210" y="78" text-anchor="middle">Load balancer</text>
+      <rect x="320" y="50" width="120" height="46" rx="6" class="box"/><text x="380" y="78" text-anchor="middle">Web server</text>
+      <rect x="500" y="10" width="160" height="46" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="580" y="31" text-anchor="middle" class="t-h">Cache</text><text x="580" y="47" text-anchor="middle" class="t-s">shortURL → longURL</text>
+      <rect x="500" y="92" width="160" height="46" rx="6" class="box"/><text x="580" y="120" text-anchor="middle" class="t-h">Database</text>
+      <line x1="100" y1="73" x2="146" y2="73" class="ln" marker-end="url(#ar)"/>
+      <line x1="270" y1="73" x2="316" y2="73" class="ln" marker-end="url(#ar)"/>
+      <line x1="440" y1="64" x2="496" y2="36" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/><text x="468" y="40" text-anchor="end" class="t-s ok-t">① আগে</text>
+      <line x1="440" y1="84" x2="496" y2="112" class="ln-mut dash" marker-end="url(#ar-mut)"/><text x="468" y="128" text-anchor="end" class="t-s mut">② miss হলে</text>
+    </svg></div>
+    <figcaption>Read write-এর দশগুণ, তাই redirect-এর পথে cache থাকবেই। Wrap up-এ বই আরও বলে: rate limiter (একজন বিপুল URL পাঠালে), stateless web tier, DB replication ও sharding, আর analytics।</figcaption>
+  </figure>
+</section>
+
+<!-- ================= CHAPTER 9 ================= -->
+<section class="chapter" id="ch9">
+  <div class="eyebrow">CHAPTER 9</div>
+  <h2>Web crawler</h2>
+  <p>কিছু URL দিয়ে শুরু, সেই page নামানো, তার ভেতরের link বের করা, সেগুলো আবার নামানো। ব্যবহার: search engine indexing, web archive, web mining, copyright বা trademark monitoring।</p>
+</section>
+
+<section class="c" id="s-wc-scope">
+  <div class="head"><span class="num">9.1</span><h3>Scope ও হিসাব</h3></div>
+  <p>বইয়ের ধরে নেওয়া: search engine indexing, মাসে ১০০ কোটি page, শুধু HTML, ৫ বছর রাখা, duplicate content বাদ। সাথে চারটা গুণ: scalability, robustness (খারাপ HTML, crash করা server, ফাঁদ), politeness (এক site-এ অল্প সময়ে বেশি request নয়), extensibility (নতুন content type যোগ সহজ)।</p>
+  <div class="tbl"><table>
+    <tr><th>হিসাব</th><th>কীভাবে</th><th>ফল</th></tr>
+    <tr><td>QPS</td><td class="n">1B ÷ 30 ÷ 24 ÷ 3600</td><td class="n">≈ 400</td></tr>
+    <tr><td>Peak QPS</td><td class="n">2 × QPS</td><td class="n">≈ 800</td></tr>
+    <tr><td>মাসে storage (গড় page 500 KB)</td><td class="n">1B × 500 KB</td><td class="n">500 TB</td></tr>
+    <tr><td>৫ বছরে</td><td class="n">500 TB × 12 × 5</td><td class="n">30 PB</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-wc-flow">
+  <div class="head"><span class="num">9.2</span><h3>Component ও flow</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 300" role="img" aria-label="Seed URL থেকে URL frontier, HTML downloader DNS resolver ব্যবহার করে page নামায়, content parser, content seen check, তারপর content storage। Link extractor, URL filter, URL seen check, তারপর নতুন URL frontier-এ ফেরে।">
+      <rect x="10" y="20" width="110" height="40" rx="6" class="soft"/><text x="65" y="45" text-anchor="middle">Seed URLs</text>
+      <rect x="160" y="20" width="130" height="40" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="225" y="45" text-anchor="middle" class="t-h">URL frontier</text>
+      <rect x="330" y="20" width="150" height="40" rx="6" class="box"/><text x="405" y="45" text-anchor="middle">HTML downloader</text>
+      <rect x="520" y="20" width="150" height="40" rx="6" class="soft"/><text x="595" y="45" text-anchor="middle">DNS resolver</text>
+      <rect x="330" y="100" width="150" height="40" rx="6" class="box"/><text x="405" y="125" text-anchor="middle">Content parser</text>
+      <rect x="330" y="180" width="150" height="40" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="405" y="205" text-anchor="middle">Content seen?</text>
+      <rect x="520" y="180" width="150" height="40" rx="6" class="soft"/><text x="595" y="205" text-anchor="middle">Content storage</text>
+      <rect x="330" y="252" width="150" height="40" rx="6" class="box"/><text x="405" y="277" text-anchor="middle">Link extractor</text>
+      <rect x="160" y="252" width="130" height="40" rx="6" class="box"/><text x="225" y="277" text-anchor="middle">URL filter</text>
+      <rect x="160" y="140" width="130" height="40" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="225" y="165" text-anchor="middle">URL seen?</text>
+      <rect x="10" y="140" width="110" height="40" rx="6" class="soft"/><text x="65" y="165" text-anchor="middle">URL storage</text>
+      <line x1="120" y1="40" x2="156" y2="40" class="ln" marker-end="url(#ar)"/>
+      <line x1="290" y1="40" x2="326" y2="40" class="ln" marker-end="url(#ar)"/>
+      <line x1="480" y1="40" x2="516" y2="40" class="ln-mut" marker-start="url(#ar-mut)" marker-end="url(#ar-mut)"/>
+      <line x1="405" y1="60" x2="405" y2="96" class="ln" marker-end="url(#ar)"/>
+      <line x1="405" y1="140" x2="405" y2="176" class="ln" marker-end="url(#ar)"/>
+      <line x1="480" y1="200" x2="516" y2="200" class="ln" marker-end="url(#ar)"/><text x="498" y="194" text-anchor="middle" class="t-s">নতুন</text>
+      <line x1="405" y1="220" x2="405" y2="248" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="272" x2="294" y2="272" class="ln" marker-end="url(#ar)"/>
+      <line x1="225" y1="252" x2="225" y2="184" class="ln" marker-end="url(#ar)"/>
+      <line x1="160" y1="160" x2="124" y2="160" class="ln-mut" marker-end="url(#ar-mut)"/>
+      <line x1="225" y1="140" x2="225" y2="64" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/><text x="232" y="104" class="t-s ok-t">নতুন URL</text>
+    </svg></div>
+    <figcaption>দুটো "seen?" check (হলুদ) duplicate আটকায়। Content seen দেখে page-এর hash তুলনা করে, কারণ web-এর প্রায় ৩০% page duplicate। URL seen সাধারণত bloom filter বা hash table।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: content seen check-এ পুরো HTML character ধরে তুলনা করলে সমস্যা কী?</summary><p>১০০ কোটি page-এ এটা খুব ধীর আর ব্যয়বহুল। তার বদলে প্রতিটা page-এর hash রাখা হয়, আর শুধু hash মেলানো হয়।</p></details>
+</section>
+
+<section class="c" id="s-wc-bfs">
+  <div class="head"><span class="num">9.3</span><h3>BFS ও URL frontier</h3></div>
+  <p>Web হল একটা directed graph: page node, link edge। DFS খুব গভীরে চলে যেতে পারে, তাই BFS (FIFO queue)। কিন্তু সাধারণ BFS-এর দুটো সমস্যা: একই page-এর বেশিরভাগ link একই host-এর, তাই একসাথে সেই host-এ বন্যা (impolite); আর সব URL-কে সমান গুরুত্ব দেয়।</p>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 230" role="img" aria-label="URL frontier: prioritizer URL-কে priority অনুযায়ী front queue-তে রাখে। Queue selector সেখান থেকে নিয়ে host অনুযায়ী back queue-তে পাঠায়, প্রতিটা back queue একটা host-এর আর একটা worker-এর।">
+      <rect x="10" y="90" width="100" height="44" rx="6" class="box"/><text x="60" y="117" text-anchor="middle">Prioritizer</text>
+      <rect x="150" y="14" width="200" height="164" rx="10" class="acc-bg acc-s dash" stroke-width="1.2"/>
+      <text x="250" y="32" text-anchor="middle" class="t-s acc-t">Front queues · priority</text>
+      <rect x="170" y="44" width="160" height="28" rx="4" class="box"/><text x="250" y="63" text-anchor="middle" class="t-s">f1 · সবচেয়ে জরুরি</text>
+      <rect x="170" y="80" width="160" height="28" rx="4" class="box"/><text x="250" y="99" text-anchor="middle" class="t-s">f2</text>
+      <rect x="170" y="116" width="160" height="28" rx="4" class="box"/><text x="250" y="135" text-anchor="middle" class="t-s">fn · কম জরুরি</text>
+      <text x="250" y="168" text-anchor="middle" class="t-s mut">বেশি priority-র queue বেশি বার বাছা হয়</text>
+      <rect x="410" y="14" width="260" height="164" rx="10" class="ok-bg ok-s dash" stroke-width="1.2"/>
+      <text x="540" y="32" text-anchor="middle" class="t-s ok-t">Back queues · politeness</text>
+      <rect x="430" y="44" width="130" height="28" rx="4" class="box"/><text x="495" y="63" text-anchor="middle" class="t-s">b1 · wikipedia.org</text>
+      <rect x="430" y="80" width="130" height="28" rx="4" class="box"/><text x="495" y="99" text-anchor="middle" class="t-s">b2 · apple.com</text>
+      <rect x="430" y="116" width="130" height="28" rx="4" class="box"/><text x="495" y="135" text-anchor="middle" class="t-s">bn · …</text>
+      <text x="610" y="63" text-anchor="middle" class="t-s">worker 1</text>
+      <text x="610" y="99" text-anchor="middle" class="t-s">worker 2</text>
+      <text x="610" y="135" text-anchor="middle" class="t-s">worker n</text>
+      <text x="540" y="168" text-anchor="middle" class="t-s mut">এক queue = এক host, download-এর মাঝে delay</text>
+      <line x1="110" y1="112" x2="166" y2="96" class="ln" marker-end="url(#ar)"/>
+      <line x1="330" y1="94" x2="426" y2="94" class="ln" marker-end="url(#ar)"/><text x="378" y="86" text-anchor="middle" class="t-s">queue router</text>
+      <text x="340" y="212" text-anchor="middle" class="t-s mut">Priority ঠিক হয় PageRank, traffic, update হওয়ার হার দেখে। Host → queue-র mapping একটা table-এ থাকে।</text>
+    </svg></div>
+    <figcaption>Front queue ঠিক করে কোন URL আগে, back queue ঠিক করে একটা site-এ কত দ্রুত। Freshness-এর জন্য পুরনো page আবার crawl হয়, যে page বেশি বদলায় বা বেশি গুরুত্বপূর্ণ সেটা আগে। Frontier-এ কোটি কোটি URL থাকে, তাই বেশিরভাগ disk-এ, আর enqueue-dequeue-এর জন্য memory-তে buffer।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: politeness নিশ্চিত করতে এক host-এর সব URL একটা queue-তে রাখা কেন?</summary><p>প্রতিটা queue-কে একটাই worker নামায়, আর প্রতি download-এর মাঝে delay রাখে। তাই এক host-এ একসাথে একটার বেশি request যায় না, অথচ বিভিন্ন host সমান্তরালে চলে।</p></details>
+</section>
+
+<section class="c" id="s-wc-more">
+  <div class="head"><span class="num">9.4</span><h3>Performance ও robustness</h3></div>
+  <div class="tbl"><table>
+    <tr><th>বিষয়</th><th>কৌশল</th></tr>
+    <tr><td>Robots.txt</td><td>Site কোন page crawl করতে দেয় সেটা মানা; file cache করে রাখা</td></tr>
+    <tr><td>Distributed crawl</td><td>URL space ভাগ করে অনেক server, প্রতিটায় অনেক thread</td></tr>
+    <tr><td>DNS cache</td><td>DNS request ১০–২০০ ms নেয় আর synchronous; domain → IP নিজের cache-এ, cron দিয়ে refresh</td></tr>
+    <tr><td>Locality</td><td>Crawl server target host-এর কাছের অঞ্চলে</td></tr>
+    <tr><td>Short timeout</td><td>Server উত্তর না দিলে বেশিক্ষণ অপেক্ষা নয়, পরের page</td></tr>
+    <tr><td>Consistent hashing</td><td>Downloader-দের মাঝে load ভাগ, server যোগ-বাদ সহজ</td></tr>
+    <tr><td>Crawl state সংরক্ষণ</td><td>Crash হলে সংরক্ষিত state থেকে আবার শুরু</td></tr>
+    <tr><td>Exception handling ও validation</td><td>একটা খারাপ page-এ পুরো system যেন না পড়ে</td></tr>
+  </table></div>
+  <p>Extensibility: নতুন module জুড়ে নতুন content ধরা যায়, যেমন PNG downloader বা copyright লঙ্ঘন খোঁজার web monitor।</p>
+</section>
+
+<section class="c" id="s-wc-bad">
+  <div class="head"><span class="num">9.5</span><h3>সমস্যার content</h3></div>
+  <div class="tbl"><table>
+    <tr><th>সমস্যা</th><th>উদাহরণ</th><th>উপায়</th></tr>
+    <tr><td>Redundant content</td><td>প্রায় ৩০% page duplicate</td><td>Hash বা checksum</td></tr>
+    <tr><td>Spider trap</td><td>অসীম গভীর directory: <span class="mono">/foo/bar/foo/bar/…</span></td><td>URL-এর সর্বোচ্চ দৈর্ঘ্য; বাকিটা হাতে চিহ্নিত করে বাদ</td></tr>
+    <tr><td>Data noise</td><td>বিজ্ঞাপন, code snippet, spam URL</td><td>সম্ভব হলে বাদ</td></tr>
+  </table></div>
+  <p>Wrap up-এ বই আরও বলে: JavaScript-এ তৈরি page-এর জন্য server-side rendering, spam page filter, database replication ও sharding, আর analytics।</p>
+</section>
+
+<!-- ================= CHAPTER 10 ================= -->
+<section class="chapter" id="ch10">
+  <div class="eyebrow">CHAPTER 10</div>
+  <h2>Notification system</h2>
+  <p>Push, SMS আর email দিয়ে user-কে খবর পাঠানো। Delivery platform-এ এটা প্রতিদিনের কাজ: parcel pickup, out for delivery, delivered, COD জমা। Chapter-এর মূল প্রশ্ন: একটা notification-ও যেন না হারায়, আবার একই notification যেন বারবার না যায়।</p>
+</section>
+
+<section class="c" id="s-nt-scope">
+  <div class="head"><span class="num">10.1</span><h3>Scope ও তিন ধরন</h3></div>
+  <p>বইয়ের ধরে নেওয়া: iOS ও Android push, SMS, email; soft real-time (যত দ্রুত সম্ভব, চাপ বেশি হলে সামান্য দেরি চলে); user opt-out করতে পারে। দিনে ১ কোটি push, ১০ লাখ SMS, ৫০ লাখ email।</p>
+  <div class="tbl"><table>
+    <tr><th>ধরন</th><th>পথ</th><th>Provider-এর উদাহরণ</th></tr>
+    <tr><td>iOS push</td><td>Provider → APNs → iOS device; লাগে device token আর payload</td><td>Apple Push Notification Service</td></tr>
+    <tr><td>Android push</td><td>Provider → FCM → Android device</td><td>Firebase Cloud Messaging</td></tr>
+    <tr><td>SMS</td><td>Provider → SMS service → phone</td><td>Twilio, Nexmo</td></tr>
+    <tr><td>Email</td><td>Provider → email service → inbox</td><td>Sendgrid, Mailchimp</td></tr>
+  </table></div>
+  <p>Contact info যোগাড়: app install বা signup-এর সময় API server device token, ফোন নম্বর, email নিয়ে DB-তে রাখে। একজন user-এর একাধিক device থাকতে পারে, তাই <span class="mono">user</span> আর <span class="mono">device</span> আলাদা table।</p>
+</section>
+
+<section class="c" id="s-nt-v1">
+  <div class="head"><span class="num">10.2</span><h3>প্রথম design ও তার সমস্যা</h3></div>
+  <p>সহজ design: কয়েকটা service (billing, shipping …) একটা notification server-কে call করে, server সরাসরি APNs, FCM, SMS, email provider-কে পাঠায়। তিনটা সমস্যা:</p>
+  <div class="tbl"><table>
+    <tr><th>সমস্যা</th><th>কেন</th></tr>
+    <tr><td>Single point of failure</td><td>একটাই notification server</td></tr>
+    <tr><td>Scale করা কঠিন</td><td>DB, cache আর notification processing সব এক জায়গায়, আলাদা করে বাড়ানো যায় না</td></tr>
+    <tr><td>Performance bottleneck</td><td>HTML বানানো আর third-party-র উত্তরের অপেক্ষায় সময় যায়; peak-এ system ভেঙে পড়তে পারে</td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-nt-v2">
+  <div class="head"><span class="num">10.3</span><h3>উন্নত design</h3></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 260" role="img" aria-label="Service-রা notification server-এ পাঠায়। Server cache ও DB থেকে তথ্য নিয়ে ধরন অনুযায়ী আলাদা message queue-তে রাখে। প্রতিটা queue-র worker নিজের third-party provider-এ পাঠায়।">
+      <rect x="10" y="100" width="90" height="56" rx="6" class="soft"/><text x="55" y="124" text-anchor="middle">Services</text><text x="55" y="142" text-anchor="middle" class="t-s mut">1 … N</text>
+      <rect x="130" y="96" width="120" height="64" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="190" y="122" text-anchor="middle" class="t-h">Notification</text><text x="190" y="140" text-anchor="middle" class="t-h">servers</text>
+      <rect x="130" y="196" width="56" height="36" rx="6" class="soft"/><text x="158" y="219" text-anchor="middle" class="t-s">Cache</text>
+      <rect x="194" y="196" width="56" height="36" rx="6" class="soft"/><text x="222" y="219" text-anchor="middle" class="t-s">DB</text>
+      <line x1="100" y1="128" x2="126" y2="128" class="ln" marker-end="url(#ar)"/>
+      <line x1="190" y1="160" x2="190" y2="192" class="ln-mut" marker-start="url(#ar-mut)"/>
+      <g>
+        <rect x="290" y="18" width="130" height="34" rx="6" class="gs-bg gs-s"/><text x="355" y="40" text-anchor="middle" class="t-s">iOS push queue</text>
+        <rect x="290" y="72" width="130" height="34" rx="6" class="gs-bg gs-s"/><text x="355" y="94" text-anchor="middle" class="t-s">Android queue</text>
+        <rect x="290" y="126" width="130" height="34" rx="6" class="gs-bg gs-s"/><text x="355" y="148" text-anchor="middle" class="t-s">SMS queue</text>
+        <rect x="290" y="180" width="130" height="34" rx="6" class="gs-bg gs-s"/><text x="355" y="202" text-anchor="middle" class="t-s">Email queue</text>
+      </g>
+      <g>
+        <rect x="450" y="18" width="80" height="34" rx="6" class="box"/><text x="490" y="40" text-anchor="middle" class="t-s">Workers</text>
+        <rect x="450" y="72" width="80" height="34" rx="6" class="box"/><text x="490" y="94" text-anchor="middle" class="t-s">Workers</text>
+        <rect x="450" y="126" width="80" height="34" rx="6" class="box"/><text x="490" y="148" text-anchor="middle" class="t-s">Workers</text>
+        <rect x="450" y="180" width="80" height="34" rx="6" class="box"/><text x="490" y="202" text-anchor="middle" class="t-s">Workers</text>
+      </g>
+      <g>
+        <rect x="560" y="18" width="110" height="34" rx="6" class="soft"/><text x="615" y="40" text-anchor="middle" class="t-s">APNs</text>
+        <rect x="560" y="72" width="110" height="34" rx="6" class="soft"/><text x="615" y="94" text-anchor="middle" class="t-s">FCM</text>
+        <rect x="560" y="126" width="110" height="34" rx="6" class="soft"/><text x="615" y="148" text-anchor="middle" class="t-s">SMS provider</text>
+        <rect x="560" y="180" width="110" height="34" rx="6" class="soft"/><text x="615" y="202" text-anchor="middle" class="t-s">Email provider</text>
+      </g>
+      <line x1="250" y1="110" x2="286" y2="36" class="ln" marker-end="url(#ar)"/>
+      <line x1="250" y1="120" x2="286" y2="90" class="ln" marker-end="url(#ar)"/>
+      <line x1="250" y1="136" x2="286" y2="144" class="ln" marker-end="url(#ar)"/>
+      <line x1="250" y1="148" x2="286" y2="196" class="ln" marker-end="url(#ar)"/>
+      <line x1="420" y1="35" x2="446" y2="35" class="ln" marker-end="url(#ar)"/><line x1="530" y1="35" x2="556" y2="35" class="ln" marker-end="url(#ar)"/>
+      <line x1="420" y1="89" x2="446" y2="89" class="ln" marker-end="url(#ar)"/><line x1="530" y1="89" x2="556" y2="89" class="ln" marker-end="url(#ar)"/>
+      <line x1="420" y1="143" x2="446" y2="143" class="ln" marker-end="url(#ar)"/><line x1="530" y1="143" x2="556" y2="143" class="ln" marker-end="url(#ar)"/>
+      <line x1="420" y1="197" x2="446" y2="197" class="ln" marker-end="url(#ar)"/><line x1="530" y1="197" x2="556" y2="197" class="ln" marker-end="url(#ar)"/>
+      <text x="480" y="248" text-anchor="middle" class="t-s mut">ধরন অনুযায়ী আলাদা queue: SMS provider বন্ধ হলেও push আর email চলে</text>
+    </svg></div>
+    <figcaption>বদল তিনটা: DB আর cache notification server থেকে আলাদা; notification server একাধিক আর horizontal scaling; message queue দিয়ে component-দের আলাদা করা। Notification server API দেয়, input validate করে, cache বা DB থেকে user info আর template এনে event queue-তে রাখে। Worker queue থেকে নিয়ে provider-এ পাঠায়।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: সব ধরনের জন্য একটা queue না রেখে আলাদা কেন?</summary><p>একটা provider বন্ধ বা ধীর হলে তার message queue-তে জমবে, কিন্তু অন্য ধরনের notification আটকাবে না। আর প্রতিটা ধরনের worker তার চাপ অনুযায়ী আলাদাভাবে বাড়ানো যায়।</p></details>
+</section>
+
+<section class="c" id="s-nt-deep">
+  <div class="head"><span class="num">10.4</span><h3>Reliability ও বাকি অংশ</h3></div>
+  <div class="two">
+    <div><h4>Data হারানো চলবে না</h4><p>Notification দেরিতে বা ভিন্ন ক্রমে গেলেও চলে, কিন্তু হারানো চলবে না। তাই worker পাঠানোর আগে notification log DB-তে রাখে। Provider fail করলে worker message আবার queue-তে দেয় আর retry করে।</p></div>
+    <div><h4>Exactly once কি সম্ভব?</h4><p>না। Distributed system-এ duplicate কখনও কখনও হবেই। কমানোর উপায় dedupe: প্রতিটা event-এর একটা ID; worker আগে দেখে এই ID আগে পাঠানো হয়েছে কি না। হলে বাদ।</p></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>অংশ</th><th>কী করে</th></tr>
+    <tr><td>Template</td><td>একই format বারবার না বানিয়ে parameter বসানো; format একরকম থাকে, ভুল কমে</td></tr>
+    <tr><td>Notification setting</td><td>পাঠানোর আগে দেখা user ওই channel-এ opt-in কি না (<span class="mono">user_id, channel, opt_in</span>)</td></tr>
+    <tr><td>Rate limiting</td><td>একজনকে কতগুলো পাঠানো যাবে তার সীমা; বেশি গেলে user notification পুরো বন্ধ করে দিতে পারে</td></tr>
+    <tr><td>Retry</td><td>Third-party fail করলে queue-তে ফেরত; বারবার fail হলে developer-কে alert</td></tr>
+    <tr><td>Security</td><td>শুধু authenticated client API call করতে পারে (appKey, appSecret)</td></tr>
+    <tr><td>Queue monitoring</td><td>Queue-তে জমা notification বেশি হলে worker বাড়ানো</td></tr>
+    <tr><td>Event tracking</td><td>Open rate, click rate, engagement; analytics service-এর সাথে যুক্ত</td></tr>
+  </table></div>
+  <details class="self"><summary>নিজেকে যাচাই: worker SMS পাঠাল, provider সফল, কিন্তু ack আসার আগে worker crash। কী হবে, কীভাবে সামলাবেন?</summary><p>Message queue-তে ফেরত যাবে আর অন্য worker আবার পাঠাতে চাইবে। Event ID দিয়ে dedupe থাকলে দ্বিতীয়বার যাবে না। এই কারণেই exactly-once-এর বদলে "at least once + dedupe"।</p></details>
+</section>
+
+<!-- ================= CHAPTER 11 ================= -->
+<section class="chapter" id="ch11">
+  <div class="eyebrow">CHAPTER 11</div>
+  <h2>News feed system</h2>
+  <p>Home page-এ বন্ধুদের নতুন post-এর তালিকা। দুটো আলাদা flow: <b>feed publishing</b> (post লেখা হলে বন্ধুদের feed-এ পৌঁছানো) আর <b>news feed building</b> (feed খুললে post জোড়া লাগিয়ে দেখানো)।</p>
+</section>
+
+<section class="c" id="s-nf-scope">
+  <div class="head"><span class="num">11.1</span><h3>Scope ও API</h3></div>
+  <p>বইয়ের ধরে নেওয়া: web আর mobile; post দেওয়া আর বন্ধুদের post দেখা; সাজানো উল্টো সময়ক্রমে; একজনের সর্বোচ্চ ৫,০০০ বন্ধু; দিনে ১ কোটি active user; post-এ ছবি আর video থাকতে পারে।</p>
+  <div class="tbl"><table>
+    <tr><th>API</th><th>কাজ</th></tr>
+    <tr><td class="n">POST /v1/me/feed</td><td>Post publish; param: <span class="mono">content</span>, <span class="mono">auth_token</span></td></tr>
+    <tr><td class="n">GET /v1/me/feed</td><td>নিজের news feed আনা; param: <span class="mono">auth_token</span></td></tr>
+  </table></div>
+</section>
+
+<section class="c" id="s-nf-fan">
+  <div class="head"><span class="num">11.2</span><h3>Fanout: push বনাম pull</h3></div>
+  <p>Fanout মানে একটা post সব বন্ধুর কাছে পৌঁছানো। কখন পৌঁছাবে, সেটাই প্রশ্ন।</p>
+  <div class="tbl"><table>
+    <tr><th></th><th>Fanout on write (push)</th><th>Fanout on read (pull)</th></tr>
+    <tr><td>কখন</td><td>Post দেওয়ার সাথে সাথে সব বন্ধুর feed cache-এ</td><td>বন্ধু feed খুললে তখন</td></tr>
+    <tr><td>লাভ</td><td>Feed আগেই তৈরি, তাই পড়া খুব দ্রুত</td><td>যে user আসে না তার জন্য কাজ হয় না; hotkey সমস্যা নেই</td></tr>
+    <tr><td>সমস্যা</td><td>বহু বন্ধুওয়ালা user-এ hotkey সমস্যা; যারা আসেই না তাদের জন্যও কাজ</td><td>Feed খুলতে ধীর</td></tr>
+  </table></div>
+  <figure><div class="scroll">
+    <svg viewBox="0 0 680 150" role="img" aria-label="Hybrid: সাধারণ user-এর post push করে বন্ধুদের cache-এ পাঠানো হয়। Celebrity-র post pull করা হয়, follower feed খুললে তখন আনা হয়।">
+      <rect x="10" y="20" width="150" height="40" rx="6" class="box"/><text x="85" y="45" text-anchor="middle">সাধারণ user-এর post</text>
+      <rect x="10" y="90" width="150" height="40" rx="6" class="gs-bg gs-s" stroke-width="1.3"/><text x="85" y="115" text-anchor="middle">Celebrity-র post</text>
+      <rect x="430" y="50" width="240" height="50" rx="6" class="acc-bg acc-s" stroke-width="1.5"/><text x="550" y="72" text-anchor="middle" class="t-h">বন্ধুর news feed</text><text x="550" y="90" text-anchor="middle" class="t-s">cache + পড়ার সময় merge</text>
+      <line x1="160" y1="40" x2="426" y2="64" class="ok-s" stroke-width="1.6" fill="none" marker-end="url(#ar-ok)"/><text x="290" y="40" text-anchor="middle" class="t-s ok-t">push: লেখার সময়ই cache-এ</text>
+      <line x1="426" y1="88" x2="164" y2="110" class="ln-mut dash" marker-end="url(#ar-mut)"/><text x="290" y="122" text-anchor="middle" class="t-s mut">pull: feed খোলার সময় টেনে আনা</text>
+    </svg></div>
+    <figcaption>বই hybrid নেয়: বেশিরভাগ user-এ push, যাদের অনেক বন্ধু বা follower তাদের post pull। Hotkey ঠেকাতে বন্ধুদের তালিকায় consistent hashing দিয়ে request আর data ভাগ।</figcaption>
+  </figure>
+  <details class="self"><summary>নিজেকে যাচাই: কোটি follower-এর একজন celebrity-কে push দিলে কী হবে?</summary><p>একটা post-এ কোটি cache write। Fanout queue আটকে যাবে, অন্যদের post-ও দেরিতে পৌঁছাবে। তাই celebrity-র জন্য pull।</p></details>
+</section>
+
+<section class="c" id="s-nf-pub">
+  <div class="head"><span class="num">11.3</span><h3>Publish flow</h3></div>
+  <ol>
+    <li>Web server authentication আর rate limiting করে (spam ঠেকাতে)।</li>
+    <li>Post service post-টা DB আর post cache-এ রাখে।</li>
+    <li>Fanout service graph DB থেকে বন্ধুদের ID আনে।</li>
+    <li>User cache থেকে বন্ধুদের তথ্য এনে setting অনুযায়ী ছাঁকে (mute করা বন্ধু, নির্দিষ্ট লোকের সাথে share)।</li>
+    <li>বন্ধুদের তালিকা আর post ID message queue-তে।</li>
+    <li>Fanout worker queue থেকে নিয়ে news feed cache-এ <span class="mono">&lt;post_id, user_id&gt;</span> রাখে।</li>
+    <li>Notification service বন্ধুদের জানায়।</li>
+  </ol>
+  <p>Feed cache-এ পুরো user আর post object না রেখে শুধু ID রাখা হয়, নইলে memory খুব দ্রুত ফুরাবে। আর সংখ্যাটাও সীমিত: বেশিরভাগ user শুধু সাম্প্রতিক কয়েক হাজার post দেখে, তাই cache miss কম।</p>
+</section>
+
+<section class="c" id="s-nf-read">
+  <div class="head"><span class="num">11.4</span><h3>Retrieval ও cache layer</h3></div>
+  <ol>
+    <li>User <span class="mono">GET /v1/me/feed</span> পাঠায়; load balancer থেকে web server।</li>
+    <li>News feed service feed cache থেকে post ID-র তালিকা আনে।</li>
+    <li>User cache আর post cache থেকে নাম, ছবি, content ইত্যাদি এনে পুরো feed সাজায় (hydrate)।</li>
+    <li>JSON হিসেবে client-এ; ছবি আর video আসে CDN থেকে।</li>
+  </ol>
+  <div class="tbl"><table>
+    <tr><th>Cache layer</th><th>কী রাখে</th></tr>
+    <tr><td>News feed</td><td>প্রতিটা user-এর feed-এর post ID</td></tr>
+    <tr><td>Content</td><td>প্রতিটা post-এর data; জনপ্রিয় content আলাদা hot cache-এ</td></tr>
+    <tr><td>Social graph</td><td>কে কাকে follow করে</td></tr>
+    <tr><td>Action</td><td>কে like, reply বা অন্য কিছু করেছে</td></tr>
+    <tr><td>Counter</td><td>Like, reply, follower, following-এর সংখ্যা</td></tr>
+  </table></div>
+  <p>Wrap up-এ বই বলে: database scaling (vertical বনাম horizontal, SQL বনাম NoSQL, master-slave replication, read replica, consistency model, sharding), stateless web tier, যতটা সম্ভব cache, একাধিক data center, message queue দিয়ে component আলাদা, আর QPS ও feed latency monitor করা।</p>
+  <details class="self"><summary>নিজেকে যাচাই: feed cache-এ পুরো post object কেন রাখা হয় না?</summary><p>একই post হাজার বন্ধুর feed-এ থাকে। পুরো object রাখলে হাজার copy। শুধু ID রাখলে content একবার post cache-এ থাকে, আর edit হলে এক জায়গাতেই বদলাতে হয়।</p></details>
+</section>
+
+<section class="next">
+  <h2>এরপর</h2>
+  <ol>
+    <li>চারটা design-এর প্রতিটা ফাঁকা কাগজে চার ধাপে আঁকুন, এই page না দেখে। তারপর মিলিয়ে নিন।</li>
+    <li>Test দিতে চাইলে বলুন। ভুল হওয়া অংশে Part ১-এর মতো লাল দাগ বসবে।</li>
+    <li><a href="../#/study/p4" target="_top">Part ৪ →</a> chat system, search autocomplete, YouTube, Google Drive।</li>
+  </ol>
+</section>
+</div>
+
+</body></html>

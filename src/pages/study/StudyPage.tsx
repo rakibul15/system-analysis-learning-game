@@ -1,0 +1,91 @@
+import { useEffect, useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { refs } from '@/content/refs';
+import { addBook, listBooks, removeBook, type MyBook } from '@/features/study/myBooks';
+import { bn } from '@/shared/lib/bn';
+import { tr } from '@/shared/lib/i18n';
+import { AppShell } from '@/shared/ui/AppShell';
+
+export const PARTS = ['hub', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'] as const;
+export type Part = (typeof PARTS)[number];
+
+/** The study notes that ship with the app, plus the player's own PDFs kept in this browser. */
+export function StudyPage() {
+  return (
+    <AppShell>
+      <main className="mx-auto box-border flex max-w-[960px] flex-col gap-6 px-4 pb-12 pt-6 sm:px-8">
+        <div>
+          <p className="m-0 text-sm font-bold text-route-deep">{tr('পড়া', 'Study')}</p>
+          <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('ছবিতে system design', 'System design in pictures')}</h1>
+          <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with diagrams and self-check questions. Works offline too.')}</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {PARTS.map((p) => (
+            <Link key={p} to="/study/$part" params={{ part: p }} className="btn-press flex flex-col gap-1 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-ink no-underline shadow-[0_4px_0_#16252D]">
+              <span className="font-display text-lg font-bold">{refs[p].label}</span>
+              <span className="text-sm text-muted">{p === 'hub' ? tr('সব অংশের সূচি আর এক পাতার cheat sheet', 'Index of every part and a one-page cheat sheet') : tr('পড়তে খুলুন →', 'Open to read →')}</span>
+            </Link>
+          ))}
+        </div>
+        <MyBooks />
+      </main>
+    </AppShell>
+  );
+}
+
+function MyBooks() {
+  const [books, setBooks] = useState<MyBook[]>([]);
+  const [open, setOpen] = useState<{ name: string; url: string } | null>(null);
+  const [msg, setMsg] = useState('');
+  const refresh = () => listBooks().then(setBooks).catch(() => setMsg(tr('এই browser-এ বই রাখা যাচ্ছে না।', 'This browser cannot store books.')));
+  useEffect(() => { void refresh(); }, []);
+  useEffect(() => () => { if (open) URL.revokeObjectURL(open.url); }, [open]);
+
+  return (
+    <section className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-white p-5">
+      <h2 className="m-0 font-display text-xl font-bold">{tr('আমার বই', 'My books')}</h2>
+      <p className="m-0 text-sm text-ink-soft">{tr('নিজের কেনা বইয়ের PDF এখানে খুলুন। File শুধু এই browser-এ থাকে, কোথাও upload হয় না, অন্য কেউ দেখতে পায় না।', 'Open the PDFs of books you own here. Files stay only in this browser: never uploaded, never visible to anyone else.')}</p>
+      <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel px-4 font-bold">
+        {tr('PDF যোগ করুন', 'Add a PDF')}
+        <input type="file" accept="application/pdf" className="sr-only" onChange={async (e) => {
+          const f = e.target.files?.[0]; e.target.value = '';
+          if (!f) return;
+          try { await addBook(f); setMsg(''); await refresh(); } catch { setMsg(tr('রাখা গেল না; browser-এর জায়গা কম হতে পারে।', 'Could not store it; the browser may be out of space.')); }
+        }} />
+      </label>
+      {msg && <p className="m-0 text-sm font-semibold text-coral-deep">{msg}</p>}
+      {books.length > 0 && (
+        <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          {books.map((b) => (
+            <li key={b.id} className="flex flex-wrap items-center gap-2 rounded-xl border-2 border-ink px-3 py-2">
+              <span className="min-w-0 flex-1 truncate font-semibold">{b.name}</span>
+              <span className="font-mono text-xs text-muted">{bn(Math.round(b.size / 1e6))} MB</span>
+              <button type="button" onClick={() => setOpen({ name: b.name, url: URL.createObjectURL(b.blob) })} className="cursor-pointer rounded-lg border-2 border-ink bg-white px-3 py-1 font-semibold">{tr('খুলুন', 'Open')}</button>
+              <button type="button" onClick={async () => { await removeBook(b.id); await refresh(); }} className="cursor-pointer rounded-lg border-2 border-coral bg-white px-3 py-1 font-semibold text-coral-deep">{tr('সরান', 'Remove')}</button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {open && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2"><b className="truncate">{open.name}</b><button type="button" onClick={() => setOpen(null)} className="cursor-pointer rounded-lg border-2 border-ink bg-white px-3 py-1 font-semibold">{tr('বন্ধ', 'Close')}</button></div>
+          <iframe title={open.name} src={open.url} className="h-[80vh] w-full rounded-xl border-2 border-ink" />
+        </div>
+      )}
+    </section>
+  );
+}
+
+/** One part of the study notes, full height inside the app. */
+export function StudyReader({ part }: { part: Part }) {
+  return (
+    <div className="flex h-screen flex-col">
+      <header className="flex flex-wrap items-center gap-3 border-b-[3px] border-ink bg-white px-4 py-2">
+        <Link to="/study" className="font-bold text-route-deep no-underline">← {tr('সব নোট', 'All notes')}</Link>
+        <span className="font-display font-bold">{refs[part].label}</span>
+        <Link to="/" className="ml-auto font-semibold text-ink no-underline">{tr('শহর', 'City')}</Link>
+      </header>
+      <iframe key={part} title={refs[part].label} src={`./study/${part}.html`} className="w-full flex-1 border-0" />
+    </div>
+  );
+}
