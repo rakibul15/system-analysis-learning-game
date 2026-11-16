@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { SimFrame, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow, useClock, vis } from '../knob/anim';
 
 const DAU = 10_000_000;
 const ORDERS = 2;
@@ -56,6 +57,7 @@ export function EstimationSim({ onFinish }: { onFinish: (done: number) => void }
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4 text-[15px]">
+          <LiveOrders qps={qps} />
           <div className="rounded-xl border-2 border-ink bg-white p-3">
             <div className="text-xs font-bold text-muted">ParcelGo-র তথ্য</div>
             <ul className="m-0 mt-1 flex flex-col gap-1 pl-5">
@@ -86,5 +88,24 @@ export function EstimationSim({ onFinish }: { onFinish: (done: number) => void }
         { text: '৫ বছরের storage (TB) বের করুন', done: done[2]!, hint: 'ছবিই আসল ভার; record প্রায় কিছুই না।' },
       ]}
     />
+  );
+}
+
+/** Orders arriving live at the real average rate, so QPS is something you can watch. */
+function LiveOrders({ qps: rate }: { qps: number }) {
+  const t = useClock(10);
+  return (
+    <div className="flex items-center gap-3 rounded-xl border-2 border-ink bg-white p-2">
+      <div className="min-w-0 flex-1">
+        <Flow label="Customer থেকে order আসছে" h={16} nodes={[
+          { id: 'u', label: 'Customer', x: 12, y: 8 },
+          { id: 'a', label: 'ParcelGo', x: 86, y: 8, tone: 'hot' },
+        ]} links={[{ from: 'u', to: 'a', rate: vis(rate) * 1.4, secs: 0.9 }]} />
+      </div>
+      <div className="text-right">
+        <div className="text-[11px] font-semibold text-muted">খোলার পর order</div>
+        <div className="font-mono text-xl font-bold">{bn(Math.floor(t * rate))}</div>
+      </div>
+    </div>
   );
 }

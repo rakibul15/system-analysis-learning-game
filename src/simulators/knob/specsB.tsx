@@ -1,6 +1,7 @@
 import { bn } from '@/shared/lib/bn';
 import { Bars, fmt, Strip } from './KnobSim';
 import { spec } from './specsA';
+import { CoinRun, Conveyor, Flow, InterviewClock, Ranking, Rush, vis, Windows } from './anim';
 
 /* L21 · stream aggregation */
 const LATE = [[5, 0.8], [30, 0.15], [90, 0.04], [600, 0.01]] as const; // [seconds late, share]
@@ -21,7 +22,10 @@ export const stream = spec<{ lateness: number; updates: boolean }>({
         { id: 'dropped', label: 'বাদ পড়া scan', value: dropped, unit: '%', digits: 1, good: dropped <= 1 },
         { id: 'delay', label: 'ফল দেখাতে দেরি', value: delay, unit: 'সে.', good: delay <= 10 },
       ],
-      picture: <Strip cells={LATE.map(([sec, p]) => ({ label: sec >= 600 ? '২ মিনিট+' : `≤ ${bn(sec)} সে.`, flex: Math.max(0.6, p * 10), color: sec <= waitedFor ? '#BFEBDD' : '#FFD9D4', sub: `${bn(Math.round(p * 100))}%` }))} />,
+      picture: <>
+      <Windows waited={waitedFor} updates={s.updates} />
+      <Strip cells={LATE.map(([sec, p]) => ({ label: sec >= 600 ? '২ মিনিট+' : `≤ ${bn(sec)} সে.`, flex: Math.max(0.6, p * 10), color: sec <= waitedFor ? '#BFEBDD' : '#FFD9D4', sub: `${bn(Math.round(p * 100))}%` }))} />
+      </>,
       note: s.updates ? 'Window শেষে প্রথম ফল যায়; দেরির scan এলে সেই মিনিটের সংখ্যা আপডেট হয়।' : undefined,
     };
   },
@@ -33,17 +37,17 @@ export const stream = spec<{ lateness: number; updates: boolean }>({
 });
 
 /* L22 · reservation and concurrency */
-export const reservation = spec<{ strategy: string; users: number; ran: boolean; doubles: number; wait: number; retries: number }>({
+export const reservation = spec<{ strategy: string; users: number; ran: boolean; doubles: number; wait: number; retries: number; runs: number }>({
   title: 'একটাই pickup slot',
   intro: 'বিকেল ৫টার pickup slot-এ জায়গা একটাই। অনেক merchant একসাথে "Book" চাপছে।',
-  init: { strategy: 'none', users: 2, ran: false, doubles: 0, wait: 0, retries: 0 },
+  init: { strategy: 'none', users: 2, ran: false, doubles: 0, wait: 0, retries: 0, runs: 0 },
   controls: [
     { kind: 'choice', key: 'strategy', label: 'Book করার নিয়ম', options: [{ id: 'none', label: 'পড়ো, তারপর লেখো' }, { id: 'lock', label: 'SELECT … FOR UPDATE' }, { id: 'optimistic', label: 'Version দিয়ে (optimistic)' }, { id: 'unique', label: 'Unique constraint' }] },
     { kind: 'slider', key: 'users', label: 'একসাথে merchant', min: 2, max: 100 },
   ],
   actions: [{
     label: 'সবাই একসাথে Book', tone: 'go',
-    run: (s) => ({ ran: true, doubles: s.strategy === 'none' ? s.users - 1 : 0, wait: s.strategy === 'lock' ? s.users * 20 : 8, retries: s.strategy === 'optimistic' ? s.users - 1 : 0 }),
+    run: (s) => ({ ran: true, runs: s.runs + 1, doubles: s.strategy === 'none' ? s.users - 1 : 0, wait: s.strategy === 'lock' ? s.users * 20 : 8, retries: s.strategy === 'optimistic' ? s.users - 1 : 0 }),
   }],
   model: (s) => ({
     readings: [
@@ -51,12 +55,15 @@ export const reservation = spec<{ strategy: string; users: number; ran: boolean;
       { id: 'wait', label: 'সবচেয়ে বেশি অপেক্ষা', value: s.ran ? s.wait : 0, unit: 'ms', good: s.ran ? s.wait <= 100 : undefined },
       { id: 'retries', label: 'ব্যর্থ হয়ে আবার', value: s.ran ? s.retries : 0 },
     ],
-    picture: <div className="grid grid-cols-10 gap-1" role="img" aria-label="কে slot পেল">
+    picture: <>
+    <Rush strategy={s.strategy} users={s.users} run={s.runs} />
+    <div className="grid grid-cols-10 gap-1" role="img" aria-label="কে slot পেল">
       {Array.from({ length: Math.min(s.users, 50) }, (_, i) => {
         const got = i === 0 || (s.ran && s.strategy === 'none');
         return <span key={i} className={`grid aspect-square place-items-center rounded-md border-2 border-ink text-[10px] font-bold ${!s.ran ? 'bg-white' : got ? (i === 0 ? 'bg-route text-white' : 'bg-coral text-white') : 'bg-[#E3E6DF]'}`}>{s.ran ? (got ? '✓' : '✕') : bn(i + 1)}</span>;
       })}
-    </div>,
+    </div>
+    </>,
     note: s.ran ? (s.doubles ? `${bn(s.doubles + 1)} জন একই slot পেল! দুজনেই পড়েছিল "খালি", তারপর দুজনেই লিখেছে।` : s.strategy === 'lock' ? 'এক এক করে: সঠিক, কিন্তু লাইনের শেষজন অপেক্ষা করল।' : 'একজনই পেল, বাকিরা সাথে সাথে "slot নেই" জানল।') : undefined,
   }),
   missions: [
@@ -92,7 +99,18 @@ export const email = spec<{ auth: boolean; warm: boolean; suppress: boolean; uns
         { id: 'complaints', label: 'Spam অভিযোগ', value: complaints, unit: '%', digits: 2, good: complaints <= 0.1 },
         { id: 'rate', label: 'হার / ঘণ্টা', value: s.rate * 1000 },
       ],
-      picture: <Bars rows={[{ label: 'Inbox', value: inbox, max: 100, target: 95, bad: inbox < 95, text: `${bn(inbox)}%` }, { label: 'Spam folder', value: 100 - inbox, max: 100, bad: true, text: `${bn(100 - inbox)}%` }]} />,
+      picture: <>
+      <Flow label="Receipt email: inbox না spam" h={40} nodes={[
+        { id: 's', label: 'ParcelGo', x: 10, y: 20, sub: `${bn(s.rate)}k/ঘণ্টা` },
+        { id: 'f', label: 'Gmail filter', x: 48, y: 20, tone: inbox < 95 ? 'hot' : 'ok', sub: s.auth ? 'SPF/DKIM ✓' : 'পরিচয় নেই' },
+        { id: 'i', label: 'Inbox', x: 88, y: 8 }, { id: 'x', label: 'Spam', x: 88, y: 32, tone: 'down' },
+      ]} links={[
+        { from: 's', to: 'f', rate: vis(s.rate * 1000) },
+        { from: 'f', to: 'i', rate: (inbox / 100) * 10 },
+        { from: 'f', to: 'x', rate: ((100 - inbox) / 100) * 10, color: '#E0483E' },
+      ]} />
+      <Bars rows={[{ label: 'Inbox', value: inbox, max: 100, target: 95, bad: inbox < 95, text: `${bn(inbox)}%` }, { label: 'Spam folder', value: 100 - inbox, max: 100, bad: true, text: `${bn(100 - inbox)}%` }]} />
+      </>,
     };
   },
   missions: [
@@ -125,10 +143,13 @@ export const objectStore = spec<{ scheme: string; coldAfter: number }>({
         { id: 'disk', label: 'আসল disk', value: tb * overhead, unit: 'TB' },
         { id: 'slow', label: 'নতুন ছবি ধীরে খোলে', value: slowRecent ? 1 : 0, good: !slowRecent },
       ],
-      picture: <Bars rows={[
+      picture: <>
+      <Conveyor coldAfter={s.coldAfter} ec={s.scheme === 'ec'} />
+      <Bars rows={[
         { label: 'Hot storage', value: tb * overhead * hotShare, max: 360, text: `${fmt(tb * overhead * hotShare)} TB` },
         { label: 'Cold storage', value: tb * overhead * (1 - hotShare), max: 360, text: `${fmt(tb * overhead * (1 - hotShare))} TB` },
-      ]} />,
+      ]} />
+      </>,
       note: slowRecent ? 'প্রথম মাসেই ছবি cold-এ: customer-এর অভিযোগের সময় ছবি খুলতে মিনিট লাগবে।' : undefined,
     };
   },
@@ -160,7 +181,10 @@ export const leaderboard = spec<{ store: string; users: number }>({
         { id: 'mem', label: 'Memory', value: mem, unit: 'GB', digits: 1, good: mem <= 8 },
         { id: 'n', label: 'Rider', value: n },
       ],
-      picture: <Bars rows={[{ label: 'Rank query (log)', value: Math.log10(rank * 100), max: 6, bad: rank > 10, text: `${fmt(rank, rank < 10 ? 2 : 0)} ms` }]} />,
+      picture: <>
+      <Ranking slow={s.store === 'sql' && rank > 10} />
+      <Bars rows={[{ label: 'Rank query (log)', value: Math.log10(rank * 100), max: 6, bad: rank > 10, text: `${fmt(rank, rank < 10 ? 2 : 0)} ms` }]} />
+      </>,
       note: s.store === 'sql' && rank > 10 ? 'নিজের rank জানতে নিজের চেয়ে বেশি পয়েন্টের সবাইকে গুনতে হয়: O(n)।' : undefined,
     };
   },
@@ -183,11 +207,14 @@ export const wallet = spec<{ approach: string; crashes: number; lost: number; lo
       { id: 'lost', label: 'হারানো টাকা', value: s.lost, unit: '৳', good: s.crashes ? s.lost === 0 : undefined },
       { id: 'locked', label: 'টাকা আটকে (সে.)', value: s.locked, good: s.crashes ? s.locked === 0 : undefined },
     ],
-    picture: <Strip cells={[
+    picture: <>
+    <CoinRun approach={s.approach} crashed={s.crashes > 0} />
+    <Strip cells={[
       { label: 'Merchant −৳৫০০', flex: 1, color: '#FFD9D4', sub: s.crashes ? 'হয়েছে' : '' },
       { label: s.crashes ? 'crash!' : '→', flex: 0.6, color: s.crashes ? '#E0483E' : '#FFFFFF' },
       { label: 'Rider +৳৫০০', flex: 1, color: '#BFEBDD', sub: s.crashes ? (s.approach === 'naive' ? 'হয়নি' : s.approach === 'saga' ? 'ফেরত' : 'অপেক্ষায়') : '' },
-    ]} />,
+    ]} />
+    </>,
     note: s.crashes ? (s.approach === 'naive' ? 'Merchant-এর টাকা কাটা, rider পায়নি: ৳৫০০ বাতাসে মিলিয়ে গেল।' : s.approach === '2pc' ? 'Coordinator ফেরা পর্যন্ত দুটো wallet-ই lock: কেউ কিছু করতে পারছে না।' : 'Saga ফেরতের ধাপ চালাল: merchant টাকা ফেরত পেল, পরে আবার চেষ্টা হবে।') : undefined,
   }),
   missions: [
@@ -218,7 +245,18 @@ export const exchange = spec<{ engine: string; seq: boolean; priority: string; t
         { id: 'fair', label: 'ন্যায্য ক্রম', value: fair ? 1 : 0, good: s.tested ? fair : undefined },
         { id: 'replay', label: 'Replay-তে একই ফল', value: s.seq && s.engine === 'mem' ? 1 : 0, good: s.seq && s.engine === 'mem' },
       ],
-      picture: s.tested ? <ol className="m-0 flex flex-col gap-1.5 pl-6 text-sm">{order.map((o) => <li key={o} className="pop-in rounded-lg bg-white px-3 py-1.5">{o}</li>)}</ol> : <p className="m-0 text-muted">"৩টা order" চাপুন।</p>,
+      picture: <>
+      <Flow label="Order থেকে matching engine হয়ে trade" h={30} nodes={[
+        { id: 'o', label: 'Orders', x: 9, y: 15 },
+        ...(s.seq ? [{ id: 'q', label: 'Sequencer', x: 33, y: 15, sub: '১, ২, ৩…' }] : []),
+        { id: 'e', label: s.engine === 'db' ? 'DB engine' : 'Memory engine', x: 60, y: 15, tone: (s.engine === 'db' ? 'hot' : 'ok') as 'hot' | 'ok' },
+        { id: 't', label: 'Trades', x: 90, y: 15 },
+      ]} links={[
+        ...(s.seq ? [{ from: 'o', to: 'q', rate: 10 }, { from: 'q', to: 'e', rate: 10 }] : [{ from: 'o', to: 'e', rate: 10, mix: 0.3, mixColor: '#2F6FDE' }]),
+        { from: 'e', to: 't', rate: s.engine === 'db' ? 2.5 : 10, secs: s.engine === 'db' ? 2.2 : 0.6 },
+      ]} />
+      {s.tested ? <ol className="m-0 flex flex-col gap-1.5 pl-6 text-sm">{order.map((o) => <li key={o} className="pop-in rounded-lg bg-white px-3 py-1.5">{o}</li>)}</ol> : <p className="m-0 text-muted">"৩টা order" চাপুন।</p>}
+      </>,
     };
   },
   missions: [
@@ -254,10 +292,22 @@ export const resilience = spec<{ down: boolean; timeout: number; retries: number
         { id: 'lost', label: 'হারানো SMS', value: lost, unit: '%', good: lost === 0 },
         { id: 'surge', label: 'ফেরার সময় চাপ', value: surge, unit: '×', digits: 1, good: surge <= 2 },
       ],
-      picture: <Bars rows={[
+      picture: <>
+      <Flow label="Order service থেকে SMS service" h={40} nodes={[
+        { id: 'u', label: 'Customer', x: 9, y: 20 },
+        { id: 'o', label: 'Order service', x: 40, y: 20, w: 20, tone: busy > 50 ? 'hot' : 'ok', sub: `thread ${bn(Math.round(busy))}%` },
+        { id: 's', label: 'SMS service', x: 86, y: 8, tone: s.down ? 'down' : 'ok' },
+        { id: 'b', label: 'Outbox', x: 86, y: 32, tone: s.outbox ? 'ok' : 'plain' },
+      ]} links={[
+        { from: 'u', to: 'o', rate: busy >= 100 ? 3 : 8, drop: busy >= 100 ? 0.5 : 0 },
+        { from: 'o', to: 's', rate: open ? 0 : 8, drop: s.down ? 1 : 0, secs: s.down ? Math.min(3, 0.4 + s.timeout / 2500) : 1.1 },
+        { from: 'o', to: 'b', rate: s.outbox ? 6 : 0, color: '#2F6FDE' },
+      ]} />
+      <Bars rows={[
         { label: 'Thread pool', value: busy, max: 100, target: 50, bad: busy > 50, text: `${bn(Math.round(busy))}%` },
         { label: 'SMS service ফেরার মুহূর্তে চাপ', value: surge, max: 6, target: 2, bad: surge > 2, text: `${fmt(surge, 1)}×` },
-      ]} />,
+      ]} />
+      </>,
       note: s.down && busy >= 100 ? 'সব thread SMS-এর অপেক্ষায়: নতুন order-ই নেওয়া যাচ্ছে না। এক service-এর অসুখ সবার।' : open ? 'Breaker খোলা: SMS-কে ডাকাই হচ্ছে না, order চলছে।' : undefined,
     };
   },
@@ -294,13 +344,20 @@ export const interview = spec<{ req: number; est: number; hld: number; deep: num
         { id: 'inRange', label: 'ঠিক মাপের ধাপ', value: inRange, unit: '/৫', good: inRange === 5 },
         { id: 'score', label: 'প্রস্তুতি', value: Math.min(100, score), unit: '/১০০', good: score >= 90 },
       ],
-      picture: <Strip cells={[
+      picture: <>
+      <InterviewClock phases={[
+        { label: 'প্রয়োজন বোঝা', min: s.req, color: '#FFE7A8' }, { label: 'হিসাব', min: s.est, color: '#C8E6FF' },
+        { label: 'High-level design', min: s.hld, color: '#BFEBDD' }, { label: 'Deep dive', min: s.deep, color: '#C7D3F5' },
+        { label: 'শেষ কথা', min: s.wrap, color: '#E3D7F5' },
+      ]} />
+      <Strip cells={[
         { label: 'প্রয়োজন', flex: Math.max(0.3, s.req), color: '#FFE7A8', sub: bn(s.req) },
         { label: 'হিসাব', flex: Math.max(0.3, s.est), color: '#C8E6FF', sub: bn(s.est) },
         { label: 'HLD', flex: Math.max(0.3, s.hld), color: '#BFEBDD', sub: bn(s.hld) },
         { label: 'Deep dive', flex: Math.max(0.3, s.deep), color: '#C7D3F5', sub: bn(s.deep) },
         { label: 'শেষ', flex: Math.max(0.3, s.wrap), color: '#E3D7F5', sub: bn(s.wrap) },
-      ]} />,
+      ]} />
+      </>,
       note: s.deep < 10 ? 'Deep dive-এ সময় কম: senior interview-এ এখানেই পার্থক্য হয়।' : s.req < 3 ? 'প্রয়োজন না বুঝে শুরু করলে ভুল জিনিস design করবেন।' : undefined,
     };
   },

@@ -60,7 +60,13 @@ body {
 .amb-smoke-b { animation-delay: -1.1s; } .amb-smoke-c { animation-delay: -2.2s; }
 @keyframes amb-smoke { 0% { transform: translate(0,0) scale(.5); opacity: .75; } 100% { transform: translate(26px,-84px) scale(1.5); opacity: 0; } }
 
+/* simulator animations */
+.sim-pulse { animation: sim-pulse 1s ease-in-out infinite; }
+@keyframes sim-pulse { 50% { transform: scale(1.06); } }
+.sim-caret { animation: sim-caret 1s steps(1) infinite; }
+@keyframes sim-caret { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
+  .sim-pulse, .sim-caret { animation: none; }
   .amb-drift, .amb-drift-slow, .amb-spin, .amb-spin-fast, .amb-sway, .amb-blink, .amb-ants, .amb-water, .amb-smoke { animation: none; }
 }
 

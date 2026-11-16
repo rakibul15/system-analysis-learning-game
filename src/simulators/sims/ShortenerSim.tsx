@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { toBase62 } from '../lib';
 import { ActionButton, Choice, SimFrame, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow } from '../knob/anim';
 
 type Redirect = '301' | '302';
 
@@ -62,6 +63,13 @@ export function ShortenerSim({ onFinish }: { onFinish: (done: number) => void })
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4">
+          <Flow label={redirect === '301' && browserCache ? 'Browser সরাসরি merchant site-এ যাচ্ছে' : 'প্রতিটা click আমাদের server ঘুরে যাচ্ছে'} h={30} nodes={[
+            { id: 'b', label: 'Browser', x: 10, y: 15, sub: browserCache ? '301 মনে আছে' : undefined },
+            { id: 's', label: 'pgo.to', x: 50, y: 6, tone: browserCache ? 'plain' : 'ok', sub: 'click গোনে' },
+            { id: 'm', label: 'Tracking page', x: 88, y: 15, w: 20 },
+          ]} links={browserCache
+            ? [{ from: 'b', to: 'm', rate: 2.5, color: '#2F6FDE' }]
+            : [{ from: 'b', to: 's', rate: code ? 2.5 : 0.6 }, { from: 's', to: 'm', rate: code ? 2.5 : 0.6 }]} />
           <div className="rounded-xl border-2 border-ink bg-white p-3 text-sm">
             <div className="text-xs font-bold text-muted">URL-এর দৈর্ঘ্য</div>
             <div className="font-mono">{bn(url.length)} অক্ষর → {code ? `pgo.to/${code} (${bn(7 + code.length)} অক্ষর)` : '…'}</div>

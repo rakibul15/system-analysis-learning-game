@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { strongQuorum } from '../lib';
 import { ActionButton, SimFrame, Slider, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow } from '../knob/anim';
 
 const NODES = ['A', 'B', 'C'] as const;
 type Node = (typeof NODES)[number];
@@ -68,6 +69,17 @@ export function QuorumSim({ onFinish }: { onFinish: (done: number) => void }) {
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4">
+          <Flow label={`Write যায় ${bn(w)}টা node-এ সাথে সাথে, read আসে ${bn(r)}টা থেকে`} h={30} nodes={[
+            { id: 'c', label: 'App', x: 10, y: 15 },
+            ...NODES.map((n, i) => ({ id: n, label: `Node ${n}`, x: 86, y: 4.8 + i * 10.2, tone: (n === 'C' && cDown ? 'down' : ver[n] < latest ? 'hot' : 'ok') as 'down' | 'hot' | 'ok' })),
+          ]} links={NODES.flatMap((n, i) => {
+            const down = n === 'C' && cDown;
+            const synced = alive.indexOf(n) > -1 && alive.indexOf(n) < w;
+            return [
+              { from: 'c', to: n, rate: down ? 0 : synced ? 3 : 0.8, color: synced ? '#0B8A7A' : '#B8730A', secs: synced ? 0.8 : 2.4 },
+              ...(i < r && !down ? [{ from: n, to: 'c', rate: 1.2, color: '#2F6FDE' }] : []),
+            ];
+          })} />
           <div className="grid grid-cols-3 gap-3">
             {NODES.map((n) => {
               const down = n === 'C' && cDown;

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
 import { SimFrame, Slider, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { useClock } from '../knob/anim';
 
 const MAP_KM = 20;
 const CELLS: Record<number, number> = { 4: 2, 5: 4, 6: 8, 7: 16 };
@@ -17,6 +18,7 @@ export function ProximitySim({ onFinish }: { onFinish: (done: number) => void })
   const [neighbors, setNeighbors] = useState(false);
   const [me, setMe] = useState({ x: 9.7, y: 10.2 });
 
+  const t = useClock(30);
   const n = CELLS[precision]!;
   const size = MAP_KM / n;
   const cell = (p: { x: number; y: number }) => ({ cx: Math.min(n - 1, Math.floor(p.x / size)), cy: Math.min(n - 1, Math.floor(p.y / size)) });
@@ -78,6 +80,7 @@ export function ProximitySim({ onFinish }: { onFinish: (done: number) => void })
           {Array.from({ length: n + 1 }, (_, i) => <g key={i}><line x1={i * size * sc} y1="0" x2={i * size * sc} y2="100" stroke="#16252D" strokeOpacity="0.25" strokeWidth="0.25" /><line x1="0" y1={i * size * sc} x2="100" y2={i * size * sc} stroke="#16252D" strokeOpacity="0.25" strokeWidth="0.25" /></g>)}
           {SHOPS.map((s, i) => <circle key={i} cx={s.x * sc} cy={s.y * sc} r={r.kind[i] === 'none' ? 0.55 : 0.9} fill={color[r.kind[i]!]} />)}
           <circle cx={me.x * sc} cy={me.y * sc} r={radius * sc} fill="none" stroke="#16252D" strokeWidth="0.5" strokeDasharray="1.5 1" />
+          <circle cx={me.x * sc} cy={me.y * sc} r={((t * 0.7) % 1) * radius * sc} fill="#E0483E" fillOpacity={0.12 * (1 - ((t * 0.7) % 1))} stroke="#E0483E" strokeOpacity={0.6 * (1 - ((t * 0.7) % 1))} strokeWidth="0.4" />
           <circle cx={me.x * sc} cy={me.y * sc} r="1.8" fill="#E0483E" stroke="#16252D" strokeWidth="0.5" />
         </svg>
       }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { ActionButton, Choice, SimFrame, Slider, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow } from '../knob/anim';
 
 type Protocol = 'poll' | 'long' | 'ws';
 const PROTO: Record<Protocol, { reqPerMin: number; latency: number; label: string }> = {
@@ -73,6 +74,14 @@ export function ChatSim({ onFinish }: { onFinish: (done: number) => void }) {
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4">
+          <Flow label={`${p.label}: idle অবস্থায় মিনিটে ${p.reqPerMin}টা request`} h={22} nodes={[
+            { id: 'c', label: 'ক্রেতা', x: 10, y: 11 },
+            { id: 's', label: proto === 'ws' ? 'WebSocket server' : 'Chat server', x: 50, y: 11, w: 22, tone: proto === 'poll' ? 'hot' : 'ok' },
+            { id: 'r', label: 'Rider', x: 90, y: 11, tone: riderOnline ? 'ok' : 'down' },
+          ]} links={[
+            { from: 'c', to: 's', rate: proto === 'poll' ? 8 : proto === 'long' ? 1 : 0.3, color: '#AAB3A8' },
+            { from: 's', to: 'r', rate: riderOnline ? (proto === 'ws' ? 1.5 : 0.8) : 0, secs: p.latency / 400 + 0.4 },
+          ]} />
           <div className="flex items-center justify-between rounded-xl border-2 border-ink bg-white px-3 py-2 text-sm">
             <span className="font-bold">ক্রেতা</span>
             <span className="text-xs text-muted">{p.label}</span>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { ActionButton, SimFrame, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow } from '../knob/anim';
 
 interface Entry { account: string; amount: number; pay: number }
 interface Attempt { pay: number; text: string; tone: 'good' | 'bad' | 'neutral' }
@@ -69,7 +70,17 @@ export function PaymentSim({ onFinish }: { onFinish: (done: number) => void }) {
         </div>
       </>}
       stage={
-        <div className="grid h-full gap-3 p-4 sm:grid-cols-2">
+        <div className="flex h-full flex-col gap-3 p-4">
+        <Flow label="App থেকে payment service হয়ে PSP" h={26} nodes={[
+          { id: 'a', label: 'App', x: 10, y: 13 },
+          { id: 'p', label: 'Payment svc', x: 50, y: 13, w: 20, sub: idem ? 'key দেখে' : undefined },
+          { id: 'b', label: 'PSP', x: 90, y: 13, tone: overcharged > 0 ? 'hot' : 'ok' },
+        ]} links={[
+          { from: 'a', to: 'p', rate: 2, mix: drop ? 0.4 : 0, mixColor: '#2F6FDE' },
+          { from: 'p', to: 'b', rate: 2, mix: drop && !idem ? 0.4 : 0, mixColor: '#E0483E' },
+          { from: 'p', to: 'a', rate: 2, drop: drop ? 0.4 : 0, color: '#2F6FDE' },
+        ]} />
+        <div className="grid gap-3 sm:grid-cols-2">
           <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
             <li className="text-xs font-bold text-muted">Payment-এর ঘটনা</li>
             {log.map((l, i) => <li key={`${log.length}-${i}`} className={`pop-in rounded-lg px-3 py-1.5 ${l.tone === 'good' ? 'bg-route-soft' : l.tone === 'bad' ? 'bg-coral-soft' : 'bg-white'}`}><b>#{bn(l.pay)}</b> {l.text}</li>)}
@@ -87,6 +98,7 @@ export function PaymentSim({ onFinish }: { onFinish: (done: number) => void }) {
               </table>
             </div>
           </div>
+        </div>
         </div>
       }
       metrics={metrics}

@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { bn } from '@/shared/lib/bn';
-import { assign, buildRing, imbalance, movedFraction, unitHash } from '../lib';
+import { assign, buildRing, imbalance, movedFraction, ringOwner, unitHash } from '../lib';
 import { ActionButton, Choice, pct, SimFrame, Slider, useLatched, type Metric } from '../frame/SimFrame';
+import { useClock } from '../knob/anim';
 
 const KEYS = Array.from({ length: 400 }, (_, i) => unitHash(`parcel-${i}`));
 const COLORS = ['#0B8A7A', '#2F6FDE', '#E0483E', '#B8730A', '#6B4D9E', '#16252D', '#3FB37A', '#D0245A'];
@@ -18,6 +19,7 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
   const owners = useMemo(() => assign(KEYS, servers, mode, vnodes), [servers, mode, vnodes]);
   const ring = useMemo(() => (mode === 'ring' ? buildRing(servers, Math.min(vnodes, 60)) : []), [servers, mode, vnodes]);
   const imb = imbalance(owners, servers);
+  const t = useClock(30);
 
   const change = (next: string[], kind: 'add' | 'remove') => {
     const after = assign(KEYS, next, mode, vnodes);
@@ -68,6 +70,19 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
               return <circle key={i} cx={p.x} cy={p.y} r={moved ? 1.1 : 0.7} fill={moved ? '#E0483E' : colorOf(owners[i]!)} opacity={moved ? 1 : 0.75} />;
             })}
             {mode === 'ring' && ring.map((r, i) => { const a = pt(r.at, R + 1), b = pt(r.at, R + 4.5); return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={colorOf(r.server)} strokeWidth={vnodes > 30 ? 0.6 : 1.4} />; })}
+            {(() => {
+              const u = (t * 0.12) % 1;
+              const owner = mode === 'ring' ? ringOwner(ring, u) : servers[Math.floor(u * 997) % servers.length]!;
+              const tip = pt(u, R - 1);
+              const at = mode === 'ring' ? ring.find((r) => r.at >= u) ?? ring[0] : undefined;
+              const dest = at ? pt(at.at, R + 2.5) : undefined;
+              return <g>
+                <line x1={cx} y1={cy} x2={tip.x} y2={tip.y} stroke={colorOf(owner)} strokeWidth="0.7" strokeLinecap="round" />
+                <circle cx={tip.x} cy={tip.y} r="1.6" fill="#FFC02E" stroke="#16252D" strokeWidth="0.35" />
+                {dest && <circle cx={dest.x} cy={dest.y} r="2.2" fill="none" stroke={colorOf(owner)} strokeWidth="0.7" className="sim-pulse" style={{ transformOrigin: `${dest.x}px ${dest.y}px` }} />}
+                <text x={cx} y={cy + 6} textAnchor="middle" fontSize="3" fill={colorOf(owner)} fontWeight="700">→ {owner}</text>
+              </g>;
+            })()}
             {mode === 'ring' && vnodes === 1 && ring.map((r) => { const p = pt(r.at, R + 9); return <text key={r.server} x={p.x} y={p.y + 1.2} fontSize="3.4" fontWeight="700" textAnchor="middle" fill={colorOf(r.server)}>{r.server}</text>; })}
             <text x={cx} y={cy + 1.5} textAnchor="middle" fontSize="4" fontWeight="700" fill="#16252D">{mode === 'ring' ? 'hash ring' : 'hash % ' + bn(servers.length)}</text>
           </svg>

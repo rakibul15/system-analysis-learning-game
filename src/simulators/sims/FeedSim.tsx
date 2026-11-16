@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { ActionButton, Choice, SimFrame, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow, vis } from '../knob/anim';
 
 type Strategy = 'push' | 'pull' | 'hybrid';
 const NORMAL_FOLLOWERS = 300;
@@ -54,6 +55,19 @@ export function FeedSim({ onFinish }: { onFinish: (done: number) => void }) {
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4">
+          <Flow label={strategy === 'pull' ? 'Feed খোলার সময় সবার কাছ থেকে টানা' : 'Post-এর সময় follower-দের feed-এ লেখা'} h={34} nodes={[
+            { id: 'a', label: celeb ? 'তারকা rider' : 'Rider', x: 10, y: 17, tone: celeb ? 'hot' : 'ok' },
+            { id: 'f', label: 'Fan-out', x: 44, y: 17 },
+            ...[0, 1, 2].map((i) => ({ id: `r${i}`, label: `Feed ${bn(i + 1)}`, x: 86, y: 5 + i * 12, tone: 'plain' as const })),
+          ]} links={[
+            { from: 'a', to: 'f', rate: 2 },
+            ...[0, 1, 2].map((i) => {
+              const pushes = strategy === 'push' || (strategy === 'hybrid' && !celeb);
+              return pushes
+                ? { from: 'f', to: `r${i}`, rate: vis(c.writes) * 0.7, color: c.writes > 10_000 ? '#E0483E' : '#0B8A7A' }
+                : { from: `r${i}`, to: 'f', rate: strategy === 'pull' ? 6 : 1.5, color: '#2F6FDE' };
+            }),
+          ]} />
           <svg viewBox="0 0 100 56" className="block w-full" role="img" aria-label={`এই মুহূর্তে একটা post-এ ${bn(c.writes)}টা feed-এ লেখা`}>
             <circle cx="12" cy="28" r="7" fill={celeb ? '#FFC02E' : '#0B8A7A'} stroke="#16252D" strokeWidth="0.8" />
             <text x="12" y="30" textAnchor="middle" fontSize="5">{celeb ? '★' : '✎'}</text>

@@ -1,5 +1,6 @@
 import { bn } from '@/shared/lib/bn';
 import { Bars, fmt, Strip, type KnobSpec, type State } from './KnobSim';
+import { AlertScan, Flow, IdStream, Player, RiderMap, SearchGrow, Typing, vis } from './anim';
 
 export const spec = <S extends State>(x: KnobSpec<S>) => x;
 const YEAR_MS = 365.25 * 24 * 3600 * 1000;
@@ -36,6 +37,7 @@ export const snowflake = spec<{ ts: number; machine: number; guard: boolean; eve
           { label: 'Sequence', flex: Math.max(1, seq), color: valid ? '#C7D3F5' : '#E0483E', sub: bn(seq) },
         ]} />
         {!valid && <p className="m-0 font-semibold text-coral-deep">৬৩ bit-এর বেশি নিয়ে ফেলেছেন!</p>}
+        <IdStream ts={s.ts} machine={s.machine} seq={seq} dup={s.lastDup} />
       </>,
       note: s.events ? (s.lastDup ? 'ঘড়ি পিছোতেই আগের মিলিসেকেন্ড ফিরে এল: একই ID দ্বিতীয়বার!' : 'Generator শেষ timestamp মনে রেখেছে, ঘড়ি ধরে না ফেলা পর্যন্ত অপেক্ষা করল: কোনো duplicate নেই।') : undefined,
     };
@@ -71,11 +73,21 @@ export const crawler = spec<{ workers: number; delay: number; dedupe: boolean }>
         { id: 'perHost', label: 'এক site-এ request / সে.', value: perHost, digits: 1, good: perHost <= 1 },
         { id: 'waste', label: 'বাড়তি (duplicate) আনা', value: fetched - pages, good: fetched === pages },
       ],
-      picture: <Bars rows={[
+      picture: <>
+        <Flow label="Crawler থেকে merchant site-এ request" h={46} nodes={[
+          { id: 'q', label: 'URL queue', x: 10, y: 23, sub: s.dedupe ? 'দেখা URL বাদ' : 'সব URL' },
+          { id: 'w', label: 'Worker', x: 40, y: 23, sub: bn(s.workers) },
+          ...[0, 1, 2, 3].map((i) => ({ id: `h${i}`, label: `site ${bn(i + 1)}`, x: 84, y: 6 + i * 11.3, tone: (perHost > 1 ? 'hot' : 'ok') as 'hot' | 'ok' })),
+        ]} links={[
+          { from: 'q', to: 'w', rate: vis(rate), mix: s.dedupe ? 0 : 0.3, mixColor: '#FFC02E' },
+          ...[0, 1, 2, 3].map((i) => ({ from: 'w', to: `h${i}`, rate: Math.min(12, perHost * 1.5), color: perHost > 1 ? '#E0483E' : '#0B8A7A', mix: s.dedupe ? 0 : 0.3 })),
+        ]} />
+        <Bars rows={[
         { label: 'Worker-এর ক্ষমতা (page/সে.)', value: workerRate, max: 1000 },
         { label: 'ভদ্রতার সীমা (page/সে.)', value: Math.min(politeCap, 1000), max: 1000, text: Number.isFinite(politeCap) ? fmt(politeCap) : 'সীমা নেই' },
         { label: 'আসল গতি (page/সে.)', value: rate, max: 1000 },
-      ]} />,
+      ]} />
+      </>,
       note: perHost > 1 ? `একটা site-এ সেকেন্ডে ${fmt(perHost)}টা request: ছোট merchant-এর server বসে যাবে।` : undefined,
     };
   },
@@ -106,15 +118,7 @@ export const autocomplete = spec<{ debounce: number; mode: string }>({
         { id: 'server', label: 'Server-এ সময়', value: server, unit: 'ms', good: server <= 10 },
         { id: 'felt', label: 'User-এর অপেক্ষা', value: felt, unit: 'ms', good: felt <= 300 },
       ],
-      picture: <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap gap-1 font-mono text-sm">
-          {'dhanmondi 27'.split('').map((c, i) => <span key={i} className={`grid h-8 w-7 place-items-center rounded-md border-2 border-ink ${requests === 12 || i === 8 || i === 11 ? 'bg-parcel' : 'bg-white'}`}>{c === ' ' ? '␣' : c}</span>)}
-        </div>
-        <p className="m-0 text-xs text-muted">হলুদ = এই অক্ষরে server-এ request গেছে</p>
-        <ul className="m-0 flex list-none flex-col gap-1 rounded-xl border-2 border-ink bg-white p-2 text-sm">
-          {['Dhanmondi 27, Road 16', 'Dhanmondi 27 Bus Stop', 'Dhanmondi 27 Mosque', 'Dhanmondi 27 Star Kabab', 'Dhanmondi 27 Lake'].map((x) => <li key={x}>{x}</li>)}
-        </ul>
-      </div>,
+      picture: <Typing debounce={s.debounce} server={server} />,
     };
   },
   missions: [
@@ -159,7 +163,9 @@ export const video = spec<{ r240: boolean; r480: boolean; r720: boolean; r1080: 
         { id: 'storage', label: 'Storage / মিনিট', value: storage, unit: 'MB', good: storage <= 50 },
         { id: 'count', label: 'Rendition', value: on.length },
       ],
-      picture: <div className="grid grid-cols-3 gap-2">
+      picture: <>
+      <Player segs={net.map((bw, i) => ({ q: picks[i] ?? 0, br: RENDITIONS.find(([h]) => h === picks[i])?.[1] ?? 1, bw }))} />
+      <div className="grid grid-cols-3 gap-2">
         {net.map((bw, i) => (
           <div key={i} className="rounded-xl border-2 border-ink bg-white p-2 text-center text-sm">
             <div className="text-xs text-muted">অংশ {bn(i + 1)} · {bn(bw, { grouping: false })} Mbps</div>
@@ -167,7 +173,8 @@ export const video = spec<{ r240: boolean; r480: boolean; r720: boolean; r1080: 
             <div className={`text-xs font-bold ${picks[i] && (RENDITIONS.find(([h]) => h === picks[i])![1] > bw) ? 'text-coral-deep' : 'text-route-deep'}`}>{picks[i] && (RENDITIONS.find(([h]) => h === picks[i])![1] > bw) ? 'আটকে আটকে চলছে' : 'মসৃণ'}</div>
           </div>
         ))}
-      </div>,
+      </div>
+      </>,
     };
   },
   missions: [
@@ -199,9 +206,18 @@ export const filesync = spec<{ size: number; block: string; delta: boolean; comp
         { id: 'share', label: 'ফাইলের কত ভাগ', value: share * 100, unit: '%', digits: 1, good: share <= 0.01 },
         { id: 'lost', label: 'হারানো বদল', value: s.lost, good: s.lost === 0 },
       ],
-      picture: <div className="grid grid-cols-10 gap-1" role="img" aria-label="ফাইলের block">
-        {Array.from({ length: 40 }, (_, i) => <span key={i} className="aspect-square rounded border-2 border-ink" style={{ background: !s.delta || i === 17 ? '#FFC02E' : '#E3E6DF' }} />)}
-      </div>,
+      picture: <>
+      <Flow label="ফোন থেকে server-এ upload" h={30} nodes={[
+        { id: 'a', label: 'ফোন A', x: 12, y: 8 }, { id: 'b', label: 'ফোন B', x: 12, y: 23, tone: s.conflicts ? 'hot' : 'plain' },
+        { id: 's', label: 'Server', x: 86, y: 15, tone: s.lost ? 'down' : 'ok', sub: s.lost ? 'একটা বদল হারাল' : undefined },
+      ]} links={[
+        { from: 'a', to: 's', rate: Math.min(18, 1 + upload / 12), color: share <= 0.01 ? '#0B8A7A' : '#FFC02E' },
+        { from: 'b', to: 's', rate: s.conflicts ? 2 : 0, color: '#2F6FDE', drop: s.policy === 'last' ? 0.5 : 0 },
+      ]} />
+      <div className="grid grid-cols-10 gap-1" role="img" aria-label="ফাইলের block">
+        {Array.from({ length: 40 }, (_, i) => <span key={i} className={`aspect-square rounded border-2 border-ink ${!s.delta || i === 17 ? 'sim-pulse' : ''}`} style={{ background: !s.delta || i === 17 ? '#FFC02E' : '#E3E6DF', animationDelay: `${(i % 10) * 60}ms` }} />)}
+      </div>
+      </>,
       note: s.conflicts ? (s.lost ? `${bn(s.lost)} বার একজনের বদল নিঃশব্দে মুছে গেছে!` : 'দুটো version-ই রাখা হয়েছে: "invoice (conflicted copy).xlsx"') : undefined,
     };
   },
@@ -231,7 +247,10 @@ export const nearby = spec<{ riders: number; interval: number; fanout: string }>
         { id: 'fresh', label: 'Map কত পুরনো', value: s.interval, unit: 'সে.', good: s.interval <= 10 },
         { id: 'riders', label: 'Rider', value: s.riders * 1000 },
       ],
-      picture: <Bars rows={[{ label: 'Message / সে. (log scale)', value: Math.log10(msgs + 1), max: 11, target: 5, bad: msgs > 100_000, text: fmt(msgs) }]} />,
+      picture: <>
+        <RiderMap fanout={s.fanout} interval={s.interval} />
+        <Bars rows={[{ label: 'Message / সে. (log scale)', value: Math.log10(msgs + 1), max: 11, target: 5, bad: msgs > 100_000, text: fmt(msgs) }]} />
+      </>,
       note: msgs > 1e8 ? 'প্রতিটা location সবার কাছে: পুরো WebSocket cluster গলে যাবে।' : undefined,
     };
   },
@@ -263,10 +282,13 @@ export const maps = spec<{ algo: string; live: boolean; km: number; time: string
         { id: 'ms', label: 'পথ বের করতে', value: ms, unit: 'ms', good: ms <= 50, digits: ms < 10 ? 1 : 0 },
         { id: 'error', label: 'ETA-র ভুল', value: error, unit: '%', good: error <= 10 },
       ],
-      picture: <Bars rows={[
+      picture: <>
+      <SearchGrow algo={s.algo} km={s.km} live={s.live} rush={s.time === 'rush'} />
+      <Bars rows={[
         { label: 'ঘাঁটা মোড় (log)', value: Math.log10(explored), max: 7, text: fmt(explored), bad: ms > 50 },
         { label: 'ETA-র ভুল', value: error, max: 50, target: 10, bad: error > 10, text: `${bn(error)}%` },
-      ]} />,
+      ]} />
+      </>,
     };
   },
   missions: [
@@ -298,11 +320,23 @@ export const mq = spec<{ acks: string; rf: number; commit: string; idem: boolean
       { id: 'cDup', label: 'দুবার process', value: s.cDup, good: s.cCrashes > 0 ? s.cDup === 0 : undefined },
       { id: 'latency', label: 'Write latency', value: s.acks === 'all' ? 3 + s.rf : s.acks === '1' ? 2 : 1, unit: 'ms' },
     ],
-    picture: <Strip cells={[
+    picture: <>
+    <Flow label="Producer থেকে broker হয়ে consumer" h={44} nodes={[
+      { id: 'p', label: 'Producer', x: 10, y: 22, sub: `acks=${s.acks}` },
+      { id: 'l', label: 'Leader', x: 42, y: 22, tone: s.bLost ? 'down' : 'ok' },
+      ...Array.from({ length: s.rf - 1 }, (_, i) => ({ id: `f${i}`, label: `Follower ${bn(i + 1)}`, x: 42, y: i ? 38 : 6, tone: 'plain' as const })),
+      { id: 'c', label: 'Consumer', x: 86, y: 22, tone: s.cLost || s.cDup ? 'hot' : 'ok', sub: s.commit === 'before' ? 'commit → কাজ' : 'কাজ → commit' },
+    ]} links={[
+      { from: 'p', to: 'l', rate: 6, drop: s.bLost ? 0.35 : 0 },
+      ...Array.from({ length: s.rf - 1 }, (_, i) => ({ from: 'l', to: `f${i}`, rate: 6, color: '#2F6FDE' })),
+      { from: 'l', to: 'c', rate: 6, drop: s.cLost ? 0.3 : 0, mix: s.cDup ? 0.3 : 0 },
+    ]} />
+    <Strip cells={[
       { label: 'Producer', flex: 1, color: '#FFE7A8', sub: `acks=${s.acks}` },
       ...Array.from({ length: s.rf }, (_, i) => ({ label: i ? `Follower ${bn(i)}` : 'Leader', flex: 1, color: '#C7D3F5', sub: 'partition' })),
       { label: 'Consumer', flex: 1, color: '#BFEBDD', sub: s.commit === 'before' ? 'commit → কাজ' : 'কাজ → commit' },
-    ]} />,
+    ]} />
+    </>,
     note: s.cCrashes && s.cDup ? 'কাজ শেষ, কিন্তু commit-এর আগে crash: restart-এ একই event আবার।' : s.cCrashes && s.cLost ? 'Commit হয়ে গেছে, কাজের আগেই crash: event-গুলো চিরতরে বাদ।' : undefined,
   }),
   missions: [
@@ -337,13 +371,7 @@ export const alerting = spec<{ threshold: number; forMin: number; agg: string }>
         { id: 'false', label: 'অকারণ alert', value: falseAlerts, good: falseAlerts === 0 },
         { id: 'delay', label: 'আসল সমস্যা ধরতে', value: delay, unit: 'মিনিট', good: delay <= 3 },
       ],
-      picture: <svg viewBox="0 0 120 50" className="block w-full" role="img" aria-label="এক ঘণ্টার error rate, সীমা আর alert">
-        <rect x="60" y="0" width="60" height="44" fill="#FFD9D4" opacity="0.5" />
-        <polyline points={v.map((x, i) => `${i * 2},${44 - x * 2.4}`).join(' ')} fill="none" stroke="#16252D" strokeWidth="0.8" />
-        <line x1="0" x2="120" y1={44 - s.threshold * 2.4} y2={44 - s.threshold * 2.4} stroke="#E0483E" strokeDasharray="2 1" strokeWidth="0.6" />
-        {fires.map((i) => <text key={i} x={i * 2} y="49" fontSize="5" textAnchor="middle">{i < 30 ? '🔔' : '🚨'}</text>)}
-        <text x="62" y="6" fontSize="3.5" fill="#9E2A22">আসল সমস্যা</text>
-      </svg>,
+      picture: <AlertScan v={v} threshold={s.threshold} fires={fires} />,
     };
   },
   missions: [

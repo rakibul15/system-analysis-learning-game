@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
 import { ActionButton, SimFrame, Toggle, useLatched, type Metric } from '../frame/SimFrame';
+import { Flow } from '../knob/anim';
 
 type Outcome = 'once' | 'twice' | 'lost';
 interface Run { flaky: boolean; retry: boolean; dedupe: boolean; results: { outcome: Outcome; tries: number }[] }
@@ -65,8 +66,16 @@ export function NotifySim({ onFinish }: { onFinish: (done: number) => void }) {
       </>}
       stage={
         <div className="flex h-full flex-col gap-3 p-4">
+          <Flow label="Queue থেকে worker, provider হয়ে ফোনে" h={24} nodes={[
+            { id: 'q', label: 'Queue', x: 9, y: 12 }, { id: 'w', label: 'Worker', x: 36, y: 12 },
+            { id: 'p', label: 'Provider', x: 63, y: 12, tone: flaky ? 'hot' : 'ok' }, { id: 'f', label: 'ফোন', x: 90, y: 12 },
+          ]} links={[
+            { from: 'q', to: 'w', rate: 4 },
+            { from: 'w', to: 'p', rate: 4, mix: retry && flaky ? 0.3 : 0, mixColor: '#2F6FDE' },
+            { from: 'p', to: 'f', rate: 4, drop: flaky && !retry ? 0.2 : 0, mix: flaky && retry && !dedupe ? 0.15 : 0 },
+          ]} />
           <div className="flex flex-wrap items-center gap-3 text-xs font-semibold">
-            <span>Queue → Worker → Provider → ফোন</span>
+            <span>নীল = আবার চেষ্টা, হলুদ = একই SMS দ্বিতীয়বার, লাল = হারাল</span>
             <span className="ml-auto flex gap-3">
               <span><i className="mr-1 inline-block h-3 w-3 rounded bg-route" />একবার</span>
               <span><i className="mr-1 inline-block h-3 w-3 rounded bg-parcel" />দুবার</span>
