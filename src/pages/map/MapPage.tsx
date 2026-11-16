@@ -8,6 +8,7 @@ import { masteryLabel } from '@/shared/lib/scoring';
 import { AppShell } from '@/shared/ui/AppShell';
 import { CityMap, type MapStopView } from '@/widgets/city-map/CityMap';
 import { tr } from '@/shared/lib/i18n';
+import { PlanCard } from '@/widgets/plan/PlanCard';
 
 /** Where to land: the chapter with the first open, unplayed level. */
 function startingPoint(p: ReturnType<typeof useProgress.getState>) {
@@ -34,6 +35,7 @@ export function MapPage() {
   return (
     <AppShell>
       <main className="mx-auto box-border flex max-w-[1280px] flex-col gap-4 px-4 pb-10 pt-5 sm:px-8">
+        <PlanCard />
         <nav aria-label={tr('অধ্যায়', 'Chapters')} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {chapters.map((c) => {
             const done = c.levels.filter((id) => levelState(id, p) === 'done').length;

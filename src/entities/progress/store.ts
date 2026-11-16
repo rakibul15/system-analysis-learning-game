@@ -26,6 +26,9 @@ export interface AnswerLog { qid: string; correct: boolean; sure: boolean }
 export interface DesignAttempt { promptId: string; score: number; max: number; minutes: number; notes: string; at: string }
 export interface SpeakAttempt { promptId: string; score: number; max: number; at: string }
 
+/** Rebuild-from-memory schedule for one builder challenge (Leitner box like review cards). */
+export interface RebuildRecord { box: number; due: number; attempts: number; best: number }
+
 export interface ProgressData {
   levels: Record<number, LevelRecord>;
   cards: Record<string, ReviewCard>;
@@ -38,7 +41,9 @@ export interface ProgressData {
   incidents: Record<string, number>;
   /** Best score (0 to 1) per architecture-builder challenge. */
   builds: Record<string, number>;
-  settings: { unlockAll: boolean; sound?: boolean };
+  /** Rebuild-from-memory state per builder challenge. */
+  rebuilds: Record<string, RebuildRecord>;
+  settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number };
 }
 
 interface ProgressActions {
@@ -49,6 +54,8 @@ interface ProgressActions {
   recordSpeak: (a: SpeakAttempt) => void;
   recordIncident: (id: string, score: number) => void;
   recordBuild: (id: string, score: number) => void;
+  recordRebuild: (id: string, score: number) => void;
+  setPlan: (interviewDate: string | null, dailyMinutes: number) => void;
   setUnlockAll: (on: boolean) => void;
   setSound: (on: boolean) => void;
   importData: (data: unknown) => boolean;
@@ -65,8 +72,12 @@ export const emptyProgress = (): ProgressData => ({
   speak: [],
   incidents: {},
   builds: {},
+  rebuilds: {},
   settings: { unlockAll: false },
 });
+
+/** Days until the next rebuild-from-memory, by box. */
+export const REBUILD_DAYS = [1, 3, 7, 21, 60] as const;
 
 const withToday = (days: string[]) => {
   const today = dayKey();
@@ -135,6 +146,16 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       recordSpeak: (a) => set((s) => ({ days: withToday(s.days), speak: [...s.speak, a].slice(-100) })),
       recordIncident: (id, score) => set((s) => ({ days: withToday(s.days), incidents: { ...s.incidents, [id]: Math.max(s.incidents[id] ?? 0, score) } })),
       recordBuild: (id, score) => set((s) => ({ days: withToday(s.days), builds: { ...s.builds, [id]: Math.max(s.builds[id] ?? 0, score) } })),
+      recordRebuild: (id, score) => set((s) => {
+        const old = s.rebuilds[id];
+        const box = score >= 1 ? Math.min(REBUILD_DAYS.length - 1, (old?.box ?? 0) + 1) : 0;
+        return {
+          days: withToday(s.days),
+          builds: { ...s.builds, [id]: Math.max(s.builds[id] ?? 0, score) },
+          rebuilds: { ...s.rebuilds, [id]: { box, due: Date.now() + REBUILD_DAYS[box]! * DAY_MS, attempts: (old?.attempts ?? 0) + 1, best: Math.max(old?.best ?? 0, score) } },
+        };
+      }),
+      setPlan: (interviewDate, dailyMinutes) => set((s) => ({ settings: { ...s.settings, interviewDate, dailyMinutes } })),
       setUnlockAll: (on) => set((s) => ({ settings: { ...s.settings, unlockAll: on } })),
       setSound: (on) => set((s) => ({ settings: { ...s.settings, sound: on } })),
       importData: (data) => {
@@ -150,7 +171,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         levels: s.levels, cards: s.cards, days: s.days, reviewXp: s.reviewXp,
-        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, settings: s.settings,
+        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, rebuilds: s.rebuilds, settings: s.settings,
       }),
       // v1 (the pilot) only stored the traffic level as level 3; it is level 1 now.
       migrate: (persisted, version) => {
@@ -171,6 +192,6 @@ export const useProgress = create<ProgressData & ProgressActions>()(
 );
 
 export function exportProgress(s: ProgressData): string {
-  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, settings } = s;
-  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, settings }, null, 2);
+  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, settings } = s;
+  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, settings }, null, 2);
 }

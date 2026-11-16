@@ -9,9 +9,12 @@ import { levelList } from '@/content/levels';
 import type { SimulatorId } from '@/content/schema';
 import { simulators } from '@/simulators/registry';
 import { tr } from '@/shared/lib/i18n';
+import { getRouteApi } from '@tanstack/react-router';
+import { GuidedPractice } from '@/widgets/guided/GuidedPractice';
 
-type Tab = 'estimation' | 'design' | 'speak' | 'lab';
+type Tab = 'guided' | 'estimation' | 'design' | 'speak' | 'lab';
 const TABS: { id: Tab; label: string; note: string }[] = [
+  { id: 'guided', label: tr('ধাপে ধাপে design', 'Step-by-step design'), note: tr('৫ ধাপ, checklist আর model answer', '5 steps, checklist and model answer') },
   { id: 'estimation', label: 'Estimation drill', note: tr('১০টা হিসাব, প্রতিটায় ৩০ সেকেন্ড', '10 estimates, 30 seconds each') },
   { id: 'design', label: 'Design challenge', note: tr('খোলা প্রশ্ন, timer, নিজের rubric', 'Open question, timer, your own rubric') },
   { id: 'speak', label: tr('মুখে বলা', 'Speak aloud'), note: tr('২ মিনিটে একটা ধারণা জোরে বলা', 'Explain one idea out loud in 2 minutes') },
@@ -19,7 +22,8 @@ const TABS: { id: Tab; label: string; note: string }[] = [
 ];
 
 export function PracticePage() {
-  const [tab, setTab] = useState<Tab>('estimation');
+  const search = getRouteApi('/practice').useSearch();
+  const [tab, setTab] = useState<Tab>(() => (TABS.some((t) => t.id === search.tab) ? (search.tab as Tab) : 'guided'));
   return (
     <AppShell>
       <main className="mx-auto box-border flex max-w-[960px] flex-col gap-5 px-4 pb-12 pt-6 sm:px-8">
@@ -36,6 +40,7 @@ export function PracticePage() {
             </button>
           ))}
         </div>
+        {tab === 'guided' && <GuidedPractice />}
         {tab === 'estimation' && <EstimationDrill />}
         {tab === 'design' && <DesignChallenge />}
         {tab === 'speak' && <SpeakAloud />}

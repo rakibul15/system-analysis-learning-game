@@ -27,10 +27,16 @@ const rootRoute = createRootRoute({ component: () => <AuthGate><Outlet /></AuthG
 
 const mapRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: MapPage });
 const reviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/review', component: ReviewPage });
-const practiceRoute = createRoute({ getParentRoute: () => rootRoute, path: '/practice', component: PracticePage });
+const practiceRoute = createRoute({
+  getParentRoute: () => rootRoute, path: '/practice', component: PracticePage,
+  validateSearch: (s: Record<string, unknown>): { tab?: string } => (typeof s.tab === 'string' ? { tab: s.tab } : {}),
+});
 const mockRoute = createRoute({ getParentRoute: () => rootRoute, path: '/mock', component: MockPage });
 const incidentRoute = createRoute({ getParentRoute: () => rootRoute, path: '/incident', component: IncidentPage });
-const builderRoute = createRoute({ getParentRoute: () => rootRoute, path: '/builder', component: BuilderPage });
+const builderRoute = createRoute({
+  getParentRoute: () => rootRoute, path: '/builder', component: BuilderPage,
+  validateSearch: (s: Record<string, unknown>): { memory?: string } => (typeof s.memory === 'string' ? { memory: s.memory } : {}),
+});
 const studyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/study', component: StudyPage });
 const studyPartRoute = createRoute({
   getParentRoute: () => rootRoute,

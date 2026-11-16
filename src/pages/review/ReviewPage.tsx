@@ -8,6 +8,7 @@ import { DAY_MS, REVIEW_DAYS } from '@/shared/lib/scoring';
 import { AppShell } from '@/shared/ui/AppShell';
 import { QuestionCard } from '@/shared/ui/QuestionCard';
 import { tr } from '@/shared/lib/i18n';
+import { dueRebuilds, rebuildQueue } from '@/features/rebuild/rebuild';
 
 const SESSION = 20;
 
@@ -84,6 +85,8 @@ export function ReviewPage() {
           )}
         </section>
 
+        <RebuildSection />
+
         {all.length > 0 && (
           <section className="rounded-[22px] border-[2.5px] border-ink bg-white p-6">
             <h2 className="m-0 mb-3 font-display text-xl font-bold">{tr('কোন ঘরে কতগুলো', 'How many in each box')}</h2>
@@ -100,5 +103,32 @@ export function ReviewPage() {
         <p className="m-0 text-sm text-muted">{tr('নতুন প্রশ্ন জমাতে', 'To collect new questions, play a level in')} <Link to="/" className="font-semibold text-route-deep">{tr('শহরে', 'the city')}</Link>{tr(' একটা level খেলুন।', '.')}</p>
       </main>
     </AppShell>
+  );
+}
+
+/** Architecture builder challenges due to be redrawn from memory. */
+function RebuildSection() {
+  const p = useProgress();
+  const queue = rebuildQueue(p);
+  const due = dueRebuilds(p);
+  if (!queue.length) return null;
+  const next = queue.find((r) => r.due > Date.now());
+  return (
+    <section className="rounded-[22px] border-[3px] border-ink bg-[#EDE6F8] p-6">
+      <p className="m-0 text-sm font-bold text-[#4B2F7A]">Rebuild from memory</p>
+      <h2 className="m-0 font-display text-2xl font-extrabold">{tr('না দেখে আবার আঁকুন', 'Redraw it from memory')}</h2>
+      <p className="m-0 mt-1 text-ink-soft">{tr('যে level পাস করেছেন তার architecture খালি canvas-এ আবার আঁকুন, নিয়ম লুকানো। পুরো ঠিক হলে পরের বার ৩, ৭, ২১, ৬০ দিন পরে আসে।', 'Redraw the architecture of a level you passed on a blank canvas, with the rules hidden. Fully right, and it returns after 3, 7, 21, then 60 days.')}</p>
+      {due.length ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {due.map((r) => (
+            <Link key={r.challenge.id} to="/builder" search={{ memory: r.challenge.id }} className="btn-press flex min-h-12 items-center rounded-xl border-2 border-ink bg-white px-4 font-semibold text-ink no-underline shadow-[0_3px_0_#16252D]">
+              {r.challenge.title}{r.first ? tr(' · প্রথমবার', ' · first time') : ''}
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="m-0 mt-2 font-semibold">{tr(`আজ কিছু বাকি নেই।${next ? ` পরেরটা ${bn(Math.max(1, Math.ceil((next.due - Date.now()) / DAY_MS)))} দিনের মধ্যে।` : ''}`, `Nothing due today.${next ? ` The next one is within ${Math.max(1, Math.ceil((next.due - Date.now()) / DAY_MS))} days.` : ''}`)}</p>
+      )}
+    </section>
   );
 }

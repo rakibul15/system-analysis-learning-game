@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <svg width="32" height="32" viewBox="0 0 34 34" aria-hidden="true"><rect x="3" y="7" width="28" height="22" rx="4" fill="#FFC02E" stroke="#16252D" strokeWidth="2.5" /><path d="M3 14h28M17 7v7" stroke="#16252D" strokeWidth="2.5" /></svg>
               <span className="hidden font-display text-[24px] font-extrabold min-[420px]:inline">ParcelGo</span>
             </Link>
-            <nav aria-label={tr('প্রধান', 'Main')} className="hidden flex-wrap gap-1 xl:flex">{navLinks(false)}</nav>
+            <nav aria-label={tr('প্রধান', 'Main')} className="hidden flex-wrap gap-1 min-[1360px]:flex">{navLinks(false)}</nav>
           </div>
           <div className="flex flex-none items-center gap-1.5 font-bold sm:gap-2">
             <span className="flex h-10 items-center gap-1.5 rounded-xl border-[2.5px] border-ink bg-parcel-soft px-2 sm:px-3" title={tr('টানা কত দিন খেলেছেন', 'Days played in a row')}>
@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <AuthButton />
           </div>
         </div>
-        <nav aria-label={tr('প্রধান', 'Main')} className="flex gap-1 overflow-x-auto px-3 pb-2 [scrollbar-width:none] sm:px-8 xl:hidden">{navLinks(true)}</nav>
+        <nav aria-label={tr('প্রধান', 'Main')} className="flex gap-1 overflow-x-auto px-3 pb-2 [scrollbar-width:none] sm:px-8 min-[1360px]:hidden">{navLinks(true)}</nav>
       </header>
       {children}
     </div>
