@@ -63,3 +63,32 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .amb-drift, .amb-drift-slow, .amb-spin, .amb-spin-fast, .amb-sway, .amb-blink, .amb-ants, .amb-water, .amb-smoke { animation: none; }
 }
+
+/* lesson: dots moving along a flow */
+.flow-dot {
+  position: absolute;
+  width: max(9px, 1.1cqw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--color-parcel);
+  border: 2px solid var(--color-ink);
+  transform: translate(-50%, -50%);
+  animation: flow-move var(--dur, 1.8s) linear infinite;
+  pointer-events: none;
+}
+@keyframes flow-move {
+  0% { left: var(--x1); top: var(--y1); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { left: var(--x2); top: var(--y2); opacity: 0; }
+}
+.node-in { animation: node-in .45s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes node-in { from { opacity: 0; transform: translate(-50%,-50%) scale(.6); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
+.pop-in { animation: pop-in .4s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes pop-in { from { opacity: 0; transform: scale(.85) translateY(8px); } to { opacity: 1; transform: none; } }
+.shake-x { animation: shake-x .4s ease-in-out; }
+@keyframes shake-x { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) {
+  .flow-dot { animation: none; left: calc((var(--x1) + var(--x2)) / 2); top: calc((var(--y1) + var(--y2)) / 2); }
+  .node-in, .pop-in, .shake-x { animation: none; }
+}

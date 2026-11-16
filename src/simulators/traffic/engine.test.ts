@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createSim, multiplierFor, setSwitch, simulate, starsFor, step } from './engine';
 import type { SimState, TrafficRules } from './types';
-import { level03 } from '@/content/levels/level-03';
-import { trafficLevelSchema } from '@/content/schema';
+import { l1 } from '@/content/levels/ch1';
+import { levelSchema } from '@/content/schema';
 
-const { manual, auto } = level03.rounds;
+if (l1.play.kind !== 'traffic') throw new Error('level 1 must be traffic');
+const { manual, auto } = l1.play.rounds;
 
 /** A sensible player: send each parcel to the up hub with the shorter queue. */
 const smartBot = (sim: SimState) => {
@@ -14,8 +15,8 @@ const smartBot = (sim: SimState) => {
 };
 
 describe('traffic engine', () => {
-  it('level 3 content passes the schema', () => {
-    expect(() => trafficLevelSchema.parse(level03)).not.toThrow();
+  it('level 1 content passes the schema', () => {
+    expect(() => levelSchema.parse(l1)).not.toThrow();
   });
 
   it('is deterministic for a seed', () => {
