@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { chapters, levelsById } from '@/content/levels';
 import type { Level } from '@/content/schema';
@@ -10,6 +10,7 @@ import { QuestionCard, type AnswerResult } from '@/shared/ui/QuestionCard';
 import { Stars } from '@/shared/ui/Stars';
 import { LessonPlayer } from '@/widgets/lesson-player/LessonPlayer';
 import { TrafficGame } from '@/widgets/traffic-stage/TrafficGame';
+import { simulators } from '@/simulators/registry';
 
 type Step = 'briefing' | 'predict' | 'lesson' | 'summary' | 'play' | 'boss' | 'result';
 const FLOW: { id: Step; label: string }[] = [
@@ -140,7 +141,16 @@ export function LevelPage({ level }: { level: Level }) {
           </>
         )}
 
-        {step === 'play' && level.play.kind === 'missions' && (
+        {step === 'play' && level.play.kind === 'missions' && level.simulator && (() => {
+          const Sim = simulators[level.simulator];
+          return (
+            <Suspense fallback={<p className="text-muted">Simulator আসছে…</p>}>
+              <Sim onFinish={(n) => { setPlay({ points: (LEVEL_PARTS.play * n) / 3, answers: [] }); setStep('boss'); }} />
+            </Suspense>
+          );
+        })()}
+
+        {step === 'play' && level.play.kind === 'missions' && !level.simulator && (
           <>
             <Intro kicker={`ধাপ ৪ · Mission ${bn(mi + 1)}/৩`} title="Mission" body={level.play.intro} />
             <MissionBar done={play.answers} total={3} />
@@ -255,7 +265,7 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
   const nextOpen = nextId ? !lockReason(nextId, progress) : false;
   const rows: [string, number, number][] = [
     ['Lesson checkpoint', parts.lesson, LEVEL_PARTS.lesson],
-    [level.play.kind === 'traffic' ? 'Simulator' : 'Mission', parts.play, LEVEL_PARTS.play],
+    [level.play.kind === 'traffic' || level.simulator ? 'Simulator' : 'Mission', parts.play, LEVEL_PARTS.play],
     ['Boss', parts.boss, LEVEL_PARTS.boss],
     ['Hint ছাড়া', parts.noHints, LEVEL_PARTS.noHints],
   ];

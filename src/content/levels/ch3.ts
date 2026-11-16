@@ -4,7 +4,7 @@ import { refs } from '../refs';
 /* Chapter ৩ · ParcelGo-র app-গুলো — Vol 1, ch 8–15 */
 
 export const l8 = level({
-  id: 8, chapter: 3,
+  id: 8, chapter: 3, simulator: 'shortener',
   title: 'ছোট link', concept: 'URL shortener',
   story: 'SMS-এ tracking link লম্বা',
   briefing: 'প্রতিটা SMS-এ tracking link ১২০ অক্ষরের, SMS দুই ভাগ হয়ে খরচ দ্বিগুণ। link ছোট করতে হবে: pgo.to/zn9edcu।',
@@ -79,7 +79,7 @@ export const l9 = level({
 });
 
 export const l10 = level({
-  id: 10, chapter: 3,
+  id: 10, chapter: 3, simulator: 'notify',
   title: 'SMS দুবার', concept: 'Notification system',
   story: 'SMS দুবার যাচ্ছে বা যাচ্ছেই না',
   briefing: 'কেউ "parcel পৌঁছেছে" SMS দুবার পাচ্ছে, কেউ একবারও না। Provider মাঝে মাঝে বন্ধ হয়, আর retry ঠিকমতো হচ্ছে না।',
@@ -117,7 +117,7 @@ export const l10 = level({
 });
 
 export const l11 = level({
-  id: 11, chapter: 3,
+  id: 11, chapter: 3, simulator: 'feed',
   title: 'Merchant feed', concept: 'News feed',
   story: 'Merchant feed ধীর',
   briefing: 'Customer-রা যেসব merchant follow করে, তাদের নতুন offer feed-এ দেখে। কিন্তু feed খুলতে ৫ সেকেন্ড, আর বড় merchant post দিলে সব আটকে যায়।',
@@ -156,7 +156,7 @@ export const l11 = level({
 });
 
 export const l12 = level({
-  id: 12, chapter: 3,
+  id: 12, chapter: 3, simulator: 'chat',
   title: 'Rider-এর সাথে কথা', concept: 'Chat system',
   story: 'Rider আর merchant-এর chat',
   briefing: 'Rider ঠিকানা খুঁজে পাচ্ছে না, merchant-কে message দিল। Message গেল ৩০ সেকেন্ড পরে! Real-time chat চাই, offline থাকলেও যেন হারায় না।',

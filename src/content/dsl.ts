@@ -1,4 +1,4 @@
-import type { DiagramNode, LessonStep, Level, Question, TrafficPlay } from './schema';
+import type { DiagramNode, LessonStep, Level, Question, SimulatorId, TrafficPlay } from './schema';
 import { nodeKinds } from './schema';
 
 /**
@@ -27,6 +27,7 @@ export interface LevelDef {
   summary: [string, string, string];
   play: TrafficPlay | { kind: 'missions'; intro: string; missions: Q[] };
   boss: Q[];
+  simulator?: SimulatorId;
 }
 
 const toQ = (id: string, [prompt, options, explain, hint]: Q, fallback = ''): Question => ({
@@ -59,5 +60,6 @@ export function level(def: LevelDef): Level {
     summary: def.summary,
     play: def.play.kind === 'traffic' ? def.play : { kind: 'missions', intro: def.play.intro, missions: def.play.missions.map((m, i) => toQ(`${p}-m${i + 1}`, m)) },
     boss: def.boss.map((b, i) => toQ(`${p}-b${i + 1}`, b)),
+    ...(def.simulator ? { simulator: def.simulator } : {}),
   };
 }

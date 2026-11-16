@@ -1,16 +1,20 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { makeDrill, type DrillQuestion } from '@/features/estimation/generate';
 import { designPrompts, designRubric, speakPrompts, speakRubric, type DesignPrompt, type SpeakPrompt } from '@/features/practice/prompts';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { AppShell } from '@/shared/ui/AppShell';
+import { levelList } from '@/content/levels';
+import type { SimulatorId } from '@/content/schema';
+import { simulators } from '@/simulators/registry';
 
-type Tab = 'estimation' | 'design' | 'speak';
+type Tab = 'estimation' | 'design' | 'speak' | 'lab';
 const TABS: { id: Tab; label: string; note: string }[] = [
   { id: 'estimation', label: 'Estimation drill', note: '১০টা হিসাব, প্রতিটায় ৩০ সেকেন্ড' },
   { id: 'design', label: 'Design challenge', note: 'খোলা প্রশ্ন, timer, নিজের rubric' },
   { id: 'speak', label: 'মুখে বলা', note: '২ মিনিটে একটা ধারণা জোরে বলা' },
+  { id: 'lab', label: 'Simulator lab', note: 'যেকোনো simulator আবার খেলুন' },
 ];
 
 export function PracticePage() {
@@ -34,6 +38,7 @@ export function PracticePage() {
         {tab === 'estimation' && <EstimationDrill />}
         {tab === 'design' && <DesignChallenge />}
         {tab === 'speak' && <SpeakAloud />}
+        {tab === 'lab' && <SimulatorLab />}
       </main>
     </AppShell>
   );
@@ -247,5 +252,37 @@ function SpeakAloud() {
         {saved ? 'রাখা হয়েছে' : `রাখুন · ${bn(checks.filter(Boolean).length)}/${bn(speakRubric.length)}`}
       </button>
     </section>
+  );
+}
+
+/** Replay any level's simulator freely; nothing here is scored. */
+function SimulatorLab() {
+  const [open, setOpen] = useState<SimulatorId | null>(null);
+  const [last, setLast] = useState<string | null>(null);
+  const withSim = levelList.filter((l) => l.simulator);
+  if (open) {
+    const Sim = simulators[open];
+    return (
+      <div className="flex flex-col gap-3">
+        <button type="button" onClick={() => setOpen(null)} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">← সব simulator</button>
+        <Suspense fallback={<p className="text-muted">Simulator আসছে…</p>}>
+          <Sim onFinish={(n) => { setLast(`শেষবার ${bn(n)}/৩ mission`); setOpen(null); }} />
+        </Suspense>
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      {last && <p className="m-0 rounded-xl bg-route-soft px-4 py-2 font-semibold">{last}</p>}
+      <div className="grid gap-3 sm:grid-cols-2">
+        {withSim.map((l) => (
+          <button key={l.id} type="button" onClick={() => setOpen(l.simulator!)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+            <span className="text-sm font-bold text-route-deep">Level {bn(l.id)}</span>
+            <span className="font-display text-lg font-extrabold">{l.title}</span>
+            <span className="text-sm text-muted">{l.concept}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

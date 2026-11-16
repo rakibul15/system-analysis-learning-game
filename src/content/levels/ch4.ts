@@ -4,7 +4,7 @@ import { refs } from '../refs';
 /* Chapter ৪ · জায়গা আর ঘটনার স্রোত — Vol 2, ch 1–6 */
 
 export const l16 = level({
-  id: 16, chapter: 4,
+  id: 16, chapter: 4, simulator: 'proximity',
   title: 'কাছের rider', concept: 'Proximity service',
   story: 'কাছের rider খোঁজা',
   briefing: 'Order এলেই কাছের ফাঁকা rider চাই। Lat/lng দিয়ে database-এ খুঁজলে ধীর, আর সীমানার ঠিক ওপারের rider চোখেই পড়ে না।',

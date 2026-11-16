@@ -44,7 +44,11 @@ describe('level content', () => {
     expect(longer / total).toBeLessThan(0.1);
   });
 
-  it('only level 1 uses the traffic simulator for now; the rest have three missions', () => {
+  it('only level 1 uses the traffic simulator; every other level keeps three missions', () => {
     expect(levelList.filter((l) => l.play.kind === 'traffic').map((l) => l.id)).toEqual([1]);
+  });
+
+  it('the v1 levels have an interactive simulator', () => {
+    expect(levelList.filter((l) => l.simulator).map((l) => l.id)).toEqual([2, 3, 4, 5, 6, 8, 10, 11, 12, 16, 26]);
   });
 });

@@ -94,6 +94,9 @@ export const missionPlaySchema = z.object({
 
 /* ---------- level ---------- */
 
+export const SIMULATOR_IDS = ['cache', 'estimation', 'ratelimit', 'hashring', 'quorum', 'shortener', 'notify', 'feed', 'chat', 'proximity', 'payment'] as const;
+export type SimulatorId = (typeof SIMULATOR_IDS)[number];
+
 export const levelSchema = z
   .object({
     id: z.number().int().min(1).max(30),
@@ -109,6 +112,8 @@ export const levelSchema = z
     steps: z.array(lessonStepSchema).min(4).max(10),
     summary: z.array(z.string()).length(3),
     play: z.discriminatedUnion('kind', [trafficPlaySchema, missionPlaySchema]),
+    /** an interactive simulator that replaces the three mission questions in the play step */
+    simulator: z.enum(SIMULATOR_IDS).optional(),
     boss: z.array(questionSchema).length(5),
   })
   .superRefine((l, ctx) => {

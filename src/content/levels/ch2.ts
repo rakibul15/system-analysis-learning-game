@@ -4,7 +4,7 @@ import { refs } from '../refs';
 /* Chapter ২ · ছড়ানো system-এর ভিত — Vol 1, ch 5–7 */
 
 export const l5 = level({
-  id: 5, chapter: 2,
+  id: 5, chapter: 2, simulator: 'hashring',
   title: 'Cache-এর আংটি', concept: 'Consistent hashing',
   story: 'Cache server যোগ করতেই সব miss',
   briefing: 'ঈদের ভিড়ে আরেকটা cache server যোগ করলেন। পরের মিনিটেই প্রায় সব request cache miss, database ধসে পড়ার উপক্রম। একটা server যোগ করায় কেন সব গোলমাল হল?',
@@ -45,7 +45,7 @@ export const l5 = level({
 });
 
 export const l6 = level({
-  id: 6, chapter: 2,
+  id: 6, chapter: 2, simulator: 'quorum',
   title: 'পুরনো data-র রহস্য', concept: 'Key-value store · CAP',
   story: 'এক node পড়লে data পুরনো দেখায়',
   briefing: 'Merchant দাম বদলাল, কিন্তু কিছু customer এখনো পুরনো দাম দেখছে। Data তিনটা node-এ রাখা হয়—তাহলে পুরনো মান এল কোথা থেকে? আজ quorum, CAP আর vector clock।',

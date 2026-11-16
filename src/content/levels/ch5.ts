@@ -156,7 +156,7 @@ export const l25 = level({
 });
 
 export const l26 = level({
-  id: 26, chapter: 5,
+  id: 26, chapter: 5, simulator: 'payment',
   title: 'COD দুবার কাটা', concept: 'Payment system',
   story: 'Online payment দুবার কাটা পড়ল',
   briefing: 'Customer pay চাপল, network কেটে গেল, আবার চাপল। দুবার টাকা কাটা! Payment-এ এমন ভুল মানে আস্থা শেষ। Idempotency আর ledger-এর পাঠ।',

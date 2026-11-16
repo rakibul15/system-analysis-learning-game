@@ -82,7 +82,7 @@ export const l1 = level({
 });
 
 export const l2 = level({
-  id: 2, chapter: 1,
+  id: 2, chapter: 1, simulator: 'cache',
   title: 'দ্রুত তাক', concept: 'Cache · CDN',
   story: 'Page ধীর, DB-তে চাপ',
   briefing: 'একই product page দিনে লাখবার খোলা হয়, আর প্রতিবার database থেকে পড়া হয়। DB হাঁপিয়ে উঠেছে, page খুলতে ৩ সেকেন্ড। বারবার চাওয়া জিনিস হাতের কাছের তাকে রাখার সময়।',
@@ -121,7 +121,7 @@ export const l2 = level({
 });
 
 export const l3 = level({
-  id: 3, chapter: 1,
+  id: 3, chapter: 1, simulator: 'estimation',
   title: 'Investor-এর প্রশ্ন', concept: 'Estimation · Interview framework',
   story: 'Investor জিজ্ঞেস করছে কত server লাগবে',
   briefing: 'Investor meeting-এ প্রশ্ন: "এক কোটি customer হলে কত server আর কত storage লাগবে?" Calculator ছাড়া, মুখে মুখে, পাঁচ মিনিটে। সাথে শিখবেন interview-এর ৪৫ মিনিট কীভাবে ভাগ করবেন।',
@@ -161,7 +161,7 @@ export const l3 = level({
 });
 
 export const l4 = level({
-  id: 4, chapter: 1,
+  id: 4, chapter: 1, simulator: 'ratelimit',
   title: 'Bot-এর বন্যা', concept: 'Rate limiter',
   story: 'একটা bot API ভাসিয়ে দিচ্ছে',
   briefing: 'রাত ২টায় একটা IP থেকে সেকেন্ডে হাজার request। আসল customer order দিতে পারছে না। সামনে একজন দারোয়ান দরকার, যে গুনে গুনে ঢুকতে দেবে।',
