@@ -65,7 +65,7 @@ export function AccountCard() {
             <button type="button" onClick={() => void syncProgressNow()} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('এখনই sync করুন', 'Sync now')}</button>
             <button type="button" disabled={busy} onClick={async () => { setBusy(true); await signOutUser(); setBusy(false); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('Logout', 'Sign out')}</button>
           </div>
-          <p className="m-0 text-xs text-muted">{tr('Logout করলেও এই browser-এর progress থেকে যায়।', 'Signing out keeps the progress in this browser.')}</p>
+          <p className="m-0 text-xs text-muted">{tr('Logout করলে progress এই browser থেকে সরে যায়, আপনার account-এ (cloud-এ) থেকে যায়। আবার login করলেই ফিরে আসবে।', 'Signing out removes the progress from this browser; it stays in your account in the cloud and comes back when you sign in.')}</p>
         </>
       ) : (
         <>

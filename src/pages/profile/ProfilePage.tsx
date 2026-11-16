@@ -122,7 +122,7 @@ export function ProfilePage() {
                   <button type="button" onClick={() => setConfirmReset(false)} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('না', 'No')}</button></span>}
           </div>
           {msg && <p role="status" className="m-0 font-semibold text-route-deep">{msg}</p>}
-          <p className="m-0 text-sm text-muted">{tr('Login না করলে সব data শুধু এই browser-এ থাকে। Login করলে cloud-এও থাকে।', 'Without signing in, all data lives only in this browser. Signed in, it is also kept in the cloud.')}</p>
+          <p className="m-0 text-sm text-muted">{tr('Progress আপনার Google account-এ save থাকে; download করে নিজের কাছেও একটা copy রাখতে পারেন।', 'Progress is saved to your Google account; you can also download a copy to keep yourself.')}</p>
         </section>
       </main>
     </AppShell>

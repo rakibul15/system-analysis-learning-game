@@ -10,6 +10,7 @@ import { PracticePage } from '@/pages/practice/PracticePage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
 import { tr } from '@/shared/lib/i18n';
+import { AuthGate } from './AuthGate';
 
 function NotFound() {
   return (
@@ -22,7 +23,7 @@ function NotFound() {
   );
 }
 
-const rootRoute = createRootRoute({ component: Outlet, notFoundComponent: NotFound });
+const rootRoute = createRootRoute({ component: () => <AuthGate><Outlet /></AuthGate>, notFoundComponent: NotFound });
 
 const mapRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: MapPage });
 const reviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/review', component: ReviewPage });

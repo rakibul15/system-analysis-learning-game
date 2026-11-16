@@ -45,7 +45,7 @@ export function MapPage() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => { setChapterId(c.id); setSel(Math.max(0, c.levels.findIndex((id) => levelState(id, p) === 'open'))); }}
-                className={`flex min-w-[150px] flex-none cursor-pointer flex-col items-start rounded-2xl border-[2.5px] px-3.5 py-2 text-left font-[inherit] ${active ? 'border-ink bg-ink text-white shadow-[0_4px_0_#FFC02E]' : 'border-ink bg-white text-ink'}`}
+                className={`relative flex min-w-[150px] flex-none cursor-pointer flex-col items-start rounded-2xl border-[2.5px] px-3.5 py-2 text-left font-[inherit] ${active ? 'border-ink bg-ink text-white shadow-[0_4px_0_#FFC02E]' : 'border-ink bg-white text-ink'}`}
               >
                 <span className="text-xs font-bold opacity-80">{tr('অধ্যায়', 'Chapter')} {bn(c.id)} {firstLocked ? tr('· তালা', '· locked') : ''}</span>
                 <span className="font-display text-[15px] font-bold leading-tight">{c.title}</span>

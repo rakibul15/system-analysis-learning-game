@@ -19,6 +19,11 @@ export const useAuth = create<AuthState>(() => ({ user: null, status: 'idle', sy
 
 /** Remembered so a returning learner's session is restored without a click, and guests never download Firebase. */
 const FLAG = 'salg-auth';
+const OWNER = 'salg-owner';
+/** Which account the progress in this browser belongs to, so two people on one browser never mix. */
+const owner = { get: () => { try { return localStorage.getItem(OWNER); } catch { return null; } }, set: (uid: string | null) => { try { uid ? localStorage.setItem(OWNER, uid) : localStorage.removeItem(OWNER); } catch { /* storage blocked */ } } };
+const clearLocal = () => { applying = true; useProgress.getState().reset(); applying = false; };
+
 const flag = { get: () => { try { return localStorage.getItem(FLAG) === '1'; } catch { return false; } }, set: (on: boolean) => { try { on ? localStorage.setItem(FLAG, '1') : localStorage.removeItem(FLAG); } catch { /* storage blocked */ } } };
 
 type Fb = Awaited<ReturnType<typeof loadFirebase>>;
@@ -92,11 +97,18 @@ export async function startAuth() {
     f.authMod.onAuthStateChanged(f.auth, (u) => {
       if (!u) {
         unsubProgress?.(); unsubProgress = null;
+        // progress is safe in the cloud; leave nothing behind for the next person on this browser
+        if (owner.get()) { clearLocal(); owner.set(null); }
         useAuth.setState({ user: null, status: 'ready', sync: 'off' });
         flag.set(false);
         return;
       }
       flag.set(true);
+      // another account's progress in this browser must not merge into this one;
+      // progress made before any sign-in (no owner) is claimed by the first account
+      const prev = owner.get();
+      if (prev && prev !== u.uid) clearLocal();
+      owner.set(u.uid);
       useAuth.setState({ user: { uid: u.uid, name: u.displayName ?? u.email ?? 'Learner', email: u.email ?? '', photo: u.photoURL }, status: 'ready' });
       watchProgress();
       void syncNow();
@@ -108,6 +120,9 @@ export async function startAuth() {
 }
 
 /** Restore a previous session on load, only if this browser signed in before. */
+/** True when this browser signed in before (the session may still be restoring). */
+export const hasSession = () => flag.get();
+
 export function resumeAuth() { if (flag.get()) void startAuth(); }
 
 export async function signInWithGoogle() {
