@@ -1,22 +1,23 @@
+import { tr } from '@/shared/lib/i18n';
 /** The interviewer's script for a 45-minute mock: five phases and prompt-specific follow-ups. */
 export interface MockPhase { id: string; title: string; minutes: number; ask: string[] }
 
 export const mockPhases: MockPhase[] = [
-  { id: 'req', title: 'প্রয়োজন বোঝা', minutes: 5, ask: ['কোন feature-গুলো এই আলোচনায় থাকবে, কোনগুলো বাদ?', 'কত user, কত request? কোন অঞ্চলে?', 'কোনটা বেশি জরুরি: latency, availability না consistency?'] },
-  { id: 'est', title: 'হিসাব', minutes: 5, ask: ['গড় আর peak QPS কত?', 'বছরে কত storage লাগবে?', 'Read আর write-এর অনুপাত কেমন?'] },
-  { id: 'hld', title: 'High-level design', minutes: 15, ask: ['মূল API-গুলো লিখুন।', 'Data model আর database: কোনটা, কেন?', 'একটা request শুরু থেকে শেষ পর্যন্ত কোন পথে যায়, এঁকে দেখান।'] },
+  { id: 'req', title: tr('প্রয়োজন বোঝা', 'Requirements'), minutes: 5, ask: [tr('কোন feature-গুলো এই আলোচনায় থাকবে, কোনগুলো বাদ?', 'Which features are in scope today, and which are out?'), tr('কত user, কত request? কোন অঞ্চলে?', 'How many users, how many requests? In which regions?'), tr('কোনটা বেশি জরুরি: latency, availability না consistency?', 'What matters most: latency, availability or consistency?')] },
+  { id: 'est', title: tr('হিসাব', 'Estimation'), minutes: 5, ask: [tr('গড় আর peak QPS কত?', 'What are the average and peak QPS?'), tr('বছরে কত storage লাগবে?', 'How much storage per year?'), tr('Read আর write-এর অনুপাত কেমন?', 'What is the read-to-write ratio?')] },
+  { id: 'hld', title: 'High-level design', minutes: 15, ask: [tr('মূল API-গুলো লিখুন।', 'Write down the main APIs.'), tr('Data model আর database: কোনটা, কেন?', 'Data model and database: which, and why?'), tr('একটা request শুরু থেকে শেষ পর্যন্ত কোন পথে যায়, এঁকে দেখান।', 'Draw the path one request takes from start to finish.')] },
   { id: 'deep', title: 'Deep dive', minutes: 15, ask: [] },
-  { id: 'wrap', title: 'শেষ কথা', minutes: 5, ask: ['Single point of failure কোথায়?', 'Traffic ১০ গুণ হলে আগে কী ভাঙবে?', 'আরও সময় পেলে কী বদলাতেন?'] },
+  { id: 'wrap', title: tr('শেষ কথা', 'Wrap-up'), minutes: 5, ask: [tr('Single point of failure কোথায়?', 'Where is the single point of failure?'), tr('Traffic ১০ গুণ হলে আগে কী ভাঙবে?', 'If traffic grows 10×, what breaks first?'), tr('আরও সময় পেলে কী বদলাতেন?', 'With more time, what would you change?')] },
 ];
 
 /** Deep-dive questions the interviewer asks for each design prompt. */
 export const followUps: Record<string, string[]> = {
-  shortener: ['একই লম্বা URL দুবার এলে কী করবেন?', 'Click গুনতে 301 না 302, কেন?', 'ID কোথা থেকে আসবে যাতে দুই server একই code না দেয়?'],
-  ratelimit: ['অনেক API server-এর মধ্যে counter কোথায় রাখবেন?', 'দুই server একসাথে counter বাড়ালে race condition কীভাবে আটকাবেন?', 'Rate limiter নিজে বন্ধ হলে request ঢুকতে দেবেন না আটকাবেন?'],
-  notify: ['Provider ব্যর্থ হলে retry কীভাবে, কতবার?', 'একই notification দুবার যাওয়া কীভাবে আটকাবেন?', 'User notification বন্ধ রাখলে সেটা কোথায় দেখবেন?'],
-  chat: ['WebSocket server-গুলোর মধ্যে message কীভাবে পৌঁছাবে?', 'Online/offline কীভাবে জানবেন, ঝিকমিক কীভাবে আটকাবেন?', 'Message-এর ক্রম কীভাবে ঠিক রাখবেন?'],
-  nearby: ['প্রতি ৫ সেকেন্ডে ৫ লাখ location write কোথায় রাখবেন?', 'Geohash-এর ঘরের কিনারায় rider থাকলে?', 'একই rider দুটো order পেয়ে গেলে?'],
-  queue: ['Consumer পড়ে ব্যর্থ হলে message হারাবে না কীভাবে?', 'ক্রম শুধু কোথায় দরকার: সব topic-এ, নাকি এক order-এর মধ্যে?', 'Consumer পিছিয়ে পড়লে কী দেখবেন, কী করবেন?'],
-  payment: ['Network-এ উত্তর হারালে retry-তে দুবার কাটা কীভাবে আটকাবেন?', 'আমাদের হিসাব আর PSP-র হিসাব না মিললে?', 'Merchant payout ব্যর্থ হলে কী হবে?'],
-  feed: ['লাখো follower-ওয়ালা merchant post করলে কী হবে?', 'Feed cache-এ কী রাখবেন, কতক্ষণ?', 'Follow বাদ দিলে পুরনো offer feed থেকে সরবে কীভাবে?'],
+  shortener: [tr('একই লম্বা URL দুবার এলে কী করবেন?', 'What do you do when the same long URL arrives twice?'), tr('Click গুনতে 301 না 302, কেন?', '301 or 302 for counting clicks, and why?'), tr('ID কোথা থেকে আসবে যাতে দুই server একই code না দেয়?', 'Where do IDs come from so two servers never issue the same code?')],
+  ratelimit: [tr('অনেক API server-এর মধ্যে counter কোথায় রাখবেন?', 'Where do you keep the counter across many API servers?'), tr('দুই server একসাথে counter বাড়ালে race condition কীভাবে আটকাবেন?', 'How do you stop a race when two servers bump the counter at once?'), tr('Rate limiter নিজে বন্ধ হলে request ঢুকতে দেবেন না আটকাবেন?', 'If the rate limiter itself is down, do you let requests in or block them?')],
+  notify: [tr('Provider ব্যর্থ হলে retry কীভাবে, কতবার?', 'When the provider fails, how do you retry, and how many times?'), tr('একই notification দুবার যাওয়া কীভাবে আটকাবেন?', 'How do you stop the same notification going twice?'), tr('User notification বন্ধ রাখলে সেটা কোথায় দেখবেন?', 'Where do you check that a user has turned notifications off?')],
+  chat: [tr('WebSocket server-গুলোর মধ্যে message কীভাবে পৌঁছাবে?', 'How does a message travel between WebSocket servers?'), tr('Online/offline কীভাবে জানবেন, ঝিকমিক কীভাবে আটকাবেন?', 'How do you know online/offline, and how do you stop flicker?'), tr('Message-এর ক্রম কীভাবে ঠিক রাখবেন?', 'How do you keep messages in order?')],
+  nearby: [tr('প্রতি ৫ সেকেন্ডে ৫ লাখ location write কোথায় রাখবেন?', 'Where do 500,000 location writes every 5 seconds go?'), tr('Geohash-এর ঘরের কিনারায় rider থাকলে?', 'What if a rider sits on the edge of a geohash cell?'), tr('একই rider দুটো order পেয়ে গেলে?', 'What if one rider gets two orders at once?')],
+  queue: [tr('Consumer পড়ে ব্যর্থ হলে message হারাবে না কীভাবে?', 'If a consumer reads and then fails, how is the message not lost?'), tr('ক্রম শুধু কোথায় দরকার: সব topic-এ, নাকি এক order-এর মধ্যে?', 'Where is ordering actually needed: across a topic, or within one order?'), tr('Consumer পিছিয়ে পড়লে কী দেখবেন, কী করবেন?', 'When consumers fall behind, what do you watch and what do you do?')],
+  payment: [tr('Network-এ উত্তর হারালে retry-তে দুবার কাটা কীভাবে আটকাবেন?', 'If a response is lost in the network, how do you stop a retry charging twice?'), tr('আমাদের হিসাব আর PSP-র হিসাব না মিললে?', 'What if our books and the PSP\'s books disagree?'), tr('Merchant payout ব্যর্থ হলে কী হবে?', 'What happens when a merchant payout fails?')],
+  feed: [tr('লাখো follower-ওয়ালা merchant post করলে কী হবে?', 'What happens when a merchant with hundreds of thousands of followers posts?'), tr('Feed cache-এ কী রাখবেন, কতক্ষণ?', 'What goes in the feed cache, and for how long?'), tr('Follow বাদ দিলে পুরনো offer feed থেকে সরবে কীভাবে?', 'After an unfollow, how do old offers leave the feed?')],
 };

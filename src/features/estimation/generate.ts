@@ -1,10 +1,11 @@
 import { mulberry32 } from '@/simulators/traffic';
+import { isEn, tr } from '@/shared/lib/i18n';
 
 /** Back-of-the-envelope drill: the skill is the order of magnitude, so options differ ×10. */
 
 export interface DrillQuestion { prompt: string; options: string[]; answer: number; explain: string }
 
-const DIG = '০১২৩৪৫৬৭৮৯';
+const DIG = isEn ? '0123456789' : '০১২৩৪৫৬৭৮৯';
 const toBn = (s: string) => s.replace(/\d/g, (d) => DIG[Number(d)]!);
 
 function sig2(n: number): string {
@@ -15,9 +16,9 @@ function sig2(n: number): string {
 
 /** 12,00,000 → "১২ লাখ"; 3,50,00,000 → "৩.৫ কোটি". */
 export function fmtCount(n: number): string {
-  if (n >= 1e7) return toBn(`${sig2(n / 1e7)} কোটি`);
-  if (n >= 1e5) return toBn(`${sig2(n / 1e5)} লাখ`);
-  if (n >= 1e3) return toBn(`${sig2(n / 1e3)} হাজার`);
+  if (n >= 1e7) return (isEn ? `${sig2(n / 1e6)} million` : toBn(`${sig2(n / 1e7)} কোটি`));
+  if (n >= 1e5) return isEn ? (n >= 1e6 ? `${sig2(n / 1e6)} million` : `${sig2(n / 1e3)} thousand`) : toBn(`${sig2(n / 1e5)} লাখ`);
+  if (n >= 1e3) return (isEn ? `${sig2(n / 1e3)} thousand` : toBn(`${sig2(n / 1e3)} হাজার`));
   return toBn(sig2(n));
 }
 
@@ -35,26 +36,26 @@ const gens: Gen[] = [
   (r) => {
     const dau = pick(r, [1e6, 5e6, 1e7, 5e7, 1e8, 2e8]);
     const per = pick(r, [2, 5, 10, 20, 50]);
-    return { prompt: `DAU ${fmtCount(dau)}, প্রতিজন দিনে ${toBn(String(per))}টা request। গড় QPS কত?`, value: (dau * per) / 86400, fmt: fmtCount, explain: `${fmtCount(dau)} × ${toBn(String(per))} ÷ ~১ লাখ সেকেন্ড` };
+    return { prompt: tr(`DAU ${fmtCount(dau)}, প্রতিজন দিনে ${toBn(String(per))}টা request। গড় QPS কত?`, `DAU ${fmtCount(dau)}, ${per} requests each per day. Average QPS?`), value: (dau * per) / 86400, fmt: fmtCount, explain: tr(`${fmtCount(dau)} × ${toBn(String(per))} ÷ ~১ লাখ সেকেন্ড`, `${fmtCount(dau)} × ${per} ÷ ~100,000 seconds`) };
   },
   (r) => {
     const avg = pick(r, [1200, 3500, 12000, 40000]);
-    return { prompt: `গড় QPS ${fmtCount(avg)}। Peak QPS কত ধরবেন?`, value: avg * 2, fmt: fmtCount, explain: 'Peak ≈ গড়ের ২ গুণ' };
+    return { prompt: tr(`গড় QPS ${fmtCount(avg)}। Peak QPS কত ধরবেন?`, `Average QPS ${fmtCount(avg)}. What peak QPS do you assume?`), value: avg * 2, fmt: fmtCount, explain: tr('Peak ≈ গড়ের ২ গুণ', 'Peak ≈ 2× the average') };
   },
   (r) => {
     const items = pick(r, [1e6, 1e7, 1e8]);
     const size = pick(r, [1e3, 1e4, 1e5, 5e5, 2e6]);
-    return { prompt: `দিনে ${fmtCount(items)} নতুন জিনিস, প্রতিটা গড়ে ${fmtBytes(size)}। দিনে কত storage?`, value: items * size, fmt: fmtBytes, explain: `${fmtCount(items)} × ${fmtBytes(size)}` };
+    return { prompt: tr(`দিনে ${fmtCount(items)} নতুন জিনিস, প্রতিটা গড়ে ${fmtBytes(size)}। দিনে কত storage?`, `${fmtCount(items)} new items a day, ${fmtBytes(size)} each on average. Storage per day?`), value: items * size, fmt: fmtBytes, explain: `${fmtCount(items)} × ${fmtBytes(size)}` };
   },
   (r) => {
     const perDay = pick(r, [1e10, 1e11, 5e11, 1e12]);
     const years = pick(r, [1, 5, 10]);
-    return { prompt: `দিনে ${fmtBytes(perDay)} নতুন data। ${toBn(String(years))} বছরে মোট?`, value: perDay * 365 * years, fmt: fmtBytes, explain: `${fmtBytes(perDay)} × ৩৬৫ × ${toBn(String(years))}` };
+    return { prompt: tr(`দিনে ${fmtBytes(perDay)} নতুন data। ${toBn(String(years))} বছরে মোট?`, `${fmtBytes(perDay)} of new data a day. Total over ${years} years?`), value: perDay * 365 * years, fmt: fmtBytes, explain: tr(`${fmtBytes(perDay)} × ৩৬৫ × ${toBn(String(years))}`, `${fmtBytes(perDay)} × 365 × ${years}`) };
   },
   (r) => {
     const peak = pick(r, [5000, 20000, 100000, 400000]);
     const perServer = pick(r, [500, 1000, 2000]);
-    return { prompt: `Peak QPS ${fmtCount(peak)}, একটা server সামলায় ${fmtCount(perServer)} QPS। কতগুলো server?`, value: peak / perServer, fmt: fmtCount, explain: `${fmtCount(peak)} ÷ ${fmtCount(perServer)}` };
+    return { prompt: tr(`Peak QPS ${fmtCount(peak)}, একটা server সামলায় ${fmtCount(perServer)} QPS। কতগুলো server?`, `Peak QPS ${fmtCount(peak)}, one server handles ${fmtCount(perServer)} QPS. How many servers?`), value: peak / perServer, fmt: fmtCount, explain: `${fmtCount(peak)} ÷ ${fmtCount(perServer)}` };
   },
 ];
 

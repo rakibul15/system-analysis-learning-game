@@ -3,6 +3,7 @@ import type { Parcel, SimState } from '@/simulators/traffic';
 import { multiplierFor } from '@/simulators/traffic';
 import { bn, easeBack } from '@/shared/lib/bn';
 import { hubY, type RoundFx } from './useTrafficRound';
+import { tr } from '@/shared/lib/i18n';
 
 const INK = '#16252D';
 const HUB_LOOK = [
@@ -118,7 +119,7 @@ export function TrafficStage({ sim, fx, interactive, onPickHub, showTimer, child
 
         <button
           type="button"
-          aria-label="Lever ঘোরান"
+          aria-label={tr('Lever ঘোরান', 'Swing the lever')}
           disabled={!interactive}
           onClick={() => onPickHub((sim.switchTo + 1) % n)}
           className="absolute z-[3] rounded-full bg-ink p-0 enabled:cursor-pointer"
@@ -141,7 +142,7 @@ export function TrafficStage({ sim, fx, interactive, onPickHub, showTimer, child
               type="button"
               disabled={!interactive}
               onClick={() => onPickHub(i)}
-              aria-label={`Hub ${bn(i + 1)}-এ পাঠান, জমা ${bn(h.queue)}${h.down ? ', বন্ধ' : ''}`}
+              aria-label={tr(`Hub ${bn(i + 1)}-এ পাঠান, জমা ${bn(h.queue)}${h.down ? ', বন্ধ' : ''}`, `Send to hub ${i + 1}, ${h.queue} waiting${h.down ? ', down' : ''}`)}
               className="absolute z-[3] block border-0 bg-transparent p-0 text-ink enabled:cursor-pointer"
               style={{ left: '75.5%', top: `${hubY(i, n)}%`, width: '21.5%', transformOrigin: '50% 90%', transform: `translate(0,-50%) rotate(${rot.toFixed(2)}deg) scale(${(1 + 0.1 * bump).toFixed(3)},${(1 - 0.09 * bump).toFixed(3)})` }}
             >
@@ -176,7 +177,7 @@ export function TrafficStage({ sim, fx, interactive, onPickHub, showTimer, child
                   className="absolute left-[30%] top-[30%] rounded-[0.4em] bg-coral font-display font-extrabold text-white"
                   style={{ padding: '0.1em 0.7em', border: `max(2px,0.25cqw) solid ${INK}`, fontSize: 'max(13px,2cqw)', transform: 'rotate(-8deg)' }}
                 >
-                  বন্ধ
+                  {tr('বন্ধ', 'Down')}
                 </span>
               )}
             </button>
@@ -217,12 +218,12 @@ export function TrafficStage({ sim, fx, interactive, onPickHub, showTimer, child
           className="rounded-full bg-ink text-parcel"
           style={{ padding: '0.3em 0.9em', border: `max(2px,0.22cqw) solid ${INK}`, transformOrigin: '0 50%', transform: `scale(${sim.combo >= 3 ? (1 + fx.comboPulse * 0.25).toFixed(2) : 0})` }}
         >
-          টানা {bn(sim.combo)} · ×{bn(mult)}
+          {tr('টানা', 'Streak')} {bn(sim.combo)} · ×{bn(mult)}
         </div>
         <div className="box-border flex-1 overflow-hidden rounded-full bg-white" style={{ height: '0.9em', border: `max(2px,0.22cqw) solid ${INK}`, opacity: showTimer ? 1 : 0 }}>
           <div className="h-full" style={{ width: `${(left * 100).toFixed(1)}%`, background: left < 0.25 ? '#E0483E' : '#0B8A7A' }} />
         </div>
-        <Pill label={`Customer খুশি ${bn(sim.happiness)}%`}>
+        <Pill label={tr(`Customer খুশি ${bn(sim.happiness)}%`, `Customers happy ${sim.happiness}%`)}>
           <svg viewBox="0 0 20 20" aria-hidden="true" style={{ width: '1.2em', height: '1.2em' }}><path d="M10 17S2.5 12.4 2.5 7.2A4 4 0 0 1 10 5.3a4 4 0 0 1 7.5 1.9C17.5 12.4 10 17 10 17z" fill="#E0483E" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" /></svg>
           <span className="block overflow-hidden rounded-full bg-locked" style={{ width: '6em', height: '0.7em' }}>
             <span className="block h-full" style={{ width: `${sim.happiness}%`, background: sim.happiness < 40 ? '#E0483E' : '#3FB37A', transition: 'width .25s' }} />

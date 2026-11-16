@@ -2,6 +2,7 @@ import { useEffect, useMemo, useReducer, useRef } from 'react';
 import type { Chapter, Level } from '@/content/schema';
 import { bn, easeBack } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
+import { tr } from '@/shared/lib/i18n';
 
 const INK = '#16252D';
 
@@ -152,7 +153,7 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
         const pop = isSel ? 0.92 + 0.26 * easeBack((a.clock - a.pickAt) / 0.3) : 1;
         const faded = s.state === 'locked';
         const bg = s.state === 'done' ? chapter.accent : s.state === 'open' ? '#FFC02E' : '#E3E6DF';
-        const label = { done: 'পাস', open: 'খেলা যায়', locked: 'তালাবদ্ধ' }[s.state];
+        const label = { done: tr('পাস', 'passed'), open: tr('খেলা যায়', 'open'), locked: tr('তালাবদ্ধ', 'locked') }[s.state];
         return (
           <div key={s.level.id}>
             {s.stars > 0 && (
@@ -192,11 +193,11 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
       </div>
 
       <div className="absolute left-[2%] top-[3%] rounded-[14px] bg-white" style={{ padding: '0.35em 1em', border: `max(2px,0.25cqw) solid ${INK}`, boxShadow: `0 max(3px,0.4cqw) 0 ${INK}`, fontSize: 'max(12px,1.45cqw)' }}>
-        <div className="text-[0.8em] font-bold" style={{ color: chapter.accent }}>অধ্যায় {bn(chapter.id)} · {bn(stops.filter((s) => s.state === 'done').length)}/{bn(stops.length)} পাস</div>
+        <div className="text-[0.8em] font-bold" style={{ color: chapter.accent }}>{tr('অধ্যায়', 'Chapter')} {bn(chapter.id)} · {bn(stops.filter((s) => s.state === 'done').length)}/{bn(stops.length)} {tr('পাস', 'passed')}</div>
         <h1 className="m-0 font-display text-[1.45em] font-extrabold leading-[1.15]">{chapter.title}</h1>
       </div>
       <div role="status" className="pointer-events-none absolute bottom-[4%] left-1/2 whitespace-nowrap rounded-full bg-ink font-bold text-white" style={{ padding: '0.4em 1.1em', fontSize: 'max(12px,1.45cqw)', opacity: lockAge < 2.2 ? Math.min(1, (2.2 - lockAge) * 4) : 0, transform: `translate(-50%, ${((1 - easeBack(lockAge / 0.3)) * 30).toFixed(1)}px)` }}>
-        {lockAge < 2.2 ? 'এই level এখনো তালাবদ্ধ' : ''}
+        {lockAge < 2.2 ? tr('এই level এখনো তালাবদ্ধ', 'This level is still locked') : ''}
       </div>
     </div>
   );

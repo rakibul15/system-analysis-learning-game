@@ -1,3 +1,4 @@
+import { isEn, tr } from '@/shared/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { play } from '@/shared/lib/sound';
 import type { Question } from '@/content/schema';
@@ -26,7 +27,7 @@ const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math
  * One multiple-choice question with confidence marking.
  * Options are shuffled per question id (the content keeps the right one first).
  */
-export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = 'পরের ধাপ', tone = 'light' }: Props) {
+export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light' }: Props) {
   const order = useMemo(() => shuffledOrder(q.id, q.options.length), [q.id, q.options.length]);
   const [picked, setPicked] = useState<number | null>(null);
   const [sure, setSure] = useState<boolean | null>(null);
@@ -53,17 +54,17 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   const earned = points * confidenceFactor(correct, !!sure);
   const ready = picked !== null && sure !== null;
   const boss = tone === 'boss';
-  const letters = ['ক', 'খ', 'গ', 'ঘ'];
+  const letters = isEn ? ['A', 'B', 'C', 'D'] : ['ক', 'খ', 'গ', 'ঘ'];
 
   return (
     <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-[#1D2E37] text-white shadow-[0_6px_0_#E0483E]' : 'border-ink bg-white shadow-block'}`}>
       <div className="mb-2 flex items-center justify-between gap-3 text-[13px] font-bold">
         <span className={boss ? 'text-parcel' : 'text-route-deep'}>{label}</span>
-        {points > 0 && <span className={boss ? 'text-[#C9D6DC]' : 'text-muted'}>মান {bn(Math.round(points * 10) / 10, { grouping: false })} নম্বর</span>}
+        {points > 0 && <span className={boss ? 'text-[#C9D6DC]' : 'text-muted'}>{tr('মান', 'Worth')} {bn(Math.round(points * 10) / 10, { grouping: false })} {tr('নম্বর', 'points')}</span>}
       </div>
       <h3 className="m-0 mb-4 font-display text-[22px] font-bold leading-snug" style={{ textWrap: 'balance' }}>{q.prompt}</h3>
 
-      <div className="flex flex-col gap-2.5" role="radiogroup" aria-label="উত্তর">
+      <div className="flex flex-col gap-2.5" role="radiogroup" aria-label={tr('উত্তর', 'Answers')}>
         {order.map((oi, pos) => {
           const isPicked = picked === oi;
           const showRight = done && oi === 0;
@@ -93,9 +94,9 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
 
       {!done && (
         <>
-          <p className="mb-2 mt-5 font-semibold">কতটা নিশ্চিত?</p>
+          <p className="mb-2 mt-5 font-semibold">{tr('কতটা নিশ্চিত?', 'How sure are you?')}</p>
           <div className="flex gap-2.5">
-            {[{ v: true, l: 'নিশ্চিত' }, { v: false, l: 'আন্দাজ' }].map((c) => (
+            {[{ v: true, l: tr('নিশ্চিত', 'Sure') }, { v: false, l: tr('আন্দাজ', 'Guess') }].map((c) => (
               <button
                 key={c.l}
                 type="button"
@@ -107,7 +108,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               </button>
             ))}
           </div>
-          {points > 0 && <p className={`mb-0 mt-2 text-[13px] ${boss ? 'text-[#C9D6DC]' : 'text-muted'}`}>নিশ্চিত ও ঠিক: পুরো · আন্দাজে ঠিক: ৬০% · নিশ্চিত ও ভুল: −২৫%</p>}
+          {points > 0 && <p className={`mb-0 mt-2 text-[13px] ${boss ? 'text-[#C9D6DC]' : 'text-muted'}`}>{tr('নিশ্চিত ও ঠিক: পুরো · আন্দাজে ঠিক: ৬০% · নিশ্চিত ও ভুল: −২৫%', 'Sure and right: full · right on a guess: 60% · sure and wrong: −25%')}</p>}
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               type="button"
@@ -115,7 +116,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               onClick={() => setDone(true)}
               className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
             >
-              উত্তর দিন
+              {tr('উত্তর দিন', 'Answer')}
             </button>
             {q.hint && onHint && (
               <button
@@ -134,12 +135,12 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
       {done && (
         <div className={`pop-in mt-4 rounded-[14px] border-2 p-4 ${correct ? 'border-route bg-route-soft text-ink' : 'border-coral bg-coral-soft text-ink'}`}>
           <div className="mb-1 flex items-baseline justify-between gap-3">
-            <strong className="font-display text-xl">{correct ? (sure ? 'ঠিক!' : 'ঠিক, তবে আন্দাজে') : sure ? 'নিশ্চিত ছিলেন, কিন্তু ভুল' : 'এবার হয়নি'}</strong>
+            <strong className="font-display text-xl">{correct ? (sure ? tr('ঠিক!', 'Right!') : tr('ঠিক, তবে আন্দাজে', 'Right, but a guess')) : sure ? tr('নিশ্চিত ছিলেন, কিন্তু ভুল', 'You were sure, but wrong') : tr('এবার হয়নি', 'Not this time')}</strong>
             {points > 0 && <span className="font-mono text-lg font-bold">{fmt(earned)}</span>}
           </div>
-          {!correct && <p className="m-0 mb-1 font-semibold">সঠিক: {q.options[0]}</p>}
+          {!correct && <p className="m-0 mb-1 font-semibold">{tr('সঠিক:', 'Correct:')} {q.options[0]}</p>}
           {q.explain && <p className="m-0">{q.explain}</p>}
-          {!correct && sure && <p className="mb-0 mt-2 text-sm font-semibold">এই প্রশ্ন review-তে আগে আসবে।</p>}
+          {!correct && sure && <p className="mb-0 mt-2 text-sm font-semibold">{tr('এই প্রশ্ন review-তে আগে আসবে।', 'This question will come up sooner in review.')}</p>}
           <button
             type="button"
             autoFocus

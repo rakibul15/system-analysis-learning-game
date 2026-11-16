@@ -8,13 +8,14 @@ import { BuilderPage } from '@/pages/builder/BuilderPage';
 import { PracticePage } from '@/pages/practice/PracticePage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
+import { tr } from '@/shared/lib/i18n';
 
 function NotFound() {
   return (
     <main className="grid min-h-screen place-items-center p-8 text-center">
       <div>
-        <p className="font-display text-2xl font-extrabold">এই রাস্তা কোথাও যায় না</p>
-        <Link to="/" className="font-bold text-route-deep">শহরে ফিরুন</Link>
+        <p className="font-display text-2xl font-extrabold">{tr('এই রাস্তা কোথাও যায় না', 'This road goes nowhere')}</p>
+        <Link to="/" className="font-bold text-route-deep">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
       </div>
     </main>
   );

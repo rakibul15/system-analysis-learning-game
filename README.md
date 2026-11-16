@@ -16,7 +16,7 @@ Screen:
 
 Install করা যায় (PWA), একবার খোলার পর offline-এ চলে। শব্দ আছে, header থেকে বন্ধ করা যায়।
 
-**জানা ঘাটতি:** English mode নেই; সব content বাংলায়।
+**ভাষা:** বাংলা আর English। Header-এর `EN` / `বাং` বোতামে বদলায়। Level content `src/content/levels/en/`-এ, interface-এর লেখা `tr(bn, en)` দিয়ে (`src/shared/lib/i18n.ts`)। Test নিশ্চিত করে দুই ভাষার level-এর গঠন হুবহু এক আর English-এ কোনো বাংলা লেখা বাকি নেই।
 
 ## চালানো
 

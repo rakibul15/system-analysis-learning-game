@@ -1,10 +1,12 @@
+import { isEn } from './i18n';
+
 const DIGITS = '০১২৩৪৫৬৭৮৯';
 
-/** 1240 → "১,২৪০". Numbers in the UI are shown in Bangla digits. */
+/** 1240 → "১,২৪০" in Bangla mode, "1,240" in English mode. */
 export function bn(value: number | string, { grouping = true } = {}): string {
   const text =
     typeof value === 'number' && grouping ? Math.round(value).toLocaleString('en-US') : String(value);
-  return text.replace(/\d/g, (d) => DIGITS[Number(d)]!);
+  return isEn ? text : text.replace(/\d/g, (d) => DIGITS[Number(d)]!);
 }
 
 /** Overshooting ease-out (easeOutBack), for pops. */

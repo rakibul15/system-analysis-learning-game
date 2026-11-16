@@ -1,8 +1,10 @@
+import { bn } from '@/shared/lib/bn';
 import { challenges } from '@/features/builder/model';
 import { incidents } from '@/features/incident/incidents';
 import { chapters, levelsById } from '@/content/levels';
 import { CHAPTER_GATE, DAY_MS, PASS_MARK, dayKey, type Mastery } from '@/shared/lib/scoring';
 import type { ProgressData } from './store';
+import { tr } from '@/shared/lib/i18n';
 
 export type LevelState = 'done' | 'open' | 'locked';
 
@@ -16,9 +18,9 @@ export function lockReason(id: number, p: ProgressData): string | null {
   if (id === first) {
     const prevCh = chapters.find((c) => c.id === ch.id - 1)!;
     const gate = prevCh.levels[prevCh.levels.length - 1]!;
-    return (p.levels[gate]?.best ?? 0) >= CHAPTER_GATE ? null : `অধ্যায় ${toBn(prevCh.id)}-এর শেষ level (${toBn(gate)})-এ ${toBn(CHAPTER_GATE)}+ পেলে খুলবে`;
+    return (p.levels[gate]?.best ?? 0) >= CHAPTER_GATE ? null : tr(`অধ্যায় ${toBn(prevCh.id)}-এর শেষ level (${toBn(gate)})-এ ${toBn(CHAPTER_GATE)}+ পেলে খুলবে`, `Opens at ${CHAPTER_GATE}+ on chapter ${prevCh.id}'s last level (${gate})`);
   }
-  return (p.levels[id - 1]?.best ?? 0) >= PASS_MARK ? null : `Level ${toBn(id - 1)}-এ ${toBn(PASS_MARK)}+ পেলে খুলবে`;
+  return (p.levels[id - 1]?.best ?? 0) >= PASS_MARK ? null : tr(`Level ${toBn(id - 1)}-এ ${toBn(PASS_MARK)}+ পেলে খুলবে`, `Opens at ${PASS_MARK}+ on level ${id - 1}`);
 }
 
 export function levelState(id: number, p: ProgressData): LevelState {
@@ -75,15 +77,15 @@ export function readiness(p: ProgressData): { total: number; parts: ReadinessPar
   const builder = avgBest(p.builds ?? {}, builderCount);
   const incident = avgBest(p.incidents ?? {}, incidentCount);
   const parts: ReadinessPart[] = [
-    { id: 'campaign', label: 'Campaign (৩০ level)', weight: 30, score: campaign, available: true, note: 'সব level-এর সেরা নম্বরের গড়' },
-    { id: 'mock', label: 'Mock আর design challenge', weight: 20, score: mock, available: true, note: 'শেষ ৩টা mock বা design challenge-এর নিজের দেওয়া নম্বর' },
-    { id: 'mastery', label: 'দখল', weight: 15, score: mastered, available: true, note: 'কতগুলো level "দক্ষ" বা "পাকা"' },
-    { id: 'builder', label: 'Architecture builder', weight: 15, score: builder, available: true, note: `${toBn(builderCount)}টা challenge-এর সেরা নম্বরের গড়` },
-    { id: 'drill', label: 'Estimation drill', weight: 10, score: drill, available: true, note: 'নির্ভুলতা, অন্তত ৪০টা প্রশ্নে পূর্ণ মান' },
-    { id: 'incident', label: 'Incident mode', weight: 10, score: incident, available: true, note: `${toBn(incidentCount)}টা incident-এর সেরা নম্বরের গড়` },
+    { id: 'campaign', label: tr('Campaign (৩০ level)', 'Campaign (30 levels)'), weight: 30, score: campaign, available: true, note: tr('সব level-এর সেরা নম্বরের গড়', 'Average of your best score on every level') },
+    { id: 'mock', label: tr('Mock আর design challenge', 'Mock and design challenge'), weight: 20, score: mock, available: true, note: tr('শেষ ৩টা mock বা design challenge-এর নিজের দেওয়া নম্বর', 'Your own scores on the last 3 mocks or design challenges') },
+    { id: 'mastery', label: tr('দখল', 'Mastery'), weight: 15, score: mastered, available: true, note: tr('কতগুলো level "দক্ষ" বা "পাকা"', 'How many levels are "skilled" or "solid"') },
+    { id: 'builder', label: 'Architecture builder', weight: 15, score: builder, available: true, note: tr(`${toBn(builderCount)}টা challenge-এর সেরা নম্বরের গড়`, `Average best score over ${builderCount} challenges`) },
+    { id: 'drill', label: 'Estimation drill', weight: 10, score: drill, available: true, note: tr('নির্ভুলতা, অন্তত ৪০টা প্রশ্নে পূর্ণ মান', 'Accuracy, full marks after at least 40 questions') },
+    { id: 'incident', label: 'Incident mode', weight: 10, score: incident, available: true, note: tr(`${toBn(incidentCount)}টা incident-এর সেরা নম্বরের গড়`, `Average best score over ${incidentCount} incidents`) },
   ];
   const total = parts.reduce((s, x) => s + x.weight * x.score, 0);
   return { total: Math.round(total), parts };
 }
 
-const toBn = (n: number) => String(n).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[Number(d)]!);
+const toBn = (n: number) => bn(n, { grouping: false });

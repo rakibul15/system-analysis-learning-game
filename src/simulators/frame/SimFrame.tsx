@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { play } from '@/shared/lib/sound';
 import { bn } from '@/shared/lib/bn';
+import { tr } from '@/shared/lib/i18n';
 
 export interface Mission { text: string; done: boolean; hint?: string }
 export interface Metric { label: string; value: string; tone?: 'good' | 'bad' | 'neutral' }
@@ -51,7 +52,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
   return (
     <div className="flex flex-col gap-4">
       <div className="pop-in">
-        <p className="m-0 text-sm font-bold text-route-deep">ধাপ ৪ · Simulator</p>
+        <p className="m-0 text-sm font-bold text-route-deep">{tr('ধাপ ৪ · Simulator', 'Step 4 · Simulator')}</p>
         <h2 className="m-0 font-display text-[28px] font-extrabold leading-tight">{title}</h2>
         <p className="m-0 mt-1 text-ink-soft">{intro}</p>
       </div>
@@ -63,7 +64,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
         <section aria-label="Simulation" className="relative min-h-[300px] overflow-hidden rounded-[20px] border-[3px] border-ink bg-[#F7F8F3] shadow-[0_5px_0_#16252D]" style={{ containerType: 'inline-size' }}>
           {stage}
         </section>
-        <section aria-label="সংখ্যা" aria-live="polite" className="grid grid-cols-2 gap-2 self-start lg:grid-cols-1">
+        <section aria-label={tr('সংখ্যা', 'Numbers')} aria-live="polite" className="grid grid-cols-2 gap-2 self-start lg:grid-cols-1">
           {metrics.map((m) => (
             <div key={m.label} className={`rounded-2xl border-[2.5px] border-ink p-3 ${m.tone === 'good' ? 'bg-route-soft' : m.tone === 'bad' ? 'bg-coral-soft' : 'bg-white'}`}>
               <div className="text-xs font-semibold text-muted">{m.label}</div>
@@ -94,7 +95,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
           onClick={() => onFinish(done)}
           className={`btn-press mt-4 min-h-[54px] w-full cursor-pointer rounded-2xl border-[3px] border-ink font-display text-xl font-extrabold shadow-[0_5px_0_#16252D] ${all ? 'bg-parcel' : 'bg-white'}`}
         >
-          {all ? 'সব mission শেষ! Boss-এর দিকে →' : `এখানেই থামুন (${bn(done)}/${bn(missions.length)}) · Boss-এর দিকে`}
+          {all ? tr('সব mission শেষ! Boss-এর দিকে →', 'All missions done! On to the boss →') : tr(`এখানেই থামুন (${bn(done)}/${bn(missions.length)}) · Boss-এর দিকে`, `Stop here (${done}/${missions.length}) · on to the boss`)}
         </button>
       </section>
     </div>

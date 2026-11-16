@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { chapters, levelList, questionsById } from './levels';
-import { levelSchema } from './schema';
+import { bnLevels, chapters, enLevels, levelList, questionsById } from './levels';
+import { levelSchema, type Level } from './schema';
 
 describe('level content', () => {
   it('has all 30 levels, numbered 1–30 in order', () => {
@@ -52,5 +52,51 @@ describe('level content', () => {
     const sims = levelList.filter((l) => l.simulator);
     expect(sims.map((l) => l.id)).toEqual(levelList.map((l) => l.id).filter((id) => id !== 1));
     expect(new Set(sims.map((l) => l.simulator)).size).toBe(sims.length);
+  });
+});
+
+describe('English content', () => {
+  const pairs = bnLevels.map((b, i) => [b, enLevels[i]!] as const);
+  const shape = (l: Level) => ({
+    id: l.id, chapter: l.chapter, simulator: l.simulator, minutes: l.minutes, ref: l.ref.url,
+    nodes: l.nodes.map((n) => [n.id, n.kind, n.x, n.y]),
+    steps: l.steps.map((s) => ({ ...s, text: undefined, badges: Object.keys(s.badges ?? {}), ask: s.ask && [s.ask.id, s.ask.options.length] })),
+    predict: [l.predict.id, l.predict.options.length],
+    play: l.play.kind === 'missions' ? l.play.missions.map((m) => [m.id, m.options.length]) : l.play.kind,
+    boss: l.boss.map((q) => [q.id, q.options.length, !!q.hint]),
+  });
+
+  it('every English level passes the schema', () => {
+    for (const l of enLevels) expect(levelSchema.safeParse(l).success, `en level ${l?.id}`).toBe(true);
+  });
+
+  it('has exactly the same structure as the Bangla level (ids, nodes, steps, questions)', () => {
+    for (const [b, e] of pairs) expect(shape(e), `level ${b.id}`).toEqual(shape(b));
+  });
+
+  it('contains no Bangla text', () => {
+    const bangla = /[ঀ-৿]/;
+    for (const l of enLevels) {
+      const text = JSON.stringify({ ...l, ref: undefined });
+      const hit = text.match(new RegExp(`.{0,30}${bangla.source}.{0,30}`));
+      // ৳ (the taka sign) is fine in English text
+      expect(hit && !/^[^ঀ-৲৴-৿]*$/.test(hit[0]) ? hit[0] : null, `level ${l.id}`).toBeNull();
+    }
+  });
+
+  it('option length does not give the answer away in English either', () => {
+    let longer = 0, total = 0;
+    for (const l of enLevels) {
+      const qs = [...l.steps.flatMap((s) => (s.ask ? [s.ask] : [])), ...(l.play.kind === 'missions' ? l.play.missions : []), ...l.boss];
+      for (const q of qs) {
+        expect(new Set(q.options).size, q.id).toBe(q.options.length);
+        const [right, ...wrong] = q.options.map((o) => o.length);
+        const ratio = right! / Math.max(...wrong);
+        expect(ratio, `${q.id}: ${q.options.join(' | ')}`).toBeLessThan(1.5);
+        total++;
+        if (ratio > 1.3) longer++;
+      }
+    }
+    expect(longer / total).toBeLessThan(0.1);
   });
 });

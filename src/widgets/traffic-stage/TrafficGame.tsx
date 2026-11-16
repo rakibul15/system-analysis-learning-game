@@ -4,6 +4,7 @@ import { starsFor, type SimEvent } from '@/simulators/traffic';
 import { bn, easeBack } from '@/shared/lib/bn';
 import { TrafficStage } from '@/widgets/traffic-stage/TrafficStage';
 import { useTrafficRound, type Banner } from '@/widgets/traffic-stage/useTrafficRound';
+import { tr } from '@/shared/lib/i18n';
 
 type Phase = 'intro' | 'count' | 'manual' | 'manualEnd' | 'auto' | 'autoEnd';
 
@@ -23,13 +24,13 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
   const bannerFor = (e: SimEvent): Banner | null => {
     if (roundName === 'demo') return null;
     const name = (i: number) => `Hub ${bn(i + 1)}`;
-    if (e.type === 'hubWarning') return { text: `${name(e.hub)} কাঁপছে… কিছু একটা গোলমাল`, tone: 'bad', age: 0 };
+    if (e.type === 'hubWarning') return { text: tr(`${name(e.hub)} কাঁপছে… কিছু একটা গোলমাল`, `${name(e.hub)} is shaking… something is wrong`), tone: 'bad', age: 0 };
     if (e.type === 'hubDown') return isManual
-      ? { text: `${name(e.hub)} বন্ধ! অন্য hub-এ পাঠান`, tone: 'bad', age: 0 }
-      : { text: `Health check ব্যর্থ: ${name(e.hub)} তালিকা থেকে বাদ`, tone: 'bad', age: 0 };
+      ? { text: tr(`${name(e.hub)} বন্ধ! অন্য hub-এ পাঠান`, `${name(e.hub)} is down! Send to the other hub`), tone: 'bad', age: 0 }
+      : { text: tr(`Health check ব্যর্থ: ${name(e.hub)} তালিকা থেকে বাদ`, `Health check failed: ${name(e.hub)} removed from the list`), tone: 'bad', age: 0 };
     if (e.type === 'hubUp') return isManual
-      ? { text: `${name(e.hub)} ফিরেছে! আবার ভাগ করুন`, tone: 'good', age: 0 }
-      : { text: `Health check পাস: ${name(e.hub)} আবার তালিকায়`, tone: 'good', age: 0 };
+      ? { text: tr(`${name(e.hub)} ফিরেছে! আবার ভাগ করুন`, `${name(e.hub)} is back! Share the load again`), tone: 'good', age: 0 }
+      : { text: tr(`Health check পাস: ${name(e.hub)} আবার তালিকায়`, `Health check passed: ${name(e.hub)} back in the list`), tone: 'good', age: 0 };
     return null;
   };
 
@@ -96,9 +97,9 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
 
   const endAge = (performance.now() - endedAt) / 1000;
   const endTitle =
-    phase === 'autoEnd' ? 'Auto controller একই ভিড় সামলাল'
-    : sim.status === 'failed' ? 'Customer-রা রেগে গেছে'
-    : (['ভিড় জিতে গেল', 'ভিড় জিতে গেল', 'ভালো সামলেছেন!', 'নিখুঁত dispatch!'] as const)[stars];
+    phase === 'autoEnd' ? tr('Auto controller একই ভিড় সামলাল', 'The auto controller handled the same rush')
+    : sim.status === 'failed' ? tr('Customer-রা রেগে গেছে', 'Customers are angry')
+    : [tr('ভিড় জিতে গেল', 'The rush won'), tr('ভিড় জিতে গেল', 'The rush won'), tr('ভালো সামলেছেন!', 'Well handled!'), tr('নিখুঁত dispatch!', 'Perfect dispatch!')][stars];
 
   return (
     <div className="flex flex-col gap-4">
@@ -114,8 +115,8 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
                     <li key={r} className="rounded-[10px] bg-[#F0F2EC] px-[0.8em] py-[0.4em]">{r}</li>
                   ))}
                 </ul>
-                <BigButton onClick={startManual}>খেলা শুরু</BigButton>
-                <p className="mb-0 mt-3 text-[0.85em] text-muted">Keyboard: ১ / ২ চাপলেও hub বাছা যায়</p>
+                <BigButton onClick={startManual}>{tr('খেলা শুরু', 'Start playing')}</BigButton>
+                <p className="mb-0 mt-3 text-[0.85em] text-muted">{tr('Keyboard: ১ / ২ চাপলেও hub বাছা যায়', 'Keyboard: press 1 / 2 to pick a hub')}</p>
               </Card>
             </Overlay>
           )}
@@ -146,18 +147,18 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
                   ))}
                 </div>
                 <h2 className="mb-[0.3em] mt-0 font-display text-[2em] font-extrabold leading-[1.15]" style={{ textWrap: 'balance' }}>{endTitle}</h2>
-                <p className="sr-only">{bn(stars)}টা তারা</p>
+                <p className="sr-only">{bn(stars)} {tr('টা তারা', 'stars')}</p>
                 <div className="mb-[0.7em] flex flex-wrap justify-center gap-[0.6em] font-bold">
-                  <span className="rounded-[10px] bg-route-soft px-[0.8em] py-[0.25em] text-route-deep">পৌঁছেছে {bn(sim.delivered)}</span>
-                  <span className="rounded-[10px] bg-coral-soft px-[0.8em] py-[0.25em] text-coral-deep">হারিয়েছে {bn(sim.lost)}</span>
-                  <span className="rounded-[10px] bg-parcel-soft px-[0.8em] py-[0.25em]">নম্বর {bn(sim.score)}</span>
+                  <span className="rounded-[10px] bg-route-soft px-[0.8em] py-[0.25em] text-route-deep">{tr('পৌঁছেছে', 'Delivered')} {bn(sim.delivered)}</span>
+                  <span className="rounded-[10px] bg-coral-soft px-[0.8em] py-[0.25em] text-coral-deep">{tr('হারিয়েছে', 'Lost')} {bn(sim.lost)}</span>
+                  <span className="rounded-[10px] bg-parcel-soft px-[0.8em] py-[0.25em]">{tr('নম্বর', 'Score')} {bn(sim.score)}</span>
                 </div>
                 <p className="mb-[1em] mt-0" style={{ textWrap: 'pretty' }}>{phase === 'autoEnd' ? c.afterAuto : c.afterManual}</p>
                 <div className="flex flex-wrap justify-center gap-[0.7em]">
-                  {phase === 'manualEnd' && <BigButton onClick={startAuto}>Auto controller লাগান</BigButton>}
-                  {phase === 'autoEnd' && <BigButton onClick={() => onComplete(manual.stars, manual.score)}>Boss challenge-এ চলুন →</BigButton>}
+                  {phase === 'manualEnd' && <BigButton onClick={startAuto}>{tr('Auto controller লাগান', 'Turn on the auto controller')}</BigButton>}
+                  {phase === 'autoEnd' && <BigButton onClick={() => onComplete(manual.stars, manual.score)}>{tr('Boss challenge-এ চলুন →', 'On to the boss challenge →')}</BigButton>}
                   <button type="button" onClick={startManual} className="btn-press min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-white px-[1.2em] font-bold shadow-press">
-                    আবার হাতে খেলুন
+                    {tr('আবার হাতে খেলুন', 'Play by hand again')}
                   </button>
                 </div>
               </Card>
@@ -169,7 +170,7 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
           <p aria-live="polite" className="m-0 min-w-0 flex-[999_1_420px] rounded-2xl border-[2.5px] border-ink bg-white px-4.5 py-3.5 text-[17px] leading-normal">
             {caption}
           </p>
-          <ul aria-label="এই খেলায় যা শিখছেন" className="m-0 flex min-w-0 flex-[1_1_320px] list-none flex-wrap items-center gap-2 p-0">
+          <ul aria-label={tr('এই খেলায় যা শিখছেন', 'What you are learning in this game')} className="m-0 flex min-w-0 flex-[1_1_320px] list-none flex-wrap items-center gap-2 p-0">
             {level.concepts.map((k) => {
               const lit = phase === 'autoEnd' || (phase === 'auto' && sim.t >= k.litAt);
               return (

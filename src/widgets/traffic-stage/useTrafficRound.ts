@@ -1,5 +1,7 @@
+import { bn } from '@/shared/lib/bn';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { createSim, setSwitch, step, type SimEvent, type SimState, type TrafficRules } from '@/simulators/traffic';
+import { tr } from '@/shared/lib/i18n';
 
 export interface Floater { id: number; x: number; y: number; text: string; tone: 'good' | 'combo' | 'bad' | 'info'; age: number }
 export interface Confetti { id: number; x: number; y: number; vx: number; vy: number; rot: number; vr: number; color: string }
@@ -85,7 +87,7 @@ export function useTrafficRound(rules: TrafficRules, roundKey: string, callbacks
         float(73, y, '+' + toBn(e.points), e.multiplier > 1 ? 'combo' : 'good');
       } else if (e.type === 'dropped') {
         fx.shake = 1;
-        float(73, y, e.reason === 'down' ? 'হারিয়ে গেল!' : 'উপচে পড়ল!', 'bad');
+        float(73, y, e.reason === 'down' ? tr('হারিয়ে গেল!', 'Lost!') : tr('উপচে পড়ল!', 'Overflowed!'), 'bad');
       } else if (e.type === 'rerouted') {
         float(70, hubY(e.from, n), 'retry →', 'info');
       } else if (e.type === 'hubDown') {
@@ -121,4 +123,4 @@ function freshFx(hubs: number): RoundFx {
   return { floaters: [], confetti: [], banner: null, shake: 0, comboPulse: 0, hubBump: Array(hubs).fill(0), shownScore: 0, clock: 0 };
 }
 
-const toBn = (n: number) => String(n).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[Number(d)]!);
+const toBn = (n: number) => bn(n, { grouping: false });

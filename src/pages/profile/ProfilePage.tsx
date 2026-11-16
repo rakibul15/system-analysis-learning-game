@@ -6,6 +6,7 @@ import { exportProgress, useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { masteryLabel, type Mastery } from '@/shared/lib/scoring';
 import { AppShell } from '@/shared/ui/AppShell';
+import { tr } from '@/shared/lib/i18n';
 
 const MASTERY_COLOR: Record<Mastery, string> = { none: '#EEF1EA', seen: '#FFE9C7', understood: '#FFC02E', skilled: '#3FB37A', solid: '#0B8A7A' };
 
@@ -41,8 +42,8 @@ export function ProfilePage() {
             <text x="60" y="80" textAnchor="middle" fontSize="11" fill="#4A5A62">Readiness</text>
           </svg>
           <div className="min-w-0">
-            <h1 className="m-0 font-display text-[30px] font-extrabold">Interview-এর জন্য কতটা তৈরি</h1>
-            <p className="m-0 mt-1 text-ink-soft">Plan-এর ওজন ধরে। যে অংশ এখনো তৈরি হয়নি সেটা আপাতত ০।</p>
+            <h1 className="m-0 font-display text-[30px] font-extrabold">{tr('Interview-এর জন্য কতটা তৈরি', 'How ready you are for the interview')}</h1>
+            <p className="m-0 mt-1 text-ink-soft">{tr('Plan-এর ওজন ধরে। যে অংশ এখনো তৈরি হয়নি সেটা আপাতত ০।', 'Weighted as in the plan.')}</p>
             <div className="mt-4 grid gap-2.5">
               {r.parts.map((x) => (
                 <div key={x.id} className={x.available ? '' : 'opacity-50'}>
@@ -56,8 +57,8 @@ export function ProfilePage() {
 
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            ['XP', bn(totalXp(p))], ['টানা দিন', bn(streak(p))], ['Level পাস', `${bn(passed)}/৩০`], ['Review দিয়েছেন', bn(reviews)],
-            ['Level খেলেছেন', bn(played)], ['Estimation নির্ভুলতা', p.estimation.attempts ? `${bn(Math.round((p.estimation.correct / p.estimation.attempts) * 100))}%` : '—'], ['Design challenge', bn(p.design.length)], ['মুখে বলা', bn(p.speak.length)],
+            [tr('XP', 'XP'), bn(totalXp(p))], [tr('টানা দিন', 'Day streak'), bn(streak(p))], [tr('Level পাস', 'Levels passed'), `${bn(passed)}/${bn(30)}`], [tr('Review দিয়েছেন', 'Reviews done'), bn(reviews)],
+            [tr('Level খেলেছেন', 'Levels played'), bn(played)], [tr('Estimation নির্ভুলতা', 'Estimation accuracy'), p.estimation.attempts ? `${bn(Math.round((p.estimation.correct / p.estimation.attempts) * 100))}%` : '—'], ['Design challenge', bn(p.design.length)], [tr('মুখে বলা', 'Speak aloud'), bn(p.speak.length)],
           ].map(([k, v]) => (
             <div key={k} className="rounded-2xl border-[2.5px] border-ink bg-white p-4">
               <div className="text-sm text-muted">{k}</div>
@@ -68,7 +69,7 @@ export function ProfilePage() {
 
         <section className="rounded-[24px] border-[3px] border-ink bg-white p-6">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="m-0 font-display text-xl font-bold">৩০ level-এর দখল</h2>
+            <h2 className="m-0 font-display text-xl font-bold">{tr('৩০ level-এর দখল', 'Mastery of the 30 levels')}</h2>
             <ul className="m-0 flex list-none flex-wrap gap-3 p-0 text-xs">
               {(Object.keys(MASTERY_COLOR) as Mastery[]).map((m) => <li key={m} className="flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-ink" style={{ background: MASTERY_COLOR[m] }} />{masteryLabel[m]}</li>)}
             </ul>
@@ -76,7 +77,7 @@ export function ProfilePage() {
           <div className="flex flex-col gap-3">
             {chapters.map((c) => (
               <div key={c.id}>
-                <div className="mb-1 text-sm font-semibold">অধ্যায় {bn(c.id)} · {c.title}</div>
+                <div className="mb-1 text-sm font-semibold">{tr('অধ্যায়', 'Chapter')} {bn(c.id)} · {c.title}</div>
                 <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
                   {c.levels.map((id) => {
                     const m = masteryOf(id, p);
@@ -95,29 +96,29 @@ export function ProfilePage() {
         </section>
 
         <section className="flex flex-col gap-4 rounded-[24px] border-[3px] border-ink bg-white p-6">
-          <h2 className="m-0 font-display text-xl font-bold">Setting আর data</h2>
+          <h2 className="m-0 font-display text-xl font-bold">{tr('Setting আর data', 'Settings and data')}</h2>
           <label className="flex min-h-11 cursor-pointer items-center gap-3">
             <input type="checkbox" checked={p.settings.unlockAll} onChange={(e) => setUnlockAll(e.target.checked)} className="h-5 w-5" />
-            <span><strong>সব level খুলে দিন</strong> <span className="text-sm text-muted">· ক্রম না মেনে যেকোনো level খেলতে (নিজের জানা অংশ বাদ দিতে)</span></span>
+            <span><strong>{tr('সব level খুলে দিন', 'Unlock every level')}</strong> <span className="text-sm text-muted">{tr('· ক্রম না মেনে যেকোনো level খেলতে (নিজের জানা অংশ বাদ দিতে)', '· play any level out of order (to skip what you already know)')}</span></span>
           </label>
           <div className="flex flex-wrap gap-3">
             <button type="button" onClick={download} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">Progress download (JSON)</button>
-            <button type="button" onClick={() => file.current?.click()} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">File থেকে ফেরত আনুন</button>
+            <button type="button" onClick={() => file.current?.click()} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('File থেকে ফেরত আনুন', 'Restore from a file')}</button>
             <input ref={file} type="file" accept="application/json" hidden onChange={async (e) => {
               const f = e.target.files?.[0];
               if (!f) return;
-              try { setMsg(importData(JSON.parse(await f.text())) ? 'Progress ফেরত আনা হয়েছে।' : 'এটা ParcelGo-র progress file মনে হচ্ছে না।'); }
-              catch { setMsg('File পড়া গেল না।'); }
+              try { setMsg(importData(JSON.parse(await f.text())) ? tr('Progress ফেরত আনা হয়েছে।', 'Progress restored.') : tr('এটা ParcelGo-র progress file মনে হচ্ছে না।', 'This does not look like a ParcelGo progress file.')); }
+              catch { setMsg(tr('File পড়া গেল না।', 'Could not read the file.')); }
               e.target.value = '';
             }} />
             {!confirmReset
-              ? <button type="button" onClick={() => setConfirmReset(true)} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-white px-4 font-semibold text-coral-deep">সব মুছে নতুন করে</button>
-              : <span className="flex flex-wrap items-center gap-2"><span className="font-semibold text-coral-deep">নিশ্চিত? সব নম্বর আর review মুছে যাবে।</span>
-                  <button type="button" onClick={() => { reset(); setConfirmReset(false); setMsg('সব মুছে ফেলা হয়েছে।'); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-coral px-4 font-semibold text-white">হ্যাঁ, মুছুন</button>
-                  <button type="button" onClick={() => setConfirmReset(false)} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">না</button></span>}
+              ? <button type="button" onClick={() => setConfirmReset(true)} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-white px-4 font-semibold text-coral-deep">{tr('সব মুছে নতুন করে', 'Wipe everything and start over')}</button>
+              : <span className="flex flex-wrap items-center gap-2"><span className="font-semibold text-coral-deep">{tr('নিশ্চিত? সব নম্বর আর review মুছে যাবে।', 'Sure? Every score and review will be deleted.')}</span>
+                  <button type="button" onClick={() => { reset(); setConfirmReset(false); setMsg(tr('সব মুছে ফেলা হয়েছে।', 'Everything has been deleted.')); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-coral px-4 font-semibold text-white">{tr('হ্যাঁ, মুছুন', 'Yes, delete')}</button>
+                  <button type="button" onClick={() => setConfirmReset(false)} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('না', 'No')}</button></span>}
           </div>
           {msg && <p role="status" className="m-0 font-semibold text-route-deep">{msg}</p>}
-          <p className="m-0 text-sm text-muted">সব data এই browser-এ থাকে। অন্য computer-এ নিতে download করে সেখানে ফেরত আনুন।</p>
+          <p className="m-0 text-sm text-muted">{tr('সব data এই browser-এ থাকে। অন্য computer-এ নিতে download করে সেখানে ফেরত আনুন।', 'All data lives in this browser. To move it to another computer, download it and restore it there.')}</p>
         </section>
       </main>
     </AppShell>

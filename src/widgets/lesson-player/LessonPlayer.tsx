@@ -4,6 +4,7 @@ import { bn } from '@/shared/lib/bn';
 import { CHECKPOINT_POINTS } from '@/shared/lib/scoring';
 import { QuestionCard, type AnswerResult } from '@/shared/ui/QuestionCard';
 import { NodeIcon } from './NodeIcon';
+import { tr } from '@/shared/lib/i18n';
 
 interface Props {
   nodes: DiagramNode[];
@@ -137,7 +138,7 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
         })}
 
         <div className="absolute left-[2%] top-[3%] rounded-full bg-ink px-3 py-1 font-mono font-bold text-white" style={{ fontSize: 'max(11px,1.2cqw)' }}>
-          ধাপ {bn(i + 1)}/{bn(steps.length)}
+          {tr('ধাপ', 'Step')} {bn(i + 1)}/{bn(steps.length)}
         </div>
       </div>
 
@@ -146,23 +147,23 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
       </p>
 
       <div className="flex flex-wrap items-center gap-2.5">
-        <button type="button" aria-label="আগের ধাপ" disabled={i === 0} onClick={() => go(i - 1)} className="grid h-12 w-12 cursor-pointer place-items-center rounded-[14px] border-2 border-ink bg-white disabled:cursor-not-allowed disabled:opacity-40">
+        <button type="button" aria-label={tr('আগের ধাপ', 'Previous step')} disabled={i === 0} onClick={() => go(i - 1)} className="grid h-12 w-12 cursor-pointer place-items-center rounded-[14px] border-2 border-ink bg-white disabled:cursor-not-allowed disabled:opacity-40">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M12 3L6 9l6 6" fill="none" stroke="#16252D" strokeWidth="2.5" strokeLinecap="round" /></svg>
         </button>
-        <button type="button" aria-label={playing ? 'থামান' : 'চালান'} onClick={() => setPlaying((p) => !p)} className="btn-press grid h-14 w-14 cursor-pointer place-items-center rounded-full border-[2.5px] border-ink bg-parcel shadow-[0_3px_0_#16252D]">
+        <button type="button" aria-label={playing ? tr('থামান', 'Pause') : tr('চালান', 'Play')} onClick={() => setPlaying((p) => !p)} className="btn-press grid h-14 w-14 cursor-pointer place-items-center rounded-full border-[2.5px] border-ink bg-parcel shadow-[0_3px_0_#16252D]">
           {playing
             ? <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M5 3v12M13 3v12" stroke="#16252D" strokeWidth="3.5" strokeLinecap="round" /></svg>
             : <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M5 3l10 6-10 6z" fill="#16252D" /></svg>}
         </button>
-        <button type="button" aria-label="পরের ধাপ" disabled={blocked || last} onClick={() => go(i + 1)} className="grid h-12 w-12 cursor-pointer place-items-center rounded-[14px] border-2 border-ink bg-white disabled:cursor-not-allowed disabled:opacity-40">
+        <button type="button" aria-label={tr('পরের ধাপ', 'Next step')} disabled={blocked || last} onClick={() => go(i + 1)} className="grid h-12 w-12 cursor-pointer place-items-center rounded-[14px] border-2 border-ink bg-white disabled:cursor-not-allowed disabled:opacity-40">
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M6 3l6 6-6 6" fill="none" stroke="#16252D" strokeWidth="2.5" strokeLinecap="round" /></svg>
         </button>
-        <ol aria-label="ধাপগুলো" className="m-0 flex min-w-0 flex-[1_1_200px] list-none items-center gap-1.5 p-0">
+        <ol aria-label={tr('ধাপগুলো', 'Steps')} className="m-0 flex min-w-0 flex-[1_1_200px] list-none items-center gap-1.5 p-0">
           {steps.map((s, k) => (
             <li key={k} className="flex-1">
               <button
                 type="button"
-                aria-label={`ধাপ ${bn(k + 1)}${s.ask ? ' (প্রশ্ন)' : ''}`}
+                aria-label={`${tr('ধাপ', 'Step')} ${bn(k + 1)}${s.ask ? tr(' (প্রশ্ন)', ' (question)') : ''}`}
                 aria-current={k === i ? 'step' : undefined}
                 disabled={k > reached || blocked}
                 onClick={() => go(k)}
@@ -172,7 +173,7 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
             </li>
           ))}
         </ol>
-        <div className="flex overflow-hidden rounded-xl border-2 border-ink" role="group" aria-label="গতি">
+        <div className="flex overflow-hidden rounded-xl border-2 border-ink" role="group" aria-label={tr('গতি', 'Speed')}>
           {SPEEDS.map((sp) => (
             <button key={sp} type="button" aria-pressed={speed === sp} onClick={() => setSpeed(sp)} className={`min-h-11 cursor-pointer border-0 px-2.5 font-mono text-sm font-bold ${speed === sp ? 'bg-ink text-white' : 'bg-white text-ink'}`}>
               {bn(sp, { grouping: false })}×
@@ -184,9 +185,9 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
       {blocked && step.ask && (
         <QuestionCard
           q={step.ask}
-          label={`থামুন! Checkpoint ${bn(askNumber)}/${bn(askTotal)}`}
+          label={`${tr('থামুন!', 'Stop!')} Checkpoint ${bn(askNumber)}/${bn(askTotal)}`}
           points={CHECKPOINT_POINTS}
-          continueLabel="Animation-এ দেখি"
+          continueLabel={tr('Animation-এ দেখি', 'Show me in the animation')}
           onDone={(r) => {
             onCheckpoint(r);
             setAnswered((s) => new Set(s).add(i));
@@ -198,7 +199,7 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
 
       {last && (
         <button type="button" onClick={onFinish} className="btn-press min-h-[56px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold text-ink shadow-[0_5px_0_#16252D]">
-          সারাংশ দেখুন →
+          {tr('সারাংশ দেখুন →', 'See the summary →')}
         </button>
       )}
     </div>

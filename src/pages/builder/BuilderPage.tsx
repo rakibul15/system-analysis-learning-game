@@ -4,6 +4,7 @@ import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { play } from '@/shared/lib/sound';
 import { AppShell } from '@/shared/ui/AppShell';
+import { tr } from '@/shared/lib/i18n';
 
 const COLOR: Record<PartKind, string> = {
   client: '#FFFFFF', cdn: '#C8E6FF', limiter: '#FFD9D4', lb: '#FFE7A8', api: '#BFEBDD', ws: '#BFEBDD',
@@ -21,16 +22,16 @@ export function BuilderPage() {
           <>
             <div>
               <p className="m-0 text-sm font-bold text-route-deep">Architecture builder</p>
-              <h1 className="m-0 font-display text-[32px] font-extrabold">নিজে আঁকুন</h1>
-              <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">অংশ বসান, তীর টানুন, তারপর যাচাই করুন। প্রতিটা নিয়ম পূরণ হলে নম্বর।</p>
+              <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('নিজে আঁকুন', 'Draw it yourself')}</h1>
+              <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('অংশ বসান, তীর টানুন, তারপর যাচাই করুন। প্রতিটা নিয়ম পূরণ হলে নম্বর।', 'Place parts, draw arrows, then check. Every rule you meet scores.')}</p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {challenges.map((c) => (
                 <button key={c.id} type="button" onClick={() => setOpen(c)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
-                  <span className="text-xs font-bold text-route-deep">Level {bn(c.level)}-এর বিষয়</span>
+                  <span className="text-xs font-bold text-route-deep">{tr(`Level ${bn(c.level)}-এর বিষয়`, `Topic of level ${c.level}`)}</span>
                   <span className="font-display text-lg font-bold">{c.title}</span>
                   <span className="text-sm text-ink-soft">{c.brief}</span>
-                  {best[c.id] !== undefined && <span className="mt-1 font-mono text-sm font-bold">সেরা: {bn(Math.round(best[c.id]! * 100))}%</span>}
+                  {best[c.id] !== undefined && <span className="mt-1 font-mono text-sm font-bold">{tr('সেরা:', 'Best:')} {bn(Math.round(best[c.id]! * 100))}%</span>}
                 </button>
               ))}
             </div>
@@ -81,23 +82,23 @@ function Board({ c, onBack }: { c: Challenge; onBack: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">← সব challenge</button>
+      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">{tr('← সব challenge', '← All challenges')}</button>
       <div>
         <p className="m-0 text-xs font-bold text-route-deep">Architecture builder · Level {bn(c.level)}</p>
         <h1 className="m-0 font-display text-[28px] font-extrabold">{c.title}</h1>
         <p className="m-0 mt-1 max-w-[70ch]">{c.brief}</p>
       </div>
       <div className="grid gap-4 lg:grid-cols-[200px_1fr_260px]">
-        <section aria-label="অংশ" className="flex flex-wrap content-start gap-2 rounded-[20px] border-[3px] border-ink bg-white p-3 lg:flex-col">
-          <span className="w-full text-xs font-bold text-muted">যোগ করুন</span>
+        <section aria-label={tr('অংশ', 'Parts')} className="flex flex-wrap content-start gap-2 rounded-[20px] border-[3px] border-ink bg-white p-3 lg:flex-col">
+          <span className="w-full text-xs font-bold text-muted">{tr('যোগ করুন', 'Add')}</span>
           {c.palette.filter((k) => k !== 'client').map((k) => (
             <button key={k} type="button" onClick={() => add(k)} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink px-3 text-left text-sm font-semibold" style={{ background: COLOR[k] }}>+ {PARTS[k].label}</button>
           ))}
-          <button type="button" disabled={!sel || g.nodes.find((n) => n.id === sel)?.kind === 'client'} onClick={remove} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-coral px-3 text-sm font-bold text-white disabled:opacity-40">বাছাই করা অংশ মুছুন</button>
+          <button type="button" disabled={!sel || g.nodes.find((n) => n.id === sel)?.kind === 'client'} onClick={remove} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-coral px-3 text-sm font-bold text-white disabled:opacity-40">{tr('বাছাই করা অংশ মুছুন', 'Delete the selected part')}</button>
         </section>
         <section aria-label="Canvas" className="relative min-w-0 overflow-x-auto rounded-[20px] border-[3px] border-ink bg-[#F7F8F3]">
-          <p className="m-0 px-3 pt-2 text-xs text-muted">{sel ? 'এবার যেখানে তীর যাবে সেটায় click করুন (আবার click করলে তীর মুছে যায়)' : 'তীর টানতে: আগে উৎস, তারপর গন্তব্যে click'}</p>
-          <svg viewBox="0 0 100 62" className="block min-w-[560px] w-full" role="img" aria-label={`${bn(g.nodes.length)}টা অংশ, ${bn(g.edges.length)}টা তীর`}>
+          <p className="m-0 px-3 pt-2 text-xs text-muted">{sel ? tr('এবার যেখানে তীর যাবে সেটায় click করুন (আবার click করলে তীর মুছে যায়)', 'Now click where the arrow should go (clicking again removes it)') : tr('তীর টানতে: আগে উৎস, তারপর গন্তব্যে click', 'To draw an arrow: click the source, then the target')}</p>
+          <svg viewBox="0 0 100 62" className="block min-w-[560px] w-full" role="img" aria-label={tr(`${bn(g.nodes.length)}টা অংশ, ${bn(g.edges.length)}টা তীর`, `${g.nodes.length} parts, ${g.edges.length} arrows`)}>
             <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16252D" /></marker></defs>
             {g.edges.map(([a, b]) => {
               const p = pos[a], q = pos[b];
@@ -117,8 +118,8 @@ function Board({ c, onBack }: { c: Challenge; onBack: () => void }) {
             })}
           </svg>
         </section>
-        <section aria-label="নিয়ম" className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4">
-          <h2 className="m-0 font-display text-lg font-bold">যা লাগবে</h2>
+        <section aria-label={tr('নিয়ম', 'Rules')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4">
+          <h2 className="m-0 font-display text-lg font-bold">{tr('যা লাগবে', 'Requirements')}</h2>
           <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
             {c.rules.map((r, i) => (
               <li key={r.text} className={`flex gap-2 rounded-lg px-2 py-1.5 ${checked ? (checked[i] ? 'bg-route-soft' : 'bg-coral-soft') : 'bg-[#F0F2EC]'}`}>
@@ -126,7 +127,7 @@ function Board({ c, onBack }: { c: Challenge; onBack: () => void }) {
               </li>
             ))}
           </ol>
-          <button type="button" onClick={check} className="btn-press mt-1 min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_#16252D]">যাচাই করুন</button>
+          <button type="button" onClick={check} className="btn-press mt-1 min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_#16252D]">{tr('যাচাই করুন', 'Check')}</button>
           {checked && <p className="m-0 text-center font-mono text-xl font-bold">{bn(checked.filter(Boolean).length)}/{bn(checked.length)}</p>}
         </section>
       </div>

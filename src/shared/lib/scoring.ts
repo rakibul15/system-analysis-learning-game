@@ -1,3 +1,4 @@
+import { tr } from '@/shared/lib/i18n';
 /**
  * Marking rules from the plan.
  *  - Confidence: sure + right 100%, guess + right 60%, guess + wrong 0, sure + wrong −25%.
@@ -31,7 +32,7 @@ export const trafficPlayPoints = (stars: 0 | 1 | 2 | 3) => [0, 10, 18, 25][stars
 
 export type Mastery = 'none' | 'seen' | 'understood' | 'skilled' | 'solid';
 export const masteryLabel: Record<Mastery, string> = {
-  none: 'শুরু হয়নি', seen: 'দেখেছি', understood: 'বুঝেছি', skilled: 'দক্ষ', solid: 'পাকা',
+  none: tr('শুরু হয়নি', 'Not started'), seen: tr('দেখেছি', 'Seen'), understood: tr('বুঝেছি', 'Understood'), skilled: tr('দক্ষ', 'Skilled'), solid: tr('পাকা', 'Solid'),
 };
 
 /** Spaced repetition boxes: next review after 1, 3, 7, 16, 35 days. */

@@ -54,7 +54,7 @@ export function level(def: LevelDef): Level {
     minutes: def.minutes ?? 15,
     briefing: def.briefing,
     ref: def.ref,
-    predict: toQ(`${p}-p`, def.predict, 'Lesson-এ ধাপে ধাপে দেখবেন কেন।'),
+    predict: toQ(`${p}-p`, def.predict, /[\u0980-\u09FF]/.test(def.briefing) ? 'Lesson-এ ধাপে ধাপে দেখবেন কেন।' : 'The lesson shows why, step by step.'),
     nodes,
     steps,
     summary: def.summary,

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { bn } from '@/shared/lib/bn';
+import { isEn, tr } from '@/shared/lib/i18n';
 import { useTicker } from '../frame/SimFrame';
 
 /**
@@ -123,7 +124,7 @@ export function IdStream({ ts, machine, seq, dup }: { ts: number; machine: numbe
     return { time: time.toString(2).padStart(6, '0').slice(-6), m: (5).toString(2).padStart(4, '0').slice(-mbits), s: valid ? (k % 4).toString(2).padStart(3, '0') : '!!!' };
   };
   return (
-    <ol className="m-0 flex list-none flex-col gap-1 p-0 font-mono text-xs" aria-label="এইমাত্র বানানো ID">
+    <ol className="m-0 flex list-none flex-col gap-1 p-0 font-mono text-xs" aria-label={tr('এইমাত্র বানানো ID', 'IDs just generated')}>
       {ids.map((k, i) => {
         const b = bits(k);
         const isDup = dup && i === 1;
@@ -160,7 +161,7 @@ export function Typing({ debounce, server }: { debounce: number; server: number 
       <div className="flex items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 py-2 font-mono text-lg">
         <span>{WORD.slice(0, typed)}</span><span className="sim-caret inline-block h-5 w-0.5 bg-ink" />
       </div>
-      <svg viewBox="0 0 100 16" className="block w-full" role="img" aria-label={`${bn(fires.length)}টা request`}>
+      <svg viewBox="0 0 100 16" className="block w-full" role="img" aria-label={tr(`${bn(fires.length)}টা request`, `${fires.length} requests`)}>
         <rect x="1" y="3" width="16" height="10" rx="2" fill="#fff" stroke={INK} strokeWidth="0.5" /><text x="9" y="9.6" fontSize="3" textAnchor="middle" fontWeight="700">App</text>
         <rect x="83" y="3" width="16" height="10" rx="2" fill={server > 10 ? '#FFF4D6' : '#E6F4F1'} stroke={INK} strokeWidth="0.5" /><text x="91" y="9.6" fontSize="3" textAnchor="middle" fontWeight="700">Trie</text>
         <line x1="17" y1="8" x2="83" y2="8" stroke={INK} strokeOpacity="0.25" strokeWidth="0.4" />
@@ -229,7 +230,7 @@ export function RiderMap({ fanout, interval }: { fanout: string; interval: numbe
     });
   });
   return (
-    <svg viewBox="0 0 100 60" className="block w-full rounded-xl border-2 border-ink bg-[#EEF1E8]" role="img" aria-label={`এই মুহূর্তে ${bn(lines.length)}টা location message`}>
+    <svg viewBox="0 0 100 60" className="block w-full rounded-xl border-2 border-ink bg-[#EEF1E8]" role="img" aria-label={tr(`এই মুহূর্তে ${bn(lines.length)}টা location message`, `${lines.length} location messages right now`)}>
       {[20, 40, 60, 80].map((x) => <line key={x} x1={x} y1="0" x2={x} y2="60" stroke="#fff" strokeWidth="1.5" />)}
       {[15, 30, 45].map((y) => <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="#fff" strokeWidth="1.5" />)}
       {lines.slice(0, 400).map(([i, j], k) => <line key={k} x1={riders[i]!.x} y1={riders[i]!.y} x2={riders[j]!.x} y2={riders[j]!.y} stroke={fanout === 'all' ? CORAL : SKY} strokeOpacity={fanout === 'all' ? 0.18 : 0.6} strokeWidth="0.35" />)}
@@ -258,7 +259,7 @@ export function SearchGrow({ algo, km, live, rush }: { algo: string; km: number;
   const done = p >= 1;
   const jam = rush && !live;
   return (
-    <svg viewBox={`0 0 ${cols} ${rows}`} className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label="মোড় খোঁজার বিস্তার">
+    <svg viewBox={`0 0 ${cols} ${rows}`} className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label={tr('মোড় খোঁজার বিস্তার', 'How far the junction search spreads')}>
       {cells.map((c, i) => c.on ? <rect key={i} x={c.x + 0.08} y={c.y + 0.08} width="0.84" height="0.84" rx="0.15" fill={algo === 'tiles' ? '#BFEBDD' : '#FFE7A8'} /> : null)}
       {rush && <rect x={sx + span * 0.45} y={gy - 1} width={span * 0.2} height="2" fill={CORAL} opacity="0.35" />}
       {done && <line x1={sx} y1={gy} x2={goalX} y2={gy} stroke={jam ? CORAL : ROUTE} strokeWidth="0.45" strokeDasharray={jam ? '0.6 0.4' : undefined} />}
@@ -276,9 +277,9 @@ export function AlertScan({ v, threshold, fires }: { v: number[]; threshold: num
   const upto = reduced ? 60 : Math.min(60, ((t % 7) / 6) * 60);
   const shown = v.slice(0, Math.max(1, Math.floor(upto)));
   return (
-    <svg viewBox="0 0 120 52" className="block w-full" role="img" aria-label="এক ঘণ্টার error rate, সীমা আর alert">
+    <svg viewBox="0 0 120 52" className="block w-full" role="img" aria-label={tr('এক ঘণ্টার error rate, সীমা আর alert', 'An hour of error rate, the threshold and alerts')}>
       <rect x="60" y="0" width="60" height="44" fill="#FFD9D4" opacity="0.5" />
-      <text x="62" y="6" fontSize="3.5" fill="#9E2A22">আসল সমস্যা</text>
+      <text x="62" y="6" fontSize="3.5" fill="#9E2A22">{tr('আসল সমস্যা', 'real problem')}</text>
       <line x1="0" x2="120" y1={44 - threshold * 2.4} y2={44 - threshold * 2.4} stroke={CORAL} strokeDasharray="2 1" strokeWidth="0.6" />
       <polyline points={shown.map((x, i) => `${i * 2},${44 - x * 2.4}`).join(' ')} fill="none" stroke={INK} strokeWidth="0.8" />
       <line x1={upto * 2} x2={upto * 2} y1="0" y2="44" stroke={SKY} strokeWidth="0.4" />
@@ -303,13 +304,13 @@ export function Windows({ waited, updates }: { waited: number; updates: boolean 
     return { at: i * 3 + 1.2, late };
   });
   return (
-    <svg viewBox="0 0 100 34" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label="Scan আর মিনিটের window">
+    <svg viewBox="0 0 100 34" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label={tr('Scan আর মিনিটের window', 'Scans and minute windows')}>
       {[0, 1, 2, 3, 4].map((k) => {
         const x = k * 30 - offset;
-        return <g key={k}><rect x={x} y="18" width="29" height="12" rx="1.5" fill="#F0F2EC" stroke={INK} strokeWidth="0.4" /><text x={x + 14.5} y="32.8" fontSize="2.4" textAnchor="middle" fill="#4A5A62">এক মিনিট</text></g>;
+        return <g key={k}><rect x={x} y="18" width="29" height="12" rx="1.5" fill="#F0F2EC" stroke={INK} strokeWidth="0.4" /><text x={x + 14.5} y="32.8" fontSize="2.4" textAnchor="middle" fill="#4A5A62">{tr('এক মিনিট', 'one minute')}</text></g>;
       })}
       <line x1="70" y1="2" x2="70" y2="31" stroke={SKY} strokeWidth="0.5" strokeDasharray="1 0.8" />
-      <text x="71" y="5" fontSize="2.4" fill={SKY}>এখন</text>
+      <text x="71" y="5" fontSize="2.4" fill={SKY}>{tr('এখন', 'now')}</text>
       {events.map((e, i) => {
         const x = e.at * 3 - offset - 30;
         const arrive = x + Math.min(e.late, 60) * 0.25; // late scans land further right
@@ -332,10 +333,10 @@ export function Rush({ strategy, users, run }: { strategy: string; users: number
   const since = run ? t - t0 : 0;
   const n = Math.min(users, 24);
   return (
-    <svg viewBox="0 0 100 40" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label="Merchant-রা slot-এর দিকে">
+    <svg viewBox="0 0 100 40" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label={tr('Merchant-রা slot-এর দিকে', 'Merchants racing for the slot')}>
       <rect x="78" y="12" width="18" height="16" rx="2" fill="#FFF4D6" stroke={INK} strokeWidth="0.5" />
-      <text x="87" y="19" textAnchor="middle" fontSize="3" fontWeight="700">৫টার slot</text>
-      <text x="87" y="24" textAnchor="middle" fontSize="2.5">১টা জায়গা</text>
+      <text x="87" y="19" textAnchor="middle" fontSize="3" fontWeight="700">{tr('৫টার slot', '5 p.m. slot')}</text>
+      <text x="87" y="24" textAnchor="middle" fontSize="2.5">{tr('১টা জায়গা', '1 place')}</text>
       {Array.from({ length: n }, (_, i) => {
         const startY = 3 + (i / Math.max(1, n - 1)) * 34;
         let x = 6 + Math.sin(t * 3 + i) * 1.2, y = startY, fill = '#FFFFFF';
@@ -363,10 +364,10 @@ export function Conveyor({ coldAfter, ec }: { coldAfter: number; ec: boolean }) 
   const t = useClock(30);
   const coldX = coldAfter === 0 ? 200 : 6 + (coldAfter / 365) * 88;
   return (
-    <svg viewBox="0 0 100 30" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label="ছবির বয়স বাড়ছে: hot থেকে cold">
+    <svg viewBox="0 0 100 30" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label={tr('ছবির বয়স বাড়ছে: hot থেকে cold', 'Photos age: from hot to cold')}>
       {coldAfter > 0 && <rect x={coldX} y="0" width={100 - coldX} height="24" fill="#E3EEFF" />}
-      <text x="3" y="28" fontSize="2.4" fill="#4A5A62">নতুন</text>
-      <text x="97" y="28" fontSize="2.4" fill="#4A5A62" textAnchor="end">১ বছর</text>
+      <text x="3" y="28" fontSize="2.4" fill="#4A5A62">{tr('নতুন', 'new')}</text>
+      <text x="97" y="28" fontSize="2.4" fill="#4A5A62" textAnchor="end">{tr('১ বছর', '1 year')}</text>
       {coldAfter > 0 && <text x={Math.min(coldX + 1, 80)} y="4" fontSize="2.4" fill={SKY}>cold</text>}
       {Array.from({ length: 9 }, (_, i) => {
         const x = 4 + ((i * 11 + t * 6) % 92);
@@ -383,7 +384,7 @@ export function Conveyor({ coldAfter, ec }: { coldAfter: number; ec: boolean }) 
 
 /* ------------------------------------------------ L25 · leaderboard */
 
-const RIDERS = ['রহিম', 'সুমি', 'জামাল', 'তানিয়া', 'আসিফ', 'নাদিয়া'];
+const RIDERS = isEn ? ['Rahim', 'Sumi', 'Jamal', 'Tania', 'Asif', 'Nadia'] : ['রহিম', 'সুমি', 'জামাল', 'তানিয়া', 'আসিফ', 'নাদিয়া'];
 export function Ranking({ slow }: { slow: boolean }) {
   const t = useClock(12);
   const pts = RIDERS.map((_, i) => 900 + Math.floor(t * (8 + ((i * 7) % 11)) + 40 * Math.sin(t * 0.7 + i)));
@@ -401,10 +402,10 @@ export function Ranking({ slow }: { slow: boolean }) {
           );
         })}
       </div>
-      <div className="h-2.5 overflow-hidden rounded-full border-2 border-ink bg-white" aria-label="Rank query চলছে">
+      <div className="h-2.5 overflow-hidden rounded-full border-2 border-ink bg-white" aria-label={tr('Rank query চলছে', 'Rank query running')}>
         <div className="h-full bg-sky" style={{ width: `${slow ? scan * 100 : 100}%` }} />
       </div>
-      <p className="m-0 text-xs text-muted">{slow ? 'নীল দাগ: নিজের rank জানতে পুরো table গোনা চলছে…' : 'Sorted set: rank এক ঝটকায়'}</p>
+      <p className="m-0 text-xs text-muted">{slow ? tr('নীল দাগ: নিজের rank জানতে পুরো table গোনা চলছে…', 'Blue bar: counting the whole table to find one rank…') : tr('Sorted set: rank এক ঝটকায়', 'Sorted set: rank in one hop')}</p>
     </div>
   );
 }
@@ -422,7 +423,7 @@ export function CoinRun({ approach, crashed }: { approach: string; crashed: bool
   }
   const locked = crashed && approach === '2pc';
   return (
-    <svg viewBox="0 0 100 26" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label="Merchant থেকে rider-এ ৳৫০০">
+    <svg viewBox="0 0 100 26" className="block w-full rounded-xl border-2 border-ink bg-white" role="img" aria-label={tr('Merchant থেকে rider-এ ৳৫০০', '৳500 from merchant to rider')}>
       {[[10, 'Merchant'], [90, 'Rider']].map(([cx, l]) => (
         <g key={l as string}>
           <rect x={(cx as number) - 9} y="7" width="18" height="12" rx="2" fill={locked ? '#F0F2EC' : '#fff'} stroke={INK} strokeWidth="0.5" />
@@ -451,7 +452,7 @@ export function InterviewClock({ phases }: { phases: { label: string; min: numbe
       <div className="relative h-4 rounded-full border-2 border-ink bg-white">
         <span className="absolute top-[-6px] h-6 w-1 rounded bg-coral" style={{ left: `${Math.min(1, p) * 100}%` }} />
       </div>
-      <p className="m-0 text-sm">মিনিট <b className="font-mono">{bn(Math.floor(at))}</b>: এখন <b>{cur.label}</b>{total > 45 && at > 45 ? ', সময় শেষ, interviewer থামিয়ে দিলেন!' : ''}</p>
+      <p className="m-0 text-sm">{tr('মিনিট', 'Minute')} <b className="font-mono">{bn(Math.floor(at))}</b>{tr(': এখন ', ': now ')}<b>{cur.label}</b>{total > 45 && at > 45 ? tr(', সময় শেষ, interviewer থামিয়ে দিলেন!', ', time is up, the interviewer stops you!') : ''}</p>
     </div>
   );
 }

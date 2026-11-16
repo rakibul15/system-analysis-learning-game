@@ -3,6 +3,7 @@ import { bn } from '@/shared/lib/bn';
 import { assign, buildRing, imbalance, movedFraction, ringOwner, unitHash } from '../lib';
 import { ActionButton, Choice, pct, SimFrame, Slider, useLatched, type Metric } from '../frame/SimFrame';
 import { useClock } from '../knob/anim';
+import { tr } from '@/shared/lib/i18n';
 
 const KEYS = Array.from({ length: 400 }, (_, i) => unitHash(`parcel-${i}`));
 const COLORS = ['#0B8A7A', '#2F6FDE', '#E0483E', '#B8730A', '#6B4D9E', '#16252D', '#3FB37A', '#D0245A'];
@@ -37,8 +38,8 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
     mode === 'ring' && servers.length >= 4 && imb <= 0.1,
   ]);
   const metrics: Metric[] = [
-    { label: 'শেষ বদলে key সরেছে', value: last ? pct(last.moved) : '—', tone: last ? (last.moved > 0.4 ? 'bad' : 'good') : 'neutral' },
-    { label: 'ভাগের অসমতা', value: pct(imb), tone: imb <= 0.1 ? 'good' : imb > 0.3 ? 'bad' : 'neutral' },
+    { label: tr('শেষ বদলে key সরেছে', 'Keys moved by the last change'), value: last ? pct(last.moved) : '—', tone: last ? (last.moved > 0.4 ? 'bad' : 'good') : 'neutral' },
+    { label: tr('ভাগের অসমতা', 'Imbalance'), value: pct(imb), tone: imb <= 0.1 ? 'good' : imb > 0.3 ? 'bad' : 'neutral' },
     { label: 'Server', value: bn(servers.length) },
   ];
 
@@ -49,12 +50,12 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
 
   return (
     <SimFrame
-      title="Cache-এর আংটি"
-      intro={`${bn(KEYS.length)}টা key, কয়েকটা cache server। Server যোগ-বাদ করে দেখুন কত key জায়গা বদলায়।`}
+      title={tr('Cache-এর আংটি', 'The cache ring')}
+      intro={tr(`${bn(KEYS.length)}টা key, কয়েকটা cache server। Server যোগ-বাদ করে দেখুন কত key জায়গা বদলায়।`, `${KEYS.length} keys, a few cache servers. Add and remove servers and see how many keys move.`)}
       onFinish={onFinish}
       controls={<>
         <Choice label="Hashing" value={mode} onChange={(m) => { setMode(m); setLast(null); setPrevOwners(null); }} options={[{ id: 'modulo', label: 'hash % n' }, { id: 'ring', label: 'Ring' }]} />
-        <Slider label="Virtual node / server" value={vnodes} min={1} max={200} onChange={setVnodes} />
+        <Slider label={tr('Virtual node / server', 'Virtual nodes / server')} value={vnodes} min={1} max={200} onChange={setVnodes} />
         <div className="flex flex-wrap gap-2">
           <ActionButton tone="go" onClick={add}>+ Server</ActionButton>
           <ActionButton tone="warn" onClick={remove}>− Server</ActionButton>
@@ -62,7 +63,7 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
       </>}
       stage={
         <div className="grid h-full gap-2 p-3 sm:grid-cols-[1fr_150px]">
-          <svg viewBox="0 0 100 100" className="mx-auto block h-full max-h-[360px] w-full" role="img" aria-label={mode === 'ring' ? 'Hash ring' : 'Modulo ভাগ'}>
+          <svg viewBox="0 0 100 100" className="mx-auto block h-full max-h-[360px] w-full" role="img" aria-label={mode === 'ring' ? 'Hash ring' : tr('Modulo ভাগ', 'Modulo split')}>
             <circle cx={cx} cy={cy} r={R} fill="none" stroke="#16252D" strokeWidth="1.2" />
             {KEYS.map((k, i) => {
               const moved = prevOwners && prevOwners[i] !== owners[i];
@@ -94,15 +95,15 @@ export function HashRingSim({ onFinish }: { onFinish: (done: number) => void }) 
                 <span className="w-7 text-right font-mono">{bn(counts[i]!)}</span>
               </div>
             ))}
-            <p className="m-0 mt-2 text-muted">লাল বিন্দু = শেষ বদলে সরে যাওয়া key</p>
+            <p className="m-0 mt-2 text-muted">{tr('লাল বিন্দু = শেষ বদলে সরে যাওয়া key', 'Red dots = keys moved by the last change')}</p>
           </div>
         </div>
       }
       metrics={metrics}
       missions={[
-        { text: 'hash % n দিয়ে একটা server যোগ বা বাদ দিন, দেখুন অর্ধেকের বেশি key সরে', done: done[0]!, hint: 'Mode: hash % n, তারপর + Server।' },
-        { text: 'Ring-এ একটা server যোগ করুন, আর ২৫%-এর কম key সরান', done: done[1]!, hint: 'Ring-এ নতুন server শুধু নিজের ভাগটা নেয়।' },
-        { text: 'Ring-এ ৪+ server রেখে ভাগের অসমতা ১০%-এর নিচে আনুন', done: done[2]!, hint: 'প্রতিটা server আংটিতে অনেক জায়গায় বসলে?' },
+        { text: tr('hash % n দিয়ে একটা server যোগ বা বাদ দিন, দেখুন অর্ধেকের বেশি key সরে', 'With hash % n, add or remove a server and see more than half the keys move'), done: done[0]!, hint: tr('Mode: hash % n, তারপর + Server।', 'Mode: hash % n, then + Server.') },
+        { text: tr('Ring-এ একটা server যোগ করুন, আর ২৫%-এর কম key সরান', 'Add a server on the ring and move under 25% of keys'), done: done[1]!, hint: tr('Ring-এ নতুন server শুধু নিজের ভাগটা নেয়।', 'On a ring, a new server takes only its own share.') },
+        { text: tr('Ring-এ ৪+ server রেখে ভাগের অসমতা ১০%-এর নিচে আনুন', 'With 4+ servers on the ring, bring imbalance under 10%'), done: done[2]!, hint: tr('প্রতিটা server আংটিতে অনেক জায়গায় বসলে?', 'What if each server sits at many points on the ring?') },
       ]}
     />
   );
