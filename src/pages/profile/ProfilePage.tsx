@@ -7,6 +7,8 @@ import { bn } from '@/shared/lib/bn';
 import { masteryLabel, type Mastery } from '@/shared/lib/scoring';
 import { AppShell } from '@/shared/ui/AppShell';
 import { tr } from '@/shared/lib/i18n';
+import { AccountCard } from '@/features/auth/AuthUi';
+import { replaceCloudWithLocal, useAuth } from '@/features/auth/auth';
 
 const MASTERY_COLOR: Record<Mastery, string> = { none: '#EEF1EA', seen: '#FFE9C7', understood: '#FFC02E', skilled: '#3FB37A', solid: '#0B8A7A' };
 
@@ -95,6 +97,8 @@ export function ProfilePage() {
           </div>
         </section>
 
+        <AccountCard />
+
         <section className="flex flex-col gap-4 rounded-[24px] border-[3px] border-ink bg-white p-6">
           <h2 className="m-0 font-display text-xl font-bold">{tr('Setting আর data', 'Settings and data')}</h2>
           <label className="flex min-h-11 cursor-pointer items-center gap-3">
@@ -114,11 +118,11 @@ export function ProfilePage() {
             {!confirmReset
               ? <button type="button" onClick={() => setConfirmReset(true)} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-white px-4 font-semibold text-coral-deep">{tr('সব মুছে নতুন করে', 'Wipe everything and start over')}</button>
               : <span className="flex flex-wrap items-center gap-2"><span className="font-semibold text-coral-deep">{tr('নিশ্চিত? সব নম্বর আর review মুছে যাবে।', 'Sure? Every score and review will be deleted.')}</span>
-                  <button type="button" onClick={() => { reset(); setConfirmReset(false); setMsg(tr('সব মুছে ফেলা হয়েছে।', 'Everything has been deleted.')); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-coral px-4 font-semibold text-white">{tr('হ্যাঁ, মুছুন', 'Yes, delete')}</button>
+                  <button type="button" onClick={() => { reset(); if (useAuth.getState().user) void replaceCloudWithLocal(); setConfirmReset(false); setMsg(tr('সব মুছে ফেলা হয়েছে।', 'Everything has been deleted.')); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-coral bg-coral px-4 font-semibold text-white">{tr('হ্যাঁ, মুছুন', 'Yes, delete')}</button>
                   <button type="button" onClick={() => setConfirmReset(false)} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('না', 'No')}</button></span>}
           </div>
           {msg && <p role="status" className="m-0 font-semibold text-route-deep">{msg}</p>}
-          <p className="m-0 text-sm text-muted">{tr('সব data এই browser-এ থাকে। অন্য computer-এ নিতে download করে সেখানে ফেরত আনুন।', 'All data lives in this browser. To move it to another computer, download it and restore it there.')}</p>
+          <p className="m-0 text-sm text-muted">{tr('Login না করলে সব data শুধু এই browser-এ থাকে। Login করলে cloud-এও থাকে।', 'Without signing in, all data lives only in this browser. Signed in, it is also kept in the cloud.')}</p>
         </section>
       </main>
     </AppShell>
