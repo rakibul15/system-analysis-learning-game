@@ -1,0 +1,65 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #16252d;
+  --color-ink-soft: #33444c;
+  --color-muted: #4a5a62;
+  --color-ground: #f2f5ef;
+  --color-grass: #dcebcb;
+  --color-parcel: #ffc02e;
+  --color-parcel-soft: #fff4d6;
+  --color-route: #0b8a7a;
+  --color-route-deep: #0b5f55;
+  --color-route-soft: #e6f4f1;
+  --color-coral: #e0483e;
+  --color-coral-deep: #9e2a22;
+  --color-coral-soft: #fdecea;
+  --color-sky: #2f6fde;
+  --color-locked: #e3e6df;
+  --color-locked-ink: #5d6b66;
+
+  --font-display: 'Baloo Da 2', 'Noto Sans Bengali', system-ui, sans-serif;
+  --font-body: 'Noto Sans Bengali', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --shadow-block: 0 6px 0 var(--color-ink);
+  --shadow-press: 0 4px 0 var(--color-ink);
+}
+
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* chunky pressable button feel */
+.btn-press { transition: transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s; }
+.btn-press:hover { transform: translateY(-2px); }
+.btn-press:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--color-ink) !important; }
+
+/* ambient world motion */
+.amb-drift { animation: amb-drift 50s linear infinite; }
+.amb-drift-slow { animation: amb-drift 76s linear infinite; animation-delay: -34s; }
+@keyframes amb-drift { from { transform: translateX(-320px); } to { transform: translateX(1900px); } }
+.amb-spin { transform-box: fill-box; transform-origin: center; animation: amb-spin 50s linear infinite; }
+.amb-spin-fast { transform-box: view-box; animation: amb-spin 7s linear infinite; }
+@keyframes amb-spin { to { transform: rotate(360deg); } }
+.amb-sway { transform-box: fill-box; transform-origin: 50% 100%; animation: amb-sway 3.4s ease-in-out infinite alternate; }
+.amb-sway-b { animation-delay: -1.4s; }
+@keyframes amb-sway { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+.amb-blink { animation: amb-blink 1s steps(2) infinite; }
+@keyframes amb-blink { 50% { opacity: .25; } }
+.amb-ants { animation: amb-ants 1.2s linear infinite; }
+@keyframes amb-ants { to { stroke-dashoffset: -44; } }
+.amb-water { animation: amb-water 3s linear infinite; }
+@keyframes amb-water { to { stroke-dashoffset: -120; } }
+.amb-smoke { transform-box: fill-box; transform-origin: center; animation: amb-smoke 3.2s ease-out infinite; }
+.amb-smoke-b { animation-delay: -1.1s; } .amb-smoke-c { animation-delay: -2.2s; }
+@keyframes amb-smoke { 0% { transform: translate(0,0) scale(.5); opacity: .75; } 100% { transform: translate(26px,-84px) scale(1.5); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .amb-drift, .amb-drift-slow, .amb-spin, .amb-spin-fast, .amb-sway, .amb-blink, .amb-ants, .amb-water, .amb-smoke { animation: none; }
+}
