@@ -34,7 +34,7 @@ export interface ProgressData {
   estimation: { attempts: number; correct: number; bestRound: number };
   design: DesignAttempt[];
   speak: SpeakAttempt[];
-  settings: { unlockAll: boolean };
+  settings: { unlockAll: boolean; sound?: boolean };
 }
 
 interface ProgressActions {
@@ -44,6 +44,7 @@ interface ProgressActions {
   recordDesign: (a: DesignAttempt) => void;
   recordSpeak: (a: SpeakAttempt) => void;
   setUnlockAll: (on: boolean) => void;
+  setSound: (on: boolean) => void;
   importData: (data: unknown) => boolean;
   reset: () => void;
 }
@@ -125,6 +126,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       recordDesign: (a) => set((s) => ({ days: withToday(s.days), design: [...s.design, a].slice(-50) })),
       recordSpeak: (a) => set((s) => ({ days: withToday(s.days), speak: [...s.speak, a].slice(-100) })),
       setUnlockAll: (on) => set((s) => ({ settings: { ...s.settings, unlockAll: on } })),
+      setSound: (on) => set((s) => ({ settings: { ...s.settings, sound: on } })),
       importData: (data) => {
         if (!data || typeof data !== 'object' || !('levels' in data) || !('cards' in data)) return false;
         set({ ...emptyProgress(), ...(data as Partial<ProgressData>) });

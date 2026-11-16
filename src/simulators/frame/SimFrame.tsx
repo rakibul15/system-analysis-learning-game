@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { play } from '@/shared/lib/sound';
 import { bn } from '@/shared/lib/bn';
 
 export interface Mission { text: string; done: boolean; hint?: string }
@@ -44,7 +45,7 @@ interface Props {
 export function SimFrame({ title, intro, controls, stage, metrics, missions, onFinish }: Props) {
   const done = missions.filter((m) => m.done).length;
   const [celebrated, setCelebrated] = useState(0);
-  useEffect(() => { if (done > celebrated) setCelebrated(done); }, [done, celebrated]);
+  useEffect(() => { if (done > celebrated) { setCelebrated(done); play('mission'); } }, [done, celebrated]);
   const all = done === missions.length;
 
   return (

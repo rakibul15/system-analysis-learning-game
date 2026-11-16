@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { play } from '@/shared/lib/sound';
 import type { Question } from '@/content/schema';
 import { bn } from '@/shared/lib/bn';
 import { confidenceFactor, shuffledOrder } from '@/shared/lib/scoring';
@@ -48,6 +49,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   }, [order, done]);
 
   const correct = picked === 0;
+  useEffect(() => { if (done) play(correct ? 'right' : 'wrong'); }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
   const earned = points * confidenceFactor(correct, !!sure);
   const ready = picked !== null && sure !== null;
   const boss = tone === 'boss';

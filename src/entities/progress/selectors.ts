@@ -68,7 +68,7 @@ export function readiness(p: ProgressData): { total: number; parts: ReadinessPar
   const mock = recentDesign.length ? (recentDesign.reduce((s, d) => s + d.score / d.max, 0) / 3) : 0;
   const parts: ReadinessPart[] = [
     { id: 'campaign', label: 'Campaign (৩০ level)', weight: 30, score: campaign, available: true, note: 'সব level-এর সেরা নম্বরের গড়' },
-    { id: 'mock', label: 'Design challenge', weight: 20, score: mock, available: true, note: 'শেষ ৩টা design challenge-এর নিজের দেওয়া নম্বর' },
+    { id: 'mock', label: 'Mock আর design challenge', weight: 20, score: mock, available: true, note: 'শেষ ৩টা mock বা design challenge-এর নিজের দেওয়া নম্বর' },
     { id: 'mastery', label: 'দখল', weight: 15, score: mastered, available: true, note: 'কতগুলো level "দক্ষ" বা "পাকা"' },
     { id: 'builder', label: 'Architecture builder', weight: 15, score: 0, available: false, note: 'এখনো তৈরি হয়নি' },
     { id: 'drill', label: 'Estimation drill', weight: 10, score: drill, available: true, note: 'নির্ভুলতা, অন্তত ৪০টা প্রশ্নে পূর্ণ মান' },

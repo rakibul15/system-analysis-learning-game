@@ -3,10 +3,12 @@ import { Link } from '@tanstack/react-router';
 import { dueCards, streak, totalXp } from '@/entities/progress/selectors';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
+import { play } from '@/shared/lib/sound';
 
 const NAV = [
   { to: '/', label: 'শহর' },
   { to: '/practice', label: 'Practice' },
+  { to: '/mock', label: 'Mock' },
   { to: '/review', label: 'Review' },
   { to: '/profile', label: 'প্রোফাইল' },
 ] as const;
@@ -16,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const p = useProgress();
   const due = dueCards(p).length;
   const days = streak(p);
+  const soundOn = p.settings.sound ?? true;
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b-[3px] border-ink bg-white px-4 py-2.5 sm:px-8">
@@ -45,6 +48,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             {bn(days)} দিন
           </span>
           <span className="rounded-xl border-[2.5px] border-ink px-3 py-1.5 font-mono">{bn(totalXp(p))} XP</span>
+          <button type="button" aria-pressed={soundOn} aria-label={soundOn ? 'শব্দ বন্ধ করুন' : 'শব্দ চালু করুন'} title={soundOn ? 'শব্দ চালু' : 'শব্দ বন্ধ'}
+            onClick={() => { p.setSound(!soundOn); if (!soundOn) play('tap'); }}
+            className="grid h-10 w-10 cursor-pointer place-items-center rounded-xl border-[2.5px] border-ink bg-white">
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 8h3l4-4v12l-4-4H3z" fill="#16252D" />{soundOn ? <path d="M13 7c1.5 1.5 1.5 4.5 0 6M15.5 5c3 3 3 7 0 10" stroke="#16252D" strokeWidth="1.8" fill="none" strokeLinecap="round" /> : <path d="M13 7l5 6M18 7l-5 6" stroke="#E0483E" strokeWidth="2" strokeLinecap="round" />}</svg>
+          </button>
         </div>
       </header>
       {children}

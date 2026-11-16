@@ -5,6 +5,7 @@ import type { Level } from '@/content/schema';
 import { masteryOf, lockReason } from '@/entities/progress/selectors';
 import { useProgress, type AnswerLog } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
+import { play } from '@/shared/lib/sound';
 import { BOSS_POINTS, LEVEL_PARTS, MISSION_POINTS, PASS_MARK, masteryLabel, starsForTotal, trafficPlayPoints } from '@/shared/lib/scoring';
 import { QuestionCard, type AnswerResult } from '@/shared/ui/QuestionCard';
 import { Stars } from '@/shared/ui/Stars';
@@ -250,6 +251,7 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
     if (saved.current) return;
     saved.current = true;
     finishLevel(level.id, { total, stars, parts, answers });
+    play(total >= PASS_MARK ? 'level' : 'wrong');
   }, [finishLevel, level.id, total, stars, parts, answers]);
 
   // count-up animation
