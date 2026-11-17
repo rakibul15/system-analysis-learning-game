@@ -41,7 +41,7 @@ export const BOOKS: Record<BookId, BookInfo> = {
 };
 
 /** A place in a book: a chapter, optionally one section of it, with printed pages when known. */
-export interface BookRef { book: BookId; chapter: number; section?: string; pages?: [number, number] }
+export interface BookRef { book: BookId; chapter: number; section?: string; pages?: [number, number]; /** Open at exactly this printed page (a figure or table), instead of the section start. */ at?: number; label?: string }
 
 const D = (chapter: number, section: string, a: number, b: number): BookRef => ({ book: 'ddia2', chapter, section, pages: [a, b] });
 const DC = (chapter: number, a: number, b: number): BookRef => ({ book: 'ddia2', chapter, pages: [a, b] });
@@ -109,5 +109,5 @@ export function detectBook(text: string): BookId | null {
 export const refLabel = (r: BookRef) => {
   const b = BOOKS[r.book];
   const ch = b.chapters[r.chapter] ?? '';
-  return { book: b.short, where: r.section ? `${r.chapter} › ${r.section}` : `${tr('অধ্যায়', 'Ch.')} ${r.chapter} · ${ch}` };
+  return { book: b.short, where: r.label ? r.label : r.section ? `${r.chapter} › ${r.section}` : `${tr('অধ্যায়', 'Ch.')} ${r.chapter} · ${ch}` };
 };

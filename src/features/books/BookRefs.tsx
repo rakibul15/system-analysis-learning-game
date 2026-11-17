@@ -3,16 +3,21 @@ import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOKS, refLabel, type BookRef } from './catalog';
 import { bookFor, useReader, useShelf } from './shelf';
+import { Link } from '@tanstack/react-router';
+import { notesForLevel } from '@/content/notes';
 
 /** "Read it in the book": each reference opens the learner's own copy at that place. */
-export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', 'Read it in the book'), className = '' }: { refs: BookRef[] | undefined; title?: string; className?: string }) {
+export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', 'Read it in the book'), className = '', level }: { refs: BookRef[] | undefined; title?: string; className?: string; level?: number }) {
   const { books, loaded, refresh } = useShelf();
   const open = useReader((s) => s.open);
   useEffect(() => { if (!loaded) void refresh(); }, [loaded, refresh]);
   if (!refs?.length) return null;
   return (
     <div className={`text-left ${className}`}>
-      <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>
+      {level !== undefined && notesForLevel(level).map((n) => (
+        <Link key={n.id} to="/notes/$noteId" params={{ noteId: n.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-route-soft px-3 py-1.5 font-semibold text-ink no-underline">📝 {tr('আমাদের নোট:', 'Our notes:')} {n.title} →</Link>
+      ))}
+      {title && <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>}
       <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
         {refs.map((r, i) => {
           const { book, where } = refLabel(r);

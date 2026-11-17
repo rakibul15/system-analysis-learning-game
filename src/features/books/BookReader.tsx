@@ -17,6 +17,7 @@ const loadDoc = (key: string, blob: Blob) => {
 };
 
 async function locate(doc: PDFDocumentProxy, ref: BookRef): Promise<number> {
+  if (ref.at !== undefined) { const i = pageFromLabels(await doc.getPageLabels(), ref); if (i !== null) return i; }
   const outline = (await doc.getOutline()) as unknown as OutlineNode[] | null;
   if (outline?.length) {
     const node = findInOutline(outline, ref, BOOKS[ref.book].chapters[ref.chapter] ?? '');

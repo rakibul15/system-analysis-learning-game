@@ -34,7 +34,8 @@ export function findInOutline(outline: OutlineNode[], ref: BookRef, chapterTitle
 
 /** Fallback: the page whose printed label is the reference's first page. */
 export function pageFromLabels(labels: string[] | null, ref: BookRef): number | null {
-  if (!labels || !ref.pages) return null;
-  const i = labels.indexOf(String(ref.pages[0]));
+  const want = ref.at ?? ref.pages?.[0];
+  if (!labels || want === undefined) return null;
+  const i = labels.indexOf(String(want));
   return i >= 0 ? i : null;
 }
