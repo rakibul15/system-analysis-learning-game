@@ -74,7 +74,7 @@ export function readiness(p: ProgressData): { total: number; parts: ReadinessPar
   const recentDesign = p.design.slice(-3);
   const mock = recentDesign.length ? (recentDesign.reduce((s, d) => s + d.score / d.max, 0) / 3) : 0;
   const avgBest = (rec: Record<string, number>, n: number) => Object.values(rec).reduce((a, b) => a + b, 0) / n;
-  const builder = avgBest(p.builds ?? {}, builderCount);
+  const builder = challenges.reduce((sum, c) => sum + (p.builds?.[c.id] ?? 0), 0) / builderCount;
   const incident = avgBest(p.incidents ?? {}, incidentCount);
   const parts: ReadinessPart[] = [
     { id: 'campaign', label: tr('Campaign (৩০ level)', 'Campaign (30 levels)'), weight: 30, score: campaign, available: true, note: tr('সব level-এর সেরা নম্বরের গড়', 'Average of your best score on every level') },

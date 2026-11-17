@@ -14,9 +14,12 @@ export interface Incident {
   series: Series[];
   logs: string[];
   stages: [Stage, Stage, Stage];
+  /** A simulator to try the fix in, opened after the postmortem. */
+  fix?: SimulatorId;
 }
 
 import { isEn } from '@/shared/lib/i18n';
+import type { SimulatorId } from '@/content/schema';
 import { enIncidents } from './incidents.en';
 
 const t = (...v: number[]) => v;
@@ -140,6 +143,51 @@ const bnIncidents: Incident[] = [
       { prompt: 'কোন দুটো জিনিস একসাথে ঘটেছে?', options: ['id-server-4-এর ঘড়ি পিছিয়েছে, ঠিক তখনই duplicate', 'Order বাড়ার সাথে সাথেই duplicate দেখা দিয়েছে', 'Database ধীর হওয়ার সময় duplicate এসেছে', 'সব id server-এ একসাথে error দেখা দিয়েছে'], explain: 'Clock offset −৮০০ ms, ঠিক সেই মিনিটে duplicate।' },
       { prompt: 'Snowflake-এ কেন duplicate হল?', options: ['ID শুরু হয় timestamp দিয়ে; ঘড়ি পিছোলে আগের ms ফেরে', 'দুটো server-এ ভুল করে একই machine id বসানো', 'এক ms-এ ১২ bit-এর sequence ফুরিয়ে গেছে', 'Database-এর unique index-এ একটা bug আছে'], explain: 'একই timestamp + একই machine + sequence ০ থেকে = আগের ID।' },
       { prompt: 'সমাধান?', options: ['ঘড়ি পিছোলে আগের timestamp পার না হওয়া পর্যন্ত থামা', 'Machine id-র bit বাড়িয়ে আরও জায়গা করা', 'ID থেকে timestamp অংশটা পুরো বাদ দেওয়া', 'Duplicate হলে চুপচাপ আবার insert করা'], explain: 'Generator শেষ timestamp মনে রাখে; ঘড়ি পিছোলে অপেক্ষা বা error, কখনো পুরনো সময়ে ID নয়।' },
+    ],
+  },
+  {
+    id: 'retrystorm', title: 'থামতে না পারা ঝড়', level: 29, severity: 'SEV-1', fix: 'retrystorm',
+    alert: 'Payment provider ৩০ সেকেন্ড বন্ধ ছিল, ১০ মিনিট আগে ঠিক হয়েছে। তবু payment service এখনো ডুবে আছে, ৮০% checkout ব্যর্থ।',
+    series: [
+      { label: 'Payment-এ request / সে.', unit: '', values: t(1000, 1020, 2900, 8800, 9100, 9000, 9200, 8900, 9100, 9000, 9050, 9100), bad: true },
+      { label: 'Provider error rate', unit: '%', values: t(1, 1, 100, 2, 1, 1, 1, 1, 1, 1, 1, 1) },
+      { label: 'Checkout সফল', unit: '%', values: t(99, 99, 10, 15, 18, 20, 19, 20, 21, 19, 20, 20), bad: true },
+    ],
+    logs: ['10:01:30 provider: 503 Service Unavailable (30s)', '10:02:00 provider: recovered', 'gateway: retry=3 backoff=none', 'order-service: retry=3 backoff=none', 'payment-service: retry=3 on provider timeout', '10:12:00 payment-service: thread pool 400/400, queue 52,000'],
+    stages: [
+      { prompt: 'Provider ঠিক হয়ে গেছে, তবু ঝড় থামছে না। আগে কোন graph ধরবেন?', options: ['Payment-এ request, স্বাভাবিকের ৯ গুণ হয়ে আছে', 'Provider error rate, এখনো কত বেশি আছে', 'Checkout সফল, কোন সময় থেকে কমেছে', 'Payment server-এর memory আর GC-র সময়'], explain: 'User বাড়েনি, অথচ payment-এ ৯ গুণ request: এই বাড়তি request কেউ বানাচ্ছে।' },
+      { prompt: 'Log দেখে মূল কারণ কী?', options: ['তিন layer-এ ৩টা করে retry, চাপ গুণ হয়ে ফিরছে', 'Provider পুরো ঠিক হয়নি, মাঝে মাঝে পড়ছে', 'Campaign-এর জন্য হঠাৎ অনেক নতুন user এসেছে', 'Payment service-এর নতুন deploy-এ একটা bug'], explain: 'প্রতিটা layer নিজে retry করে: সবচেয়ে খারাপে ৪ × ৪ × ৪ = ৬৪ গুণ। Payment ধীর হলে আরও ব্যর্থ, আরও retry: ঝড় নিজেকেই খাওয়ায়।' },
+      { prompt: 'আবার যেন না হয়, সবচেয়ে ভালো সমাধান?', options: ['এক জায়গায় retry, retry budget, backoff-এ jitter', 'Payment server দ্বিগুণ করে বাড়তি চাপ নেওয়া', 'সব retry বন্ধ, প্রথম ব্যর্থতাতেই হাল ছাড়া', 'Provider বদলে আরও বড় একটা provider নেওয়া'], explain: 'Retry একটাই layer-এ, মোট retry-র সীমা (budget), আর এলোমেলো দেরি: তাহলে retry সাহায্য করে, ঝড় বানায় না। শুধু server বাড়ালে পরের ঝড়ে আবার ডুববে।' },
+    ],
+  },
+  {
+    id: 'cascade', title: 'এক ধীর service, পুরো app বন্ধ', level: 29, severity: 'SEV-1', fix: 'resilience',
+    alert: 'Homepage খুলছে না, order-ও না। অথচ শুধু "কখন পৌঁছাবে" (ETA) service-টা ধীর হয়েছে।',
+    series: [
+      { label: 'ETA service p99', unit: 's', values: t(0.2, 0.2, 0.3, 8, 25, 30, 30, 31, 30, 30, 29, 30), bad: true },
+      { label: 'Order service-এর ব্যস্ত thread', unit: '%', values: t(12, 13, 15, 60, 100, 100, 100, 100, 100, 100, 100, 100), bad: true },
+      { label: 'Homepage সফল', unit: '%', values: t(100, 100, 100, 70, 5, 2, 1, 2, 1, 1, 2, 1), bad: true },
+    ],
+    logs: ['14:03 eta-service: p99 latency 30s (map provider slow)', 'order-service: http client timeout=60s, retries=2', '14:05 order-service: thread pool exhausted 200/200', 'homepage: calls order-service for "your active orders" widget'],
+    stages: [
+      { prompt: 'তিনটা graph-ই লাল। কোথা থেকে শুরু করবেন?', options: ['Order service-এর thread, ২০০টার সবই আটকে আছে', 'ETA service-এর CPU, সেটা কতটা ব্যস্ত', 'Homepage-এর request সংখ্যা, কমেছে কি না', 'Load balancer-এর health check-এর log'], explain: 'ETA ধীর হলেও homepage-এর ETA লাগে না। মাঝখানের order service আটকে থাকলেই দুটো জোড়া লাগে।' },
+      { prompt: 'কারণ কী?', options: ['ধীর ETA-র জন্য ৬০ সেকেন্ডের timeout-এ thread আটকা', 'ETA service পুরো বন্ধ, তাই সব request ব্যর্থ', 'Order service-এর database-এ বড় একটা lock', 'Homepage-এ নতুন একটা বড় ছবি যোগ হয়েছে'], explain: 'প্রতিটা ETA call ৩০ সেকেন্ড thread ধরে রাখে, timeout আরও লম্বা। ২০০টা thread শেষ, তাই order service কাউকেই উত্তর দিতে পারে না: ধীর একটা অংশ পুরো app বসিয়ে দিল।' },
+      { prompt: 'সবচেয়ে ভালো সমাধান?', options: ['ছোট timeout, circuit breaker, ETA ছাড়াই order চালু', 'ETA service-এ আরও server যোগ করে দ্রুত করা', 'Order service-এর thread সংখ্যা ১০ গুণ বাড়ানো', 'ETA ঠিক না হওয়া পর্যন্ত পুরো site বন্ধ রাখা'], explain: 'ছোট timeout thread ছেড়ে দেয়, breaker ধীর service-কে ডাকা বন্ধ করে, আর ETA না থাকলে "শীঘ্রই" দেখিয়ে order চালু থাকে (graceful degradation)। ETA ধীর হয়েছিল map provider-এর জন্য, server বাড়িয়ে লাভ নেই।' },
+    ],
+  },
+  {
+    id: 'overload', title: 'ঈদের sale-এ ডুবে যাওয়া', level: 4, severity: 'SEV-1', fix: 'overload',
+    alert: 'রাত ৮টার sale শুরু হতেই server CPU ১০০%, কিন্তু সফল order প্রায় শূন্য। গড় অপেক্ষা ৪০ সেকেন্ড।',
+    series: [
+      { label: 'আসা request / সে.', unit: '', values: t(1500, 1600, 4800, 5000, 5100, 4900, 5000, 5100, 5000, 4900, 5000, 5000), bad: true },
+      { label: 'সময়মতো সফল order / সে.', unit: '', values: t(1500, 1600, 1500, 600, 180, 90, 60, 70, 60, 50, 60, 55), bad: true },
+      { label: 'গড় অপেক্ষা', unit: 's', values: t(0.1, 0.1, 2, 9, 18, 26, 33, 38, 40, 41, 40, 41) },
+    ],
+    logs: ['20:00 marketing: Eid sale live', 'api: request queue length 310,000 (no limit)', 'app: client timeout 2s, then "try again" button', '20:04 api: 96% of finished requests had no client waiting'],
+    stages: [
+      { prompt: 'Server পুরো গতিতে চলছে, তবু order নেই। আগে কোনটা দেখবেন?', options: ['সময়মতো সফল order, ভিড় বাড়তেই প্রায় শূন্য', 'আসা request, ভিড় ঠিক কত গুণ বেড়েছে', 'Server-এর CPU, পুরো ১০০% হয়েছে কি না', 'Payment provider-এর সাড়া দেওয়ার সময়'], explain: 'আসল মাপ "কতটা কাজ হলো" নয়, "কতটা কাজ সময়মতো কারো কাজে লাগল" (goodput)।' },
+      { prompt: 'কারণ কী?', options: ['সীমাহীন queue: user চলে যাওয়ার পরও পুরনো request-এ খাটুনি', 'Server সংখ্যা কম, তাই সব request একটু ধীরে চলছে', 'Database-এর connection pool ভরে সব আটকে গেছে', 'CDN-এর cache বন্ধ হয়ে সব traffic server-এ আসছে'], explain: 'Queue-এর কোনো সীমা নেই, তাই অপেক্ষা ৪০ সেকেন্ড। User ২ সেকেন্ডে চলে যায় আর আবার চাপে; server এমন request-এ খাটে যার জন্য কেউ আর অপেক্ষা করছে না।' },
+      { prompt: 'সবচেয়ে ভালো সমাধান?', options: ['Queue-এ সীমা, বাড়তি request সাথে সাথে ফেরত, checkout আগে', 'Autoscale চালু রাখা, ভিড় এলে নতুন server আসবে', 'App-এর timeout ২ থেকে বাড়িয়ে ৬০ সেকেন্ড করা', 'Sale-এর দিন browse বন্ধ রেখে শুধু checkout খোলা'], explain: 'সীমা পেরোলে সাথে সাথে "একটু পরে চেষ্টা করুন" (load shedding), আর checkout-কে আগে রাখা: যারা ঢোকে তারা সময়মতো পায়। নতুন server আসতে মিনিট লাগে, ভিড় আসে এক সেকেন্ডে।' },
     ],
   },
 ];

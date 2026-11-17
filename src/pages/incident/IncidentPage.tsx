@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
+import { simulators } from '@/simulators/registry';
+import type { SimulatorId } from '@/content/schema';
 import { Link } from '@tanstack/react-router';
 import { incidents, type Incident, type Series } from '@/features/incident/incidents';
 import { useProgress } from '@/entities/progress/store';
@@ -7,6 +9,7 @@ import { shuffledOrder } from '@/shared/lib/scoring';
 import { play } from '@/shared/lib/sound';
 import { AppShell } from '@/shared/ui/AppShell';
 import { tr } from '@/shared/lib/i18n';
+import { StandaloneSim } from '@/simulators/frame/SimFrame';
 
 /** Incident mode: read the dashboard and logs, then make three calls under pressure. */
 export function IncidentPage() {
@@ -129,6 +132,7 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
             {inc.stages.map((s, i) => <li key={i}><b>{s.options[0]}</b> <span className="font-mono text-sm">({bn(points[i]!, { grouping: false })}/{bn(1)})</span><br /><span className="text-sm text-ink-soft">{s.explain}</span></li>)}
           </ol>
           <p className="m-0 font-mono text-xl font-bold">{bn(Math.round((total / 3) * 100))}%</p>
+          {inc.fix && <FixLab id={inc.fix} />}
           <div className="flex flex-wrap gap-2">
             <Link to="/level/$levelId" params={{ levelId: String(inc.level) }} className="rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold text-ink no-underline">{tr(`Level ${bn(inc.level)} আবার দেখুন`, `Revisit level ${inc.level}`)}</Link>
             <button type="button" onClick={onBack} className="cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 py-2 font-bold">{tr('পরের incident', 'Next incident')}</button>
@@ -136,5 +140,27 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
         </section>
       )}
     </div>
+  );
+}
+
+/** After the postmortem: try the fix yourself in a simulator. */
+function FixLab({ id }: { id: SimulatorId }) {
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState<number | null>(null);
+  const Sim = simulators[id];
+  if (!open) {
+    return (
+      <div className="rounded-xl border-2 border-dashed border-ink bg-parcel-soft p-3">
+        <p className="m-0 font-bold">{tr('এবার নিজে ঠিক করুন', 'Now fix it yourself')}</p>
+        <p className="m-0 mt-1 text-sm text-ink-soft">{tr('একই সমস্যা simulator-এ: আগে ঝড় তুলুন, তারপর সমাধানগুলো চালু করে দেখুন সত্যিই থামে কি না।', 'The same problem in a simulator: cause the failure first, then switch the fixes on and see whether it really stops.')}</p>
+        {result !== null && <p className="m-0 mt-1 text-sm font-semibold text-route-deep">{tr(`শেষবার ${bn(result)}/${bn(3)} mission`, `Last time: ${result}/3 missions`)}</p>}
+        <button type="button" onClick={() => setOpen(true)} className="btn-press mt-2 min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-bold shadow-[0_3px_0_#16252D]">{tr('Simulator খুলুন', 'Open the simulator')}</button>
+      </div>
+    );
+  }
+  return (
+    <Suspense fallback={<p className="text-muted">{tr('Simulator আসছে…', 'Loading the simulator…')}</p>}>
+      <StandaloneSim.Provider value={true}><Sim onFinish={(n) => { setResult(n); setOpen(false); }} /></StandaloneSim.Provider>
+    </Suspense>
   );
 }

@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { play } from '@/shared/lib/sound';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
+
+/** True when a simulator is opened on its own (lab, incident), not as step 4 of a level. */
+export const StandaloneSim = createContext(false);
 
 export interface Mission { text: string; done: boolean; hint?: string }
 export interface Metric { label: string; value: string; tone?: 'good' | 'bad' | 'neutral' }
@@ -44,6 +47,7 @@ interface Props {
  * picture in the middle, numbers on the right, missions underneath.
  */
 export function SimFrame({ title, intro, controls, stage, metrics, missions, onFinish }: Props) {
+  const standalone = useContext(StandaloneSim);
   const done = missions.filter((m) => m.done).length;
   const [celebrated, setCelebrated] = useState(0);
   useEffect(() => { if (done > celebrated) { setCelebrated(done); play('mission'); } }, [done, celebrated]);
@@ -52,7 +56,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
   return (
     <div className="flex flex-col gap-4">
       <div className="pop-in">
-        <p className="m-0 text-sm font-bold text-route-deep">{tr('ধাপ ৪ · Simulator', 'Step 4 · Simulator')}</p>
+        <p className="m-0 text-sm font-bold text-route-deep">{standalone ? 'Simulator' : tr('ধাপ ৪ · Simulator', 'Step 4 · Simulator')}</p>
         <h2 className="m-0 font-display text-[28px] font-extrabold leading-tight">{title}</h2>
         <p className="m-0 mt-1 text-ink-soft">{intro}</p>
       </div>
@@ -95,7 +99,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
           onClick={() => onFinish(done)}
           className={`btn-press mt-4 min-h-[54px] w-full cursor-pointer rounded-2xl border-[3px] border-ink font-display text-xl font-extrabold shadow-[0_5px_0_#16252D] ${all ? 'bg-parcel' : 'bg-white'}`}
         >
-          {all ? tr('সব mission শেষ! Boss-এর দিকে →', 'All missions done! On to the boss →') : tr(`এখানেই থামুন (${bn(done)}/${bn(missions.length)}) · Boss-এর দিকে`, `Stop here (${done}/${missions.length}) · on to the boss`)}
+          {standalone ? (all ? tr('সব mission শেষ! বন্ধ করুন', 'All missions done! Close') : tr(`এখানেই থামুন (${bn(done)}/${bn(missions.length)})`, `Stop here (${done}/${missions.length})`)) : all ? tr('সব mission শেষ! Boss-এর দিকে →', 'All missions done! On to the boss →') : tr(`এখানেই থামুন (${bn(done)}/${bn(missions.length)}) · Boss-এর দিকে`, `Stop here (${done}/${missions.length}) · on to the boss`)}
         </button>
       </section>
     </div>

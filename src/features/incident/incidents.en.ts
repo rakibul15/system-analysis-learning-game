@@ -124,4 +124,49 @@ export const enIncidents: Incident[] = [
       { prompt: 'The fix?', options: ['Pause issuing IDs until the clock passes the last one', 'Add more machine bits to make more room', 'Drop the timestamp part from the ID entirely', 'Quietly retry the insert whenever it duplicates'], explain: 'The generator remembers its last timestamp; if the clock goes back it waits or errors, never issuing an ID from the past.' },
     ],
   },
+  {
+    id: 'retrystorm', title: 'The storm that would not stop', level: 29, severity: 'SEV-1', fix: 'retrystorm',
+    alert: 'The payment provider was down for 30 seconds and recovered 10 minutes ago. Yet the payment service is still drowning and 80% of checkouts fail.',
+    series: [
+      { label: 'Requests to payment / s', unit: '', values: t(1000, 1020, 2900, 8800, 9100, 9000, 9200, 8900, 9100, 9000, 9050, 9100), bad: true },
+      { label: 'Provider error rate', unit: '%', values: t(1, 1, 100, 2, 1, 1, 1, 1, 1, 1, 1, 1) },
+      { label: 'Checkouts that succeed', unit: '%', values: t(99, 99, 10, 15, 18, 20, 19, 20, 21, 19, 20, 20), bad: true },
+    ],
+    logs: ['10:01:30 provider: 503 Service Unavailable (30s)', '10:02:00 provider: recovered', 'gateway: retry=3 backoff=none', 'order-service: retry=3 backoff=none', 'payment-service: retry=3 on provider timeout', '10:12:00 payment-service: thread pool 400/400, queue 52,000'],
+    stages: [
+      { prompt: 'The provider is fine again, yet the storm goes on. Which graph first?', options: ['Requests to payment, stuck at 9× normal', 'Provider error rate, how high it still is', 'Checkout success, when it started falling', 'Payment server memory and GC pauses'], explain: 'Users did not grow, yet payment gets 9× the requests: something is manufacturing them.' },
+      { prompt: 'From the logs, what is the root cause?', options: ['Three layers retry 3 times each; load multiplies', 'The provider is not fully healed and keeps failing', 'A campaign suddenly brought many new users', 'A bug in the latest payment service deploy'], explain: 'Each layer retries on its own: up to 4 × 4 × 4 = 64× in the worst case. As payment slows, more fails, more retries: the storm feeds itself.' },
+      { prompt: 'The best fix so it never happens again?', options: ['Retry in one place, a retry budget, jittered backoff', 'Double the payment servers to absorb the load', 'Turn off all retries and give up on first failure', 'Switch to a bigger payment provider'], explain: 'Retries in a single layer, a cap on total retries (a budget) and random delays: then retries help instead of creating storms. More servers alone just drown in the next storm.' },
+    ],
+  },
+  {
+    id: 'cascade', title: 'One slow service, the whole app down', level: 29, severity: 'SEV-1', fix: 'resilience',
+    alert: 'The homepage does not load, and neither do orders. Yet only the "when will it arrive" (ETA) service got slow.',
+    series: [
+      { label: 'ETA service p99', unit: 's', values: t(0.2, 0.2, 0.3, 8, 25, 30, 30, 31, 30, 30, 29, 30), bad: true },
+      { label: 'Busy order-service threads', unit: '%', values: t(12, 13, 15, 60, 100, 100, 100, 100, 100, 100, 100, 100), bad: true },
+      { label: 'Homepage success', unit: '%', values: t(100, 100, 100, 70, 5, 2, 1, 2, 1, 1, 2, 1), bad: true },
+    ],
+    logs: ['14:03 eta-service: p99 latency 30s (map provider slow)', 'order-service: http client timeout=60s, retries=2', '14:05 order-service: thread pool exhausted 200/200', 'homepage: calls order-service for "your active orders" widget'],
+    stages: [
+      { prompt: 'All three graphs are red. Where do you start?', options: ['Order-service threads, all 200 stuck', 'ETA service CPU, how busy it is', 'Homepage request count, whether it fell', 'The load balancer health-check log'], explain: 'The homepage does not need ETA. The order service in the middle being stuck is what links the two.' },
+      { prompt: 'What is the cause?', options: ['Threads stuck on a 60 s timeout to the slow ETA', 'ETA is completely down, so all requests fail', 'A big lock in the order service database', 'A new large image was added to the homepage'], explain: 'Every ETA call holds a thread for 30 seconds, and the timeout is even longer. All 200 threads are used up, so the order service cannot answer anyone: one slow part took down the whole app.' },
+      { prompt: 'The best fix?', options: ['Short timeouts, a breaker, orders work without ETA', 'Add more ETA servers to make it faster', 'Give the order service 10× more threads', 'Close the whole site until ETA recovers'], explain: 'Short timeouts free threads, a breaker stops calling the slow service, and without ETA the app shows "soon" and keeps taking orders (graceful degradation). ETA was slow because of the map provider, so more servers would not help.' },
+    ],
+  },
+  {
+    id: 'overload', title: 'Drowned by the Eid sale', level: 4, severity: 'SEV-1', fix: 'overload',
+    alert: 'As the 8 p.m. sale starts, server CPU hits 100% but successful orders fall to almost zero. The average wait is 40 seconds.',
+    series: [
+      { label: 'Incoming requests / s', unit: '', values: t(1500, 1600, 4800, 5000, 5100, 4900, 5000, 5100, 5000, 4900, 5000, 5000), bad: true },
+      { label: 'Orders finished in time / s', unit: '', values: t(1500, 1600, 1500, 600, 180, 90, 60, 70, 60, 50, 60, 55), bad: true },
+      { label: 'Average wait', unit: 's', values: t(0.1, 0.1, 2, 9, 18, 26, 33, 38, 40, 41, 40, 41) },
+    ],
+    logs: ['20:00 marketing: Eid sale live', 'api: request queue length 310,000 (no limit)', 'app: client timeout 2s, then "try again" button', '20:04 api: 96% of finished requests had no client waiting'],
+    stages: [
+      { prompt: 'The servers run flat out, yet no orders. What do you check first?', options: ['Orders finished in time, near zero as the crowd grew', 'Incoming requests, exactly how much the crowd grew', 'Server CPU, whether it is truly at 100%', 'How long the payment provider takes to answer'], explain: 'The real measure is not how much work got done but how much finished in time to help someone (goodput).' },
+      { prompt: 'What is the cause?', options: ['An unbounded queue: work on requests users already left', 'Too few servers, so every request runs a bit slower', 'The database connection pool filled up and blocked all', 'The CDN cache went off and all traffic hits servers'], explain: 'The queue has no limit, so the wait is 40 seconds. Users leave after 2 seconds and tap again; the servers labour on requests nobody is waiting for any more.' },
+      { prompt: 'The best fix?', options: ['Bound the queue, turn extras away at once, checkout first', 'Keep autoscaling on so new servers arrive with crowds', 'Raise the app timeout from 2 to 60 seconds', 'Close browsing on sale day and open checkout only'], explain: 'Past the limit, answer "try again shortly" at once (load shedding), and put checkout first: whoever gets in is served in time. New servers take minutes; crowds arrive in a second.' },
+    ],
+  },
 ];

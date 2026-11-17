@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { runAll, singlePoints, type FlowStatus } from '@/features/builder/chaos';
+import { capacityReport, slaByChallenge, SPEC } from '@/features/builder/capacity';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
+import { MigrationLab } from '@/widgets/migrate/MigrationLab';
 import { useClock } from '@/simulators/knob/anim';
 import { challenges, PARTS, scoreOf, type Challenge, type Graph, type PartKind } from '@/features/builder/model';
 import { useProgress } from '@/entities/progress/store';
@@ -36,6 +38,7 @@ export function BuilderPage() {
     return c ? { c, memory: true } : null;
   });
   const due = dueRebuilds(p);
+  const [section, setSection] = useState<'design' | 'migrate'>('design');
   const close = () => { setOpen(null); if (memory) void navigate({ to: '/builder', search: {} }); };
   return (
     <AppShell>
@@ -47,6 +50,12 @@ export function BuilderPage() {
               <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('নিজে আঁকুন', 'Draw it yourself')}</h1>
               <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('অংশ বসান, তীর টানুন, যাচাই করুন। তারপর "ভাঙুন" mode-এ যেকোনো অংশ বন্ধ করে দেখুন কোন request আটকায়।', 'Place parts, draw arrows, check. Then switch to "Break it" and switch off any part to see which requests stop.')}</p>
             </div>
+            <div role="tablist" aria-label={tr('ধরন', 'Kind')} className="flex flex-wrap gap-2">
+              {([['design', tr('Design challenge', 'Design challenges')], ['migrate', tr('Migration', 'Migrations')]] as const).map(([k, l]) => (
+                <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+              ))}
+            </div>
+            {section === 'migrate' ? <MigrationLab /> : <>
             {due.length > 0 && (
               <section className="rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-4">
                 <h2 className="m-0 font-display text-lg font-bold">{tr('আজ না দেখে আবার আঁকুন', 'Redraw from memory today')}</h2>
@@ -66,6 +75,7 @@ export function BuilderPage() {
                 </button>
               ))}
             </div>
+            </>}
           </>
         )}
       </main>
@@ -80,7 +90,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
   const [sel, setSel] = useState<string | null>(null);
   const [checked, setChecked] = useState<boolean[] | null>(null);
   const [seq, setSeq] = useState(1);
-  const [mode, setMode] = useState<'build' | 'chaos'>('build');
+  const [mode, setMode] = useState<'build' | 'chaos' | 'cost'>('build');
   const [down, setDown] = useState<Set<string>>(new Set());
   const [scan, setScan] = useState<{ id: string; breaks: string[] }[] | null>(null);
   const t = useClock(30);
@@ -93,6 +103,8 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
     return out;
   }, [g.nodes]);
   const results = useMemo(() => (mode === 'chaos' ? runAll(g, c.id, down) : []), [mode, g, c.id, down]);
+  const sla = slaByChallenge[c.id];
+  const report = useMemo(() => (mode === 'cost' && sla ? capacityReport(g, c.id, sla) : null), [mode, g, c.id, sla]);
   const label = (id: string) => { const n = g.nodes.find((x) => x.id === id); return n ? PARTS[n.kind].label : id; };
 
   const changed = () => { setChecked(null); setScan(null); };
@@ -124,7 +136,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
     if (memory) recordRebuild(c.id, s); else record(c.id, s);
     play(s === 1 ? 'level' : s >= 0.5 ? 'mission' : 'wrong');
   };
-  const switchMode = (m: 'build' | 'chaos') => { setMode(m); setSel(null); setDown(new Set()); setScan(null); };
+  const switchMode = (m: 'build' | 'chaos' | 'cost') => { setMode(m); setSel(null); setDown(new Set()); setScan(null); };
 
   /** A dot travelling along a path of node centres, looping. */
   const dot = (path: string[], phase: number, color: string, stopEarly: boolean) => {
@@ -149,17 +161,17 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
         <p className="m-0 mt-1 max-w-[70ch]">{c.brief}</p>
       </div>
       <div role="tablist" aria-label={tr('Mode', 'Mode')} className="flex flex-wrap gap-2">
-        {([['build', tr('আঁকুন', 'Build')], ['chaos', tr('ভাঙুন ও চালান', 'Break it and run')]] as const).map(([m, l]) => (
+        {([['build', tr('আঁকুন', 'Build')], ['chaos', tr('ভাঙুন ও চালান', 'Break it and run')], ['cost', tr('খরচ ও capacity', 'Cost and capacity')]] as const).map(([m, l]) => (
           <button key={m} role="tab" type="button" aria-selected={mode === m} onClick={() => switchMode(m)}
             className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${mode === m ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
-        {mode === 'build' ? (
+        {mode !== 'chaos' ? (
           <section aria-label={tr('অংশ', 'Parts')} className="flex flex-wrap content-start gap-2 rounded-[20px] border-[3px] border-ink bg-white p-3 lg:flex-col">
             <span className="w-full text-xs font-bold text-muted">{tr('যোগ করুন', 'Add')}</span>
             {c.palette.filter((k) => k !== 'client').map((k) => (
-              <button key={k} type="button" onClick={() => add(k)} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink px-3 text-left text-sm font-semibold" style={{ background: COLOR[k] }}>+ {PARTS[k].label}</button>
+              <button key={k} type="button" onClick={() => add(k)} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink px-3 text-left text-sm font-semibold" style={{ background: COLOR[k] }}>+ {PARTS[k].label}{mode === 'cost' && <span className="ml-1 font-mono text-xs">${SPEC[k].cost}</span>}</button>
             ))}
             <button type="button" disabled={!sel || g.nodes.find((n) => n.id === sel)?.kind === 'client'} onClick={remove} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-coral px-3 text-sm font-bold text-white disabled:opacity-40">{tr('বাছাই করা অংশ মুছুন', 'Delete the selected part')}</button>
           </section>
@@ -204,6 +216,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
                   <rect x={p.x - 6.5} y={p.y - 3} width="13" height="6" rx="1.4" fill={off ? '#E3E6DF' : COLOR[n.kind]} stroke={on ? '#E0483E' : '#16252D'} strokeWidth={on ? 0.9 : 0.45} />
                   <text x={p.x} y={p.y + 0.9} textAnchor="middle" fontSize="1.85" fontWeight="700" fill={off ? '#5D6B66' : '#16252D'}>{PARTS[n.kind].label}</text>
                   {off && <path d={`M${p.x - 2} ${p.y - 2}l4 4M${p.x + 2} ${p.y - 2}l-4 4`} stroke="#E0483E" strokeWidth="0.8" strokeLinecap="round" />}
+                  {report && (() => { const tier = report.tiers.find((x) => x.kind === n.kind); if (!tier) return null; const u = Math.round(tier.util * 100); return <text x={p.x} y={p.y + 5.2} textAnchor="middle" fontSize="1.7" fontWeight="800" fill={tier.util >= 1 ? '#9E2A22' : tier.util >= 0.8 ? '#7A4D00' : '#0B5F55'}>{bn(Math.min(u, 999))}%</text>; })()}
                 </g>
               );
             })}
@@ -228,6 +241,8 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
             {checked && <p className="m-0 text-center font-mono text-xl font-bold">{bn(checked.filter(Boolean).length)}/{bn(checked.length)}</p>}
             {checked && memory && <p className="m-0 text-center text-sm">{checked.every(Boolean) ? tr('মনে থেকে পুরো ঠিক! পরের বার আরও দেরিতে আসবে।', 'Fully right from memory! It will come back later next time.') : tr('কিছু বাদ গেছে। কাল আবার আসবে।', 'Something was missed. It comes back tomorrow.')}</p>}
           </section>
+        ) : mode === 'cost' ? (
+          <CostPanel report={report} sla={sla} />
         ) : (
           <section aria-label={tr('Request-এর অবস্থা', 'Request status')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4" aria-live="polite">
             <h2 className="m-0 font-display text-lg font-bold">{tr('Request-গুলো', 'Requests')}</h2>
@@ -249,5 +264,44 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
         )}
       </div>
     </div>
+  );
+}
+
+const KIND_LABEL = (k: PartKind) => PARTS[k].label;
+
+/** Monthly cost, per-tier load and the service-level targets for the current design. */
+function CostPanel({ report, sla }: { report: ReturnType<typeof capacityReport> | null; sla: (typeof slaByChallenge)[string] | undefined }) {
+  if (!report || !sla) return <section className="rounded-[20px] border-[3px] border-ink bg-white p-4">{tr('এই challenge-এর জন্য খরচের হিসাব নেই।', 'No cost model for this challenge.')}</section>;
+  const rows: { ok: boolean; label: string; value: string }[] = [
+    { ok: report.checks.capacity, label: tr('কোনো অংশ ১০০% পার হয়নি', 'No part above 100%'), value: report.bottleneck ? `${KIND_LABEL(report.bottleneck.kind)} ${bn(Math.round(report.bottleneck.util * 100))}%` : '—' },
+    { ok: report.checks.p99, label: `p99 ≤ ${bn(sla.p99)} ms`, value: report.p99 >= 5000 ? tr('timeout', 'timeouts') : `${bn(report.p99)} ms` },
+    { ok: report.checks.avail, label: tr(`চালু ≥ ${bn(sla.avail, { grouping: false })}%`, `Uptime ≥ ${sla.avail}%`), value: `${bn(report.avail.toFixed(2), { grouping: false })}%` },
+    { ok: report.checks.cost, label: tr(`বাজেট $${bn(sla.budget)}/মাস`, `Budget $${sla.budget}/month`), value: `$${bn(report.cost)}` },
+  ];
+  return (
+    <section aria-label={tr('খরচ ও capacity', 'Cost and capacity')} aria-live="polite" className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4">
+      <h2 className="m-0 font-display text-lg font-bold">{tr('লক্ষ্য', 'Targets')}</h2>
+      <p className="m-0 text-xs text-muted">{tr(`সেকেন্ডে ${bn(sla.rps)} request, ${bn(Math.round(sla.readShare * 100))}% পড়া`, `${sla.rps} requests a second, ${Math.round(sla.readShare * 100)}% reads`)}</p>
+      <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
+        {rows.map((r) => (
+          <li key={r.label} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 ${r.ok ? 'bg-route-soft' : 'bg-coral-soft'}`}>
+            <span><b>{r.ok ? '✓' : '✕'}</b> {r.label}</span><span className="font-mono font-bold">{r.value}</span>
+          </li>
+        ))}
+      </ul>
+      {report.met
+        ? <p className="m-0 rounded-lg bg-route px-3 py-2 text-center font-bold text-white">{tr('সব লক্ষ্য পূরণ, বাজেটের মধ্যে!', 'Every target met, within budget!')}</p>
+        : <p className="m-0 text-xs text-ink-soft">{!report.checks.capacity ? tr('যে অংশ ১০০%-এর বেশি, সেখানে আরেকটা যোগ করুন।', 'Add another of the part that is over 100%.') : !report.checks.avail ? tr('কোনো একটা অংশ একা: সেটা ভাঙলে সব বন্ধ। জোড়ায় রাখুন।', 'Some part stands alone: if it breaks, everything stops. Pair it.') : !report.checks.p99 ? tr('অংশগুলো খুব ব্যস্ত বা cache নেই: ৭০%-এর নিচে রাখুন, পড়া cache থেকে দিন।', 'Parts are too busy or there is no cache: keep them under 70%, serve reads from a cache.') : tr('বেশি খরচ: কোথায় অংশ দরকারের চেয়ে বেশি?', 'Over budget: where do you have more than you need?')}</p>}
+      <h3 className="m-0 mt-1 text-sm font-bold">{tr('প্রতিটা স্তরের চাপ', 'Load per tier')}</h3>
+      <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-xs">
+        {report.tiers.map((t) => (
+          <li key={t.kind}>
+            <div className="flex justify-between"><span>{KIND_LABEL(t.kind)} × {bn(t.count)}</span><span className="font-mono">{bn(Math.round(t.util * 100))}%</span></div>
+            <div className="h-2 overflow-hidden rounded-full bg-[#E3E6DF]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, t.util * 100)}%`, background: t.util >= 1 ? '#E0483E' : t.util >= 0.7 ? '#FFC02E' : '#0B8A7A' }} /></div>
+          </li>
+        ))}
+      </ul>
+      <p className="m-0 text-[11px] text-muted">{tr('দাম আর capacity গোল সংখ্যা, শুধু যুক্তির জন্য।', 'Prices and capacities are round numbers, for reasoning only.')}</p>
+    </section>
   );
 }

@@ -9,6 +9,7 @@ import { levelList } from '@/content/levels';
 import type { SimulatorId } from '@/content/schema';
 import { simulators } from '@/simulators/registry';
 import { tr } from '@/shared/lib/i18n';
+import { StandaloneSim } from '@/simulators/frame/SimFrame';
 import { getRouteApi } from '@tanstack/react-router';
 import { GuidedPractice } from '@/widgets/guided/GuidedPractice';
 
@@ -262,6 +263,11 @@ function SpeakAloud() {
 }
 
 /** Replay any level's simulator freely; nothing here is scored. */
+const EXTRA_SIMS: { id: SimulatorId; title: string; concept: string }[] = [
+  { id: 'retrystorm', title: tr('Retry-র ঝড়', 'The retry storm'), concept: tr('Retry budget, backoff আর jitter', 'Retry budgets, backoff and jitter') },
+  { id: 'overload', title: tr('Flash sale-এর ভিড়', 'The flash-sale crush'), concept: tr('Load shedding আর priority', 'Load shedding and priority') },
+];
+
 function SimulatorLab() {
   const [open, setOpen] = useState<SimulatorId | null>(null);
   const [last, setLast] = useState<string | null>(null);
@@ -272,7 +278,7 @@ function SimulatorLab() {
       <div className="flex flex-col gap-3">
         <button type="button" onClick={() => setOpen(null)} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">{tr('← সব simulator', '← All simulators')}</button>
         <Suspense fallback={<p className="text-muted">{tr('Simulator আসছে…', 'Loading the simulator…')}</p>}>
-          <Sim onFinish={(n) => { setLast(tr(`শেষবার ${bn(n)}/৩ mission`, `Last time: ${n}/3 missions`)); setOpen(null); }} />
+          <StandaloneSim.Provider value={true}><Sim onFinish={(n) => { setLast(tr(`শেষবার ${bn(n)}/৩ mission`, `Last time: ${n}/3 missions`)); setOpen(null); }} /></StandaloneSim.Provider>
         </Suspense>
       </div>
     );
@@ -281,6 +287,13 @@ function SimulatorLab() {
     <div className="flex flex-col gap-3">
       {last && <p className="m-0 rounded-xl bg-route-soft px-4 py-2 font-semibold">{last}</p>}
       <div className="grid gap-3 sm:grid-cols-2">
+        {EXTRA_SIMS.map((x) => (
+          <button key={x.id} type="button" onClick={() => setOpen(x.id)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-coral bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+            <span className="text-sm font-bold text-coral-deep">{tr('বড় দুর্ঘটনা', 'Big failures')}</span>
+            <span className="font-display text-lg font-extrabold">{x.title}</span>
+            <span className="text-sm text-muted">{x.concept}</span>
+          </button>
+        ))}
         {withSim.map((l) => (
           <button key={l.id} type="button" onClick={() => setOpen(l.simulator!)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
             <span className="text-sm font-bold text-route-deep">Level {bn(l.id)}</span>

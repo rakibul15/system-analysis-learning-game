@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { KnobSpec, State } from './KnobSim';
 import * as A from './specsA';
 import * as B from './specsB';
+import * as C from './specsC';
 
 type Step = Record<string, unknown> | string; // a patch, or an action label
 
@@ -43,6 +44,8 @@ const scripts: Record<string, [KnobSpec<State>, Step[]]> = {
   wallet: [B.wallet as never, ['কাটার পর, জমার আগে crash', { approach: 'saga' }, 'কাটার পর, জমার আগে crash']],
   exchange: [B.exchange as never, [{ engine: 'mem', seq: true, priority: 'time' }, 'একই দামে ৩টা order পাঠান']],
   resilience: [B.resilience as never, [{ breaker: true, outbox: true }]],
+  retrystorm: [C.retrystorm as never, [{ retries: 3 }, { edgeOnly: true, jitter: true }, { layers: 4, edgeOnly: false, budget: true, retries: 3 }]],
+  overload: [C.overload as never, [{ incoming: 5000 }, { bounded: true }, { priority: true }]],
   interview: [B.interview as never, [{ req: 5, est: 5, hld: 15, deep: 15, wrap: 5, ask: true, trade: true, diagram: true }]],
 };
 

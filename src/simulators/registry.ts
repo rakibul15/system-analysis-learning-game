@@ -16,6 +16,7 @@ const knob = (load: () => Promise<Record<string, unknown>>, key: string) =>
   });
 const A = () => import('./knob/specsA');
 const B = () => import('./knob/specsB');
+const C = () => import('./knob/specsC');
 
 /** Each simulator is its own chunk, loaded when its level reaches the play step. */
 export const simulators: Record<SimulatorId, Sim> = {
@@ -47,5 +48,7 @@ export const simulators: Record<SimulatorId, Sim> = {
   wallet: knob(B, 'wallet'),
   exchange: knob(B, 'exchange'),
   resilience: knob(B, 'resilience'),
+  retrystorm: knob(C, 'retrystorm'),
+  overload: knob(C, 'overload'),
   interview: knob(B, 'interview'),
 };
