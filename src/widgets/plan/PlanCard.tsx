@@ -15,6 +15,7 @@ function taskText(t: PlanTask): { title: string; note: string } {
     case 'rebuild': return { title: tr(`না দেখে আঁকুন: ${challenges.find((c) => c.id === t.challengeId)?.title}`, `Redraw from memory: ${challenges.find((c) => c.id === t.challengeId)?.title}`), note: tr('নিয়ম লুকানো, শুধু brief', 'Rules hidden, brief only') };
     case 'level': return { title: `Level ${bn(t.levelId!)} · ${levelTitle(t.levelId!)}`, note: tr('নতুন level', 'New level') };
     case 'weak': return { title: `Level ${bn(t.levelId!)} · ${levelTitle(t.levelId!)}`, note: tr('দুর্বল জায়গা, আবার খেলুন', 'Weak spot, play it again') };
+    case 'concept': return { title: tr(`দুর্বল ধারণা: ${t.concept!.label}`, `Weak concept: ${t.concept!.label}`), note: t.concept!.deep && !t.concept!.note ? tr(`Level ${bn(t.levelId!)} · ধাপে ধাপে দেখুন`, `Level ${t.levelId} · watch it step by step`) : tr(`Level ${bn(t.levelId!)} · নোট পড়ুন, তারপর review`, `Level ${t.levelId} · read the note, then review`) };
     case 'mock': return { title: tr('৪৫ মিনিটের mock interview', '45-minute mock interview'), note: tr('Timer চালু, আসলের মতো', 'Timer on, like the real thing') };
     case 'read': return { title: tr(`DDIA অধ্যায় ${bn(t.chapter!)} পড়ুন`, `Read DDIA chapter ${t.chapter}`), note: tr('পড়া শেষে নিজের নোট', 'Write your own notes after') };
     case 'guided': return { title: tr('ধাপে ধাপে design', 'Step-by-step design'), note: tr('একটা পুরো সমস্যা, checklist সহ', 'One full problem, with a checklist') };
@@ -24,6 +25,9 @@ function taskText(t: PlanTask): { title: string; note: string } {
 function TaskLink({ t, children }: { t: PlanTask; children: React.ReactNode }) {
   const cls = 'flex min-h-14 flex-1 items-center gap-3 rounded-xl border-2 border-ink bg-white px-3 py-2 text-ink no-underline hover:bg-[#F7F8F3]';
   if (t.kind === 'level' || t.kind === 'weak') return <Link to="/level/$levelId" params={{ levelId: String(t.levelId) }} className={cls}>{children}</Link>;
+  if (t.kind === 'concept') return t.concept!.note
+    ? <Link to="/notes/$noteId" params={{ noteId: t.concept!.note }} className={cls}>{children}</Link>
+    : <Link to="/deep/$deepId" params={{ deepId: t.concept!.deep! }} className={cls}>{children}</Link>;
   if (t.kind === 'review') return <Link to="/review" className={cls}>{children}</Link>;
   if (t.kind === 'rebuild') return <Link to="/builder" search={{ memory: t.challengeId }} className={cls}>{children}</Link>;
   if (t.kind === 'mock') return <Link to="/mock" className={cls}>{children}</Link>;

@@ -9,6 +9,7 @@ import { AppShell } from '@/shared/ui/AppShell';
 import { tr } from '@/shared/lib/i18n';
 import { AccountCard } from '@/features/auth/AuthUi';
 import { replaceCloudWithLocal, useAuth } from '@/features/auth/auth';
+import { weakConcepts } from '@/features/plan/concepts';
 
 const MASTERY_COLOR: Record<Mastery, string> = { none: '#EEF1EA', seen: '#FFE9C7', understood: '#FFC02E', skilled: '#3FB37A', solid: '#0B8A7A' };
 
@@ -22,6 +23,7 @@ export function ProfilePage() {
   const played = Object.keys(p.levels).length;
   const passed = Object.values(p.levels).filter((l) => l.best >= 50).length;
   const reviews = Object.values(p.cards).reduce((s, c) => s + c.reviews, 0);
+  const weak = weakConcepts(p, 5);
 
   const download = () => {
     const blob = new Blob([exportProgress(p)], { type: 'application/json' });
@@ -95,6 +97,33 @@ export function ProfilePage() {
               </div>
             ))}
           </div>
+        </section>
+
+        <section aria-label={tr('এরপর কী শিখবেন', 'What to learn next')} className="flex flex-col gap-3 rounded-[24px] border-[3px] border-ink bg-white p-6">
+          <h2 className="m-0 font-display text-xl font-bold">{tr('এরপর কী শিখবেন: দুর্বল ধারণা', 'What to learn next: weak concepts')}</h2>
+          {weak.length === 0 ? (
+            <p className="m-0 text-ink-soft">{tr('এখনো কোনো ধারণায় বারবার ভুল নেই। Level খেলুন আর review করুন; যেখানে ভুল জমবে, এখানে দেখাবে।', 'No concept keeps tripping you up yet. Play levels and review; where mistakes pile up, it shows here.')}</p>
+          ) : (
+            <>
+              <p className="m-0 text-sm text-ink-soft">{tr('প্রশ্ন বদলায়, ধারণা একই থাকে। যে ধারণায় সবচেয়ে বেশি ভুল, সেটা আগে।', 'Questions change, concepts stay. The concept you miss most comes first.')}</p>
+              <ol className="m-0 flex list-none flex-col gap-2 p-0">
+                {weak.map((c, i) => (
+                  <li key={c.key} className="flex flex-col gap-2 rounded-xl border-2 border-ink bg-[#F7F8F3] p-3 sm:flex-row sm:items-center">
+                    <div className="min-w-0 flex-1">
+                      <p className="m-0 font-bold">{bn(i + 1)}. {c.label}</p>
+                      <p className="m-0 text-xs text-muted">{tr(`Level ${bn(c.levelId)} · ${c.levelTitle} · ${bn(c.cards)}টা ভুল, review-এ আবার ভুল ${bn(c.lapses)} বার`, `Level ${c.levelId} · ${c.levelTitle} · ${c.cards} mistakes, missed again ${c.lapses} times in review`)}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {c.note && <Link to="/notes/$noteId" params={{ noteId: c.note.id }} className="flex min-h-10 items-center rounded-lg border-2 border-ink bg-route-soft px-2.5 text-sm font-semibold text-ink no-underline">📝 {tr('নোট', 'Note')}</Link>}
+                      {c.deep && <Link to="/deep/$deepId" params={{ deepId: c.deep.id }} className="flex min-h-10 items-center rounded-lg border-2 border-ink bg-[#EDE6F8] px-2.5 text-sm font-semibold text-ink no-underline">🔍 {tr('গভীরে', 'Deeper')}</Link>}
+                      <Link to="/level/$levelId" params={{ levelId: String(c.levelId) }} className="flex min-h-10 items-center rounded-lg border-2 border-ink bg-white px-2.5 text-sm font-semibold text-ink no-underline">🎮 Level {bn(c.levelId)}</Link>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <Link to="/review" className="self-start font-semibold text-route-deep">{tr('Review-এ এই ধারণাগুলোর নতুন প্রশ্ন →', 'New questions on these concepts in review →')}</Link>
+            </>
+          )}
         </section>
 
         <AccountCard />

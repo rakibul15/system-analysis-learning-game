@@ -4,9 +4,10 @@ import { dueCards } from '@/entities/progress/selectors';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
 import { DAY_MS, PASS_MARK, dayKey } from '@/shared/lib/scoring';
 import { chapters } from '@/features/reading/ddia';
+import { weakConcepts } from './concepts';
 
-export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'mock' | 'guided' | 'read';
-export interface PlanTask { id: string; kind: TaskKind; minutes: number; done: boolean; levelId?: number; count?: number; challengeId?: string; chapter?: number }
+export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'concept' | 'mock' | 'guided' | 'read';
+export interface PlanTask { id: string; kind: TaskKind; minutes: number; done: boolean; levelId?: number; count?: number; challengeId?: string; chapter?: number; concept?: { label: string; note?: string; deep?: string } }
 export type Phase = 'none' | 'learn' | 'final' | 'after';
 
 export interface DayPlan {
@@ -25,6 +26,7 @@ export interface DayPlan {
 export const LEVEL_MIN = 15;
 export const REBUILD_MIN = 8;
 export const READ_MIN = 25;
+export const CONCEPT_MIN = 10;
 const REVIEW_MIN_EACH = 0.5;
 const FINAL_DAYS = 2;
 
@@ -68,6 +70,13 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
     .sort((a, b) => p.levels[a]!.best - p.levels[b]!.best)[0];
   const used = tasks.reduce((s, t) => s + t.minutes, 0);
   if (weak && (phase === 'final' || minutes - used >= LEVEL_MIN)) tasks.push({ id: `weak:${weak}`, kind: 'weak', minutes: LEVEL_MIN, done: playedToday(weak), levelId: weak });
+
+  // the concept you miss most: read its note or walk its timeline, then its cards come back in review
+  const concept = weakConcepts(p, 1)[0];
+  const used2 = tasks.reduce((s, t) => s + t.minutes, 0);
+  if (concept && (concept.note || concept.deep) && (phase === 'final' || minutes - used2 >= CONCEPT_MIN)) {
+    tasks.push({ id: `concept:${concept.key}`, kind: 'concept', minutes: CONCEPT_MIN, done: false, levelId: concept.levelId, concept: { label: concept.label, note: concept.note?.id, deep: concept.deep?.id } });
+  }
 
   // a reading track counts once started: today's chapter, done when its status or notes changed today
   const reading = p.reading ?? {};
