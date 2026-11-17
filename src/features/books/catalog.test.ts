@@ -21,14 +21,27 @@ describe('book catalog', () => {
   });
 });
 
-import { labelsFor, withPages } from './catalog';
+import { labelsFor, withPages, xuStep } from './catalog';
+import { pageFromLabels } from './locate';
 
 describe('copies without page labels', () => {
-  it('Xu Vol 2: printed page 1 is PDF page 9, front matter in roman numerals', () => {
+  it('Xu Vol 2 copy: chapter starts land on the PDF pages where they really are', () => {
     const l = labelsFor(null, 427, 'xu2')!;
-    expect(l[8]).toBe('1');
     expect(l[0]).toBe('i');
-    expect(l.indexOf('35')).toBe(42);
+    // chapter start → PDF page (1-based), read off the scan
+    for (const [printed, pdf] of [[1, 9], [35, 43], [59, 67], [91, 97], [131, 135], [159, 163], [195, 199], [225, 228], [253, 255], [289, 290], [315, 316], [341, 342]] as const) {
+      expect(l.indexOf(String(printed)) + 1, `printed ${printed}`).toBe(pdf);
+    }
+    expect(labelsFor(null, 400, 'xu2')).toBeNull(); // another copy: no guessing
+  });
+  it('a page the scan skipped opens at the next one', () => {
+    const l = labelsFor(null, 427, 'xu2')!;
+    expect(l.includes('130')).toBe(false);
+    expect(pageFromLabels(l, { book: 'xu2', chapter: 4, pages: [130, 130] })).toBe(l.indexOf('131'));
+  });
+  it('step references carry their pages', () => {
+    expect(xuStep('xu2', 7, 3)).toMatchObject({ section: 'Step 3 - Design Deep Dive', pages: [202, 220] });
+    expect(xuStep('xu2', 13, 4).pages).toEqual([411, 414]);
   });
   it('keeps a copy\'s own real labels, and leaves other books alone', () => {
     expect(labelsFor(['i', 'ii', '1'], 3, 'xu2')).toEqual(['i', 'ii', '1']);

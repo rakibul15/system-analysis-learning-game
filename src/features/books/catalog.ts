@@ -11,8 +11,13 @@ export interface BookInfo {
   id: BookId; short: string; title: string; by: string; buyUrl: string; chapters: Record<number, string>;
   /** Printed first and last page of each chapter, for books whose references give only a chapter. */
   chapterPages?: Record<number, [number, number]>;
-  /** For copies with no page labels: PDF page = printed page + this (front matter before page 1). */
-  pdfOffset?: number;
+  /**
+   * A known PDF copy with no page labels: its page count, and from which PDF page on the
+   * printed number is the PDF number minus an offset (scans skip or repeat a few pages).
+   */
+  pdfLayout?: { pages: number; segments: [pdfFrom: number, offset: number][] };
+  /** Printed start page of each chapter's Step 1–4 sections, for books that follow that layout. */
+  stepPages?: Record<number, [number, number, number, number]>;
 }
 
 export const BOOKS: Record<BookId, BookInfo> = {
@@ -47,17 +52,28 @@ export const BOOKS: Record<BookId, BookInfo> = {
       1: [1, 34], 2: [35, 58], 3: [59, 90], 4: [91, 130], 5: [131, 158], 6: [159, 194], 7: [195, 224],
       8: [225, 252], 9: [253, 288], 10: [289, 314], 11: [315, 340], 12: [341, 378], 13: [379, 414],
     },
-    pdfOffset: 8,
+    // the scanned copy in use: 427 pages; a handful of pages are missing or repeated
+    pdfLayout: { pages: 427, segments: [[9, 8], [90, 6], [100, 7], [113, 5], [135, 4], [184, 5], [199, 4], [228, 3], [255, 2], [288, 1]] },
+    stepPages: {
+      1: [1, 3, 24, 31], 2: [35, 37, 45, 56], 3: [59, 68, 76, 88], 4: [91, 93, 98, 125], 5: [131, 133, 138, 153],
+      6: [159, 161, 172, 190], 7: [195, 197, 202, 221], 8: [225, 227, 236, 247], 9: [253, 257, 263, 285],
+      10: [289, 291, 303, 312], 11: [315, 317, 323, 336], 12: [341, 343, 362, 374], 13: [379, 382, 398, 411],
+    },
   },
 };
 
 /** A place in a book: a chapter, optionally one section of it, with printed pages when known. */
 export interface BookRef { book: BookId; chapter: number; section?: string; pages?: [number, number]; /** Open at exactly this printed page (a figure or table), instead of the section start. */ at?: number; label?: string }
 
+/** The four steps every Xu chapter follows, by their headings in the book. */
+const STEP_NAMES = ['Step 1 - Understand the Problem and Establish Design Scope', 'Step 2 - Propose High-level Design and Get Buy-in', 'Step 3 - Design Deep Dive', 'Step 4 - Wrap Up'] as const;
+
 const D = (chapter: number, section: string, a: number, b: number): BookRef => ({ book: 'ddia2', chapter, section, pages: [a, b] });
 const DC = (chapter: number, a: number, b: number): BookRef => ({ book: 'ddia2', chapter, pages: [a, b] });
 const X1 = (chapter: number): BookRef => ({ book: 'xu1', chapter });
 const X2 = (chapter: number): BookRef => ({ book: 'xu2', chapter });
+/** The deep-dive step of a Vol 2 chapter. */
+const X2D = (chapter: number): BookRef => xuStep('xu2', chapter, 3);
 
 export const levelRefs: Record<number, BookRef[]> = {
   1: [X1(1), D(2, 'Scalability', 49, 52), D(2, 'Fault Tolerance', 43, 48), D(6, 'Single-Leader Replication', 198, 208)],
@@ -75,19 +91,19 @@ export const levelRefs: Record<number, BookRef[]> = {
   13: [X1(13), D(4, 'Multidimensional and Full-Text Indexes', 145, 149)],
   14: [X1(14), D(11, 'Object Stores', 460, 460)],
   15: [X1(15), D(6, 'Sync Engines and Local-First Software', 220, 221), D(6, 'Dealing with Conflicting Writes', 222, 228)],
-  16: [X2(1), D(4, 'Multidimensional and Full-Text Indexes', 145, 145), D(7, 'Sharding by Key Range', 256, 257)],
-  17: [X2(2), D(12, 'Processing Streams', 513, 517), D(14, 'Privacy and Tracking', 589, 596)],
-  18: [X2(3), D(3, 'Graph-Like Data Models', 84, 100)],
-  19: [X2(4), D(12, 'Transmitting Event Streams', 488, 499), D(12, 'Fault Tolerance', 526, 528)],
-  20: [X2(5), D(2, 'Describing Performance', 37, 42), D(4, 'Column-Oriented Storage', 136, 141)],
-  21: [X2(6), D(12, 'Reasoning About Time', 518, 522), D(12, 'Stream Joins', 523, 525), D(12, 'Fault Tolerance', 526, 528)],
-  22: [X2(7), D(8, 'Weak Isolation Levels', 288, 307), D(8, 'Serializability', 308, 322)],
-  23: [X2(8)],
-  24: [X2(9), D(11, 'Object Stores', 460, 460), D(2, 'Hardware and Software Faults', 44, 46)],
-  25: [X2(10), D(4, 'Keeping Everything in Memory', 133, 134)],
-  26: [X2(11), D(8, 'The Meaning of ACID', 279, 283), D(13, 'The End-to-End Argument for Databases', 562, 565), D(13, 'Trust, but Verify', 575, 578)],
-  27: [X2(12), D(8, 'Distributed Transactions', 323, 334), D(3, 'Event Sourcing and CQRS', 101, 104), D(13, 'Enforcing Constraints', 566, 570)],
-  28: [X2(13), D(8, 'Actual Serial Execution', 309, 312), D(10, 'Consensus', 425, 439)],
+  16: [X2(1), X2D(1), D(4, 'Multidimensional and Full-Text Indexes', 145, 145), D(7, 'Sharding by Key Range', 256, 257)],
+  17: [X2(2), X2D(2), D(12, 'Processing Streams', 513, 517), D(14, 'Privacy and Tracking', 589, 596)],
+  18: [X2(3), X2D(3), D(3, 'Graph-Like Data Models', 84, 100)],
+  19: [X2(4), X2D(4), D(12, 'Transmitting Event Streams', 488, 499), D(12, 'Fault Tolerance', 526, 528)],
+  20: [X2(5), X2D(5), D(2, 'Describing Performance', 37, 42), D(4, 'Column-Oriented Storage', 136, 141)],
+  21: [X2(6), X2D(6), D(12, 'Reasoning About Time', 518, 522), D(12, 'Stream Joins', 523, 525), D(12, 'Fault Tolerance', 526, 528)],
+  22: [X2(7), X2D(7), D(8, 'Weak Isolation Levels', 288, 307), D(8, 'Serializability', 308, 322)],
+  23: [X2(8), X2D(8)],
+  24: [X2(9), X2D(9), D(11, 'Object Stores', 460, 460), D(2, 'Hardware and Software Faults', 44, 46)],
+  25: [X2(10), X2D(10), D(4, 'Keeping Everything in Memory', 133, 134)],
+  26: [X2(11), X2D(11), D(8, 'The Meaning of ACID', 279, 283), D(13, 'The End-to-End Argument for Databases', 562, 565), D(13, 'Trust, but Verify', 575, 578)],
+  27: [X2(12), X2D(12), D(8, 'Distributed Transactions', 323, 334), D(3, 'Event Sourcing and CQRS', 101, 104), D(13, 'Enforcing Constraints', 566, 570)],
+  28: [X2(13), X2D(13), D(8, 'Actual Serial Execution', 309, 312), D(10, 'Consensus', 425, 439)],
   29: [X1(10), X2(11), D(9, 'Timeouts and Unbounded Delays', 352, 354), D(12, 'Change Data Capture', 503, 507), D(5, 'Durable Execution and Workflows', 187, 188)],
   30: [X1(3), DC(1, 1, 32), DC(2, 33, 64)],
   31: [D(4, 'Log-Structured Storage', 118, 124), D(4, 'B-Trees', 125, 128), D(4, 'Comparing B-Trees and LSM-Trees', 129, 131), X1(6)],
@@ -134,9 +150,22 @@ const roman = (n: number) => [['m', 1000], ['cm', 900], ['d', 500], ['cd', 400],
 export function labelsFor(own: string[] | null, numPages: number, book: BookId): string[] | null {
   const real = own && own.some((l, i) => l !== String(i + 1)) ? own : null;
   if (real) return real;
-  const off = BOOKS[book].pdfOffset;
-  if (off === undefined) return own;
-  return Array.from({ length: numPages }, (_, i) => (i + 1 - off >= 1 ? String(i + 1 - off) : roman(i + 1)));
+  const layout = BOOKS[book].pdfLayout;
+  if (!layout || layout.pages !== numPages) return own;
+  return Array.from({ length: numPages }, (_, i) => {
+    const pdf = i + 1;
+    const seg = [...layout.segments].reverse().find(([from]) => pdf >= from);
+    return seg ? String(pdf - seg[1]) : roman(pdf);
+  });
+}
+
+/** One of a Xu chapter's four steps (1–4), with its printed pages. */
+export function xuStep(book: BookId, chapter: number, step: 1 | 2 | 3 | 4): BookRef {
+  const st = BOOKS[book].stepPages?.[chapter];
+  const end = BOOKS[book].chapterPages?.[chapter]?.[1];
+  if (!st || end === undefined) return { book, chapter };
+  const starts: number[] = [...st, end + 1];
+  return { book, chapter, section: STEP_NAMES[step - 1], pages: [starts[step - 1]!, starts[step]! - 1] };
 }
 
 export const refLabel = (r: BookRef) => {

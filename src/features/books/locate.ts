@@ -37,7 +37,21 @@ export function pageFromLabels(labels: string[] | null, ref: BookRef): number | 
   const want = ref.at ?? ref.pages?.[0];
   if (!labels || want === undefined) return null;
   const i = labels.indexOf(String(want));
-  return i >= 0 ? i : null;
+  if (i >= 0) return i;
+  // a scan may skip a page: take the next printed page within a few
+  return nearestLabel(labels, want, 1);
+}
+
+/** Index of the closest numbered page at or after (dir 1) or at or before (dir -1) `want`, within 3 pages. */
+export function nearestLabel(labels: string[], want: number, dir: 1 | -1): number | null {
+  let best: number | null = null, gap = Infinity;
+  labels.forEach((l, i) => {
+    const v = Number(l);
+    if (!Number.isFinite(v)) return;
+    const d = (v - want) * dir;
+    if (d >= 0 && d <= 3 && d < gap) { gap = d; best = i; }
+  });
+  return best;
 }
 
 /** The outline entry right after `node` at the same level (the next chapter), if any. */

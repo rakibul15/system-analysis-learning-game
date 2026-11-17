@@ -5,7 +5,7 @@ import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOKS, detectBook, labelsFor, refLabel, withPages, type BookId, type BookRef } from './catalog';
-import { findInOutline, nextSibling, pageFromLabels, type OutlineNode } from './locate';
+import { findInOutline, nearestLabel, nextSibling, pageFromLabels, type OutlineNode } from './locate';
 import { bookFor, useReader, useShelf } from './shelf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -47,7 +47,8 @@ async function chapterRange(doc: PDFDocumentProxy, given: BookRef): Promise<[num
   const ref = withPages(given);
   const labels = await pageLabels(doc, ref.book);
   if (ref.pages && labels) {
-    const s = labels.indexOf(String(ref.pages[0])), e = labels.indexOf(String(ref.pages[1]));
+    const at = (n: number, dir: 1 | -1) => { const i = labels.indexOf(String(n)); return i >= 0 ? i : nearestLabel(labels, n, dir) ?? -1; };
+    const s = at(ref.pages[0], 1), e = at(ref.pages[1], -1);
     if (s >= 0 && e >= s) return [s, e];
   }
   const outline = (await doc.getOutline()) as unknown as OutlineNode[] | null;
