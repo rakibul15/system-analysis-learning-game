@@ -101,6 +101,11 @@ export const replication: Note = {
       { q: 'লেখা খুব বেশি হলে আরও replica যোগ করা কেন সমাধান না?', a: 'সব লেখা leader-এই যায়, আর প্রতিটা replica-কেও প্রতিটা লেখা কপি করতে হয়। লেখা ভাগ করতে sharding লাগে।' },
     ] },
   ],
+  chapters: [
+    { book: 'ddia2', chapter: 6, pages: [197, 250] },
+    { book: 'xu1', chapter: 1 },
+    { book: 'xu1', chapter: 6 },
+  ],
   refs: [
     { book: 'xu1', chapter: 1 },
     { book: 'xu1', chapter: 6 },

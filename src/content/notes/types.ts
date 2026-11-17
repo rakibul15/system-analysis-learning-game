@@ -30,4 +30,6 @@ export interface Note {
   angles: { xu: string; ddia: string };
   blocks: NoteBlock[];
   refs: BookRef[];
+  /** Whole chapters to read alongside, shown from the learner's own copy. */
+  chapters: BookRef[];
 }

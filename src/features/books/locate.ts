@@ -39,3 +39,14 @@ export function pageFromLabels(labels: string[] | null, ref: BookRef): number | 
   const i = labels.indexOf(String(want));
   return i >= 0 ? i : null;
 }
+
+/** The outline entry right after `node` at the same level (the next chapter), if any. */
+export function nextSibling(outline: OutlineNode[], node: OutlineNode): OutlineNode | null {
+  const search = (list: OutlineNode[]): OutlineNode | null | undefined => {
+    const i = list.indexOf(node);
+    if (i >= 0) return list[i + 1] ?? null;
+    for (const n of list) { const r = search(n.items ?? []); if (r !== undefined) return r; }
+    return undefined;
+  };
+  return search(outline) ?? null;
+}

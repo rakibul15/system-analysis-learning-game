@@ -5,7 +5,7 @@ import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOKS, detectBook, refLabel, type BookId, type BookRef } from './catalog';
-import { findInOutline, pageFromLabels, type OutlineNode } from './locate';
+import { findInOutline, nextSibling, pageFromLabels, type OutlineNode } from './locate';
 import { bookFor, useReader, useShelf } from './shelf';
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -28,6 +28,125 @@ async function locate(doc: PDFDocumentProxy, ref: BookRef): Promise<number> {
   }
   const byLabel = pageFromLabels(await doc.getPageLabels(), ref);
   return byLabel ?? 0;
+}
+
+const bnLabel = (l: string) => (/^\d+$/.test(l) ? bn(Number(l), { grouping: false }) : l);
+
+async function destIndex(doc: PDFDocumentProxy, dest: unknown): Promise<number | null> {
+  const d = typeof dest === 'string' ? await doc.getDestination(dest) : (dest as unknown[] | null);
+  if (!d?.[0]) return null;
+  try { return await doc.getPageIndex(d[0] as never); } catch { return null; }
+}
+
+/** First and last page index of a chapter: from printed pages when known, else from the outline. */
+async function chapterRange(doc: PDFDocumentProxy, ref: BookRef): Promise<[number, number]> {
+  const labels = await doc.getPageLabels();
+  if (ref.pages && labels) {
+    const s = labels.indexOf(String(ref.pages[0])), e = labels.indexOf(String(ref.pages[1]));
+    if (s >= 0 && e >= s) return [s, e];
+  }
+  const outline = (await doc.getOutline()) as unknown as OutlineNode[] | null;
+  const node = outline ? findInOutline(outline, { ...ref, section: undefined }, BOOKS[ref.book].chapters[ref.chapter] ?? '') : null;
+  const start = node ? await destIndex(doc, node.dest) : null;
+  if (start === null) return [0, Math.min(doc.numPages - 1, 30)];
+  const next = outline && node ? nextSibling(outline, node) : null;
+  const end = next ? await destIndex(doc, next.dest) : null;
+  return [start, end !== null && end > start ? end - 1 : doc.numPages - 1];
+}
+
+/** A whole chapter of the learner's own copy, page after page, inside the current screen. */
+export function ChapterView({ refs }: { refs: BookRef[] }) {
+  const { books, loaded, refresh, add, tag } = useShelf();
+  const [pick, setPick] = useState(0);
+  useEffect(() => { if (!loaded) void refresh(); }, [loaded, refresh]);
+  const ref = refs[pick]!;
+  const book = bookFor(books, ref.book);
+  return (
+    <div className="flex flex-col gap-3">
+      {refs.length > 1 && (
+        <div role="tablist" aria-label={tr('কোন অধ্যায়', 'Which chapter')} className="flex flex-wrap gap-2">
+          {refs.map((r, i) => (
+            <button key={i} type="button" role="tab" aria-selected={pick === i} onClick={() => setPick(i)}
+              className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-3 text-sm font-bold ${pick === i ? 'bg-ink text-white' : 'bg-white'}`}>
+              {BOOKS[r.book].short} · {tr('অধ্যায়', 'Ch.')} {bn(r.chapter)}
+            </button>
+          ))}
+        </div>
+      )}
+      <p className="m-0 text-sm font-semibold">{BOOKS[ref.book].title} · {tr('অধ্যায়', 'Chapter')} {bn(ref.chapter)}: {BOOKS[ref.book].chapters[ref.chapter]}</p>
+      {!loaded ? null : book ? <ChapterPages key={`${book.id}-${pick}`} bookKey={book.id} blob={book.blob} target={ref} />
+        : <div className="overflow-hidden rounded-[22px] bg-[#2B3A41]"><AddBook bookId={ref.book} untagged={books.filter((b) => !b.bookId)} onAdd={(f) => add(f, ref.book)} onTag={(id) => tag(id, ref.book)} /></div>}
+    </div>
+  );
+}
+
+function ChapterPages({ bookKey, blob, target }: { bookKey: string; blob: Blob; target: BookRef }) {
+  const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
+  const [range, setRange] = useState<[number, number] | null>(null);
+  const [labels, setLabels] = useState<string[] | null>(null);
+  const [ratio, setRatio] = useState(1.3);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const d = await loadDoc(bookKey, blob);
+        const [r, l] = await Promise.all([chapterRange(d, target), d.getPageLabels()]);
+        const vp = (await d.getPage(r[0] + 1)).getViewport({ scale: 1 });
+        if (!alive) return;
+        setDoc(d); setRange(r); setLabels(l); setRatio(vp.height / vp.width);
+      } catch { if (alive) setError(tr('PDF খোলা গেল না।', 'Could not open the PDF.')); }
+    })();
+    return () => { alive = false; };
+  }, [bookKey, blob, target]);
+  if (error) return <p className="m-0 font-semibold text-coral-deep">{error}</p>;
+  if (!doc || !range) return <p className="m-0 text-muted">{tr('অধ্যায় খোলা হচ্ছে…', 'Opening the chapter…')}</p>;
+  const pages = Array.from({ length: range[1] - range[0] + 1 }, (_, i) => range[0] + i);
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-[22px] bg-[#2B3A41] p-2 sm:p-4">
+      <p className="m-0 text-xs font-semibold text-white/80">{tr(`আপনার কপি থেকে · ${bn(pages.length)} পাতা · পাতা ${bnLabel(labels?.[range[0]] ?? String(range[0] + 1))}–${bnLabel(labels?.[range[1]] ?? String(range[1] + 1))}`, `From your copy · ${pages.length} pages · pages ${labels?.[range[0]] ?? range[0] + 1}–${labels?.[range[1]] ?? range[1] + 1}`)}</p>
+      {pages.map((i) => <LazyPage key={i} doc={doc} index={i} ratio={ratio} label={labels?.[i] ?? String(i + 1)} />)}
+    </div>
+  );
+}
+
+/** Renders a page only while it is near the screen, and frees it again when far away. */
+function LazyPage({ doc, index, ratio, label }: { doc: PDFDocumentProxy; index: number; ratio: number; label: string }) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const task = useRef<RenderTask | null>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setNear(!!e?.isIntersecting), { rootMargin: '900px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  useEffect(() => {
+    const c = canvas.current, el = wrap.current;
+    if (!c || !el) return;
+    if (!near) { task.current?.cancel(); c.width = 0; c.height = 0; return; }
+    let alive = true;
+    (async () => {
+      const p = await doc.getPage(index + 1);
+      if (!alive) return;
+      const base = p.getViewport({ scale: 1 });
+      const vp = p.getViewport({ scale: el.clientWidth / base.width });
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      c.width = Math.floor(vp.width * dpr); c.height = Math.floor(vp.height * dpr);
+      const t = p.render({ canvasContext: c.getContext('2d')!, viewport: vp, transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined });
+      task.current = t;
+      try { await t.promise; } catch { /* scrolled away */ }
+    })();
+    return () => { alive = false; task.current?.cancel(); };
+  }, [near, doc, index]);
+  return (
+    <div ref={wrap} className="relative w-full max-w-[860px] overflow-hidden rounded bg-white shadow-lg" style={{ aspectRatio: `1 / ${ratio}` }}>
+      <canvas ref={canvas} className="block h-full w-full" />
+      <span className="absolute bottom-1 right-2 rounded bg-ink/70 px-1.5 text-[11px] font-bold text-white">{/^\d+$/.test(label) ? bn(Number(label), { grouping: false }) : label}</span>
+    </div>
+  );
 }
 
 /** Full-screen reader over the current screen: the learner's own PDF, opened at the reference. */
@@ -57,7 +176,7 @@ export default function BookReader() {
   );
 }
 
-function AddBook({ bookId, untagged, onAdd, onTag }: { bookId: BookId; untagged: { id: string; name: string }[]; onAdd: (f: File) => Promise<void>; onTag: (id: string) => Promise<void> }) {
+export function AddBook({ bookId, untagged, onAdd, onTag }: { bookId: BookId; untagged: { id: string; name: string }[]; onAdd: (f: File) => Promise<void>; onTag: (id: string) => Promise<void> }) {
   const info = BOOKS[bookId];
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState('');
