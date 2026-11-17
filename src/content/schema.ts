@@ -102,8 +102,8 @@ export type SimulatorId = (typeof SIMULATOR_IDS)[number];
 
 export const levelSchema = z
   .object({
-    id: z.number().int().min(1).max(30),
-    chapter: z.number().int().min(1).max(6),
+    id: z.number().int().min(1).max(34),
+    chapter: z.number().int().min(1).max(7),
     title: z.string().min(1),
     concept: z.string().min(1),
     story: z.string().min(1),
@@ -140,4 +140,6 @@ export interface Chapter {
   /** Map colours. */
   ground: string;
   accent: string;
+  /** The level that opens this chapter, when it is not the previous chapter's last (bonus chapters). */
+  gate?: number;
 }

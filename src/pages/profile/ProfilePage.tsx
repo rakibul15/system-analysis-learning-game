@@ -73,7 +73,7 @@ export function ProfilePage() {
 
         <section className="rounded-[24px] border-[3px] border-ink bg-white p-6">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="m-0 font-display text-xl font-bold">{tr('৩০ level-এর দখল', 'Mastery of the 30 levels')}</h2>
+            <h2 className="m-0 font-display text-xl font-bold">{tr(`${bn(Object.keys(levelsById).length)} level-এর দখল`, `Mastery of the ${Object.keys(levelsById).length} levels`)}</h2>
             <ul className="m-0 flex list-none flex-wrap gap-3 p-0 text-xs">
               {(Object.keys(MASTERY_COLOR) as Mastery[]).map((m) => <li key={m} className="flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-ink" style={{ background: MASTERY_COLOR[m] }} />{masteryLabel[m]}</li>)}
             </ul>

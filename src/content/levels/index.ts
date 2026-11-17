@@ -5,16 +5,18 @@ import { l8, l9, l10, l11, l12, l13, l14, l15 } from './ch3';
 import { l16, l17, l18, l19, l20, l21 } from './ch4';
 import { l22, l23, l24, l25, l26, l27, l28 } from './ch5';
 import { l29, l30 } from './ch6';
+import { l31, l32, l33, l34 } from './ch7';
 import * as en1 from './en/ch1';
 import * as en2 from './en/ch2';
 import * as en3 from './en/ch3';
 import * as en4 from './en/ch4';
 import * as en5 from './en/ch5';
 import * as en6 from './en/ch6';
+import * as en7 from './en/ch7';
 import { isEn, tr } from '@/shared/lib/i18n';
 
-export const bnLevels = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30];
-const enById = { ...en1, ...en2, ...en3, ...en4, ...en5, ...en6 } as Record<string, Level>;
+export const bnLevels = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l19, l20, l21, l22, l23, l24, l25, l26, l27, l28, l29, l30, l31, l32, l33, l34];
+const enById = { ...en1, ...en2, ...en3, ...en4, ...en5, ...en6, ...en7 } as Record<string, Level>;
 export const enLevels = bnLevels.map((l) => enById[`l${l.id}`]!);
 
 const all = isEn ? enLevels : bnLevels;
@@ -30,6 +32,7 @@ export const chapters: Chapter[] = [
   { id: 4, title: tr('জায়গা আর ঘটনার স্রোত', 'Places and event streams'), subtitle: 'Location, map, queue, metrics, stream', levels: [16, 17, 18, 19, 20, 21], ground: '#E4DDF0', accent: '#6B4D9E' },
   { id: 5, title: tr('টাকা, slot আর গুদাম', 'Money, slots and storage'), subtitle: 'Reservation, email, storage, ranking, payment, wallet, exchange', levels: [22, 23, 24, 25, 26, 27, 28], ground: '#F2DEDA', accent: '#C7372D' },
   { id: 6, title: tr('বড় দিনের প্রস্তুতি', 'Ready for the big day'), subtitle: tr('Resilience আর final interview', 'Resilience and the final interview'), levels: [29, 30], ground: '#F5E7C8', accent: '#16252D' },
+  { id: 7, title: tr('বোনাস: DDIA-র গভীরে', 'Bonus: deeper into DDIA'), subtitle: tr('Storage engine, analytics, encoding, consensus', 'Storage engines, analytics, encoding, consensus'), levels: [31, 32, 33, 34], ground: '#E6E0F2', accent: '#4B2F7A', gate: 7 },
 ];
 
 /** Every scored question by id: lesson checkpoints, missions and boss. */

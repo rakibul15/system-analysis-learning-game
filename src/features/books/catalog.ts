@@ -79,6 +79,10 @@ export const levelRefs: Record<number, BookRef[]> = {
   28: [X2(13), D(8, 'Actual Serial Execution', 309, 312), D(10, 'Consensus', 425, 439)],
   29: [X1(10), X2(11), D(9, 'Timeouts and Unbounded Delays', 352, 354), D(12, 'Change Data Capture', 503, 507), D(5, 'Durable Execution and Workflows', 187, 188)],
   30: [X1(3), DC(1, 1, 32), DC(2, 33, 64)],
+  31: [D(4, 'Log-Structured Storage', 118, 124), D(4, 'B-Trees', 125, 128), D(4, 'Comparing B-Trees and LSM-Trees', 129, 131), X1(6)],
+  32: [D(4, 'Data Storage for Analytics', 134, 144), D(4, 'Column-Oriented Storage', 136, 141), D(3, 'Stars and Snowflakes: Schemas for Analytics', 77, 79), D(12, 'Change Data Capture', 503, 507)],
+  33: [D(5, 'Formats for Encoding Data', 163, 177), D(5, 'Modes of Dataflow', 178, 190), DC(5, 161, 196)],
+  34: [D(10, 'Linearizability', 402, 416), D(10, 'Consensus', 425, 439), D(9, 'Distributed Locks and Leases', 373, 376), X2(12)],
 };
 
 /** Incidents point at the section about their failure; otherwise they fall back to their level's refs. */

@@ -6,10 +6,11 @@ import { ch3Bank } from './ch3';
 import { ch4Bank } from './ch4';
 import { ch5Bank } from './ch5';
 import { ch6Bank } from './ch6';
+import { ch7Bank } from './ch7';
 import type { BankItem, Generator, LevelBank } from './types';
 
 /** Question banks by level. Levels without a bank keep their fixed five boss questions. */
-export const banks: Record<number, LevelBank> = { ...ch1Bank, ...ch2Bank, ...ch3Bank, ...ch4Bank, ...ch5Bank, ...ch6Bank };
+export const banks: Record<number, LevelBank> = { ...ch1Bank, ...ch2Bank, ...ch3Bank, ...ch4Bank, ...ch5Bank, ...ch6Bank, ...ch7Bank };
 
 type Cand = { kind: 'fixed'; q: Question } | { kind: 'item'; item: BankItem } | { kind: 'gen'; gen: Generator };
 

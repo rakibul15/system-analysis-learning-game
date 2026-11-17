@@ -16,8 +16,8 @@ export function lockReason(id: number, p: ProgressData): string | null {
   const ch = chapterOf(id);
   const first = ch.levels[0]!;
   if (id === first) {
-    const prevCh = chapters.find((c) => c.id === ch.id - 1)!;
-    const gate = prevCh.levels[prevCh.levels.length - 1]!;
+    const prevCh = ch.gate ? chapterOf(ch.gate) : chapters.find((c) => c.id === ch.id - 1)!;
+    const gate = ch.gate ?? prevCh.levels[prevCh.levels.length - 1]!;
     return (p.levels[gate]?.best ?? 0) >= CHAPTER_GATE ? null : tr(`অধ্যায় ${toBn(prevCh.id)}-এর শেষ level (${toBn(gate)})-এ ${toBn(CHAPTER_GATE)}+ পেলে খুলবে`, `Opens at ${CHAPTER_GATE}+ on chapter ${prevCh.id}'s last level (${gate})`);
   }
   return (p.levels[id - 1]?.best ?? 0) >= PASS_MARK ? null : tr(`Level ${toBn(id - 1)}-এ ${toBn(PASS_MARK)}+ পেলে খুলবে`, `Opens at ${PASS_MARK}+ on level ${id - 1}`);
@@ -77,7 +77,7 @@ export function readiness(p: ProgressData): { total: number; parts: ReadinessPar
   const builder = challenges.reduce((sum, c) => sum + (p.builds?.[c.id] ?? 0), 0) / builderCount;
   const incident = avgBest(p.incidents ?? {}, incidentCount);
   const parts: ReadinessPart[] = [
-    { id: 'campaign', label: tr('Campaign (৩০ level)', 'Campaign (30 levels)'), weight: 30, score: campaign, available: true, note: tr('সব level-এর সেরা নম্বরের গড়', 'Average of your best score on every level') },
+    { id: 'campaign', label: tr(`Campaign (${toBn(ids.length)} level)`, `Campaign (${ids.length} levels)`), weight: 30, score: campaign, available: true, note: tr('সব level-এর সেরা নম্বরের গড়', 'Average of your best score on every level') },
     { id: 'mock', label: tr('Mock আর design challenge', 'Mock and design challenge'), weight: 20, score: mock, available: true, note: tr('শেষ ৩টা mock বা design challenge-এর নিজের দেওয়া নম্বর', 'Your own scores on the last 3 mocks or design challenges') },
     { id: 'mastery', label: tr('দখল', 'Mastery'), weight: 15, score: mastered, available: true, note: tr('কতগুলো level "দক্ষ" বা "পাকা"', 'How many levels are "skilled" or "solid"') },
     { id: 'builder', label: 'Architecture builder', weight: 15, score: builder, available: true, note: tr(`${toBn(builderCount)}টা challenge-এর সেরা নম্বরের গড়`, `Average best score over ${builderCount} challenges`) },

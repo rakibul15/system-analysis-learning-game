@@ -3,8 +3,8 @@ import { bnLevels, chapters, enLevels, levelList, questionsById } from './levels
 import { levelSchema, type Level } from './schema';
 
 describe('level content', () => {
-  it('has all 30 levels, numbered 1–30 in order', () => {
-    expect(levelList.map((l) => l.id)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1));
+  it('has all 34 levels (30 + the bonus DDIA chapter), numbered in order', () => {
+    expect(levelList.map((l) => l.id)).toEqual(Array.from({ length: 34 }, (_, i) => i + 1));
   });
 
   it('every level passes the schema', () => {
@@ -20,8 +20,8 @@ describe('level content', () => {
     for (const c of chapters) for (const id of c.levels) expect(levelList[id - 1]!.chapter).toBe(c.id);
   });
 
-  it('chapters start at levels 1, 5, 8, 16, 22 and 29 (the plan)', () => {
-    expect(chapters.map((c) => c.levels[0])).toEqual([1, 5, 8, 16, 22, 29]);
+  it('chapters start at levels 1, 5, 8, 16, 22, 29 and the bonus 31 (the plan)', () => {
+    expect(chapters.map((c) => c.levels[0])).toEqual([1, 5, 8, 16, 22, 29, 31]);
   });
 
   it('question ids are unique across the game', () => {
@@ -48,9 +48,10 @@ describe('level content', () => {
     expect(levelList.filter((l) => l.play.kind === 'traffic').map((l) => l.id)).toEqual([1]);
   });
 
-  it('every level after the first has an interactive simulator, each a different one', () => {
-    const sims = levelList.filter((l) => l.simulator);
-    expect(sims.map((l) => l.id)).toEqual(levelList.map((l) => l.id).filter((id) => id !== 1));
+  it('every campaign level after the first has an interactive simulator, each a different one', () => {
+    const campaign = levelList.filter((l) => l.chapter <= 6);
+    const sims = campaign.filter((l) => l.simulator);
+    expect(sims.map((l) => l.id)).toEqual(campaign.map((l) => l.id).filter((id) => id !== 1));
     expect(new Set(sims.map((l) => l.simulator)).size).toBe(sims.length);
   });
 });
