@@ -1,10 +1,11 @@
 import type { Level, Question } from '@/content/schema';
 import { levelsById } from '@/content/levels';
 import { ch1Bank } from './ch1';
+import { ch2Bank } from './ch2';
 import type { BankItem, Generator, LevelBank } from './types';
 
 /** Question banks by level. Levels without a bank keep their fixed five boss questions. */
-export const banks: Record<number, LevelBank> = { ...ch1Bank };
+export const banks: Record<number, LevelBank> = { ...ch1Bank, ...ch2Bank };
 
 type Cand = { kind: 'fixed'; q: Question } | { kind: 'item'; item: BankItem } | { kind: 'gen'; gen: Generator };
 
