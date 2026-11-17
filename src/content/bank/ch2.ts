@@ -11,11 +11,11 @@ const remap: Generator = {
   make: (rand) => {
     const s = pick(rand, [4, 5, 8, 10]);
     const mod = Math.round((s / (s + 1)) * 100), ring = Math.round((1 / (s + 1)) * 100);
-    const opts = wrongs(ring, [mod, Math.round(100 / s), 50, 100 - ring]);
+    const opts = wrongs(ring, [mod, 50, 100, Math.round(ring / 2)]);
     return {
-      prompt: tr(`${n(s)}টা cache server থেকে ${n(s + 1)}টা হলো। Consistent hashing-এ মোটামুটি কত % key সরতে হয়?`, `Cache servers go from ${s} to ${s + 1}. With consistent hashing, roughly what % of keys move?`),
+      prompt: tr(`${n(s)}টা cache server থেকে ${n(s + 1)}টা হলো। Consistent hashing-এ মোটামুটি কত % key সরতে হয়?`, `Cache servers go from ${n(s)} to ${n(s + 1)}. With consistent hashing, roughly what % of keys move?`),
       options: [`~${n(ring)}%`, ...opts.map((o) => `~${n(o)}%`)],
-      explain: tr(`নতুন server শুধু নিজের ভাগটা নেয়: ~১/${n(s + 1)} = ${n(ring)}%। Modulo হলে প্রায় ${n(mod)}% সরত।`, `The new server takes only its share: ~1/${s + 1} = ${ring}%. With modulo, about ${mod}% would move.`),
+      explain: tr(`নতুন server শুধু নিজের ভাগটা নেয়: ~১/${n(s + 1)} = ${n(ring)}%। Modulo হলে প্রায় ${n(mod)}% সরত।`, `The new server takes only its share: ~1/${n(s + 1)} = ${n(ring)}%. With modulo, about ${n(mod)}% would move.`),
     };
   },
 };
@@ -27,9 +27,9 @@ const quorum: Generator = {
     const R = N - W + 1;
     const opts = wrongs(R, [N - W, R + 1, N, W]);
     return {
-      prompt: tr(`N = ${n(N)}টা কপি, লেখা সফল W = ${n(W)}টা ack-এ। পড়ায় সর্বশেষ মান নিশ্চিত করতে R কমপক্ষে কত?`, `N = ${N} copies, a write succeeds after W = ${W} acks. What is the smallest R that guarantees the latest value on reads?`),
+      prompt: tr(`N = ${n(N)}টা কপি, লেখা সফল W = ${n(W)}টা ack-এ। পড়ায় সর্বশেষ মান নিশ্চিত করতে R কমপক্ষে কত?`, `N = ${n(N)} copies, a write succeeds after W = ${n(W)} acks. What is the smallest R that guarantees the latest value on reads?`),
       options: [n(R), ...opts.map(n)],
-      explain: tr(`W + R > N লাগবে: ${n(W)} + R > ${n(N)}, তাই R = ${n(R)}।`, `You need W + R > N: ${W} + R > ${N}, so R = ${R}.`),
+      explain: tr(`W + R > N লাগবে: ${n(W)} + R > ${n(N)}, তাই R = ${n(R)}।`, `You need W + R > N: ${n(W)} + R > ${n(N)}, so R = ${n(R)}.`),
     };
   },
 };
@@ -40,9 +40,9 @@ const idBits: Generator = {
     const right = 2 ** bits;
     const opts = wrongs(right, [bits * 2, 2 ** (bits - 1), 10 ** Math.min(bits, 4) / 10, right * 2]);
     return {
-      prompt: tr(`ID-তে machine-এর জন্য ${n(bits)} bit রাখা হলো। সর্বোচ্চ কয়টা machine আলাদা ID বানাতে পারবে?`, `${bits} bits of the ID are for the machine. At most how many machines can issue IDs?`),
+      prompt: tr(`ID-তে machine-এর জন্য ${n(bits)} bit রাখা হলো। সর্বোচ্চ কয়টা machine আলাদা ID বানাতে পারবে?`, `${n(bits)} bits of the ID are for the machine. At most how many machines can issue IDs?`),
       options: [n(right), ...opts.map(n)],
-      explain: tr(`${n(bits)} bit-এ ২^${n(bits)} = ${n(right)}টা আলাদা মান।`, `${bits} bits give 2^${bits} = ${right} distinct values.`),
+      explain: tr(`${n(bits)} bit-এ ২^${n(bits)} = ${n(right)}টা আলাদা মান।`, `${n(bits)} bits give 2^${n(bits)} = ${n(right)} distinct values.`),
     };
   },
 };
@@ -53,9 +53,9 @@ const seqBits: Generator = {
     const right = 2 ** seq * 1000;
     const opts = wrongs(right, [2 ** seq, right / 2, right * 2, seq * 1000]);
     return {
-      prompt: tr(`প্রতি millisecond-এ sequence-এর জন্য ${n(seq)} bit। এক machine সেকেন্ডে সর্বোচ্চ কয়টা ID দিতে পারে?`, `${seq} bits for the per-millisecond sequence. At most how many IDs can one machine issue a second?`),
+      prompt: tr(`প্রতি millisecond-এ sequence-এর জন্য ${n(seq)} bit। এক machine সেকেন্ডে সর্বোচ্চ কয়টা ID দিতে পারে?`, `${n(seq)} bits for the per-millisecond sequence. At most how many IDs can one machine issue a second?`),
       options: [n(right), ...opts.map(n)],
-      explain: tr(`প্রতি ms-এ ২^${n(seq)} = ${n(2 ** seq)}টা, সেকেন্ডে ১,০০০ ms: ${n(right)}টা।`, `2^${seq} = ${2 ** seq} per ms, and a second has 1,000 ms: ${right}.`),
+      explain: tr(`প্রতি ms-এ ২^${n(seq)} = ${n(2 ** seq)}টা, সেকেন্ডে ১,০০০ ms: ${n(right)}টা।`, `2^${n(seq)} = ${n(2 ** seq)} per ms, and a second has 1,000 ms: ${n(right)}.`),
     };
   },
 };
