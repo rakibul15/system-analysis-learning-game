@@ -38,7 +38,7 @@ const mockRoute = createRoute({ getParentRoute: () => rootRoute, path: '/mock', 
 const incidentRoute = createRoute({ getParentRoute: () => rootRoute, path: '/incident', component: IncidentPage });
 const builderRoute = createRoute({
   getParentRoute: () => rootRoute, path: '/builder', component: BuilderPage,
-  validateSearch: (s: Record<string, unknown>): { memory?: string } => (typeof s.memory === 'string' ? { memory: s.memory } : {}),
+  validateSearch: (s: Record<string, unknown>): { memory?: string; tab?: string } => ({ ...(typeof s.memory === 'string' ? { memory: s.memory } : {}), ...(typeof s.tab === 'string' ? { tab: s.tab } : {}) }),
 });
 const studyRoute = createRoute({ getParentRoute: () => rootRoute, path: '/study', component: StudyPage });
 const studyPartRoute = createRoute({

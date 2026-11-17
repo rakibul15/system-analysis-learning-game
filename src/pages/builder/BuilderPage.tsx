@@ -4,6 +4,7 @@ import { runAll, singlePoints, type FlowStatus } from '@/features/builder/chaos'
 import { capacityReport, slaByChallenge, SPEC } from '@/features/builder/capacity';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
 import { MigrationLab } from '@/widgets/migrate/MigrationLab';
+import { DbDesignLab } from '@/widgets/dbdesign/DbDesignLab';
 import { BookRefs } from '@/features/books/BookRefs';
 import { costRefs, levelRefs } from '@/features/books/catalog';
 import { useClock } from '@/simulators/knob/anim';
@@ -34,14 +35,14 @@ const STATUS: Record<FlowStatus, { text: string; cls: string }> = {
 export function BuilderPage() {
   const best = useProgress((s) => s.builds);
   const p = useProgress();
-  const { memory } = builderSearch();
+  const { memory, tab } = builderSearch();
   const navigate = useNavigate();
   const [open, setOpen] = useState<{ c: Challenge; memory: boolean } | null>(() => {
     const c = memory ? challenges.find((x) => x.id === memory) : undefined;
     return c ? { c, memory: true } : null;
   });
   const due = dueRebuilds(p);
-  const [section, setSection] = useState<'design' | 'migrate'>('design');
+  const [section, setSection] = useState<'design' | 'db' | 'migrate'>(() => (tab === 'db' || tab === 'migrate' ? tab : 'design'));
   const close = () => { setOpen(null); if (memory) void navigate({ to: '/builder', search: {} }); };
   return (
     <AppShell>
@@ -54,11 +55,11 @@ export function BuilderPage() {
               <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('অংশ বসান, তীর টানুন, যাচাই করুন। তারপর "ভাঙুন" mode-এ যেকোনো অংশ বন্ধ করে দেখুন কোন request আটকায়।', 'Place parts, draw arrows, check. Then switch to "Break it" and switch off any part to see which requests stop.')}</p>
             </div>
             <div role="tablist" aria-label={tr('ধরন', 'Kind')} className="flex flex-wrap gap-2">
-              {([['design', tr('Design challenge', 'Design challenges')], ['migrate', tr('Migration', 'Migrations')]] as const).map(([k, l]) => (
+              {([['design', tr('Design challenge', 'Design challenges')], ['db', tr('Database design', 'Database design')], ['migrate', tr('Migration', 'Migrations')]] as const).map(([k, l]) => (
                 <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
               ))}
             </div>
-            {section === 'migrate' ? <MigrationLab /> : <>
+            {section === 'migrate' ? <MigrationLab /> : section === 'db' ? <DbDesignLab /> : <>
             {due.length > 0 && (
               <section className="rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-4">
                 <h2 className="m-0 font-display text-lg font-bold">{tr('আজ না দেখে আবার আঁকুন', 'Redraw from memory today')}</h2>
