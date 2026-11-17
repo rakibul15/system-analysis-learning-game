@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { bankQuestion, conceptLabel, reviewVariant } from '@/content/bank';
 import { Link } from '@tanstack/react-router';
 import { levelsById, questionsById } from '@/content/levels';
 import { dueCards } from '@/entities/progress/selectors';
@@ -29,29 +30,7 @@ export function ReviewPage() {
 
   if (session && k < session.length) {
     const card = session[k]!;
-    const entry = questionsById[card.qid];
-    return (
-      <AppShell>
-        <main className="mx-auto box-border flex max-w-[820px] flex-col gap-4 px-4 pb-12 pt-6 sm:px-8">
-          <div className="flex items-center justify-between gap-3">
-            <p className="m-0 font-bold text-route-deep">Review {bn(k + 1)}/{bn(session.length)}</p>
-            <button type="button" onClick={() => setSession(null)} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-semibold">{tr('থামুন', 'Stop')}</button>
-          </div>
-          <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? '#0B8A7A' : i === k ? '#FFC02E' : '#D7DED1' }} />)}</div>
-          {entry ? (
-            <QuestionCard
-              key={card.qid}
-              q={entry.q}
-              label={`Level ${bn(entry.levelId)} · ${levelsById[entry.levelId]!.title} · ${tr('ঘর', 'Box')} ${bn(card.box + 1)}`}
-              continueLabel={k + 1 < session.length ? tr('পরের প্রশ্ন', 'Next question') : tr('শেষ', 'Finish')}
-              onDone={(r) => { answerReview(card.qid, r.correct, r.sure); if (r.correct) setRight((n) => n + 1); setK(k + 1); }}
-            />
-          ) : (
-            <button type="button" onClick={() => setK(k + 1)} className="min-h-12 rounded-xl border-2 border-ink bg-white">{tr('এই প্রশ্ন আর নেই, পরেরটা', 'This question no longer exists, next one')}</button>
-          )}
-        </main>
-      </AppShell>
-    );
+    return <ReviewStep key={`${card.qid}-${k}`} card={card} k={k} total={session.length} session={session} onStop={() => setSession(null)} onAnswer={(r) => { answerReview(card.qid, r.correct, r.sure); if (r.correct) setRight((n) => n + 1); setK(k + 1); }} />;
   }
 
   return (
@@ -130,5 +109,33 @@ function RebuildSection() {
         <p className="m-0 mt-2 font-semibold">{tr(`আজ কিছু বাকি নেই।${next ? ` পরেরটা ${bn(Math.max(1, Math.ceil((next.due - Date.now()) / DAY_MS)))} দিনের মধ্যে।` : ''}`, `Nothing due today.${next ? ` The next one is within ${Math.max(1, Math.ceil((next.due - Date.now()) / DAY_MS))} days.` : ''}`)}</p>
       )}
     </section>
+  );
+}
+
+/** One review question: a different question on the same concept when the bank has one. */
+function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: ReviewCard; k: number; total: number; session: ReviewCard[]; onStop: () => void; onAnswer: (r: { correct: boolean; sure: boolean }) => void }) {
+  const q = useMemo(() => reviewVariant(card.qid, questionsById[card.qid]?.q ?? bankQuestion(card.qid)), [card.qid]);
+  const levelId = questionsById[card.qid]?.levelId ?? card.levelId;
+  const concept = conceptLabel(card.qid);
+  return (
+    <AppShell>
+      <main className="mx-auto box-border flex max-w-[820px] flex-col gap-4 px-4 pb-12 pt-6 sm:px-8">
+        <div className="flex items-center justify-between gap-3">
+          <p className="m-0 font-bold text-route-deep">Review {bn(k + 1)}/{bn(total)}</p>
+          <button type="button" onClick={onStop} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-semibold">{tr('থামুন', 'Stop')}</button>
+        </div>
+        <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? '#0B8A7A' : i === k ? '#FFC02E' : '#D7DED1' }} />)}</div>
+        {q ? (
+          <QuestionCard
+            q={q}
+            label={`Level ${bn(levelId)} · ${levelsById[levelId]?.title ?? ''}${concept ? ` · ${concept}` : ''} · ${tr('ঘর', 'Box')} ${bn(card.box + 1)}`}
+            continueLabel={k + 1 < total ? tr('পরের প্রশ্ন', 'Next question') : tr('শেষ', 'Finish')}
+            onDone={(r) => onAnswer(r)}
+          />
+        ) : (
+          <button type="button" onClick={() => onAnswer({ correct: true, sure: false })} className="min-h-12 rounded-xl border-2 border-ink bg-white">{tr('এই প্রশ্ন আর নেই, পরেরটা', 'This question no longer exists, next one')}</button>
+        )}
+      </main>
+    </AppShell>
   );
 }

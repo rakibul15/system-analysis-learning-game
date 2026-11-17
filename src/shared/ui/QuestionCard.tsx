@@ -28,7 +28,9 @@ const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math
  * Options are shuffled per question id (the content keeps the right one first).
  */
 export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light' }: Props) {
-  const order = useMemo(() => shuffledOrder(q.id, q.options.length), [q.id, q.options.length]);
+  // a fresh order every time the question is shown, so positions cannot be memorised
+  const [nonce] = useState(() => Math.random().toString(36).slice(2));
+  const order = useMemo(() => shuffledOrder(`${q.id}:${nonce}`, q.options.length), [q.id, q.options.length, nonce]);
   const [picked, setPicked] = useState<number | null>(null);
   const [sure, setSure] = useState<boolean | null>(null);
   const [done, setDone] = useState(false);

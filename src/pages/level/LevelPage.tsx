@@ -15,6 +15,7 @@ import { simulators } from '@/simulators/registry';
 import { tr } from '@/shared/lib/i18n';
 import { BookRefs } from '@/features/books/BookRefs';
 import { levelRefs } from '@/features/books/catalog';
+import { conceptLabel, drawBoss } from '@/content/bank';
 
 type Step = 'briefing' | 'predict' | 'lesson' | 'summary' | 'play' | 'boss' | 'result';
 const FLOW: { id: Step; label: string }[] = [
@@ -32,6 +33,8 @@ export function LevelPage({ level }: { level: Level }) {
   const [lesson, setLesson] = useState<AnswerResult[]>([]);
   const [play, setPlay] = useState<{ points: number; answers: AnswerResult[] }>({ points: 0, answers: [] });
   const [boss, setBoss] = useState<AnswerResult[]>([]);
+  const seenIds = () => new Set(Object.values(useProgress.getState().cards).filter((c) => c.levelId === level.id).map((c) => c.qid));
+  const [bossSet, setBossSet] = useState(() => drawBoss(level, seenIds()));
   const [hintsUsed, setHintsUsed] = useState(0);
   const [mi, setMi] = useState(0);
   const [bi, setBi] = useState(0);
@@ -48,6 +51,7 @@ export function LevelPage({ level }: { level: Level }) {
   const total = Math.round(parts.lesson + parts.play + parts.boss + parts.noHints);
 
   const restart = () => {
+    setBossSet(drawBoss(level, seenIds()));
     setLesson([]); setPlay({ points: 0, answers: [] }); setBoss([]); setHintsUsed(0); setMi(0); setBi(0); setStep('briefing');
   };
 
@@ -181,17 +185,17 @@ export function LevelPage({ level }: { level: Level }) {
               <h2 className="m-0 mt-1 font-display text-[30px] font-extrabold">{level.story}</h2>
               <p className="mb-0 mt-1 text-[#C9D6DC]">{tr('৫টা প্রশ্ন, ৫৫ নম্বর। Hint নিলে "hint ছাড়া" বোনাসের ১০ নম্বর যাবে।', '5 questions, 55 points. Taking a hint costs the 10-point no-hints bonus.')}</p>
               <div className="mt-3 flex gap-1.5" aria-label={`${tr('প্রশ্ন', 'Question')} ${bn(bi + 1)}/${bn(5)}`}>
-                {level.boss.map((b, k) => {
+                {bossSet.map((b, k) => {
                   const r = boss.find((x) => x.qid === b.id);
                   return <span key={b.id} className="h-2.5 flex-1 rounded-full" style={{ background: r ? (r.correct ? '#3FD38A' : '#E0483E') : k === bi ? '#FFC02E' : '#2A3B44' }} />;
                 })}
               </div>
             </div>
             <QuestionCard
-              key={level.boss[bi]!.id}
+              key={`${bossSet[bi]!.id}-${bi}`}
               tone="boss"
-              q={level.boss[bi]!}
-              label={`Boss ${bn(bi + 1)}/${bn(5)}`}
+              q={bossSet[bi]!}
+              label={`Boss ${bn(bi + 1)}/${bn(5)}${conceptLabel(bossSet[bi]!.id) ? ` · ${conceptLabel(bossSet[bi]!.id)}` : ''}`}
               points={BOSS_POINTS}
               hintUsed={hintsUsed > 0}
               onHint={() => setHintsUsed((h) => h + 1)}
