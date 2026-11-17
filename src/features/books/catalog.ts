@@ -7,7 +7,13 @@ import { tr } from '@/shared/lib/i18n';
  */
 export type BookId = 'ddia2' | 'xu1' | 'xu2';
 
-export interface BookInfo { id: BookId; short: string; title: string; by: string; buyUrl: string; chapters: Record<number, string> }
+export interface BookInfo {
+  id: BookId; short: string; title: string; by: string; buyUrl: string; chapters: Record<number, string>;
+  /** Printed first and last page of each chapter, for books whose references give only a chapter. */
+  chapterPages?: Record<number, [number, number]>;
+  /** For copies with no page labels: PDF page = printed page + this (front matter before page 1). */
+  pdfOffset?: number;
+}
 
 export const BOOKS: Record<BookId, BookInfo> = {
   ddia2: {
@@ -37,6 +43,11 @@ export const BOOKS: Record<BookId, BookInfo> = {
       6: 'Ad Click Event Aggregation', 7: 'Hotel Reservation System', 8: 'Distributed Email Service', 9: 'S3-like Object Storage',
       10: 'Real-time Gaming Leaderboard', 11: 'Payment System', 12: 'Digital Wallet', 13: 'Stock Exchange',
     },
+    chapterPages: {
+      1: [1, 34], 2: [35, 58], 3: [59, 90], 4: [91, 130], 5: [131, 158], 6: [159, 194], 7: [195, 224],
+      8: [225, 252], 9: [253, 288], 10: [289, 314], 11: [315, 340], 12: [341, 378], 13: [379, 414],
+    },
+    pdfOffset: 8,
   },
 };
 
@@ -108,6 +119,24 @@ export function detectBook(text: string): BookId | null {
     return /(vol(ume)?[\s._-]*(2|ii)\b|\bv2\b|volume[\s._-]*two)/.test(t) ? 'xu2' : 'xu1';
   }
   return null;
+}
+
+/** A reference with its printed pages filled in from the book's chapter table when it names only a chapter. */
+export const withPages = (r: BookRef): BookRef => (r.pages || r.section ? r : BOOKS[r.book].chapterPages?.[r.chapter] ? { ...r, pages: BOOKS[r.book].chapterPages![r.chapter] } : r);
+
+/** Lower-case roman numerals for front-matter pages. */
+const roman = (n: number) => [['m', 1000], ['cm', 900], ['d', 500], ['cd', 400], ['c', 100], ['xc', 90], ['l', 50], ['xl', 40], ['x', 10], ['ix', 9], ['v', 5], ['iv', 4], ['i', 1]].reduce((out, [s, v]) => { while (n >= (v as number)) { out += s; n -= v as number; } return out; }, '');
+
+/**
+ * Printed page labels for a copy: its own labels when it has real ones; otherwise, for a
+ * book whose front matter we know, numbers shifted by that offset (roman before page 1).
+ */
+export function labelsFor(own: string[] | null, numPages: number, book: BookId): string[] | null {
+  const real = own && own.some((l, i) => l !== String(i + 1)) ? own : null;
+  if (real) return real;
+  const off = BOOKS[book].pdfOffset;
+  if (off === undefined) return own;
+  return Array.from({ length: numPages }, (_, i) => (i + 1 - off >= 1 ? String(i + 1 - off) : roman(i + 1)));
 }
 
 export const refLabel = (r: BookRef) => {

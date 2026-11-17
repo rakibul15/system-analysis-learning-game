@@ -4,7 +4,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
-import { BOOKS, detectBook, refLabel, type BookId, type BookRef } from './catalog';
+import { BOOKS, detectBook, labelsFor, refLabel, withPages, type BookId, type BookRef } from './catalog';
 import { findInOutline, nextSibling, pageFromLabels, type OutlineNode } from './locate';
 import { bookFor, useReader, useShelf } from './shelf';
 
@@ -16,8 +16,12 @@ const loadDoc = (key: string, blob: Blob) => {
   return docs.get(key)!;
 };
 
-async function locate(doc: PDFDocumentProxy, ref: BookRef): Promise<number> {
-  if (ref.at !== undefined) { const i = pageFromLabels(await doc.getPageLabels(), ref); if (i !== null) return i; }
+/** The copy's printed page labels, or ones derived from the book's known front matter. */
+const pageLabels = async (doc: PDFDocumentProxy, book: BookId) => labelsFor(await doc.getPageLabels(), doc.numPages, book);
+
+async function locate(doc: PDFDocumentProxy, given: BookRef): Promise<number> {
+  const ref = withPages(given);
+  if (ref.at !== undefined) { const i = pageFromLabels(await pageLabels(doc, ref.book), ref); if (i !== null) return i; }
   const outline = (await doc.getOutline()) as unknown as OutlineNode[] | null;
   if (outline?.length) {
     const node = findInOutline(outline, ref, BOOKS[ref.book].chapters[ref.chapter] ?? '');
@@ -26,7 +30,7 @@ async function locate(doc: PDFDocumentProxy, ref: BookRef): Promise<number> {
       if (dest?.[0]) { try { return await doc.getPageIndex(dest[0] as never); } catch { /* fall through */ } }
     }
   }
-  const byLabel = pageFromLabels(await doc.getPageLabels(), ref);
+  const byLabel = pageFromLabels(await pageLabels(doc, ref.book), ref);
   return byLabel ?? 0;
 }
 
@@ -39,8 +43,9 @@ async function destIndex(doc: PDFDocumentProxy, dest: unknown): Promise<number |
 }
 
 /** First and last page index of a chapter: from printed pages when known, else from the outline. */
-async function chapterRange(doc: PDFDocumentProxy, ref: BookRef): Promise<[number, number]> {
-  const labels = await doc.getPageLabels();
+async function chapterRange(doc: PDFDocumentProxy, given: BookRef): Promise<[number, number]> {
+  const ref = withPages(given);
+  const labels = await pageLabels(doc, ref.book);
   if (ref.pages && labels) {
     const s = labels.indexOf(String(ref.pages[0])), e = labels.indexOf(String(ref.pages[1]));
     if (s >= 0 && e >= s) return [s, e];
@@ -91,7 +96,7 @@ function ChapterPages({ bookKey, blob, target }: { bookKey: string; blob: Blob; 
     (async () => {
       try {
         const d = await loadDoc(bookKey, blob);
-        const [r, l] = await Promise.all([chapterRange(d, target), d.getPageLabels()]);
+        const [r, l] = await Promise.all([chapterRange(d, target), pageLabels(d, target.book)]);
         const vp = (await d.getPage(r[0] + 1)).getViewport({ scale: 1 });
         if (!alive) return;
         setDoc(d); setRange(r); setLabels(l); setRatio(vp.height / vp.width);
@@ -224,7 +229,7 @@ function Pages({ bookKey, blob, target }: { bookKey: string; blob: Blob; target:
     (async () => {
       try {
         const d = await loadDoc(bookKey, blob);
-        const [idx, l] = await Promise.all([locate(d, target), d.getPageLabels()]);
+        const [idx, l] = await Promise.all([locate(d, target), pageLabels(d, target.book)]);
         if (!alive) return;
         setDoc(d); setLabels(l); setPage(idx); setStart(idx);
       } catch { if (alive) setError(tr('PDF খোলা গেল না।', 'Could not open the PDF.')); }
@@ -266,8 +271,9 @@ function Pages({ bookKey, blob, target }: { bookKey: string; blob: Blob; target:
 
   const label = useMemo(() => (page === null ? '' : labels?.[page] ?? String(page + 1)), [labels, page]);
   const printed = Number(label);
-  const inRange = target.pages && Number.isFinite(printed) ? printed >= target.pages[0] && printed <= target.pages[1] : null;
-  const past = target.pages && Number.isFinite(printed) && printed > target.pages[1];
+  const tp = withPages(target).pages;
+  const inRange = tp && Number.isFinite(printed) ? printed >= tp[0] && printed <= tp[1] : null;
+  const past = tp && Number.isFinite(printed) && printed > tp[1];
 
   if (error) return <p className="m-auto rounded-xl bg-white p-4 font-semibold text-coral-deep">{error}</p>;
   return (
@@ -283,7 +289,7 @@ function Pages({ bookKey, blob, target }: { bookKey: string; blob: Blob; target:
         <button type="button" aria-label={tr('ছোট করুন', 'Zoom out')} onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white font-bold">−</button>
         <button type="button" aria-label={tr('বড় করুন', 'Zoom in')} onClick={() => setZoom((z) => Math.min(2.6, +(z + 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white font-bold">+</button>
         {page !== start && <button type="button" onClick={() => setPage(start)} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel-soft px-3 text-sm font-bold">{tr('Section-এর শুরু', 'Section start')}</button>}
-        {target.pages && <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${inRange ? 'bg-route-soft text-route-deep' : past ? 'bg-parcel-soft text-[#7A4D00]' : 'bg-[#F0F2EC] text-muted'}`}>{inRange ? tr(`এই অংশ: পাতা ${bn(target.pages[0], { grouping: false })}–${bn(target.pages[1], { grouping: false })}`, `This part: pages ${target.pages[0]}–${target.pages[1]}`) : past ? tr('এই অংশ শেষ ✓', 'This part is done ✓') : tr(`পড়ার অংশ: ${bn(target.pages[0], { grouping: false })}–${bn(target.pages[1], { grouping: false })}`, `To read: ${target.pages[0]}–${target.pages[1]}`)}</span>}
+        {tp && <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${inRange ? 'bg-route-soft text-route-deep' : past ? 'bg-parcel-soft text-[#7A4D00]' : 'bg-[#F0F2EC] text-muted'}`}>{inRange ? tr(`এই অংশ: পাতা ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `This part: pages ${tp[0]}–${tp[1]}`) : past ? tr('এই অংশ শেষ ✓', 'This part is done ✓') : tr(`পড়ার অংশ: ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `To read: ${tp[0]}–${tp[1]}`)}</span>}
       </footer>
     </>
   );

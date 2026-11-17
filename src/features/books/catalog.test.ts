@@ -20,3 +20,22 @@ describe('book catalog', () => {
     expect(detectBook('holiday-photos.pdf')).toBeNull();
   });
 });
+
+import { labelsFor, withPages } from './catalog';
+
+describe('copies without page labels', () => {
+  it('Xu Vol 2: printed page 1 is PDF page 9, front matter in roman numerals', () => {
+    const l = labelsFor(null, 427, 'xu2')!;
+    expect(l[8]).toBe('1');
+    expect(l[0]).toBe('i');
+    expect(l.indexOf('35')).toBe(42);
+  });
+  it('keeps a copy\'s own real labels, and leaves other books alone', () => {
+    expect(labelsFor(['i', 'ii', '1'], 3, 'xu2')).toEqual(['i', 'ii', '1']);
+    expect(labelsFor(null, 3, 'ddia2')).toBeNull();
+  });
+  it('fills chapter pages for chapter-only references', () => {
+    expect(withPages({ book: 'xu2', chapter: 7 }).pages).toEqual([195, 224]);
+    expect(withPages({ book: 'xu1', chapter: 7 }).pages).toBeUndefined();
+  });
+});

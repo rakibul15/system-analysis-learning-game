@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
-import { BOOKS, refLabel, type BookRef } from './catalog';
+import { BOOKS, refLabel, withPages, type BookRef } from './catalog';
 import { bookFor, useReader, useShelf } from './shelf';
 import { Link } from '@tanstack/react-router';
 import { notesForLevel } from '@/content/notes';
@@ -23,7 +23,8 @@ export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', '
       ))}
       {title && <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>}
       <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
-        {refs.map((r, i) => {
+        {refs.map((given, i) => {
+          const r = withPages(given);
           const { book, where } = refLabel(r);
           const have = !!bookFor(books, r.book);
           return (
