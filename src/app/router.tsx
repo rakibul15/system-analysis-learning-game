@@ -11,6 +11,7 @@ import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
 import { ReadingPage } from '@/pages/reading/ReadingPage';
 import { NotePage } from '@/pages/notes/NotePage';
+import { DeepPage } from '@/pages/deep/DeepPage';
 import { tr } from '@/shared/lib/i18n';
 import { AuthGate } from './AuthGate';
 import { ReaderHost } from '@/features/books/ReaderHost';
@@ -53,6 +54,10 @@ const noteRoute = createRoute({
   getParentRoute: () => rootRoute, path: '/notes/$noteId',
   component: function NoteView() { const { noteId } = noteRoute.useParams(); return <NotePage key={noteId} id={noteId} />; },
 });
+const deepRoute = createRoute({
+  getParentRoute: () => rootRoute, path: '/deep/$deepId',
+  component: function DeepView() { const { deepId } = deepRoute.useParams(); return <DeepPage key={deepId} id={deepId} />; },
+});
 const readingRoute = createRoute({ getParentRoute: () => rootRoute, path: '/reading', component: ReadingPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
 
@@ -68,7 +73,7 @@ const levelRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, profileRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,

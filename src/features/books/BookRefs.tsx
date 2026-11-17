@@ -5,6 +5,7 @@ import { BOOKS, refLabel, type BookRef } from './catalog';
 import { bookFor, useReader, useShelf } from './shelf';
 import { Link } from '@tanstack/react-router';
 import { notesForLevel } from '@/content/notes';
+import { timelinesForLevel } from '@/features/deep/timelines';
 
 /** "Read it in the book": each reference opens the learner's own copy at that place. */
 export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', 'Read it in the book'), className = '', level }: { refs: BookRef[] | undefined; title?: string; className?: string; level?: number }) {
@@ -16,6 +17,9 @@ export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', '
     <div className={`text-left ${className}`}>
       {level !== undefined && notesForLevel(level).map((n) => (
         <Link key={n.id} to="/notes/$noteId" params={{ noteId: n.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-route-soft px-3 py-1.5 font-semibold text-ink no-underline">📝 {tr('আমাদের নোট:', 'Our notes:')} {n.title} →</Link>
+      ))}
+      {level !== undefined && timelinesForLevel(level).map((t) => (
+        <Link key={t.id} to="/deep/$deepId" params={{ deepId: t.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-[#EDE6F8] px-3 py-1.5 font-semibold text-ink no-underline">🔍 {tr('গভীরে, ধাপে ধাপে:', 'Deeper, step by step:')} {t.title} →</Link>
       ))}
       {title && <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>}
       <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">

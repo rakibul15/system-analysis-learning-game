@@ -7,6 +7,7 @@ import { useReader } from '@/features/books/shelf';
 import { refLabel } from '@/features/books/catalog';
 import { levelsById } from '@/content/levels';
 import { Flow } from '@/simulators/knob/anim';
+import { timelinesForNote } from '@/features/deep/timelines';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { AppShell } from '@/shared/ui/AppShell';
@@ -40,6 +41,14 @@ function Tabs({ note }: { note: Note }) {
       </div>
       {tab === 'notes' ? (
         <>
+          {timelinesForNote(note.id).length > 0 && (
+            <section aria-label={tr('গভীরে', 'Deeper')} className="rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-4">
+              <p className="m-0 font-bold">🔍 {tr('গভীরে: ধাপে ধাপে দেখুন, আগে অনুমান করুন', 'Deeper: watch it step by step, predict first')}</p>
+              <div className="mt-2 flex flex-col gap-2">
+                {timelinesForNote(note.id).map((t) => <Link key={t.id} to="/deep/$deepId" params={{ deepId: t.id }} className="flex min-h-11 flex-col justify-center rounded-xl border-2 border-ink bg-white px-3 py-1.5 text-ink no-underline"><span className="font-semibold">{t.title} →</span><span className="text-xs text-muted">{t.gist}</span></Link>)}
+              </div>
+            </section>
+          )}
           {note.blocks.map((b, i) => <Block key={i} b={b} />)}
           <section className="rounded-[20px] border-[3px] border-ink bg-white p-5">
             <BookRefs refs={note.refs} title={tr('পুরোটা বইয়ে পড়ুন', 'Read the full story in the books')} />

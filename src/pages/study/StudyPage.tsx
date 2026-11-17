@@ -4,6 +4,7 @@ import { refs } from '@/content/refs';
 import { useShelf } from '@/features/books/shelf';
 import { BOOKS, type BookId } from '@/features/books/catalog';
 import { notes } from '@/content/notes';
+import { timelines } from '@/features/deep/timelines';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOK, chapters } from '@/features/reading/ddia';
@@ -27,6 +28,11 @@ export function StudyPage() {
           <h2 className="m-0 font-display text-xl font-bold">{tr('আমাদের নোট · দুই বই মিলিয়ে', 'Our notes · both books combined')}</h2>
           <p className="m-0 text-sm text-ink-soft">{tr('প্রতিটা topic-এ Alex Xu আর DDIA দুই দিক, নিজের ভাষায় আর ParcelGo-র উদাহরণে। বইয়ের ছবি আর পুরো ব্যাখ্যা আপনার নিজের কপিতে এক click-এ।', 'Each topic from both Alex Xu and DDIA, in our words with ParcelGo examples. The book\'s figures and full story are one click away in your own copy.')}</p>
           <div className="grid gap-2 sm:grid-cols-2">{notes.map((n) => <Link key={n.id} to="/notes/$noteId" params={{ noteId: n.id }} className="btn-press flex flex-col rounded-xl border-2 border-ink bg-[#F7F8F3] p-3 text-ink no-underline shadow-[0_3px_0_#16252D]"><span className="font-display font-bold">{n.title}</span><span className="text-xs text-muted">{n.gist}</span></Link>)}</div>
+        </section>
+        <section aria-label={tr('গভীরে', 'Deeper')} className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-5">
+          <h2 className="m-0 font-display text-xl font-bold">🔍 {tr('গভীরে: ধাপে ধাপে timeline', 'Deeper: step-by-step timelines')}</h2>
+          <p className="m-0 text-sm text-ink-soft">{tr('যে জিনিস box diagram-এ দেখা যায় না: কে কখন কাকে কী পাঠাল, কোথায় গোলমাল। প্রতিটায় মাঝে মাঝে আগে অনুমান করবেন, তারপর দেখবেন।', 'What a box diagram cannot show: who sent what to whom, when, and where it went wrong. In each one you predict first at some steps, then see.')}</p>
+          <div className="grid gap-2 sm:grid-cols-2">{timelines.map((t) => <Link key={t.id} to="/deep/$deepId" params={{ deepId: t.id }} className="btn-press flex flex-col rounded-xl border-2 border-ink bg-white p-3 text-ink no-underline shadow-[0_3px_0_#16252D]"><span className="font-display font-bold">{t.title}</span><span className="text-xs text-muted">{t.gist}</span></Link>)}</div>
         </section>
         <ReadingTrackCard />
         <div className="grid gap-3 sm:grid-cols-2">
