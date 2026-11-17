@@ -1,0 +1,36 @@
+import { useEffect } from 'react';
+import { bn } from '@/shared/lib/bn';
+import { tr } from '@/shared/lib/i18n';
+import { BOOKS, refLabel, type BookRef } from './catalog';
+import { bookFor, useReader, useShelf } from './shelf';
+
+/** "Read it in the book": each reference opens the learner's own copy at that place. */
+export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', 'Read it in the book'), className = '' }: { refs: BookRef[] | undefined; title?: string; className?: string }) {
+  const { books, loaded, refresh } = useShelf();
+  const open = useReader((s) => s.open);
+  useEffect(() => { if (!loaded) void refresh(); }, [loaded, refresh]);
+  if (!refs?.length) return null;
+  return (
+    <div className={`text-left ${className}`}>
+      <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>
+      <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
+        {refs.map((r, i) => {
+          const { book, where } = refLabel(r);
+          const have = !!bookFor(books, r.book);
+          return (
+            <li key={i}>
+              <button type="button" onClick={() => open(r)} title={BOOKS[r.book].title}
+                className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 py-1.5 text-left font-[inherit] hover:bg-[#F7F8F3]">
+                <span className={`flex-none rounded-md px-1.5 py-0.5 text-xs font-bold ${r.book === 'ddia2' ? 'bg-[#EDE6F8] text-[#4B2F7A]' : 'bg-parcel-soft text-[#7A4D00]'}`}>{book}</span>
+                <span className="min-w-0 flex-1 text-sm font-semibold">{where}</span>
+                {r.pages && <span className="flex-none font-mono text-xs text-muted">{tr('পাতা', 'p.')} {bn(r.pages[0], { grouping: false })}{r.pages[1] !== r.pages[0] ? `–${bn(r.pages[1], { grouping: false })}` : ''}</span>}
+                <span aria-hidden="true" className="flex-none text-sm">{have ? '→' : '+'}</span>
+                <span className="sr-only">{have ? tr('বইয়ে খুলুন', 'open in the book') : tr('বই যোগ করে খুলুন', 'add the book to open')}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}

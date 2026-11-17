@@ -2,7 +2,9 @@
  * "My books": PDFs the player opens from their own device. They are stored in
  * this browser's IndexedDB only, never uploaded, never part of the app's files.
  */
-export interface MyBook { id: string; name: string; size: number; added: string; blob: Blob }
+import { detectBook, type BookId } from '@/features/books/catalog';
+
+export interface MyBook { id: string; name: string; size: number; added: string; blob: Blob; /** Which known book this PDF is, if any. */ bookId?: BookId | null }
 
 const DB = 'salg-books';
 const STORE = 'books';
@@ -26,6 +28,11 @@ async function run<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRe
 }
 
 export const listBooks = () => run<MyBook[]>('readonly', (s) => s.getAll() as IDBRequest<MyBook[]>);
-export const addBook = (file: File) =>
-  run('readwrite', (s) => s.put({ id: `${Date.now()}-${file.name}`, name: file.name, size: file.size, added: new Date().toISOString(), blob: file } satisfies MyBook));
+export const addBook = (file: File, bookId?: BookId | null) =>
+  run('readwrite', (s) => s.put({ id: `${Date.now()}-${file.name}`, name: file.name, size: file.size, added: new Date().toISOString(), blob: file, bookId: bookId ?? detectBook(file.name) } satisfies MyBook));
+export async function setBookId(id: string, bookId: BookId | null) {
+  const all = await listBooks();
+  const b = all.find((x) => x.id === id);
+  if (b) await run('readwrite', (s) => s.put({ ...b, bookId }));
+}
 export const removeBook = (id: string) => run('readwrite', (s) => s.delete(id));

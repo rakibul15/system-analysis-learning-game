@@ -10,6 +10,8 @@ import { play } from '@/shared/lib/sound';
 import { AppShell } from '@/shared/ui/AppShell';
 import { tr } from '@/shared/lib/i18n';
 import { StandaloneSim } from '@/simulators/frame/SimFrame';
+import { BookRefs } from '@/features/books/BookRefs';
+import { incidentRefs, levelRefs } from '@/features/books/catalog';
 
 /** Incident mode: read the dashboard and logs, then make three calls under pressure. */
 export function IncidentPage() {
@@ -133,6 +135,7 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
           </ol>
           <p className="m-0 font-mono text-xl font-bold">{bn(Math.round((total / 3) * 100))}%</p>
           {inc.fix && <FixLab id={inc.fix} />}
+          <BookRefs refs={incidentRefs[inc.id] ?? levelRefs[inc.level]} title={tr('এই দুর্ঘটনা বইয়ে', 'This failure in the book')} />
           <div className="flex flex-wrap gap-2">
             <Link to="/level/$levelId" params={{ levelId: String(inc.level) }} className="rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold text-ink no-underline">{tr(`Level ${bn(inc.level)} আবার দেখুন`, `Revisit level ${inc.level}`)}</Link>
             <button type="button" onClick={onBack} className="cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 py-2 font-bold">{tr('পরের incident', 'Next incident')}</button>

@@ -7,6 +7,8 @@ import { useProgress, type ReadingRecord } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { AppShell } from '@/shared/ui/AppShell';
+import { ddiaChapterRef } from '@/features/books/catalog';
+import { useReader } from '@/features/books/shelf';
 
 const STATUS = [tr('পড়িনি', 'Not started'), tr('পড়ছি', 'Reading'), tr('শেষ', 'Done')] as const;
 const STATUS_CLS = ['bg-white', 'bg-parcel-soft', 'bg-route-soft'] as const;
@@ -70,6 +72,7 @@ export function ReadingPage() {
 
 function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecord | undefined; open: boolean; onToggle: () => void }) {
   const setReading = useProgress((s) => s.setReading);
+  const openBook = useReader((s) => s.open);
   const status = rec?.status ?? 0;
   const [draft, setDraft] = useState(rec?.notes ?? '');
   const dirty = draft !== (rec?.notes ?? '');
@@ -91,6 +94,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
                 className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
             ))}
           </div>
+          <button type="button" onClick={() => { openBook(ddiaChapterRef(c.n, c.pages)); if (status === 0) setReading(c.id, { status: 1 }); }} className="btn-press flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-[#EDE6F8] px-4 font-bold shadow-[0_3px_0_#16252D]">📖 {tr(`বইয়ে খুলুন · পাতা ${bn(c.pages[0], { grouping: false })}`, `Open in the book · page ${c.pages[0]}`)}</button>
           <div>
             <h3 className="m-0 text-sm font-bold">{tr('পড়ার সময় খুঁজুন', 'Look for while reading')}</h3>
             <ul className="m-0 mt-1 list-disc pl-5 text-[15px]">{c.look.map((q) => <li key={q}>{q}</li>)}</ul>

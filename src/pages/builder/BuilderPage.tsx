@@ -4,6 +4,8 @@ import { runAll, singlePoints, type FlowStatus } from '@/features/builder/chaos'
 import { capacityReport, slaByChallenge, SPEC } from '@/features/builder/capacity';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
 import { MigrationLab } from '@/widgets/migrate/MigrationLab';
+import { BookRefs } from '@/features/books/BookRefs';
+import { costRefs, levelRefs } from '@/features/books/catalog';
 import { useClock } from '@/simulators/knob/anim';
 import { challenges, PARTS, scoreOf, type Challenge, type Graph, type PartKind } from '@/features/builder/model';
 import { useProgress } from '@/entities/progress/store';
@@ -159,6 +161,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
         <p className="m-0 text-xs font-bold text-route-deep">Architecture builder · Level {bn(c.level)}{memory ? tr(' · না দেখে আঁকা', ' · from memory') : ''}</p>
         <h1 className="m-0 font-display text-[28px] font-extrabold">{c.title}</h1>
         <p className="m-0 mt-1 max-w-[70ch]">{c.brief}</p>
+        <details className="mt-2 max-w-[560px]"><summary className="cursor-pointer text-sm font-bold text-route-deep">📖 {tr('বইয়ে পড়ুন', 'Read it in the book')}</summary><BookRefs refs={mode === 'cost' ? [...costRefs, ...(levelRefs[c.level] ?? [])] : levelRefs[c.level]} title="" className="mt-1" /></details>
       </div>
       <div role="tablist" aria-label={tr('Mode', 'Mode')} className="flex flex-wrap gap-2">
         {([['build', tr('আঁকুন', 'Build')], ['chaos', tr('ভাঙুন ও চালান', 'Break it and run')], ['cost', tr('খরচ ও capacity', 'Cost and capacity')]] as const).map(([m, l]) => (

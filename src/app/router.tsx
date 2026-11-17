@@ -12,6 +12,7 @@ import { ReviewPage } from '@/pages/review/ReviewPage';
 import { ReadingPage } from '@/pages/reading/ReadingPage';
 import { tr } from '@/shared/lib/i18n';
 import { AuthGate } from './AuthGate';
+import { ReaderHost } from '@/features/books/ReaderHost';
 
 function NotFound() {
   return (
@@ -24,7 +25,7 @@ function NotFound() {
   );
 }
 
-const rootRoute = createRootRoute({ component: () => <AuthGate><Outlet /></AuthGate>, notFoundComponent: NotFound });
+const rootRoute = createRootRoute({ component: () => <AuthGate><Outlet /><ReaderHost /></AuthGate>, notFoundComponent: NotFound });
 
 const mapRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: MapPage });
 const reviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/review', component: ReviewPage });

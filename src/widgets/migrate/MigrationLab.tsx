@@ -4,6 +4,8 @@ import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { play } from '@/shared/lib/sound';
 import { tr } from '@/shared/lib/i18n';
+import { BookRefs } from '@/features/books/BookRefs';
+import { levelRefs, migrationRefs } from '@/features/books/catalog';
 
 const ALL: Move[] = ['expand', 'copy', 'verify', 'reads', 'writes', 'contract', 'downtime', 'bigbang'];
 /** A fixed shuffle per scenario, so the safe order is never just top to bottom. */
@@ -70,6 +72,7 @@ function Session({ sc, onBack }: { sc: Scenario; onBack: () => void }) {
         <p className="m-0 text-xs font-bold text-route-deep">Migration · Level {bn(sc.level)}</p>
         <h2 className="m-0 font-display text-[26px] font-extrabold">{sc.title}</h2>
         <p className="m-0 mt-1 max-w-[70ch]">{sc.brief}</p>
+        <BookRefs refs={[...migrationRefs, ...(levelRefs[sc.level] ?? []).filter((r) => r.book === 'ddia2').slice(0, 1)]} className="mt-3 max-w-[560px]" />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <section aria-label={tr('ধাপগুলো', 'Steps')} className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-white p-4">

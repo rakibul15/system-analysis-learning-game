@@ -13,6 +13,8 @@ import { LessonPlayer } from '@/widgets/lesson-player/LessonPlayer';
 import { TrafficGame } from '@/widgets/traffic-stage/TrafficGame';
 import { simulators } from '@/simulators/registry';
 import { tr } from '@/shared/lib/i18n';
+import { BookRefs } from '@/features/books/BookRefs';
+import { levelRefs } from '@/features/books/catalog';
 
 type Step = 'briefing' | 'predict' | 'lesson' | 'summary' | 'play' | 'boss' | 'result';
 const FLOW: { id: Step; label: string }[] = [
@@ -97,9 +99,10 @@ export function LevelPage({ level }: { level: Level }) {
                   {tr('শুরু করুন', 'Start')}
                 </button>
                 <a href={level.ref.url} target="_blank" rel="noreferrer" className="inline-flex min-h-[56px] items-center rounded-2xl border-[2.5px] border-ink px-5 font-semibold text-ink no-underline hover:bg-[#F0F2EC]">
-                  {tr('বই-এর পাতা:', 'Study page:')} {level.ref.label} ↗
+                  {tr('নোট:', 'Notes:')} {level.ref.label} ↗
                 </a>
               </div>
+              <BookRefs refs={levelRefs[level.id]} className="mt-5" />
             </div>
           </section>
         )}
@@ -130,6 +133,7 @@ export function LevelPage({ level }: { level: Level }) {
               ))}
             </ol>
             <p className="mb-0 mt-5 text-sm text-muted">{tr('Lesson-এ পেয়েছেন', 'Lesson score')} {bn(Math.round(parts.lesson * 10) / 10, { grouping: false })}/{bn(LEVEL_PARTS.lesson)} · {tr('বিস্তারিত:', 'More:')} <a href={level.ref.url} target="_blank" rel="noreferrer" className="font-semibold text-route-deep">{level.ref.label} ↗</a></p>
+            <BookRefs refs={levelRefs[level.id]} title={tr('গভীরে বুঝতে বইয়ে পড়ুন', 'Read more in the book')} className="mt-4" />
             <button type="button" onClick={() => setStep('play')} className="btn-press mt-5 min-h-[56px] w-full cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold text-ink shadow-[0_5px_0_#16252D]">
               {tr('এবার নিজে করুন →', 'Now you try →')}
             </button>
@@ -302,6 +306,7 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
         <button type="button" onClick={onRetry} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-white px-6 font-bold shadow-[0_5px_0_#16252D]">{tr('আবার খেলুন', 'Play again')}</button>
         <Link to="/" className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink px-6 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
       </div>
+      <BookRefs refs={levelRefs[level.id]} title={passed ? tr('পাকা করতে বইয়ে পড়ুন', 'Make it stick: read it in the book') : tr('আবার খেলার আগে বইয়ে পড়ুন', 'Before you replay, read it in the book')} className="mx-auto mt-6 max-w-[560px]" />
       <p className="sr-only">{bn(stars)} {tr('টা তারা', 'stars')}</p>
     </section>
   );

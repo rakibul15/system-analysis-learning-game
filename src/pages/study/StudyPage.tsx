@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { refs } from '@/content/refs';
-import { addBook, listBooks, removeBook, type MyBook } from '@/features/study/myBooks';
+import { useShelf } from '@/features/books/shelf';
+import { BOOKS, type BookId } from '@/features/books/catalog';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOK, chapters } from '@/features/reading/ddia';
@@ -49,23 +50,22 @@ function ReadingTrackCard() {
 }
 
 function MyBooks() {
-  const [books, setBooks] = useState<MyBook[]>([]);
+  const { books, refresh, add, remove, tag } = useShelf();
   const [open, setOpen] = useState<{ name: string; url: string } | null>(null);
   const [msg, setMsg] = useState('');
-  const refresh = () => listBooks().then(setBooks).catch(() => setMsg(tr('এই browser-এ বই রাখা যাচ্ছে না।', 'This browser cannot store books.')));
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => { void refresh().catch(() => setMsg(tr('এই browser-এ বই রাখা যাচ্ছে না।', 'This browser cannot store books.'))); }, [refresh]);
   useEffect(() => () => { if (open) URL.revokeObjectURL(open.url); }, [open]);
 
   return (
     <section className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-white p-5">
       <h2 className="m-0 font-display text-xl font-bold">{tr('আমার বই', 'My books')}</h2>
-      <p className="m-0 text-sm text-ink-soft">{tr('নিজের কেনা বইয়ের PDF এখানে খুলুন। File শুধু এই browser-এ থাকে, কোথাও upload হয় না, অন্য কেউ দেখতে পায় না।', 'Open the PDFs of books you own here. Files stay only in this browser: never uploaded, never visible to anyone else.')}</p>
+      <p className="m-0 text-sm text-ink-soft">{tr('নিজের বইয়ের PDF এখানে রাখুন। প্রতিটা PDF কোন বই সেটা ঠিক থাকলে, খেলার প্রতিটা topic-এর "বইয়ে পড়ুন" থেকে সোজা ঠিক পাতায় খুলবে। File শুধু এই browser-এ থাকে, কোথাও upload হয় না।', 'Keep the PDFs of your books here. When each PDF is matched to its book, every topic\'s "Read it in the book" opens it straight at the right page. Files stay in this browser only and are never uploaded.')}</p>
       <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel px-4 font-bold">
         {tr('PDF যোগ করুন', 'Add a PDF')}
         <input type="file" accept="application/pdf" className="sr-only" onChange={async (e) => {
           const f = e.target.files?.[0]; e.target.value = '';
           if (!f) return;
-          try { await addBook(f); setMsg(''); await refresh(); } catch { setMsg(tr('রাখা গেল না; browser-এর জায়গা কম হতে পারে।', 'Could not store it; the browser may be out of space.')); }
+          try { await add(f); setMsg(''); } catch { setMsg(tr('রাখা গেল না; browser-এর জায়গা কম হতে পারে।', 'Could not store it; the browser may be out of space.')); }
         }} />
       </label>
       {msg && <p className="m-0 text-sm font-semibold text-coral-deep">{msg}</p>}
@@ -73,10 +73,16 @@ function MyBooks() {
         <ul className="m-0 flex list-none flex-col gap-2 p-0">
           {books.map((b) => (
             <li key={b.id} className="flex flex-wrap items-center gap-2 rounded-xl border-2 border-ink px-3 py-2">
-              <span className="min-w-0 flex-1 truncate font-semibold">{b.name}</span>
+              <span className="min-w-0 flex-[1_1_200px] truncate font-semibold">{b.name}</span>
+              <label className="flex items-center gap-1 text-sm">{tr('কোন বই:', 'Book:')}
+                <select value={b.bookId ?? ''} onChange={(e) => void tag(b.id, (e.target.value || null) as BookId | null)} className="min-h-9 rounded-lg border-2 border-ink bg-white px-2 font-[inherit]">
+                  <option value="">{tr('অন্য বই', 'Other')}</option>
+                  {(Object.keys(BOOKS) as BookId[]).map((id) => <option key={id} value={id}>{BOOKS[id].short}</option>)}
+                </select>
+              </label>
               <span className="font-mono text-xs text-muted">{bn(Math.round(b.size / 1e6))} MB</span>
               <button type="button" onClick={() => setOpen({ name: b.name, url: URL.createObjectURL(b.blob) })} className="cursor-pointer rounded-lg border-2 border-ink bg-white px-3 py-1 font-semibold">{tr('খুলুন', 'Open')}</button>
-              <button type="button" onClick={async () => { await removeBook(b.id); await refresh(); }} className="cursor-pointer rounded-lg border-2 border-coral bg-white px-3 py-1 font-semibold text-coral-deep">{tr('সরান', 'Remove')}</button>
+              <button type="button" onClick={() => void remove(b.id)} className="cursor-pointer rounded-lg border-2 border-coral bg-white px-3 py-1 font-semibold text-coral-deep">{tr('সরান', 'Remove')}</button>
             </li>
           ))}
         </ul>
