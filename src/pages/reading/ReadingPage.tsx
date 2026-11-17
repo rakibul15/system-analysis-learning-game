@@ -1,0 +1,114 @@
+import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { BOOK, chapters, PART_TITLES, TOTAL_WEEKS, type Chapter, type Practice } from '@/features/reading/ddia';
+import { incidents } from '@/features/incident/incidents';
+import { levelsById } from '@/content/levels';
+import { useProgress, type ReadingRecord } from '@/entities/progress/store';
+import { bn } from '@/shared/lib/bn';
+import { tr } from '@/shared/lib/i18n';
+import { AppShell } from '@/shared/ui/AppShell';
+
+const STATUS = [tr('পড়িনি', 'Not started'), tr('পড়ছি', 'Reading'), tr('শেষ', 'Done')] as const;
+const STATUS_CLS = ['bg-white', 'bg-parcel-soft', 'bg-route-soft'] as const;
+const NOTE_HINT = tr('মূল ধারণা:\n\nকোথায় trade-off:\n\nCarryBee / ParcelGo-তে কোথায় দেখেছি:\n\nএখনো যা বুঝিনি:', 'Core idea:\n\nWhere the trade-off is:\n\nWhere I have seen it at work:\n\nWhat I still do not get:');
+
+function PracticeLink({ p }: { p: Practice }) {
+  const cls = 'inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-white px-3 text-sm font-semibold text-ink no-underline hover:bg-[#F0F2EC]';
+  if (p.kind === 'level') return <Link to="/level/$levelId" params={{ levelId: String(p.id) }} className={cls}>Level {bn(p.id)} · {levelsById[p.id]?.title}</Link>;
+  if (p.kind === 'incident') return <Link to="/incident" className={cls}>Incident · {incidents.find((i) => i.id === p.id)?.title ?? p.id}</Link>;
+  if (p.kind === 'builder') return <Link to="/builder" className={cls}>{tr('Builder · খরচ ও capacity', 'Builder · cost and capacity')}</Link>;
+  if (p.kind === 'migrate') return <Link to="/builder" className={cls}>{tr('Builder · Migration', 'Builder · Migration')}</Link>;
+  return <Link to="/practice" search={{ tab: 'lab' }} className={cls}>Simulator lab</Link>;
+}
+
+/** Reading track for DDIA (2nd edition): chapter by chapter, with linked practice and your own notes. */
+export function ReadingPage() {
+  const reading = useProgress((s) => s.reading);
+  const done = chapters.filter((c) => reading[c.id]?.status === 2).length;
+  const current = chapters.find((c) => reading[c.id]?.status === 1) ?? chapters.find((c) => (reading[c.id]?.status ?? 0) < 2);
+  const [open, setOpen] = useState<string | null>(current?.id ?? null);
+
+  const exportNotes = () => {
+    const md = [`# ${BOOK.title} (${BOOK.edition}): ${tr('আমার নোট', 'my notes')}`, '', ...chapters.flatMap((c) => {
+      const r = reading[c.id];
+      return r?.notes?.trim() ? [`## ${c.n}. ${c.title}`, '', r.notes.trim(), ''] : [];
+    })].join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+    a.download = 'ddia-notes.md';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  return (
+    <AppShell>
+      <main className="mx-auto box-border flex max-w-[960px] flex-col gap-5 px-4 pb-12 pt-6 sm:px-8">
+        <Link to="/study" className="self-start font-semibold text-route-deep">{tr('← পড়া', '← Study')}</Link>
+        <section className="rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-block">
+          <p className="m-0 text-sm font-bold text-route-deep">{tr('বই পড়ার track', 'Reading track')} · {BOOK.edition}</p>
+          <h1 className="m-0 font-display text-[28px] font-extrabold leading-tight [text-wrap:balance] sm:text-[32px]">{BOOK.title}</h1>
+          <p className="m-0 mt-1 text-ink-soft">{BOOK.authors}</p>
+          <p className="m-0 mt-2 max-w-[68ch] text-ink-soft">{tr(`১৪টা অধ্যায়, মোটামুটি ${bn(TOTAL_WEEKS)} সপ্তাহ। প্রতিটা অধ্যায়ে পড়ার সময় খোঁজার প্রশ্ন, app-এ মিল থাকা অনুশীলন, আর আপনার নোট। নোট আপনার account-এ save থাকে। বইয়ের লেখা এখানে নেই: নিজের কপি পাশে খুলে পড়ুন।`, `14 chapters, about ${TOTAL_WEEKS} weeks. For each chapter: questions to look for while reading, matching practice in this app, and your notes. Notes are saved to your account. The book's text is not here: read your own copy alongside.`)}</p>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[#E3E6DF]" aria-hidden="true"><div className="h-full rounded-full bg-route" style={{ width: `${(done / chapters.length) * 100}%` }} /></div>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-sm font-bold">{bn(done)}/{bn(chapters.length)} {tr('অধ্যায় শেষ', 'chapters done')}</span>
+            <button type="button" onClick={exportNotes} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 text-sm font-semibold">{tr('সব নোট download (.md)', 'Download all notes (.md)')}</button>
+          </div>
+        </section>
+
+        {PART_TITLES.map((pt, pi) => (
+          <section key={pt} className="flex flex-col gap-2">
+            <h2 className="m-0 font-display text-lg font-bold text-muted">{tr(`ভাগ ${bn(pi + 1)}`, `Part ${pi + 1}`)} · {pt}</h2>
+            {chapters.filter((c) => c.part === pi).map((c) => <ChapterCard key={c.id} c={c} rec={reading[c.id]} open={open === c.id} onToggle={() => setOpen(open === c.id ? null : c.id)} />)}
+          </section>
+        ))}
+        <p className="m-0 text-sm text-muted">{tr('বইয়ের PDF থাকলে', 'If you have the book as a PDF, add it under')} <Link to="/study" className="font-semibold text-route-deep">{tr('পড়া → আমার বই', 'Study → My books')}</Link>{tr('-এ রাখতে পারেন; সেটা শুধু এই browser-এ থাকে, কোথাও upload হয় না।', '; it stays in this browser only and is never uploaded.')}</p>
+      </main>
+    </AppShell>
+  );
+}
+
+function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecord | undefined; open: boolean; onToggle: () => void }) {
+  const setReading = useProgress((s) => s.setReading);
+  const status = rec?.status ?? 0;
+  const [draft, setDraft] = useState(rec?.notes ?? '');
+  const dirty = draft !== (rec?.notes ?? '');
+  return (
+    <article className={`rounded-[18px] border-[2.5px] border-ink ${STATUS_CLS[status]}`}>
+      <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full cursor-pointer items-center gap-3 rounded-[16px] border-0 bg-transparent p-4 text-left font-[inherit] text-ink">
+        <span className={`grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-ink font-display text-lg font-extrabold ${status === 2 ? 'bg-route text-white' : 'bg-white'}`}>{status === 2 ? '✓' : bn(c.n)}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-[17px] font-bold leading-snug">{c.title}</span>
+          <span className="block text-xs text-muted">{tr(`পাতা ${bn(c.pages[0])}–${bn(c.pages[1])} · ~${bn(c.weeks)} সপ্তাহ`, `Pages ${c.pages[0]}–${c.pages[1]} · ~${c.weeks} week${c.weeks > 1 ? 's' : ''}`)} · {STATUS[status]}{rec?.notes?.trim() ? tr(' · নোট আছে', ' · has notes') : ''}</span>
+        </span>
+        <span aria-hidden="true" className="text-xl">{open ? '−' : '+'}</span>
+      </button>
+      {open && (
+        <div className="flex flex-col gap-3 border-t-2 border-dashed border-ink px-4 pb-4 pt-3">
+          <div role="radiogroup" aria-label={tr('অবস্থা', 'Status')} className="flex flex-wrap gap-2">
+            {STATUS.map((l, i) => (
+              <button key={l} type="button" role="radio" aria-checked={status === i} onClick={() => setReading(c.id, { status: i as 0 | 1 | 2 })}
+                className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+            ))}
+          </div>
+          <div>
+            <h3 className="m-0 text-sm font-bold">{tr('পড়ার সময় খুঁজুন', 'Look for while reading')}</h3>
+            <ul className="m-0 mt-1 list-disc pl-5 text-[15px]">{c.look.map((q) => <li key={q}>{q}</li>)}</ul>
+          </div>
+          <div>
+            <h3 className="m-0 text-sm font-bold">{tr('App-এ হাতে-কলমে', 'Hands-on in the app')}</h3>
+            <div className="mt-1 flex flex-wrap gap-2">{c.practice.map((p, i) => <PracticeLink key={i} p={p} />)}</div>
+          </div>
+          <label className="flex flex-col gap-1 text-sm font-bold">{tr('আমার নোট', 'My notes')}
+            <textarea value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={() => { if (dirty) setReading(c.id, { notes: draft, status: status === 0 ? 1 : status }); }}
+              rows={7} placeholder={NOTE_HINT} className="rounded-xl border-2 border-ink bg-white p-3 font-[inherit] text-[15px] font-normal" />
+          </label>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" disabled={!dirty} onClick={() => setReading(c.id, { notes: draft, status: status === 0 ? 1 : status })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold shadow-[0_3px_0_#16252D] disabled:cursor-default disabled:opacity-50">{dirty ? tr('নোট save করুন', 'Save notes') : tr('Save হয়েছে ✓', 'Saved ✓')}</button>
+            {status !== 2 && <button type="button" onClick={() => setReading(c.id, { notes: draft, status: 2 })} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('অধ্যায় শেষ ✓', 'Chapter done ✓')}</button>}
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}

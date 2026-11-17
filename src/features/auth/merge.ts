@@ -1,4 +1,4 @@
-import { emptyProgress, type LevelRecord, type ProgressData, type RebuildRecord, type ReviewCard } from '@/entities/progress/store';
+import { emptyProgress, type LevelRecord, type ProgressData, type ReadingRecord, type RebuildRecord, type ReviewCard } from '@/entities/progress/store';
 
 /** Keep only the saved fields, filling anything missing with defaults. */
 export function normalize(data: unknown): ProgressData {
@@ -15,6 +15,7 @@ export function normalize(data: unknown): ProgressData {
     incidents: d.incidents ?? {},
     builds: d.builds ?? {},
     rebuilds: d.rebuilds ?? {},
+    reading: d.reading ?? {},
     settings: { ...e.settings, ...d.settings },
   };
 }
@@ -71,6 +72,12 @@ export function mergeProgress(aIn: unknown, bIn: unknown): ProgressData {
     rebuilds[k] = { ...pick, best: Math.max(ra.best, rb.best) };
   }
 
+  const reading: Record<string, ReadingRecord> = { ...a.reading };
+  for (const [k, rb] of Object.entries(b.reading)) {
+    const ra = reading[k];
+    reading[k] = !ra || rb.updatedAt > ra.updatedAt ? rb : ra;
+  }
+
   return {
     levels,
     cards,
@@ -86,6 +93,7 @@ export function mergeProgress(aIn: unknown, bIn: unknown): ProgressData {
     incidents: maxMap(a.incidents, b.incidents),
     builds: maxMap(a.builds, b.builds),
     rebuilds,
+    reading,
     settings: { ...b.settings, ...a.settings },
   };
 }

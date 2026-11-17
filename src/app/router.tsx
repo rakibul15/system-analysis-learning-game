@@ -9,6 +9,7 @@ import { PARTS, StudyPage, StudyReader, type Part } from '@/pages/study/StudyPag
 import { PracticePage } from '@/pages/practice/PracticePage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { ReviewPage } from '@/pages/review/ReviewPage';
+import { ReadingPage } from '@/pages/reading/ReadingPage';
 import { tr } from '@/shared/lib/i18n';
 import { AuthGate } from './AuthGate';
 
@@ -46,6 +47,7 @@ const studyPartRoute = createRoute({
     return (PARTS as readonly string[]).includes(part) ? <StudyReader part={part as Part} /> : <NotFound />;
   },
 });
+const readingRoute = createRoute({ getParentRoute: () => rootRoute, path: '/reading', component: ReadingPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
 
 const levelRoute = createRoute({
@@ -60,7 +62,7 @@ const levelRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, profileRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, profileRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,

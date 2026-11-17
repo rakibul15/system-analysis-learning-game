@@ -16,6 +16,7 @@ function taskText(t: PlanTask): { title: string; note: string } {
     case 'level': return { title: `Level ${bn(t.levelId!)} · ${levelTitle(t.levelId!)}`, note: tr('নতুন level', 'New level') };
     case 'weak': return { title: `Level ${bn(t.levelId!)} · ${levelTitle(t.levelId!)}`, note: tr('দুর্বল জায়গা, আবার খেলুন', 'Weak spot, play it again') };
     case 'mock': return { title: tr('৪৫ মিনিটের mock interview', '45-minute mock interview'), note: tr('Timer চালু, আসলের মতো', 'Timer on, like the real thing') };
+    case 'read': return { title: tr(`DDIA অধ্যায় ${bn(t.chapter!)} পড়ুন`, `Read DDIA chapter ${t.chapter}`), note: tr('পড়া শেষে নিজের নোট', 'Write your own notes after') };
     case 'guided': return { title: tr('ধাপে ধাপে design', 'Step-by-step design'), note: tr('একটা পুরো সমস্যা, checklist সহ', 'One full problem, with a checklist') };
   }
 }
@@ -26,6 +27,7 @@ function TaskLink({ t, children }: { t: PlanTask; children: React.ReactNode }) {
   if (t.kind === 'review') return <Link to="/review" className={cls}>{children}</Link>;
   if (t.kind === 'rebuild') return <Link to="/builder" search={{ memory: t.challengeId }} className={cls}>{children}</Link>;
   if (t.kind === 'mock') return <Link to="/mock" className={cls}>{children}</Link>;
+  if (t.kind === 'read') return <Link to="/reading" className={cls}>{children}</Link>;
   return <Link to="/practice" search={{ tab: 'guided' }} className={cls}>{children}</Link>;
 }
 

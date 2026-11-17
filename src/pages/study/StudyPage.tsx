@@ -4,6 +4,8 @@ import { refs } from '@/content/refs';
 import { addBook, listBooks, removeBook, type MyBook } from '@/features/study/myBooks';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
+import { BOOK, chapters } from '@/features/reading/ddia';
+import { useProgress } from '@/entities/progress/store';
 import { AppShell } from '@/shared/ui/AppShell';
 
 export const PARTS = ['hub', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'] as const;
@@ -19,6 +21,7 @@ export function StudyPage() {
           <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('ছবিতে system design', 'System design in pictures')}</h1>
           <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with diagrams and self-check questions. Works offline too.')}</p>
         </div>
+        <ReadingTrackCard />
         <div className="grid gap-3 sm:grid-cols-2">
           {PARTS.map((p) => (
             <Link key={p} to="/study/$part" params={{ part: p }} className="btn-press flex flex-col gap-1 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-ink no-underline shadow-[0_4px_0_#16252D]">
@@ -30,6 +33,18 @@ export function StudyPage() {
         <MyBooks />
       </main>
     </AppShell>
+  );
+}
+
+function ReadingTrackCard() {
+  const reading = useProgress((s) => s.reading);
+  const done = chapters.filter((c) => reading[c.id]?.status === 2).length;
+  return (
+    <Link to="/reading" className="btn-press flex flex-col gap-1 rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-5 text-ink no-underline shadow-[0_5px_0_#16252D]">
+      <span className="text-xs font-bold uppercase tracking-wide text-[#4B2F7A]">{tr('বই পড়ার track', 'Reading track')} · {BOOK.edition}</span>
+      <span className="font-display text-xl font-extrabold">{BOOK.title}</span>
+      <span className="text-sm text-ink-soft">{tr(`১৪ অধ্যায় · খোঁজার প্রশ্ন, app-এ অনুশীলন আর নিজের নোট · ${bn(done)}/${bn(14)} শেষ`, `14 chapters · questions, practice in the app and your own notes · ${done}/14 done`)}</span>
+    </Link>
   );
 }
 

@@ -3,9 +3,10 @@ import type { ProgressData } from '@/entities/progress/store';
 import { dueCards } from '@/entities/progress/selectors';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
 import { DAY_MS, PASS_MARK, dayKey } from '@/shared/lib/scoring';
+import { chapters } from '@/features/reading/ddia';
 
-export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'mock' | 'guided';
-export interface PlanTask { id: string; kind: TaskKind; minutes: number; done: boolean; levelId?: number; count?: number; challengeId?: string }
+export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'mock' | 'guided' | 'read';
+export interface PlanTask { id: string; kind: TaskKind; minutes: number; done: boolean; levelId?: number; count?: number; challengeId?: string; chapter?: number }
 export type Phase = 'none' | 'learn' | 'final' | 'after';
 
 export interface DayPlan {
@@ -23,6 +24,7 @@ export interface DayPlan {
 
 export const LEVEL_MIN = 15;
 export const REBUILD_MIN = 8;
+export const READ_MIN = 25;
 const REVIEW_MIN_EACH = 0.5;
 const FINAL_DAYS = 2;
 
@@ -66,6 +68,16 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
     .sort((a, b) => p.levels[a]!.best - p.levels[b]!.best)[0];
   const used = tasks.reduce((s, t) => s + t.minutes, 0);
   if (weak && (phase === 'final' || minutes - used >= LEVEL_MIN)) tasks.push({ id: `weak:${weak}`, kind: 'weak', minutes: LEVEL_MIN, done: playedToday(weak), levelId: weak });
+
+  // a reading track counts once started: today's chapter, done when its status or notes changed today
+  const reading = p.reading ?? {};
+  if (phase !== 'final' && chapters.some((c) => (reading[c.id]?.status ?? 0) > 0)) {
+    const ch = chapters.find((c) => reading[c.id]?.status === 1) ?? chapters.find((c) => (reading[c.id]?.status ?? 0) < 2);
+    if (ch) {
+      const r = reading[ch.id];
+      tasks.push({ id: `read:${ch.n}`, kind: 'read', minutes: READ_MIN, done: !!r && dayKey(new Date(r.updatedAt)) === today, chapter: ch.n });
+    }
+  }
 
   if (phase === 'final') {
     const didToday = (prefix: string) => p.design.some((d) => d.promptId.startsWith(prefix) && dayKey(new Date(d.at)) === today);

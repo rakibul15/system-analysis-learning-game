@@ -45,3 +45,16 @@ describe('planToday', () => {
     expect(planToday(withPlan(null, 30), NOW).tasks.filter((t) => t.kind === 'level').length).toBeGreaterThan(0);
   });
 });
+
+describe('reading track in the plan', () => {
+  it('adds the current chapter once reading has started, ticked after notes today', () => {
+    const base = withPlan(inDays(30), 60);
+    expect(planToday(base, NOW).tasks.some((t) => t.kind === 'read')).toBe(false);
+    const started = { ...base, reading: { 'ddia2:1': { status: 2 as const, notes: 'x', updatedAt: new Date(NOW - 3 * DAY_MS).toISOString() }, 'ddia2:2': { status: 1 as const, notes: '', updatedAt: new Date(NOW - 3 * DAY_MS).toISOString() } } };
+    const t = planToday(started, NOW).tasks.find((x) => x.kind === 'read')!;
+    expect(t.chapter).toBe(2);
+    expect(t.done).toBe(false);
+    const today = { ...started, reading: { ...started.reading, 'ddia2:2': { status: 1 as const, notes: 'notes', updatedAt: new Date(NOW - 1000).toISOString() } } };
+    expect(planToday(today, NOW).tasks.find((x) => x.kind === 'read')!.done).toBe(true);
+  });
+});

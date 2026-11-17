@@ -29,6 +29,9 @@ export interface SpeakAttempt { promptId: string; score: number; max: number; at
 /** Rebuild-from-memory schedule for one builder challenge (Leitner box like review cards). */
 export interface RebuildRecord { box: number; due: number; attempts: number; best: number }
 
+/** One chapter of a reading track: 0 not started, 1 reading, 2 done; notes are the learner's own. */
+export interface ReadingRecord { status: 0 | 1 | 2; notes: string; updatedAt: string }
+
 export interface ProgressData {
   levels: Record<number, LevelRecord>;
   cards: Record<string, ReviewCard>;
@@ -43,6 +46,8 @@ export interface ProgressData {
   builds: Record<string, number>;
   /** Rebuild-from-memory state per builder challenge. */
   rebuilds: Record<string, RebuildRecord>;
+  /** Reading-track progress and notes, by chapter id. */
+  reading: Record<string, ReadingRecord>;
   settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number };
 }
 
@@ -56,6 +61,7 @@ interface ProgressActions {
   recordBuild: (id: string, score: number) => void;
   recordRebuild: (id: string, score: number) => void;
   setPlan: (interviewDate: string | null, dailyMinutes: number) => void;
+  setReading: (id: string, patch: Partial<Omit<ReadingRecord, 'updatedAt'>>) => void;
   setUnlockAll: (on: boolean) => void;
   setSound: (on: boolean) => void;
   importData: (data: unknown) => boolean;
@@ -73,6 +79,7 @@ export const emptyProgress = (): ProgressData => ({
   incidents: {},
   builds: {},
   rebuilds: {},
+  reading: {},
   settings: { unlockAll: false },
 });
 
@@ -155,6 +162,10 @@ export const useProgress = create<ProgressData & ProgressActions>()(
           rebuilds: { ...s.rebuilds, [id]: { box, due: Date.now() + REBUILD_DAYS[box]! * DAY_MS, attempts: (old?.attempts ?? 0) + 1, best: Math.max(old?.best ?? 0, score) } },
         };
       }),
+      setReading: (id, patch) => set((s) => {
+        const old = s.reading[id] ?? { status: 0 as const, notes: '' };
+        return { days: withToday(s.days), reading: { ...s.reading, [id]: { ...old, ...patch, updatedAt: new Date().toISOString() } } };
+      }),
       setPlan: (interviewDate, dailyMinutes) => set((s) => ({ settings: { ...s.settings, interviewDate, dailyMinutes } })),
       setUnlockAll: (on) => set((s) => ({ settings: { ...s.settings, unlockAll: on } })),
       setSound: (on) => set((s) => ({ settings: { ...s.settings, sound: on } })),
@@ -171,7 +182,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         levels: s.levels, cards: s.cards, days: s.days, reviewXp: s.reviewXp,
-        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, rebuilds: s.rebuilds, settings: s.settings,
+        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, rebuilds: s.rebuilds, reading: s.reading, settings: s.settings,
       }),
       // v1 (the pilot) only stored the traffic level as level 3; it is level 1 now.
       migrate: (persisted, version) => {
@@ -192,6 +203,6 @@ export const useProgress = create<ProgressData & ProgressActions>()(
 );
 
 export function exportProgress(s: ProgressData): string {
-  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, settings } = s;
-  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, settings }, null, 2);
+  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, settings } = s;
+  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, settings }, null, 2);
 }
