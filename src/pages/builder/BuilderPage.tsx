@@ -7,7 +7,8 @@ import { MigrationLab } from '@/widgets/migrate/MigrationLab';
 import { BookRefs } from '@/features/books/BookRefs';
 import { costRefs, levelRefs } from '@/features/books/catalog';
 import { useClock } from '@/simulators/knob/anim';
-import { challenges, PARTS, scoreOf, type Challenge, type Graph, type PartKind } from '@/features/builder/model';
+import { challenges, PARTS, referenceGraph, scoreOf, type Challenge, type Graph, type PartKind } from '@/features/builder/model';
+import { applyFix, diagnose, type Finding } from '@/features/builder/rules';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { play } from '@/shared/lib/sound';
@@ -97,13 +98,24 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
   const [scan, setScan] = useState<{ id: string; breaks: string[] }[] | null>(null);
   const t = useClock(30);
 
-  const pos = useMemo(() => {
-    const byTier = new Map<number, string[]>();
-    for (const n of g.nodes) { const tier = PARTS[n.kind].tier; byTier.set(tier, [...(byTier.get(tier) ?? []), n.id]); }
-    const out: Record<string, { x: number; y: number }> = {};
-    for (const [tier, ids] of byTier) ids.forEach((id, i) => { out[id] = { x: 8 + tier * 14, y: ((i + 1) / (ids.length + 1)) * 60 }; });
-    return out;
-  }, [g.nodes]);
+  const pos = useMemo(() => layout(g), [g]);
+  // after checking: what each failed rule found, and the parts to outline on the canvas
+  const findings = useMemo(() => (checked ? c.rules.map((r, i) => (checked[i] ? [] : r.specs.map((s) => diagnose(g, s)).filter((f): f is Finding => !!f))) : null), [checked, c.rules, g]);
+  const marked = useMemo(() => {
+    const nodes = new Set<string>(), edges = new Set<string>();
+    for (const fs of findings ?? []) for (const f of fs) { f.mark.nodes.forEach((n) => nodes.add(n)); f.mark.edges.forEach(([a, b]) => edges.add(`${a}>${b}`)); }
+    return { nodes, edges };
+  }, [findings]);
+  const [showModel, setShowModel] = useState(false);
+  const fix = (f: Finding) => {
+    if (!f.apply) return;
+    let n = seq;
+    const next = applyFix(g, f.apply, () => `n${n++}`);
+    setSeq(n); setG(next); play('tap');
+    // re-check straight away so the answer stays in view
+    const r = c.rules.map((rule) => rule.ok(next));
+    setChecked(r); setScan(null);
+  };
   const results = useMemo(() => (mode === 'chaos' ? runAll(g, c.id, down) : []), [mode, g, c.id, down]);
   const sla = slaByChallenge[c.id];
   const report = useMemo(() => (mode === 'cost' && sla ? capacityReport(g, c.id, sla) : null), [mode, g, c.id, sla]);
@@ -208,7 +220,8 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
               if (!p || !q) return null;
               const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy) || 1;
               const dead = down.has(a) || down.has(b);
-              return <line key={`${a}-${b}`} x1={p.x + (dx / len) * 6} y1={p.y + (dy / len) * 3} x2={q.x - (dx / len) * 6.5} y2={q.y - (dy / len) * 3.4} stroke={dead ? '#AAB3A8' : '#16252D'} strokeDasharray={dead ? '1 1' : undefined} strokeWidth="0.45" markerEnd="url(#arr)" />;
+              const bad = mode === 'build' && marked.edges.has(`${a}>${b}`);
+              return <line key={`${a}-${b}`} x1={p.x + (dx / len) * 6} y1={p.y + (dy / len) * 3} x2={q.x - (dx / len) * 6.5} y2={q.y - (dy / len) * 3.4} stroke={bad ? '#E0483E' : dead ? '#AAB3A8' : '#16252D'} strokeDasharray={dead ? '1 1' : undefined} strokeWidth={bad ? 0.9 : 0.45} markerEnd="url(#arr)" />;
             })}
             {g.nodes.map((n) => {
               const p = pos[n.id]!;
@@ -216,7 +229,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
               const off = down.has(n.id);
               return (
                 <g key={n.id} onClick={() => clickNode(n.id)} className="cursor-pointer" role="button" aria-label={`${PARTS[n.kind].label}${off ? tr(' (বন্ধ)', ' (down)') : ''}`} aria-pressed={mode === 'chaos' ? off : on}>
-                  <rect x={p.x - 6.5} y={p.y - 3} width="13" height="6" rx="1.4" fill={off ? '#E3E6DF' : COLOR[n.kind]} stroke={on ? '#E0483E' : '#16252D'} strokeWidth={on ? 0.9 : 0.45} />
+                  <rect x={p.x - 6.5} y={p.y - 3} width="13" height="6" rx="1.4" fill={off ? '#E3E6DF' : COLOR[n.kind]} stroke={on || (mode === 'build' && marked.nodes.has(n.id)) ? '#E0483E' : '#16252D'} strokeWidth={on ? 0.9 : mode === 'build' && marked.nodes.has(n.id) ? 0.8 : 0.45} strokeDasharray={mode === 'build' && marked.nodes.has(n.id) && !on ? '1.2 0.6' : undefined} />
                   <text x={p.x} y={p.y + 0.9} textAnchor="middle" fontSize="1.85" fontWeight="700" fill={off ? '#5D6B66' : '#16252D'}>{PARTS[n.kind].label}</text>
                   {off && <path d={`M${p.x - 2} ${p.y - 2}l4 4M${p.x + 2} ${p.y - 2}l-4 4`} stroke="#E0483E" strokeWidth="0.8" strokeLinecap="round" />}
                   {report && (() => { const tier = report.tiers.find((x) => x.kind === n.kind); if (!tier) return null; const u = Math.round(tier.util * 100); return <text x={p.x} y={p.y + 5.2} textAnchor="middle" fontSize="1.7" fontWeight="800" fill={tier.util >= 1 ? '#9E2A22' : tier.util >= 0.8 ? '#7A4D00' : '#0B5F55'}>{bn(Math.min(u, 999))}%</text>; })()}
@@ -266,7 +279,74 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
           </section>
         )}
       </div>
+      {mode === 'build' && checked && findings && (
+        <Answer c={c} checked={checked} findings={findings} onFix={fix} showModel={showModel} setShowModel={setShowModel} />
+      )}
     </div>
+  );
+}
+
+/** Tier-by-tier positions for a graph on the 100 × 62 canvas. */
+function layout(g: Graph) {
+  const byTier = new Map<number, string[]>();
+  for (const n of g.nodes) { const tier = PARTS[n.kind].tier; byTier.set(tier, [...(byTier.get(tier) ?? []), n.id]); }
+  const out: Record<string, { x: number; y: number }> = {};
+  for (const [tier, ids] of byTier) ids.forEach((id, i) => { out[id] = { x: 8 + tier * 14, y: ((i + 1) / (ids.length + 1)) * 60 }; });
+  return out;
+}
+
+/** A read-only drawing of a graph, for the model answer. */
+function MiniGraph({ g, label }: { g: Graph; label: string }) {
+  const pos = layout(g);
+  return (
+    <svg viewBox="0 0 100 62" className="block w-full min-w-[480px]" role="img" aria-label={label}>
+      <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#0B5F55" /></marker></defs>
+      {g.edges.map(([a, b]) => { const p = pos[a]!, q = pos[b]!; const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy) || 1; return <line key={`${a}-${b}`} x1={p.x + (dx / len) * 6} y1={p.y + (dy / len) * 3} x2={q.x - (dx / len) * 6.5} y2={q.y - (dy / len) * 3.4} stroke="#0B5F55" strokeWidth="0.4" markerEnd="url(#arr2)" />; })}
+      {g.nodes.map((n) => { const p = pos[n.id]!; return <g key={n.id}><rect x={p.x - 6.5} y={p.y - 3} width="13" height="6" rx="1.4" fill={COLOR[n.kind]} stroke="#0B5F55" strokeWidth="0.45" /><text x={p.x} y={p.y + 0.9} textAnchor="middle" fontSize="1.85" fontWeight="700" fill="#16252D">{PARTS[n.kind].label}</text></g>; })}
+    </svg>
+  );
+}
+
+/** After checking: a verdict, then for each failed rule where it breaks, why it matters, and the fix; then a model design. */
+function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: Challenge; checked: boolean[]; findings: Finding[][]; onFix: (f: Finding) => void; showModel: boolean; setShowModel: (v: boolean) => void }) {
+  const passed = checked.filter(Boolean).length;
+  const verdict = passed === checked.length ? 'right' : passed >= checked.length - 1 ? 'close' : 'wrong';
+  return (
+    <section aria-label={tr('উত্তর', 'Answer')} aria-live="polite" className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5">
+      <div className={`rounded-xl px-4 py-3 font-display text-xl font-extrabold ${verdict === 'right' ? 'bg-route text-white' : verdict === 'close' ? 'bg-parcel' : 'bg-coral text-white'}`}>
+        {verdict === 'right' ? tr('ঠিক! সব নিয়ম পূরণ হয়েছে।', 'Right! Every rule is met.') : verdict === 'close' ? tr(`প্রায় ঠিক: ${bn(checked.length - passed)}টা জিনিস বাকি`, `Almost: ${checked.length - passed} thing left`) : tr(`এখনো ভুল: ${bn(checked.length - passed)}টা নিয়ম ভাঙছে`, `Not yet: ${checked.length - passed} rules broken`)}
+      </div>
+      {verdict !== 'right' && <p className="m-0 text-sm text-ink-soft">{tr('Canvas-এ লাল দাগ দেওয়া অংশ আর তীরগুলোই সমস্যা।', 'The parts and arrows outlined in red on the canvas are the problem.')}</p>}
+      <ol className="m-0 flex list-none flex-col gap-2 p-0">
+        {c.rules.map((r, i) => checked[i] ? null : (
+          <li key={r.text} className="rounded-xl border-2 border-coral bg-coral-soft p-3">
+            <p className="m-0 font-bold">✕ {r.text}</p>
+            {findings[i]!.map((f, j) => (
+              <div key={j} className="mt-2 grid gap-1 text-[15px]">
+                <p className="m-0"><b>{tr('কোথায়:', 'Where:')}</b> {f.where}</p>
+                <p className="m-0"><b>{tr('কী করবেন:', 'What to do:')}</b> {f.fix}</p>
+                {f.apply && <button type="button" onClick={() => onFix(f)} className="btn-press mt-1 min-h-10 w-fit cursor-pointer rounded-lg border-2 border-ink bg-white px-3 text-sm font-bold shadow-[0_2px_0_#16252D]">{tr('আমার হয়ে ঠিক করুন', 'Fix it for me')}</button>}
+              </div>
+            ))}
+            <p className="m-0 mt-2 rounded-lg bg-white/70 px-3 py-2 text-sm"><b>{tr('কেন জরুরি:', 'Why it matters:')}</b> {r.why}</p>
+          </li>
+        ))}
+      </ol>
+      {verdict === 'right' && (
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
+          {c.rules.map((r) => <li key={r.text} className="rounded-lg bg-route-soft px-3 py-2"><b>✓ {r.text}</b><br /><span className="text-ink-soft">{r.why}</span></li>)}
+        </ul>
+      )}
+      <div className="rounded-xl border-2 border-dashed border-ink p-3">
+        {showModel ? (
+          <>
+            <p className="m-0 font-bold">{tr('একটা সঠিক design', 'One correct design')}</p>
+            <p className="m-0 mt-1 text-sm text-ink-soft">{c.reference.note} {tr('নিয়ম পূরণ করলে অন্য design-ও সমান সঠিক।', 'Any other design that meets every rule is just as right.')}</p>
+            <div className="mt-2 overflow-x-auto rounded-lg bg-[#F7F8F3]"><MiniGraph g={referenceGraph(c)} label={tr('Model design', 'Model design')} /></div>
+          </>
+        ) : <button type="button" onClick={() => setShowModel(true)} className="min-h-10 cursor-pointer rounded-lg border-2 border-ink bg-white px-3 font-semibold">{tr('Model design দেখুন', 'Show a model design')}</button>}
+      </div>
+    </section>
   );
 }
 
