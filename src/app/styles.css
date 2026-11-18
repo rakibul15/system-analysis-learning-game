@@ -266,7 +266,17 @@ a, button, [role='button'], [role='tab'], summary { -webkit-tap-highlight-color:
 @keyframes pop-in { from { opacity: 0; transform: scale(.85) translateY(8px); } to { opacity: 1; transform: none; } }
 .shake-x { animation: shake-x .4s ease-in-out; }
 @keyframes shake-x { 20%,60% { transform: translateX(-6px); } 40%,80% { transform: translateX(6px); } }
+/* our study notes: a message travelling between two actors (Seq), a box new to this stage of a design (Stages) */
+.seq-dot { position: absolute; top: 50%; width: 14px; height: 14px; border-radius: 999px; border: 2px solid var(--color-ink); transform: translate(-50%, -50%); animation: seq-move .9s var(--ease-out, ease-out) both; pointer-events: none; }
+@keyframes seq-move { from { left: var(--a); } to { left: var(--b); } }
+.seq-self { animation: seq-self .9s ease-in-out both; left: var(--b); }
+@keyframes seq-self { 50% { transform: translate(-50%, -150%); } }
+.flow-fresh { transform-box: fill-box; transform-origin: center; animation: flow-fresh .6s var(--ease-spring) both; }
+@keyframes flow-fresh { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: none; } }
+.bar-grow { transition: width .9s var(--ease-out, ease-out); }
 @media (prefers-reduced-motion: reduce) {
   .flow-dot { animation: none; left: calc((var(--x1) + var(--x2)) / 2); top: calc((var(--y1) + var(--y2)) / 2); }
-  .node-in, .pop-in, .shake-x, .deep-draw { animation: none; }
+  .node-in, .pop-in, .shake-x, .deep-draw, .flow-fresh { animation: none; }
+  .seq-dot { animation: none; left: var(--b); }
+  .bar-grow { transition: none; }
 }
