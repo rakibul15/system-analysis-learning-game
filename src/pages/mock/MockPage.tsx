@@ -104,7 +104,7 @@ export function MockPage() {
 
         <ol className="m-0 flex list-none gap-1.5 p-0" aria-label={tr('ধাপ', 'Phases')}>
           {mockPhases.map((p, i) => (
-            <li key={p.id} className={`h-2.5 flex-1 rounded-full border-2 border-ink ${i < phase ? 'bg-route' : i === phase ? 'bg-parcel' : 'bg-surface'}`} title={p.title} />
+            <li key={p.id} className={`h-2.5 flex-1 rounded-full border-2 border-ink ${i < phase ? 'bg-route' : i === phase ? 'bg-parcel text-night' : 'bg-surface'}`} title={p.title} />
           ))}
         </ol>
 
@@ -112,9 +112,9 @@ export function MockPage() {
           <section key={ph.id} className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="m-0 font-display text-2xl font-extrabold">{tr('ধাপ', 'Step')} {bn(phase + 1)} · {ph.title}</h2>
-              <div role="timer" className={`rounded-xl border-[3px] border-ink px-3 py-1 font-mono text-2xl font-bold ${phaseLeft < 0 ? 'bg-coral text-white' : phaseLeft < 60 ? 'bg-parcel' : 'bg-parcel-soft'}`}>{phaseLeft < 0 ? '+' : ''}{mmss(phaseLeft)}</div>
+              <div role="timer" className={`rounded-xl border-[3px] border-ink px-3 py-1 font-mono text-2xl font-bold ${phaseLeft < 0 ? 'bg-coral text-white' : phaseLeft < 60 ? 'bg-parcel text-night' : 'bg-parcel-soft'}`}>{phaseLeft < 0 ? '+' : ''}{mmss(phaseLeft)}</div>
             </div>
-            <div className="rounded-2xl bg-ink p-4 text-white">
+            <div className="rounded-2xl bg-night p-4 text-white">
               <div className="mb-2 text-xs font-bold uppercase tracking-wider text-on-night-soft">Interviewer</div>
               <ul className="m-0 flex flex-col gap-2 pl-5 text-[17px]">
                 {asks.map((a) => <li key={a}>{a}</li>)}

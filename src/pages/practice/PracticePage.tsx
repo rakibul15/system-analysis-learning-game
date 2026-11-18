@@ -35,9 +35,9 @@ export function PracticePage() {
         <div role="tablist" aria-label={tr('Practice-এর ধরন', 'Practice type')} className="flex flex-wrap gap-2">
           {TABS.map((t) => (
             <button key={t.id} role="tab" type="button" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-              className={`flex min-h-[64px] flex-[1_1_200px] cursor-pointer flex-col items-start justify-center rounded-2xl border-[2.5px] border-ink px-4 text-left font-[inherit] ${tab === t.id ? 'bg-ink text-white shadow-[0_4px_0_var(--color-parcel)]' : 'bg-surface text-ink'}`}>
+              className={`flex min-h-[64px] flex-[1_1_200px] cursor-pointer flex-col items-start justify-center rounded-2xl border-[2.5px] border-ink px-4 text-left font-[inherit] ${tab === t.id ? 'bg-ink text-on-ink shadow-[0_4px_0_var(--color-parcel)]' : 'bg-surface text-ink'}`}>
               <span className="font-display text-lg font-bold">{t.label}</span>
-              <span className={`text-sm ${tab === t.id ? 'text-on-night-soft' : 'text-muted'}`}>{t.note}</span>
+              <span className={`text-sm ${tab === t.id ? 'text-on-ink-soft' : 'text-muted'}`}>{t.note}</span>
             </button>
           ))}
         </div>
@@ -156,7 +156,7 @@ function DesignChallenge() {
         <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink bg-surface p-3">
           <span className="font-semibold">{tr('সময়:', 'Time:')}</span>
           {[15, 30, 45].map((m) => (
-            <button key={m} type="button" aria-pressed={minutes === m} onClick={() => setMinutes(m)} className={`min-h-11 cursor-pointer rounded-xl border-2 border-ink px-4 font-bold ${minutes === m ? 'bg-ink text-white' : 'bg-surface'}`}>{bn(m)} {tr('মিনিট', 'min')}</button>
+            <button key={m} type="button" aria-pressed={minutes === m} onClick={() => setMinutes(m)} className={`min-h-11 cursor-pointer rounded-xl border-2 border-ink px-4 font-bold ${minutes === m ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{bn(m)} {tr('মিনিট', 'min')}</button>
           ))}
           <span className="text-sm text-muted">{tr('কাগজে আঁকুন, নোট এখানে লিখুন, শেষে rubric-এ নিজে নম্বর দিন।', 'Draw on paper, take notes here, then score yourself on the rubric.')}</span>
         </div>

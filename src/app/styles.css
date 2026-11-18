@@ -29,6 +29,8 @@
   --color-shadow: #16252d;           /* the chunky offset shadow under cards and buttons */
   --color-line-strong: #9aa69f;      /* dashed "locked" outlines */
   --color-on-ink: #ffffff;           /* text on an ink-coloured fill (a selected pill) */
+  --color-on-ink-soft: #c9d6dc;      /* quieter text on an ink fill */
+  --color-on-ink-line: #3a4f5a;      /* an empty bar segment on an ink fill */
   --color-parcel-deep: #7a4d00;      /* text on parcel-soft */
   --color-violet-soft: #ede6f8;      /* the DDIA bonus chapter */
   --color-violet-deep: #4b2f7a;
@@ -73,6 +75,80 @@
   --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
   --ease-out: cubic-bezier(.2, .8, .2, 1);
 }
+
+/*
+ * Themes. Light is the default. data-theme="dark" on <html> (set from the learner's choice, or from
+ * the device when they chose "like my phone"; see shared/lib/theme.ts and index.html) swaps the
+ * tokens above. Brand colours (parcel, route, coral, sky) and night stay the same in both.
+ */
+:root[data-theme='dark'] {
+  --color-ground: #0e171c;
+  --color-surface: #17242b;
+  --color-surface-2: #1f2e36;
+  --color-surface-sunk: #121e24;
+  --color-surface-off: #1c2a31;
+  --color-line: #2b3b43;
+  --color-line-strong: #5d6f78;
+  --color-line-soft: #3a4a52;
+  --color-track: #2b3b43;
+  --color-idle: #4a5c65;
+  --color-shadow: #04090b;
+  --color-ink: #e6edf0;
+  --color-ink-soft: #c3d0d6;
+  --color-muted: #9db0b9;
+  --color-on-ink: #0e171c;
+  --color-on-ink-soft: #3d4f58;
+  --color-on-ink-line: #9fb2bc;
+  --color-locked: #26343b;
+  --color-locked-ink: #95a6ad;
+  --color-parcel-soft: #3a3420;
+  --color-parcel-deep: #ffd27a;
+  --color-route-soft: #10302b;
+  --color-route-deep: #5ccfbf;
+  --color-coral-soft: #3b1f1c;
+  --color-coral-deep: #ff8f85;
+  --color-violet-soft: #2a2340;
+  --color-violet-deep: #c7b3f2;
+  color-scheme: dark;
+}
+
+/*
+ * Game boards stay in daylight: the city map, simulators, the traffic stage, the lesson player and
+ * the design labs are drawn in their own colours, so inside them the tokens keep their light values.
+ * light-board gives such a board its own light ground on a dark page (no change in the light theme).
+ */
+.keep-light {
+  --color-ground: #f2f5ef;
+  --color-surface: #ffffff;
+  --color-surface-2: #f0f2ec;
+  --color-surface-sunk: #f7f8f3;
+  --color-surface-off: #eef1ea;
+  --color-line: #d7ded1;
+  --color-line-strong: #9aa69f;
+  --color-line-soft: #c9cec4;
+  --color-track: #e3e8de;
+  --color-idle: #c9d0c3;
+  --color-shadow: #16252d;
+  --color-ink: #16252d;
+  --color-ink-soft: #33444c;
+  --color-muted: #4a5a62;
+  --color-on-ink: #ffffff;
+  --color-on-ink-soft: #c9d6dc;
+  --color-on-ink-line: #3a4f5a;
+  --color-locked: #e3e6df;
+  --color-locked-ink: #5d6b66;
+  --color-parcel-soft: #fff4d6;
+  --color-parcel-deep: #7a4d00;
+  --color-route-soft: #e6f4f1;
+  --color-route-deep: #0b5f55;
+  --color-coral-soft: #fdecea;
+  --color-coral-deep: #9e2a22;
+  --color-violet-soft: #ede6f8;
+  --color-violet-deep: #4b2f7a;
+  color: var(--color-ink);
+  color-scheme: light;
+}
+:root[data-theme='dark'] .light-board { background: var(--color-ground); border-radius: 26px; padding: 14px; }
 
 html, body, #root { min-height: 100%; }
 body {

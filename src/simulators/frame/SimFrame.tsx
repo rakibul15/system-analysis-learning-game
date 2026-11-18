@@ -54,7 +54,7 @@ export function SimFrame({ title, intro, controls, stage, metrics, missions, onF
   const all = done === missions.length;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="keep-light light-board flex flex-col gap-4">
       <div className="pop-in">
         <p className="m-0 text-sm font-bold text-route-deep">{standalone ? 'Simulator' : tr('ধাপ ৪ · Simulator', 'Step 4 · Simulator')}</p>
         <h2 className="m-0 font-display text-[28px] font-extrabold leading-tight">{title}</h2>

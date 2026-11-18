@@ -160,7 +160,7 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
   };
 
   return (
-    <div ref={rootEl} className="city-map relative overflow-hidden rounded-3xl border-[3px] border-ink shadow-[0_8px_0_#16252D]" style={{ aspectRatio: '16 / 9', minHeight: 300, containerType: 'inline-size', background: chapter.ground }}>
+    <div ref={rootEl} className="city-map keep-light relative overflow-hidden rounded-3xl border-[3px] border-ink shadow-[0_8px_0_#16252D]" style={{ aspectRatio: '16 / 9', minHeight: 300, containerType: 'inline-size', background: chapter.ground }}>
       <svg viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true" className="absolute inset-0 h-full w-full">
         <rect width="1600" height="900" fill={chapter.ground} />
         <ellipse cx="380" cy="230" rx="300" ry="120" fill="#FFFFFF" opacity="0.28" />

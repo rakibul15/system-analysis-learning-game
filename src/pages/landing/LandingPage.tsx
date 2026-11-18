@@ -109,7 +109,7 @@ export function LandingPage() {
             <SignInButton big />
             <p className="m-0 text-sm text-muted">{tr('বিনামূল্যে · ফোন আর laptop দুটোতেই চলে · progress আপনার account-এ save থাকে', 'Free · works on phone and laptop · progress is saved to your account')}</p>
           </div>
-          <div className="min-w-0 rounded-[30px] border-[3px] border-ink bg-surface p-3 shadow-block"><HeroMap /></div>
+          <div className="keep-light min-w-0 rounded-[30px] border-[3px] border-ink bg-surface p-3 shadow-block"><HeroMap /></div>
         </section>
 
         <section aria-label={tr('সংখ্যায়', 'In numbers')} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -152,7 +152,7 @@ export function LandingPage() {
           </ol>
         </section>
 
-        <section className="flex flex-col items-start gap-4 rounded-[28px] border-[3px] border-ink bg-ink p-6 text-white sm:p-10">
+        <section className="flex flex-col items-start gap-4 rounded-[28px] border-[3px] border-ink bg-night p-6 text-white sm:p-10">
           <h2 className="m-0 font-display text-[28px] font-extrabold [text-wrap:balance] sm:text-[34px]">{tr('প্রথম delivery আজই', 'Make the first delivery today')}</h2>
           <p className="m-0 max-w-[55ch] text-white/80">{tr('প্রথম level পনেরো মিনিটের। শেষ হলে বুঝবেন load balancer কেন লাগে।', 'The first level takes fifteen minutes. By the end you will know why a load balancer is needed.')}</p>
           <div className="text-ink"><SignInButton big /></div>

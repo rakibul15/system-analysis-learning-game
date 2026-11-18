@@ -101,7 +101,7 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
         <p className="m-0">{inc.alert}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">{inc.series.map((s) => <Spark key={s.label} s={s} />)}</div>
-      <pre className="m-0 overflow-x-auto rounded-2xl border-[2.5px] border-ink bg-ink p-3 font-mono text-xs leading-relaxed text-on-night-good">{inc.logs.join('\n')}</pre>
+      <pre className="m-0 overflow-x-auto rounded-2xl border-[2.5px] border-ink bg-night p-3 font-mono text-xs leading-relaxed text-on-night-good">{inc.logs.join('\n')}</pre>
 
       {!finished ? (
         <section className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]" key={stage}>
@@ -138,7 +138,7 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
           <BookRefs refs={incidentRefs[inc.id] ?? levelRefs[inc.level]} title={tr('এই দুর্ঘটনা বইয়ে', 'This failure in the book')} />
           <div className="flex flex-wrap gap-2">
             <Link to="/level/$levelId" params={{ levelId: String(inc.level) }} className="rounded-xl border-2 border-ink bg-surface px-4 py-2 font-bold text-ink no-underline">{tr(`Level ${bn(inc.level)} আবার দেখুন`, `Revisit level ${inc.level}`)}</Link>
-            <button type="button" onClick={onBack} className="cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 py-2 font-bold">{tr('পরের incident', 'Next incident')}</button>
+            <button type="button" onClick={onBack} className="cursor-pointer rounded-xl border-2 border-ink bg-parcel text-night px-4 py-2 font-bold">{tr('পরের incident', 'Next incident')}</button>
           </div>
         </section>
       )}

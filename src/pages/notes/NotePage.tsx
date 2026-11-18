@@ -34,7 +34,7 @@ function Tabs({ note }: { note: Note }) {
       <div role="tablist" aria-label={tr('কী পড়বেন', 'What to read')} className="sticky top-[104px] z-10 flex gap-2 rounded-2xl bg-ground/95 py-1 min-[1360px]:top-[64px]">
         {([['notes', tr('📝 আমাদের নোট', '📝 Our notes')], ['book', tr('📖 বইয়ের অধ্যায়', '📖 The book\'s chapter')]] as const).map(([k, l]) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-            className={`min-h-11 flex-1 cursor-pointer rounded-xl border-[2.5px] border-ink px-3 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
+            className={`min-h-11 flex-1 cursor-pointer rounded-xl border-[2.5px] border-ink px-3 font-bold ${tab === k ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{l}</button>
         ))}
       </div>
       {tab === 'notes' ? (
@@ -88,7 +88,7 @@ function Block({ b }: { b: NoteBlock }) {
     case 'table': return (
       <div className="overflow-x-auto rounded-xl border-2 border-ink">
         <table className="w-full min-w-[560px] border-collapse text-sm">
-          <thead><tr className="bg-ink text-left text-white">{b.head.map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr></thead>
+          <thead><tr className="bg-ink text-left text-on-ink">{b.head.map((h) => <th key={h} className="px-3 py-2">{h}</th>)}</tr></thead>
           <tbody>{b.rows.map((r, i) => <tr key={i} className={i % 2 ? 'bg-surface-sunk' : 'bg-surface'}>{r.map((c, j) => <td key={j} className={`border-t border-ink/20 px-3 py-2 align-top ${j === 0 ? 'font-bold' : ''}`}>{c}</td>)}</tr>)}</tbody>
         </table>
       </div>

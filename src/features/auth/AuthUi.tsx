@@ -15,7 +15,7 @@ const GoogleMark = () => (
 const Avatar = ({ photo, name, size = 28 }: { photo: string | null; name: string; size?: number }) =>
   photo
     ? <img src={photo} alt="" width={size} height={size} referrerPolicy="no-referrer" className="rounded-full border-2 border-ink" />
-    : <span className="grid place-items-center rounded-full border-2 border-ink bg-parcel font-bold" style={{ width: size, height: size }}>{name.slice(0, 1).toUpperCase()}</span>;
+    : <span className="grid place-items-center rounded-full border-2 border-ink bg-parcel text-night font-bold" style={{ width: size, height: size }}>{name.slice(0, 1).toUpperCase()}</span>;
 
 /** Header control: a Google sign-in button for guests, the learner's avatar once signed in. */
 export function AuthButton() {

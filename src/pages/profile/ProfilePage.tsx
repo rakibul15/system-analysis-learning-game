@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { DEFAULT_THEME, type ThemeChoice } from '@/shared/lib/theme';
 import { Link } from '@tanstack/react-router';
 import { chapters, levelMeta } from '@/content/meta';
 import { masteryOf, streak, totalXp } from '@/entities/progress/selectors';
@@ -88,7 +89,7 @@ export function ProfilePage() {
                     const m = masteryOf(id, p);
                     return (
                       <Link key={id} to="/level/$levelId" params={{ levelId: String(id) }} title={`${levelMeta[id]!.title} · ${masteryLabel[m]}`}
-                        className="flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-ink text-ink no-underline" style={{ background: MASTERY_COLOR[m], color: m === 'solid' ? 'var(--color-white)' : 'var(--color-night)' }}>
+                        className="flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-ink text-ink no-underline" style={{ background: MASTERY_COLOR[m], color: m === 'solid' ? 'var(--color-white)' : m === 'none' ? 'var(--color-ink)' : 'var(--color-night)' }}>
                         <span className="font-display text-xl font-extrabold leading-none">{bn(id)}</span>
                         <span className="font-mono text-[11px]">{p.levels[id] ? bn(p.levels[id]!.best) : ''}</span>
                       </Link>
@@ -146,6 +147,7 @@ export function ProfilePage() {
 
         <section className="flex flex-col gap-4 rounded-[24px] border-[3px] border-ink bg-surface p-6">
           <h2 className="m-0 font-display text-xl font-bold">{tr('Setting আর data', 'Settings and data')}</h2>
+          <ThemePicker />
           <label className="flex min-h-11 cursor-pointer items-center gap-3">
             <input type="checkbox" checked={p.settings.unlockAll} onChange={(e) => setUnlockAll(e.target.checked)} className="h-5 w-5" />
             <span><strong>{tr('সব level খুলে দিন', 'Unlock every level')}</strong> <span className="text-sm text-muted">{tr('· ক্রম না মেনে যেকোনো level খেলতে (নিজের জানা অংশ বাদ দিতে)', '· play any level out of order (to skip what you already know)')}</span></span>
@@ -171,5 +173,31 @@ export function ProfilePage() {
         </section>
       </main>
     </AppShell>
+  );
+}
+
+const THEMES: [ThemeChoice, string, string][] = [
+  ['light', tr('আলো', 'Light'), tr('সবসময় আলো', 'Always light')],
+  ['dark', tr('অন্ধকার', 'Dark'), tr('রাতে চোখের আরাম', 'Easy on the eyes at night')],
+  ['system', tr('Phone-এর মতো', 'Like my device'), tr('Phone যা বলে', 'Follows the device setting')],
+];
+
+/** Light, dark, or whatever the device is set to. */
+function ThemePicker() {
+  const choice = useProgress((s) => s.settings.theme) ?? DEFAULT_THEME;
+  const setTheme = useProgress((s) => s.setTheme);
+  return (
+    <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
+      <legend className="mb-2 p-0 font-bold">{tr('রং', 'Colours')}</legend>
+      <div role="radiogroup" className="flex flex-wrap gap-2">
+        {THEMES.map(([id, label, note]) => (
+          <button key={id} type="button" role="radio" aria-checked={choice === id} onClick={() => setTheme(id)}
+            className={`flex min-h-[56px] flex-[1_1_140px] cursor-pointer flex-col items-start justify-center rounded-xl border-[2.5px] border-ink px-3 text-left font-[inherit] ${choice === id ? 'bg-ink text-on-ink' : 'bg-surface text-ink'}`}>
+            <span className="font-bold">{label}</span>
+            <span className={`text-xs ${choice === id ? 'text-on-ink-soft' : 'text-muted'}`}>{note}</span>
+          </button>
+        ))}
+      </div>
+    </fieldset>
   );
 }

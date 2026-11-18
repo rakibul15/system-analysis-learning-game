@@ -84,7 +84,7 @@ export function AdminPage() {
                 ['crashes', `Crash · ${bn(new Set(state.data.crashes.map(crashKey)).size)}`],
               ] as const).map(([k, l]) => (
                 <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
+                  className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{l}</button>
               ))}
             </div>
             {tab === 'reports' && (
@@ -112,7 +112,7 @@ function OffSwitch({ qid, off, toggleOff }: { qid: string; off: Disabled | undef
   if (off) {
     return (
       <span className="inline-flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-bold text-white">{tr('বন্ধ', 'Off')}{off.reason ? ` · ${off.reason}` : ''}</span>
+        <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-bold text-on-ink">{tr('বন্ধ', 'Off')}{off.reason ? ` · ${off.reason}` : ''}</span>
         <button type="button" disabled={busy} onClick={() => void run(false)} className={`${btn} bg-surface`}>{tr('আবার চালু করুন', 'Turn back on')}</button>
       </span>
     );
@@ -222,7 +222,7 @@ function ReportGroup({ qid, reports, stat, off, who, onUpdated, toggleOff }: { q
           <button key={s} type="button" disabled={!!saving} onClick={() => void save(s)} className={`${btn} ${s === 'fixed' ? 'bg-route text-white' : 'bg-surface'}`}>{saving === s ? '…' : `→ ${STATUS[s][0]}`}</button>
         ))}
         {note.trim() !== (first.adminNote ?? '') && <button type="button" disabled={!!saving} onClick={() => void save(current)} className={`${btn} bg-surface`}>{tr('Note রাখুন', 'Save note')}</button>}
-        <a href={url} target="_blank" rel="noreferrer" className={`${btn} bg-parcel text-ink`}>{tr('GitHub issue খুলুন ↗', 'Open a GitHub issue ↗')}</a>
+        <a href={url} target="_blank" rel="noreferrer" className={`${btn} bg-parcel text-night`}>{tr('GitHub issue খুলুন ↗', 'Open a GitHub issue ↗')}</a>
         <OffSwitch qid={qid} off={off} toggleOff={toggleOff} />
       </div>
       {failed && <p className="m-0 mt-2 text-sm text-coral-deep" role="alert">{tr('Save হয়নি:', 'Not saved:')} {failed}</p>}
@@ -312,7 +312,7 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
                       )}
                       {s.older > 0 && <p className="m-0 text-xs text-muted">{tr(`আগের লেখার ${bn(s.older)}টা উত্তর এই হিসাবে নেই।`, `${s.older} answers to an earlier wording are left out.`)}</p>}
                       <div className="flex flex-wrap gap-2">
-                        <a className={`${btn} bg-parcel text-ink`} target="_blank" rel="noreferrer" href={issueUrl({
+                        <a className={`${btn} bg-parcel text-night`} target="_blank" rel="noreferrer" href={issueUrl({
                           qid: s.qid, level: levelLabel(s.qid), concept: conceptLabel(s.qid), prompt: info?.prompt, options: info?.generated ? undefined : info?.options,
                           stat: s, picks: (o) => s.picks[optionKey(o)] ?? 0, flags: flags.map((f) => FLAG[f][0]),
                         })}>{tr('GitHub issue খুলুন ↗', 'Open a GitHub issue ↗')}</a>
@@ -325,7 +325,7 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
                 <td className="px-3 py-2 font-mono">{s.n ? `${bn(pct(s.right, s.n))}%` : '–'}</td>
                 <td className="px-3 py-2 font-mono">{s.n ? `${bn(pct(s.sureWrong, s.n))}%` : '–'}</td>
                 <td className="px-3 py-2"><div className="flex flex-wrap gap-1">
-                  {off && <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-bold text-white">{tr('বন্ধ', 'Off')}</span>}
+                  {off && <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-bold text-on-ink">{tr('বন্ধ', 'Off')}</span>}
                   {flags.map((f) => <span key={f} className={`rounded-full px-2 py-0.5 text-xs font-bold ${FLAG[f][1]}`}>{FLAG[f][0]}</span>)}
                 </div></td>
               </tr>

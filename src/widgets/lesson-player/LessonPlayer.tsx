@@ -75,7 +75,7 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
   const hasFocus = (step.focus?.length ?? 0) > 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="keep-light light-board flex flex-col gap-4">
       <div className="relative overflow-hidden rounded-3xl border-[3px] border-ink bg-[#F7F8F3] shadow-block" style={{ aspectRatio: '16 / 9', minHeight: 280, containerType: 'inline-size' }}>
         <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <defs>

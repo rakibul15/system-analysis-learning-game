@@ -134,7 +134,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
                 type="button"
                 aria-pressed={sure === c.v}
                 onClick={() => setSure(c.v)}
-                className={`min-h-[46px] flex-1 cursor-pointer rounded-xl border-2 font-[inherit] font-semibold ${sure === c.v ? (boss ? 'border-parcel bg-parcel text-ink' : 'border-ink bg-ink text-white') : boss ? 'border-night-line bg-transparent text-white' : 'border-ink bg-surface text-ink'}`}
+                className={`min-h-[46px] flex-1 cursor-pointer rounded-xl border-2 font-[inherit] font-semibold ${sure === c.v ? (boss ? 'border-parcel bg-parcel text-night' : 'border-ink bg-ink text-on-ink') : boss ? 'border-night-line bg-transparent text-white' : 'border-ink bg-surface text-ink'}`}
               >
                 {c.l}
               </button>
@@ -151,7 +151,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
                 if (instant) onDone({ qid: q.id, correct, sure: !!sure, earned });
                 else setDone(true);
               }}
-              className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_var(--color-shadow)]' : 'cursor-not-allowed border-line-strong bg-surface-off text-locked-ink'}`}
+              className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-night shadow-[0_4px_0_var(--color-shadow)]' : 'cursor-not-allowed border-line-strong bg-surface-off text-locked-ink'}`}
             >
               {instant ? continueLabel : tr('উত্তর দিন', 'Answer')}
             </button>

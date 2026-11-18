@@ -102,7 +102,7 @@ export function TrafficGame({ play: level, onComplete }: { play: TrafficPlay; on
     : [tr('ভিড় জিতে গেল', 'The rush won'), tr('ভিড় জিতে গেল', 'The rush won'), tr('ভালো সামলেছেন!', 'Well handled!'), tr('নিখুঁত dispatch!', 'Perfect dispatch!')][stars];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="keep-light light-board flex flex-col gap-4">
         <TrafficStage sim={sim} fx={fx} interactive={phase === 'manual'} onPickHub={round.pickHub} showTimer={phase === 'manual' || phase === 'auto'}>
           {phase === 'intro' && (
             <Overlay>

@@ -166,8 +166,8 @@ function Result({ r, cards, onAgain }: { r: PlacementResult; cards: number; onAg
       </p>
       <div className="flex flex-wrap gap-3">
         {start
-          ? <Link to="/level/$levelId" params={{ levelId: String(start.levels[0]) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr(`Level ${bn(start.levels[0]!)} থেকে শুরু →`, `Start at level ${start.levels[0]} →`)}</Link>
-          : <Link to="/review" className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr('Review শুরু →', 'Start reviewing →')}</Link>}
+          ? <Link to="/level/$levelId" params={{ levelId: String(start.levels[0]) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr(`Level ${bn(start.levels[0]!)} থেকে শুরু →`, `Start at level ${start.levels[0]} →`)}</Link>
+          : <Link to="/review" className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr('Review শুরু →', 'Start reviewing →')}</Link>}
         <Link to="/" className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink bg-surface px-5 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
         <button type="button" onClick={onAgain} className="min-h-[54px] cursor-pointer rounded-2xl border-0 bg-transparent px-2 font-semibold text-route-deep underline">{tr('আবার দিন', 'Take it again')}</button>
       </div>

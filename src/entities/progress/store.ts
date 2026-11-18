@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { ThemeChoice } from '@/shared/lib/theme';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DAY_MS, REVIEW_DAYS, dayKey } from '@/shared/lib/scoring';
 
@@ -65,7 +66,7 @@ export interface ProgressData {
   /** The placement test, once taken. */
   placement: PlacementRecord | null;
   /** skipPlacement: the learner chose to start at level 1 instead of the placement test. */
-  settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number; skipPlacement?: boolean };
+  settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number; skipPlacement?: boolean; theme?: ThemeChoice };
 }
 
 interface ProgressActions {
@@ -84,6 +85,7 @@ interface ProgressActions {
   setReading: (id: string, patch: Partial<Omit<ReadingRecord, 'updatedAt'>>) => void;
   setUnlockAll: (on: boolean) => void;
   setSound: (on: boolean) => void;
+  setTheme: (t: ThemeChoice) => void;
   importData: (data: unknown) => boolean;
   reset: () => void;
 }
@@ -214,6 +216,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       setPlan: (interviewDate, dailyMinutes) => set((s) => ({ settings: { ...s.settings, interviewDate, dailyMinutes } })),
       setUnlockAll: (on) => set((s) => ({ settings: { ...s.settings, unlockAll: on } })),
       setSound: (on) => set((s) => ({ settings: { ...s.settings, sound: on } })),
+      setTheme: (t) => set((s) => ({ settings: { ...s.settings, theme: t } })),
       importData: (data) => {
         if (!data || typeof data !== 'object' || !('levels' in data) || !('cards' in data)) return false;
         set({ ...emptyProgress(), ...(data as Partial<ProgressData>) });
