@@ -5,7 +5,7 @@ import { designPrompts, designRubric, speakPrompts, speakRubric, type DesignProm
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { AppShell } from '@/shared/ui/AppShell';
-import { levelList } from '@/content/levels';
+import { levelMetaList } from '@/content/meta';
 import type { SimulatorId } from '@/content/schema';
 import { simulators } from '@/simulators/registry';
 import { tr } from '@/shared/lib/i18n';
@@ -271,7 +271,7 @@ const EXTRA_SIMS: { id: SimulatorId; title: string; concept: string }[] = [
 function SimulatorLab() {
   const [open, setOpen] = useState<SimulatorId | null>(null);
   const [last, setLast] = useState<string | null>(null);
-  const withSim = levelList.filter((l) => l.simulator);
+  const withSim = levelMetaList.filter((l) => l.simulator);
   if (open) {
     const Sim = simulators[open];
     return (

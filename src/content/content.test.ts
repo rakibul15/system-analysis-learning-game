@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bnLevels, chapters, enLevels, levelList, questionsById } from './levels';
+import { bnLevels, chapters, enLevels, levelList, questionsById } from './levels/all';
 import { levelSchema, type Level } from './schema';
 
 describe('level content', () => {

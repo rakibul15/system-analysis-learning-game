@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BOOKS } from '@/features/books/catalog';
-import { notes } from './index';
+import { notes } from './all';
 
 describe('study notes', () => {
   it('have unique ids, real chapters, sane pages, and figure pages inside the chapter', () => {

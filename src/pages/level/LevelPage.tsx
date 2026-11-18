@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { chapters, levelsById } from '@/content/levels';
+import { chapters, levelMeta } from '@/content/meta';
 import type { Level } from '@/content/schema';
 import { masteryOf, lockReason } from '@/entities/progress/selectors';
 import { useProgress, type AnswerLog } from '@/entities/progress/store';
@@ -56,7 +56,7 @@ export function LevelPage({ level }: { level: Level }) {
   };
 
   const chapter = chapters.find((c) => c.id === level.chapter)!;
-  const nextLevel = levelsById[level.id + 1];
+  const nextLevel = levelMeta[level.id + 1];
 
   return (
     <div className="min-h-screen" ref={top}>

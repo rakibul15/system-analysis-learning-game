@@ -1,17 +1,25 @@
 import type { Note } from './types';
-import { replication } from './replication';
-import { caching } from './caching';
-import { sharding } from './sharding';
-import { transactions } from './transactions';
-import { clocks } from './clocks';
-import { storage } from './storage';
-import { streams } from './streams';
-import { consensus } from './consensus';
-import { datamodels } from './datamodels';
-import { encoding } from './encoding';
 
-/** Our combined study notes, in the order of the game. */
-export const notes: Note[] = [caching, replication, sharding, storage, datamodels, encoding, transactions, clocks, consensus, streams];
-export const notesById: Record<string, Note> = Object.fromEntries(notes.map((n) => [n.id, n]));
-export const notesForLevel = (id: number) => notes.filter((n) => n.levels.includes(id));
+/*
+ * Notes load one at a time, when opened. Titles, gists and levels for lists and links
+ * are always available from meta.ts (notesMeta, notesForLevel).
+ */
+const loaders: Record<string, () => Promise<Note>> = {
+  caching: () => import('./caching').then((m) => m.caching),
+  replication: () => import('./replication').then((m) => m.replication),
+  sharding: () => import('./sharding').then((m) => m.sharding),
+  storage: () => import('./storage').then((m) => m.storage),
+  datamodels: () => import('./datamodels').then((m) => m.datamodels),
+  encoding: () => import('./encoding').then((m) => m.encoding),
+  transactions: () => import('./transactions').then((m) => m.transactions),
+  clocks: () => import('./clocks').then((m) => m.clocks),
+  consensus: () => import('./consensus').then((m) => m.consensus),
+  streams: () => import('./streams').then((m) => m.streams),
+};
+
+export const noteIds = Object.keys(loaders);
+/** The full note, or undefined for an unknown id. */
+export const loadNote = (id: string): Promise<Note | undefined> => (loaders[id] ? loaders[id]() : Promise.resolve(undefined));
+
+export { notesMeta, notesMetaById, notesForLevel, type NoteMeta } from '../meta';
 export type { Note } from './types';

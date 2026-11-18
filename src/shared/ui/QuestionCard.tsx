@@ -114,6 +114,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               type="button"
+              data-testid="q-answer"
               disabled={!ready}
               onClick={() => setDone(true)}
               className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
@@ -146,6 +147,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           <button
             type="button"
             autoFocus
+            data-testid="q-continue"
             onClick={() => onDone({ qid: q.id, correct, sure: !!sure, earned })}
             className="btn-press mt-3 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-white font-display text-lg font-extrabold text-ink shadow-[0_4px_0_#16252D]"
           >

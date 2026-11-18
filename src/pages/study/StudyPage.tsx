@@ -3,16 +3,15 @@ import { Link } from '@tanstack/react-router';
 import { refs } from '@/content/refs';
 import { useShelf } from '@/features/books/shelf';
 import { BOOKS, type BookId } from '@/features/books/catalog';
-import { notes } from '@/content/notes';
-import { timelines } from '@/features/deep/timelines';
+import { notesMeta as notes, timelinesMeta as timelines } from '@/content/meta';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { BOOK, chapters } from '@/features/reading/ddia';
 import { useProgress } from '@/entities/progress/store';
 import { AppShell } from '@/shared/ui/AppShell';
 
-export const PARTS = ['hub', 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7'] as const;
-export type Part = (typeof PARTS)[number];
+import { PARTS, type Part } from './parts';
+export { PARTS, type Part };
 
 /** The study notes that ship with the app, plus the player's own PDFs kept in this browser. */
 export function StudyPage() {

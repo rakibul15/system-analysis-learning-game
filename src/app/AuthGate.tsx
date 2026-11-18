@@ -19,7 +19,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   }, [remembered, user]);
 
   // end-to-end checks of the game screens build with VITE_E2E=1 (never set for production)
-  if (user || import.meta.env.VITE_E2E === '1') return <>{children}</>;
+  if (user || (import.meta.env.VITE_E2E === '1' && !e2eGuest())) return <>{children}</>;
   if (remembered && status !== 'ready') {
     if (gaveUp) return <>{children}</>;
     return (
@@ -32,4 +32,9 @@ export function AuthGate({ children }: { children: ReactNode }) {
     );
   }
   return <LandingPage />;
+}
+
+/** In end-to-end builds only: a test can ask to be a signed-out guest to check the landing page. */
+function e2eGuest() {
+  try { return localStorage.getItem('e2e-guest') === '1'; } catch { return false; }
 }

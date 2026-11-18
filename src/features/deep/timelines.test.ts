@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { notesById } from '@/content/notes';
+import { notesById } from '@/content/notes/all';
 import { timelines } from './timelines';
 
 describe('deep-dive timelines', () => {

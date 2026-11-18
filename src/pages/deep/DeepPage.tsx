@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { timelinesById, type Ev, type Predict, type Timeline, type Tone } from '@/features/deep/timelines';
 import { BookRefs } from '@/features/books/BookRefs';
-import { notesById } from '@/content/notes';
+import { notesMetaById as notesById } from '@/content/meta';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { play } from '@/shared/lib/sound';

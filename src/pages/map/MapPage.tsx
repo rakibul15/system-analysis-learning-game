@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { chapters, levelsById } from '@/content/levels';
+import { chapters, levelMeta } from '@/content/meta';
 import { dueCards, levelState, lockReason, masteryOf } from '@/entities/progress/selectors';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
@@ -26,7 +26,7 @@ export function MapPage() {
   const [sel, setSel] = useState(start.index);
 
   const chapter = chapters.find((c) => c.id === chapterId)!;
-  const stops: MapStopView[] = chapter.levels.map((id) => ({ level: levelsById[id]!, state: levelState(id, p), stars: p.levels[id]?.stars ?? 0 }));
+  const stops: MapStopView[] = chapter.levels.map((id) => ({ level: levelMeta[id]!, state: levelState(id, p), stars: p.levels[id]?.stars ?? 0 }));
   const S = stops[Math.min(sel, stops.length - 1)]!;
   const rec = p.levels[S.level.id];
   const reason = lockReason(S.level.id, p);

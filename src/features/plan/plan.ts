@@ -1,4 +1,4 @@
-import { levelList, levelsById } from '@/content/levels';
+import { levelMetaList, levelMeta } from '@/content/meta';
 import type { ProgressData } from '@/entities/progress/store';
 import { dueCards } from '@/entities/progress/selectors';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
@@ -41,7 +41,7 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
 
   const passed = (id: number) => (p.levels[id]?.best ?? 0) >= PASS_MARK;
   const playedToday = (id: number) => !!p.levels[id] && dayKey(new Date(p.levels[id]!.lastPlayedAt)) === today;
-  const order = levelList.map((l) => l.id);
+  const order = levelMetaList.map((l) => l.id);
   const remainingIds = order.filter((id) => !passed(id));
   const doneToday = order.filter((id) => passed(id) && playedToday(id));
 
@@ -105,4 +105,4 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
   };
 }
 
-export const levelTitle = (id: number) => levelsById[id]?.title ?? `Level ${id}`;
+export const levelTitle = (id: number) => levelMeta[id]?.title ?? `Level ${id}`;
