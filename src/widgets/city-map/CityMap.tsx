@@ -4,6 +4,7 @@ import type { LevelMeta } from '@/content/meta';
 import { bn } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
 import { tr } from '@/shared/lib/i18n';
+import { makeRoad } from './road';
 
 const INK = '#16252D';
 
@@ -21,18 +22,6 @@ function layout(n: number) {
     const y = n === 1 ? 560 : i % 2 === 0 ? 680 : 410;
     return { x, y };
   });
-}
-
-/** Smooth path through points (Catmull–Rom → cubic Bézier). */
-function smoothPath(pts: { x: number; y: number }[]) {
-  let d = `M${pts[0]!.x} ${pts[0]!.y}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] ?? pts[i]!, p1 = pts[i]!, p2 = pts[i + 1]!, p3 = pts[i + 2] ?? p2;
-    const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
-    const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
-    d += ` C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${p2.x} ${p2.y}`;
-  }
-  return d;
 }
 
 interface Props {
@@ -60,7 +49,9 @@ export const SCENERY_REST_MS = 8000;
  */
 export function CityMap({ chapter, stops, selected, onSelect }: Props) {
   const pts = useMemo(() => layout(stops.length), [stops.length]);
-  const road = useMemo(() => smoothPath([{ x: -80, y: pts[0]!.y + 40 }, ...pts, { x: 1700, y: pts[pts.length - 1]!.y - 60 }]), [pts]);
+  // the road runs in from the left, through every stop, and out to the right
+  const geo = useMemo(() => makeRoad([{ x: -80, y: pts[0]!.y + 40 }, ...pts, { x: 1700, y: pts[pts.length - 1]!.y - 60 }]), [pts]);
+  const road = geo.d;
   const scenery = useMemo(() => {
     const r = mulberry32(chapter.id * 97);
     return Array.from({ length: 14 }, () => {
@@ -69,9 +60,8 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
     });
   }, [chapter.id]);
   const rootEl = useRef<HTMLDivElement>(null);
-  const roadEl = useRef<SVGPathElement>(null);
   const vanEl = useRef<HTMLDivElement>(null);
-  const drive = useRef({ lens: [] as number[], total: 0, vanL: 0, dir: 1, raf: 0, last: 0 });
+  const drive = useRef({ vanL: 0, dir: 1, raf: 0, last: 0 });
   const [lockNote, setLockNote] = useState(0);
   // only the next stop to play bobs: one moving thing draws the eye, several only add noise
   const nextOpen = stops.findIndex((s) => s.state === 'open');
@@ -81,42 +71,32 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
 
   /** Puts the van at its current length along the road, facing its direction (tilted to the road only while driving). */
   const placeVan = (moving: boolean) => {
-    const r = roadEl.current, v = vanEl.current, d = drive.current;
-    if (!r || !v || !d.total) return;
-    const p = r.getPointAtLength(d.vanL);
-    const q = r.getPointAtLength(Math.min(d.total, d.vanL + 6));
+    const v = vanEl.current, d = drive.current;
+    if (!v) return;
+    const p = geo.pointAt(d.vanL);
+    const q = geo.pointAt(d.vanL + 6);
     const ang = moving ? Math.max(-30, Math.min(30, (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI)) : 0;
     v.style.left = `${p.x / 16}%`;
     v.style.top = `${p.y / 9 - 6.5}%`;
     v.style.transform = `translate(-50%,-50%) scaleX(${d.dir}) rotate(${ang.toFixed(1)}deg)`;
     v.toggleAttribute('data-driving', moving);
   };
+  /** Length along the road of stop i (the road's first point is off the map, so stop i is point i + 1). */
+  const stopAt = (i: number) => geo.at[i + 1];
 
-  // where each stop sits along the road (once per layout), and the van parked at the selected stop
+  // the van parked at the selected stop (once per layout)
   useLayoutEffect(() => {
-    const r = roadEl.current, d = drive.current;
-    if (!r) return;
-    d.total = r.getTotalLength();
-    d.lens = pts.map((s) => {
-      let best = { dist: Infinity, l: 0 };
-      for (let i = 0; i <= 500; i++) {
-        const l = (d.total * i) / 500;
-        const p = r.getPointAtLength(l);
-        const dist = (p.x - s.x) ** 2 + (p.y - s.y) ** 2;
-        if (dist < best.dist) best = { dist, l };
-      }
-      return best.l;
-    });
-    d.vanL = d.lens[selected] ?? 0;
+    const d = drive.current;
+    d.vanL = stopAt(selected) ?? 0;
     d.dir = 1;
     placeVan(false);
     return () => cancelAnimationFrame(d.raf);
-  }, [pts, road]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [geo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // drive to a newly selected stop
   useEffect(() => {
     const d = drive.current;
-    const target = d.lens[selected];
+    const target = stopAt(selected);
     if (target === undefined) return;
     cancelAnimationFrame(d.raf);
     if (reduceMotion()) { d.vanL = target; d.dir = 1; placeVan(false); return; }
@@ -188,7 +168,7 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
         <path d="M1480 -20 C 1440 160 1590 300 1540 470 S 1470 760 1560 920 L 1640 920 L 1640 -20 Z" fill="#BFE0F5" stroke={INK} strokeWidth="5" />
         <g className="amb-water" fill="none" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeDasharray="30 90"><path d="M1530 0 C 1500 160 1630 300 1590 470 S 1520 760 1600 900" /></g>
         <path d={road} fill="none" stroke={INK} strokeWidth="88" strokeLinecap="round" />
-        <path ref={roadEl} d={road} fill="none" stroke="#FBFAF5" strokeWidth="74" strokeLinecap="round" />
+        <path d={road} fill="none" stroke="#FBFAF5" strokeWidth="74" strokeLinecap="round" />
         <path d={road} fill="none" stroke="#C9D0C3" strokeWidth="7" strokeDasharray="20 24" strokeLinecap="round" />
         {pts.map((p, i) => {
           const s = stops[i]!;
