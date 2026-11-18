@@ -8,6 +8,8 @@ import { LoadFailed, PageLoading } from '@/shared/ui/Loading';
 import { AuthGate } from './AuthGate';
 import { ReaderHost } from '@/features/books/ReaderHost';
 import { UpdateNotice } from '@/shared/ui/UpdateNotice';
+import { describeError, isNoise, reportCrash } from '@/shared/lib/crash';
+import { CrashFallback } from '@/shared/ui/ErrorBoundary';
 
 /*
  * Only the map is in the first download. Every other screen, and each chapter's
@@ -29,8 +31,12 @@ const AdminPage = lazyRouteComponent(() => import('@/pages/admin/AdminPage'), 'A
 const PlacementPage = lazyRouteComponent(() => import('@/pages/placement/PlacementPage'), 'PlacementPage');
 
 
-function LoadError({ reset }: ErrorComponentProps) {
-  return <LoadFailed onRetry={() => { reset(); void router.invalidate(); }} />;
+/** A screen failed: a download that did not arrive (offline, or a new version) or a crash in its code. */
+function LoadError({ error, reset }: ErrorComponentProps) {
+  const retry = () => { reset(); void router.invalidate(); };
+  const { msg } = describeError(error);
+  // a failed download is noise to the crash reports; everything else is a crash
+  return isNoise(msg, '') ? <LoadFailed onRetry={retry} /> : <CrashFallback onRetry={retry} />;
 }
 
 function NotFound() {
@@ -106,6 +112,8 @@ export const router = createRouter({
   defaultPendingComponent: () => <PageLoading />,
   defaultPendingMs: 150,
   defaultErrorComponent: LoadError,
+  // a screen that crashed is reported to the admin (failed downloads are filtered out there)
+  defaultOnCatch: (error, info) => reportCrash(error, 'route', info?.componentStack ?? ''),
 });
 
 declare module '@tanstack/react-router' {

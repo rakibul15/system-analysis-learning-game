@@ -75,6 +75,23 @@ service cloud.firestore {
         && request.resource.data.summary is map;
     }
 
+    // Something in the app broke: the error's message, the first lines of its stack, the screen,
+    // the build and the browser (never anything the learner typed). Learners create; admins read
+    // and clear them once fixed.
+    match /crashes/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'at', 'lang', 'msg', 'stack', 'where', 'route', 'ver', 'ua'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.lang in ['bn', 'en']
+        && request.resource.data.where in ['render', 'route', 'window', 'promise']
+        && request.resource.data.msg is string && request.resource.data.msg.size() <= 300
+        && request.resource.data.stack is string && request.resource.data.stack.size() <= 2000
+        && request.resource.data.route is string && request.resource.data.route.size() <= 120
+        && request.resource.data.ver is string && request.resource.data.ver.size() <= 40
+        && request.resource.data.ua is string && request.resource.data.ua.size() <= 200;
+      allow read, delete: if isAdmin();
+    }
+
     match /admins/{uid} {
       allow read: if owner(uid);
     }

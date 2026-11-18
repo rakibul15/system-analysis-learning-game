@@ -89,7 +89,7 @@ async function legacySync(f: Fb, uid: string, local: ProgressData, overwrite: bo
   return merged;
 }
 
-/** Answer batches go to qlog/, problem reports to reports/ (see firestore.rules). */
+/** Answer batches go to qlog/, problem reports to reports/, crash reports to crashes/ (see firestore.rules). */
 function feedbackSender(f: Fb, uid: string): Sender {
   const { store, db } = f;
   return {
@@ -100,6 +100,11 @@ function feedbackSender(f: Fb, uid: string): Sender {
       await store.addDoc(store.collection(db, 'reports'), {
         uid, at: store.serverTimestamp(), lang: r.lang, qid: r.qid, levelId: r.levelId, kind: r.kind,
         note: r.note, prompt: r.prompt, options: r.options, status: 'open',
+      });
+    },
+    async sendCrash(c) {
+      await store.addDoc(store.collection(db, 'crashes'), {
+        uid, at: store.serverTimestamp(), lang: c.lang, msg: c.msg, stack: c.stack, where: c.where, route: c.route, ver: c.ver, ua: c.ua,
       });
     },
   };

@@ -17,6 +17,7 @@ import { BookRefs } from '@/features/books/BookRefs';
 import { levelRefs } from '@/features/books/catalog';
 import { conceptLabel, drawBoss } from '@/content/bank';
 import { whenIdle } from '@/shared/lib/idle';
+import { E2ECrashProbe, ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 
 type Step = 'briefing' | 'predict' | 'lesson' | 'summary' | 'play' | 'boss' | 'result';
 const FLOW: { id: Step; label: string }[] = [
@@ -58,6 +59,8 @@ export function LevelPage({ level }: { level: Level }) {
 
   const chapter = chapters.find((c) => c.id === level.chapter)!;
   const nextLevel = levelMeta[level.id + 1];
+  // a simulator that crashed is our fault: the learner moves on with the play step's full points
+  const skipBrokenSim = () => { setPlay({ points: LEVEL_PARTS.play, answers: [] }); setStep('boss'); };
 
   return (
     <div className="min-h-screen" ref={top}>
@@ -148,16 +151,22 @@ export function LevelPage({ level }: { level: Level }) {
         {step === 'play' && level.play.kind === 'traffic' && (
           <>
             <Intro kicker={tr('ধাপ ৪ · খেলা', 'Step 4 · Play')} title="Simulator" body={tr('নিজে হাতে চালান, তারপর দেখুন system নিজে কীভাবে করে। তারা অনুযায়ী ২৫ নম্বরের মধ্যে।', 'Run it by hand, then watch the system do it itself. Up to 25 points by stars.')} />
-            <TrafficGame play={level.play} onComplete={(stars) => { setPlay({ points: trafficPlayPoints(stars), answers: [] }); setStep('boss'); }} />
+            <ErrorBoundary fallback={(retry) => <SimBroke onRetry={retry} onSkip={skipBrokenSim} />}>
+              <E2ECrashProbe name="sim" />
+              <TrafficGame play={level.play} onComplete={(stars) => { setPlay({ points: trafficPlayPoints(stars), answers: [] }); setStep('boss'); }} />
+            </ErrorBoundary>
           </>
         )}
 
         {step === 'play' && level.play.kind === 'missions' && level.simulator && (() => {
           const Sim = simulators[level.simulator];
           return (
-            <Suspense fallback={<p className="text-muted">{tr('Simulator আসছে…', 'Loading the simulator…')}</p>}>
-              <Sim onFinish={(n) => { setPlay({ points: (LEVEL_PARTS.play * n) / 3, answers: [] }); setStep('boss'); }} />
-            </Suspense>
+            <ErrorBoundary fallback={(retry) => <SimBroke onRetry={retry} onSkip={skipBrokenSim} />}>
+              <Suspense fallback={<p className="text-muted">{tr('Simulator আসছে…', 'Loading the simulator…')}</p>}>
+                <E2ECrashProbe name="sim" />
+                <Sim onFinish={(n) => { setPlay({ points: (LEVEL_PARTS.play * n) / 3, answers: [] }); setStep('boss'); }} />
+              </Suspense>
+            </ErrorBoundary>
           );
         })()}
 
@@ -233,6 +242,20 @@ function Intro({ kicker, title, body }: { kicker: string; title: string; body: s
       <h2 className="m-0 font-display text-[28px] font-extrabold leading-tight">{title}</h2>
       <p className="m-0 mt-1 text-ink-soft">{body}</p>
     </div>
+  );
+}
+
+/** A simulator crashed: try it again, or go on to the boss without losing its points. */
+function SimBroke({ onRetry, onSkip }: { onRetry: () => void; onSkip: () => void }) {
+  return (
+    <section role="alert" className="pop-in rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+      <p className="m-0 font-display text-xl font-extrabold">{tr('Simulator-টা ভেঙে গেছে', 'The simulator broke')}</p>
+      <p className="m-0 mt-1 text-ink-soft">{tr('দোষটা আমাদের, খবর আমাদের কাছে যাচ্ছে। আবার চেষ্টা করুন, নয়তো Boss-এর দিকে এগোন। এই ধাপের পুরো নম্বর পাবেন।', 'Our fault, and we are being told. Try again, or go on to the boss: you get this step\'s full points.')}</p>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button type="button" onClick={onRetry} className="btn-press min-h-12 cursor-pointer rounded-2xl border-[2.5px] border-ink bg-white px-5 font-bold">{tr('আবার চেষ্টা', 'Try again')}</button>
+        <button type="button" onClick={onSkip} className="btn-press min-h-12 cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-5 font-display text-lg font-extrabold shadow-[0_4px_0_#16252D]">{tr('Boss-এর দিকে →', 'On to the boss →')}</button>
+      </div>
+    </section>
   );
 }
 

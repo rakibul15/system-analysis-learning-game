@@ -15,11 +15,17 @@ export interface AnswerEvent { q: string; c: 0 | 1; s: 0 | 1; o: string; p?: str
 export type ReportKind = 'wrong' | 'unclear' | 'typo' | 'other';
 export interface Report { qid: string; levelId: number; kind: ReportKind; note: string; prompt: string; options: string[]; t: number; lang: Lang }
 
-interface Box { answers: (AnswerEvent & { l: Lang })[]; reports: Report[] }
+/** Where an error was caught: a screen's render, the router, a handler or timer, a promise nobody awaited. */
+export type CrashWhere = 'render' | 'route' | 'window' | 'promise';
+/** Something in the app broke (see crash.ts). */
+export interface Crash { msg: string; stack: string; where: CrashWhere; route: string; ver: string; ua: string; t: number; lang: Lang }
+
+interface Box { answers: (AnswerEvent & { l: Lang })[]; reports: Report[]; crashes: Crash[] }
 
 const KEY = 'salg-outbox';
 const MAX_ANSWERS = 600;
 const MAX_REPORTS = 30;
+const MAX_CRASHES = 20;
 export const BATCH = 100;
 
 /** A short, stable key for an option's text (so rotating distractors can still be counted). */
@@ -38,8 +44,8 @@ export function optionKey(text: string): string {
 const read = (): Box => {
   try {
     const v = JSON.parse(localStorage.getItem(KEY) ?? 'null') as Partial<Box> | null;
-    return { answers: Array.isArray(v?.answers) ? v.answers : [], reports: Array.isArray(v?.reports) ? v.reports : [] };
-  } catch { return { answers: [], reports: [] }; }
+    return { answers: Array.isArray(v?.answers) ? v.answers : [], reports: Array.isArray(v?.reports) ? v.reports : [], crashes: Array.isArray(v?.crashes) ? v.crashes : [] };
+  } catch { return { answers: [], reports: [], crashes: [] }; }
 };
 const write = (b: Box) => { try { localStorage.setItem(KEY, JSON.stringify(b)); } catch { /* storage full or blocked: drop */ } };
 
@@ -61,16 +67,28 @@ export function addReport(r: Omit<Report, 't' | 'lang' | 'levelId'>) {
   schedule(0);
 }
 
+export function addCrash(c: Omit<Crash, 't' | 'lang'>) {
+  const b = read();
+  b.crashes.push({ ...c, t: Date.now(), lang });
+  if (b.crashes.length > MAX_CRASHES) b.crashes.splice(0, b.crashes.length - MAX_CRASHES);
+  write(b);
+  schedule(0);
+}
+
 export const pending = () => { const b = read(); return { answers: b.answers.length, reports: b.reports.length }; };
+export const pendingCrashes = () => read().crashes.length;
 
 /** How queued items reach the cloud; set while a learner is signed in. */
 export interface Sender {
   sendAnswers(items: AnswerEvent[], lang: Lang): Promise<void>;
   sendReport(r: Report): Promise<void>;
+  sendCrash?(c: Crash): Promise<void>;
 }
 let sender: Sender | null = null;
 let blocked = false;
-export function setSender(s: Sender | null) { sender = s; blocked = false; if (s) schedule(0); }
+/** Crash reports have their own collection and rules; a refusal there must not stop answers and reports. */
+let crashesBlocked = false;
+export function setSender(s: Sender | null) { sender = s; blocked = false; crashesBlocked = false; if (s) schedule(0); }
 
 let timer: ReturnType<typeof setTimeout> | undefined;
 function schedule(ms = 20_000) {
@@ -93,6 +111,19 @@ export function flush(): Promise<void> {
           await s.sendReport(r);
           const now = read();
           write({ ...now, reports: now.reports.filter((x) => !(x.t === r.t && x.qid === r.qid)) });
+          continue;
+        }
+        if (b.crashes.length && s.sendCrash && !crashesBlocked) {
+          const c = b.crashes[0]!;
+          try {
+            await s.sendCrash(c);
+          } catch (e) {
+            if ((e as { code?: string })?.code !== 'permission-denied') throw e;
+            crashesBlocked = true; // the crashes rules are not deployed yet: keep them, carry on with the rest
+            continue;
+          }
+          const now = read();
+          write({ ...now, crashes: now.crashes.filter((x) => !(x.t === c.t && x.msg === c.msg)) });
           continue;
         }
         if (!b.answers.length) break;

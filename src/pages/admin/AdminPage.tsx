@@ -4,7 +4,7 @@ import { questionInfo } from '@/content/bank';
 import { chapterOf, conceptLabel, levelMeta } from '@/content/meta';
 import { useChapters } from '@/content/useChapters';
 import { useAuth } from '@/features/auth/auth';
-import { isAdmin, loadAdminData, setQuestionOff, STATUSES, updateReports, usingFixture, type AdminData, type Disabled, type Learner, type ReportStatus, type StoredReport } from '@/features/stats/admin';
+import { deleteCrashes, isAdmin, loadAdminData, setQuestionOff, STATUSES, updateReports, usingFixture, type AdminData, type Disabled, type Learner, type ReportStatus, type StoredCrash, type StoredReport } from '@/features/stats/admin';
 import { aggregate, flagsFor, MIN_ANSWERS, type Flag, type QStat } from '@/features/stats/aggregate';
 import { issueUrl } from '@/features/stats/issue';
 import { bn } from '@/shared/lib/bn';
@@ -45,7 +45,7 @@ const btn = 'btn-press inline-flex min-h-11 cursor-pointer items-center justify-
 export function AdminPage() {
   const user = useAuth((s) => s.user);
   const [state, setState] = useState<State>({ kind: 'loading' });
-  const [tab, setTab] = useState<'reports' | 'questions' | 'learners'>('reports');
+  const [tab, setTab] = useState<'reports' | 'questions' | 'learners' | 'crashes'>('reports');
 
   useEffect(() => {
     if (!user && !usingFixture()) { setState({ kind: 'denied', why: tr('আগে admin account দিয়ে sign in করুন।', 'Sign in with an admin account first.') }); return; }
@@ -81,6 +81,7 @@ export function AdminPage() {
                 ['reports', `${tr('সমস্যা', 'Reports')} · ${bn(new Set(state.data.reports.filter((r) => r.status === 'open').map((r) => r.qid)).size)}`],
                 ['questions', `${tr('প্রশ্নের হিসাব', 'Answer statistics')}${Object.keys(state.data.disabled).length ? ` · ${bn(Object.keys(state.data.disabled).length)} ${tr('বন্ধ', 'off')}` : ''}`],
                 ['learners', `${tr('Learner', 'Learners')} · ${bn(state.data.learners.length)}`],
+                ['crashes', `Crash · ${bn(new Set(state.data.crashes.map(crashKey)).size)}`],
               ] as const).map(([k, l]) => (
                 <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
@@ -92,6 +93,7 @@ export function AdminPage() {
             )}
             {tab === 'questions' && <Questions data={state.data} toggleOff={toggleOff} />}
             {tab === 'learners' && <Learners data={state.data} />}
+            {tab === 'crashes' && <Crashes data={state.data} onCleared={(ids) => set((d) => ({ ...d, crashes: d.crashes.filter((x) => !ids.includes(x.id)) }))} />}
           </>
         )}
       </main>
@@ -392,6 +394,65 @@ function Learners({ data }: { data: AdminData }) {
           </table>
         </div>
       )}
+    </section>
+  );
+}
+
+/** Crash reports of the same error from the same kind of place count as one problem. */
+const crashKey = (c: StoredCrash) => `${c.where}|${c.msg}`;
+const WHERE: Record<StoredCrash['where'], string> = {
+  render: tr('পাতা আঁকতে গিয়ে', 'While drawing a screen'), route: tr('একটা screen-এ', 'In a screen'),
+  window: tr('কোনো কাজের মাঝে', 'In a handler or timer'), promise: tr('অপেক্ষার কাজে (promise)', 'In a promise nobody awaited'),
+};
+const day = (c: StoredCrash) => (c.at ? new Date(c.at.seconds * 1000).toLocaleDateString('en-CA') : '–');
+
+/** What broke in the app, grouped by error, most widespread first; cleared once fixed. */
+function Crashes({ data, onCleared }: { data: AdminData; onCleared: (ids: string[]) => void }) {
+  const groups = useMemo(() => {
+    const m = new Map<string, StoredCrash[]>();
+    for (const c of data.crashes) m.set(crashKey(c), [...(m.get(crashKey(c)) ?? []), c]);
+    return [...m.values()].map((list) => ({ list, people: new Set(list.map((c) => c.uid ?? '?')).size }))
+      .sort((a, b) => b.people - a.people || b.list.length - a.list.length);
+  }, [data.crashes]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const clear = async (list: StoredCrash[]) => {
+    setBusy(crashKey(list[0]!));
+    try { await deleteCrashes(list.map((c) => c.id)); onCleared(list.map((c) => c.id)); } finally { setBusy(null); }
+  };
+
+  return (
+    <section className="flex flex-col gap-3">
+      {data.crashesError && <p className="m-0 rounded-2xl border-2 border-coral bg-coral-soft p-4 font-semibold" role="alert">{tr('Crash report পড়া গেল না (firestore.rules-এর crashes অংশ publish হয়েছে কি?):', 'Could not read crash reports (are the crashes rules in firestore.rules published?):')} {data.crashesError}</p>}
+      {!data.crashesError && groups.length === 0 && <p className="m-0 text-muted">{tr('কোনো crash নেই। ভালো খবর।', 'No crashes. Good news.')}</p>}
+      {groups.map(({ list, people }) => {
+        const c = list[0]!;
+        const versions = [...new Set(list.map((x) => x.ver))].slice(0, 6);
+        const routes = [...new Set(list.map((x) => x.route || '#/'))].slice(0, 6);
+        return (
+          <article key={crashKey(c)} className="rounded-[18px] border-[2.5px] border-ink bg-white p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0 flex-[1_1_320px]">
+                <p className="m-0 break-words font-mono text-sm font-bold">{c.msg}</p>
+                <p className="m-0 mt-1 text-sm text-muted">
+                  {WHERE[c.where] ?? c.where} · {tr(`${bn(list.length)} বার, ${bn(people)} জন`, `${list.length} times, ${people} people`)} · {tr('শেষ', 'last')} {day(c)}
+                </p>
+                <p className="m-0 mt-1 text-sm">
+                  <span className="font-semibold">{tr('কোথায়:', 'Where:')}</span> <span className="font-mono">{routes.join(', ')}</span>
+                  {' · '}<span className="font-semibold">{tr('Build:', 'Build:')}</span> <span className="font-mono">{versions.join(', ')}</span>
+                </p>
+              </div>
+              <button type="button" disabled={busy === crashKey(c)} onClick={() => void clear(list)} className={`${btn} bg-white disabled:opacity-60`}>
+                {tr('ঠিক হয়েছে, মুছে দিন', 'Fixed: clear these')}
+              </button>
+            </div>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-sm font-semibold text-route-deep">{tr('Stack আর browser', 'Stack and browser')}</summary>
+              <pre className="m-0 mt-2 max-h-72 overflow-auto rounded-xl bg-[#F0F2EC] p-3 text-xs leading-relaxed">{c.stack || tr('(stack নেই)', '(no stack)')}</pre>
+              <p className="m-0 mt-1 break-words text-xs text-muted">{c.ua}</p>
+            </details>
+          </article>
+        );
+      })}
     </section>
   );
 }
