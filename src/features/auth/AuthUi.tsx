@@ -66,6 +66,7 @@ export function AccountCard() {
             <button type="button" disabled={busy} onClick={async () => { setBusy(true); await signOutUser(); setBusy(false); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('Logout', 'Sign out')}</button>
           </div>
           <p className="m-0 text-xs text-muted">{tr('Logout করলে progress এই browser থেকে সরে যায়, আপনার account-এ (cloud-এ) থেকে যায়। আবার login করলেই ফিরে আসবে।', 'Signing out removes the progress from this browser; it stays in your account in the cloud and comes back when you sign in.')}</p>
+          <p className="m-0 text-xs text-muted">{tr('প্রশ্নগুলো ভালো করতে কোন প্রশ্নে কোন উত্তর বাছলেন সেটা account-এর id দিয়ে পাঠানো হয়, নাম বা email ছাড়া।', 'To improve the questions, which option you pick on each question is sent with your account id, not your name or email.')}</p>
         </>
       ) : (
         <>

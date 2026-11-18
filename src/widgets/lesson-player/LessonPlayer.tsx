@@ -184,6 +184,7 @@ export function LessonPlayer({ nodes, steps, onCheckpoint, onFinish }: Props) {
 
       {blocked && step.ask && (
         <QuestionCard
+          where="lesson"
           q={step.ask}
           label={`${tr('থামুন!', 'Stop!')} Checkpoint ${bn(askNumber)}/${bn(askTotal)}`}
           points={CHECKPOINT_POINTS}

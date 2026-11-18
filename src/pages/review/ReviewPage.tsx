@@ -133,6 +133,7 @@ function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: Revie
         <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? '#0B8A7A' : i === k ? '#FFC02E' : '#D7DED1' }} />)}</div>
         {q ? (
           <QuestionCard
+            where="review"
             q={q}
             label={`Level ${bn(levelId)} · ${levelMeta[levelId]?.title ?? ''}${concept ? ` · ${concept}` : ''} · ${tr('ঘর', 'Box')} ${bn(card.box + 1)}`}
             continueLabel={k + 1 < total ? tr('পরের প্রশ্ন', 'Next question') : tr('শেষ', 'Finish')}

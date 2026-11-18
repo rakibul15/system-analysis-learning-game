@@ -3,6 +3,7 @@ import { useProgress, type ProgressData } from '@/entities/progress/store';
 import { mergeProgress, normalize, sameProgress } from './merge';
 import { firebaseConfig } from './firebaseConfig';
 import { newCache, syncParts, type CloudStore, type PartCache } from './cloud';
+import { setSender, type Sender } from '@/shared/lib/outbox';
 
 export interface AuthUser { uid: string; name: string; email: string; photo: string | null }
 type SyncState = 'off' | 'syncing' | 'saved' | 'error';
@@ -83,6 +84,22 @@ async function legacySync(f: Fb, uid: string, local: ProgressData, overwrite: bo
   const merged = cloud ? mergeProgress(local, cloud) : local;
   if (!cloud || !sameProgress(merged, cloud)) await f.store.setDoc(ref, { data: JSON.stringify(merged), v: 3, updatedAt: f.store.serverTimestamp() }, { merge: true });
   return merged;
+}
+
+/** Answer batches go to qlog/, problem reports to reports/ (see firestore.rules). */
+function feedbackSender(f: Fb, uid: string): Sender {
+  const { store, db } = f;
+  return {
+    async sendAnswers(items, lang) {
+      await store.addDoc(store.collection(db, 'qlog'), { uid, at: store.serverTimestamp(), lang, items });
+    },
+    async sendReport(r) {
+      await store.addDoc(store.collection(db, 'reports'), {
+        uid, at: store.serverTimestamp(), lang: r.lang, qid: r.qid, levelId: r.levelId, kind: r.kind,
+        note: r.note, prompt: r.prompt, options: r.options, status: 'open',
+      });
+    },
+  };
 }
 
 const denied = (e: unknown) => (e as { code?: string })?.code === 'permission-denied';
@@ -171,6 +188,7 @@ export async function startAuth() {
     f.authMod.onAuthStateChanged(f.auth, (u) => {
       if (!u) {
         unsubProgress?.(); unsubProgress = null;
+        setSender(null);
         // progress is safe in the cloud; leave nothing behind for the next person on this browser
         if (owner.get()) { clearLocal(); owner.set(null); }
         useAuth.setState({ user: null, status: 'ready', sync: 'off' });
@@ -185,6 +203,7 @@ export async function startAuth() {
       owner.set(u.uid);
       useAuth.setState({ user: { uid: u.uid, name: u.displayName ?? u.email ?? 'Learner', email: u.email ?? '', photo: u.photoURL }, status: 'ready' });
       watchProgress();
+      setSender(feedbackSender(f, u.uid));
       void syncNow();
     });
   } catch (e) {
@@ -231,5 +250,7 @@ export async function signOutUser() {
 }
 
 export const syncProgressNow = () => syncNow();
+/** Firebase for screens that read other collections (the admin view); only after sign-in. */
+export const firebase = () => fb();
 /** After a deliberate reset, replace the cloud copy instead of merging the old progress back. */
 export const replaceCloudWithLocal = () => syncNow(true);

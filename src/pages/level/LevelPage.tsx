@@ -114,7 +114,7 @@ export function LevelPage({ level }: { level: Level }) {
         {step === 'predict' && (
           <>
             <Intro kicker={tr('ধাপ ২ · অনুমান', 'Step 2 · Predict')} title={tr('আগে একটা অনুমান', 'First, a guess')} body={tr('নম্বর নেই। শুধু নিজের ধারণাটা যাচাই করুন, তারপর lesson-এ দেখবেন কেন।', 'No points. Just test your intuition; the lesson shows why.')} />
-            <QuestionCard q={level.predict} label={tr('অনুমান · নম্বর নেই', 'Predict · no points')} continueLabel={tr('Lesson শুরু →', 'Start the lesson →')} onDone={() => setStep('lesson')} />
+            <QuestionCard where="predict" q={level.predict} label={tr('অনুমান · নম্বর নেই', 'Predict · no points')} continueLabel={tr('Lesson শুরু →', 'Start the lesson →')} onDone={() => setStep('lesson')} />
           </>
         )}
 
@@ -165,6 +165,7 @@ export function LevelPage({ level }: { level: Level }) {
             <Intro kicker={`${tr('ধাপ ৪', 'Step 4')} · Mission ${bn(mi + 1)}/${bn(3)}`} title="Mission" body={level.play.intro} />
             <MissionBar done={play.answers} total={3} />
             <QuestionCard
+              where="mission"
               key={level.play.missions[mi]!.id}
               q={level.play.missions[mi]!}
               label={`Mission ${bn(mi + 1)}/${bn(3)}`}
@@ -192,6 +193,7 @@ export function LevelPage({ level }: { level: Level }) {
               </div>
             </div>
             <QuestionCard
+              where="boss"
               key={`${bossSet[bi]!.id}-${bi}`}
               tone="boss"
               q={bossSet[bi]!}

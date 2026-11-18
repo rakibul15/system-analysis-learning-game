@@ -1,5 +1,5 @@
 import type { Level, Question } from '@/content/schema';
-import { banks, loadedLevels } from '@/content/registry';
+import { banks, loadedLevels, questionsById } from '@/content/registry';
 import { conceptOf } from '@/content/meta';
 import type { BankItem, Generator, LevelBank } from './types';
 
@@ -72,4 +72,19 @@ export function bankQuestion(qid: string, rand: () => number = Math.random): Que
   if (item) return itemQ(item, rand);
   const gen = b.gens.find((g) => g.id === qid);
   return gen ? genQ(gen, rand) : undefined;
+}
+
+/**
+ * A question's text and every option it can show (right one first), for the statistics view.
+ * Generated questions change their numbers, so they come back as one example. Needs the chapter loaded.
+ */
+export function questionInfo(qid: string): { prompt: string; options: string[]; generated: boolean } | null {
+  const fixed = questionsById[qid]?.q;
+  if (fixed) return { prompt: fixed.prompt, options: fixed.options, generated: false };
+  const b = banks[Number(/^l(\d+)-/.exec(qid)?.[1])];
+  const item = b?.items.find((i) => i.id === qid);
+  if (item) return { prompt: item.prompt, options: [...item.options, ...(item.extra ?? [])], generated: false };
+  const gen = b?.gens.find((g) => g.id === qid);
+  if (gen) { const q = gen.make(() => 0.5); return { prompt: q.prompt, options: q.options, generated: true }; }
+  return null;
 }
