@@ -1,11 +1,12 @@
-import type { ReactNode } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useEffect, type ReactNode } from 'react';
+import { Link, useRouter } from '@tanstack/react-router';
 import { dueCards, streak, totalXp } from '@/entities/progress/selectors';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { play } from '@/shared/lib/sound';
 import { isEn, switchLang, tr } from '@/shared/lib/i18n';
 import { AuthButton } from '@/features/auth/AuthUi';
+import { whenIdle } from '@/shared/lib/idle';
 
 const NAV = [
   { to: '/', label: tr('শহর', 'City') },
@@ -18,9 +19,22 @@ const NAV = [
   { to: '/profile', label: tr('প্রোফাইল', 'Profile') },
 ] as const;
 
+/** Whether the menu's screens have been fetched ahead in this tab. */
+let warmed = false;
+
 /** Header with the main screens, XP and streak; used by every screen except a level. */
 export function AppShell({ children }: { children: ReactNode }) {
   const p = useProgress();
+  const router = useRouter();
+  // fetch the menu's screens once the app is idle, so the first visit to each is instant
+  // (otherwise a first tap waits on a download and the loading screen flashes in between)
+  useEffect(() => {
+    if (warmed) return;
+    warmed = true;
+    return whenIdle(() => {
+      for (const n of NAV) if (n.to !== '/') void router.preloadRoute({ to: n.to }).catch(() => { /* fetched when opened */ });
+    }, 4000);
+  }, [router]);
   const due = dueCards(p).length;
   const days = streak(p);
   const soundOn = p.settings.sound ?? true;

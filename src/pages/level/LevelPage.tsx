@@ -65,7 +65,7 @@ export function LevelPage({ level }: { level: Level }) {
   return (
     <div className="min-h-screen" ref={top}>
       <header className={`sticky top-0 z-20 flex flex-wrap items-center gap-x-6 gap-y-2.5 border-b-[3px] border-ink px-4 py-3 sm:px-8 ${step === 'boss' ? 'bg-night text-white' : 'bg-surface'}`}>
-        <Link to="/" className={`inline-flex min-h-11 items-center gap-1.5 font-bold no-underline ${step === 'boss' ? 'text-parcel' : 'text-route-deep hover:text-ink'}`}>
+        <Link to="/" viewTransition className={`inline-flex min-h-11 items-center gap-1.5 font-bold no-underline ${step === 'boss' ? 'text-parcel' : 'text-route-deep hover:text-ink'}`}>
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M11 3L5 9l6 6" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
           {tr('শহর', 'City')}
         </Link>
@@ -338,12 +338,12 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         {nextId && nextOpen && (
-          <Link to="/level/$levelId" params={{ levelId: String(nextId) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
+          <Link to="/level/$levelId" params={{ levelId: String(nextId) }} viewTransition className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
           {tr('পরের level →', 'Next level →')}
           </Link>
         )}
         <button type="button" onClick={onRetry} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-surface px-6 font-bold shadow-[0_5px_0_var(--color-shadow)]">{tr('আবার খেলুন', 'Play again')}</button>
-        <Link to="/" className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink px-6 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
+        <Link to="/" viewTransition className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink px-6 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
       </div>
       <BookRefs level={level.id} refs={levelRefs[level.id]} title={passed ? tr('পাকা করতে বইয়ে পড়ুন', 'Make it stick: read it in the book') : tr('আবার খেলার আগে বইয়ে পড়ুন', 'Before you replay, read it in the book')} className="mx-auto mt-6 max-w-[560px]" />
       <p className="sr-only">{bn(stars)} {tr('টা তারা', 'stars')}</p>
