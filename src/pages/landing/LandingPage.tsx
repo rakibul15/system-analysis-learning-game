@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { signInWithGoogle, useAuth } from '@/features/auth/auth';
+import { EmbeddedNote, SignInHelp, useWarmAuth } from '@/features/auth/AuthUi';
 import { bn } from '@/shared/lib/bn';
 import { isEn, switchLang, tr } from '@/shared/lib/i18n';
 
@@ -12,17 +13,22 @@ const G = () => (
   </svg>
 );
 
-function SignInButton({ big = false }: { big?: boolean }) {
-  const { status, error } = useAuth();
+function SignInButton({ big = false, lead = false }: { big?: boolean; lead?: boolean }) {
+  const { status, signInError } = useAuth();
   const [busy, setBusy] = useState(false);
+  // the problem shows under the button that was tapped (the page has three)
+  const [tapped, setTapped] = useState(false);
+  const warm = useWarmAuth();
   const waiting = busy || status === 'loading';
   return (
-    <div className="flex flex-col items-start gap-2">
-      <button type="button" disabled={waiting} onClick={async () => { setBusy(true); await signInWithGoogle(); setBusy(false); }}
+    <div className="relative flex flex-col items-start gap-2">
+      <button type="button" disabled={waiting} {...warm} onClick={async () => { setTapped(true); setBusy(true); await signInWithGoogle(); setBusy(false); }}
         className={`btn-press flex cursor-pointer items-center gap-3 rounded-2xl border-[3px] border-ink bg-surface font-bold shadow-press disabled:cursor-wait disabled:opacity-70 ${big ? 'min-h-14 px-6 text-lg' : 'min-h-11 px-4'}`}>
         <G /> {waiting ? tr('Google খুলছে…', 'Opening Google…') : tr('Google দিয়ে শুরু করুন', 'Start with Google')}
       </button>
-      {big && error && <p role="alert" className="m-0 text-sm font-semibold text-coral-deep">{tr('Login হয়নি, আবার চেষ্টা করুন।', 'Sign-in failed, please try again.')}</p>}
+      {signInError && !busy && (tapped || (lead && signInError === 'redirect-lost')) && (
+        big ? <SignInHelp code={signInError} /> : <span className="absolute right-0 top-full z-30 mt-2 w-[18rem]"><SignInHelp code={signInError} /></span>
+      )}
       {big && <p className="m-0 max-w-[46ch] text-xs text-muted">{tr('Login করলে আপনার নাম, email আর progress-এর সারাংশ ParcelGo-র admin দেখতে পান, যোগাযোগ আর হারানো progress খুঁজে দেওয়ার জন্য।', 'When you sign in, the ParcelGo admin can see your name, email and a progress summary, to contact you and help find lost progress.')}</p>}
     </div>
   );
@@ -106,7 +112,8 @@ export function LandingPage() {
             <p className="m-0 max-w-[58ch] text-lg leading-relaxed text-ink-soft">
               {tr('ParcelGo শূন্য থেকে লাখো customer-এ বড় হয়। প্রতিটা level-এ একটা সত্যিকারের সমস্যা: ভিড়, ধীর database, bot, দুবার টাকা কাটা। আপনি design বেছে নেন, simulator দেখায় কী হয়।', 'ParcelGo grows from zero to millions of customers. Each level is a real problem: crowds, slow databases, bots, double charges. You pick the design and the simulator shows what happens.')}
             </p>
-            <SignInButton big />
+            <EmbeddedNote />
+            <SignInButton big lead />
             <p className="m-0 text-sm text-muted">{tr('বিনামূল্যে · ফোন আর laptop দুটোতেই চলে · progress আপনার account-এ save থাকে', 'Free · works on phone and laptop · progress is saved to your account')}</p>
           </div>
           <div className="keep-light min-w-0 rounded-[30px] border-[3px] border-ink bg-surface p-3 shadow-block"><HeroMap /></div>

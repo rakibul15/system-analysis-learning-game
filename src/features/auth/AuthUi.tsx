@@ -1,7 +1,62 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { tr } from '@/shared/lib/i18n';
-import { signInWithGoogle, signOutUser, syncProgressNow, useAuth } from './auth';
+import { whenIdle } from '@/shared/lib/idle';
+import { signInWithGoogle, signOutUser, syncProgressNow, useAuth, warmAuth } from './auth';
+import { embeddedIn, isAndroid, signInProblem } from './signInProblem';
+
+const ua = () => (typeof navigator === 'undefined' ? '' : navigator.userAgent);
+const siteUrl = () => `${location.origin}${location.pathname}`;
+
+/** Links to open this site in the phone's own browser: Chrome directly on Android, and a copy of the link anywhere. */
+function OpenElsewhere() {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(siteUrl()); setCopied(true); } catch { window.prompt?.(tr('Link copy করুন', 'Copy the link'), siteUrl()); }
+  };
+  const chrome = `intent://${location.host}${location.pathname}#Intent;scheme=https;package=com.android.chrome;end`;
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      {isAndroid(ua()) && <a href={chrome} className="inline-flex min-h-10 items-center rounded-xl border-2 border-ink bg-surface px-3 text-sm font-bold text-ink no-underline">{tr('Chrome-এ খুলুন', 'Open in Chrome')}</a>}
+      <button type="button" onClick={() => void copy()} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 text-sm font-bold text-ink">
+        {copied ? tr('Link copy হয়েছে ✓', 'Link copied ✓') : tr('Link copy করুন', 'Copy the link')}
+      </button>
+    </span>
+  );
+}
+
+/** Why the last sign-in did not finish, and what to do: tap again, or open the site in the phone's own browser. */
+export function SignInHelp({ code }: { code: string }) {
+  const p = signInProblem(code);
+  return (
+    <div role="alert" className="flex max-w-[46ch] flex-col items-start gap-2 rounded-xl border-2 border-coral bg-coral-soft px-3 py-2 text-sm text-ink">
+      <p className="m-0 font-semibold">{p.text} <span className="font-mono text-[11px] font-normal text-muted">({code})</span></p>
+      {p.elsewhere && <OpenElsewhere />}
+    </div>
+  );
+}
+
+/** Before any tap: inside Facebook, Messenger and similar apps Google refuses to sign in, so say so up front. */
+export function EmbeddedNote() {
+  const app = embeddedIn(ua());
+  if (!app) return null;
+  const name = app === 'app' ? tr('এই app', 'this app') : app;
+  return (
+    <div className="flex max-w-[46ch] flex-col items-start gap-2 rounded-xl border-2 border-ink bg-parcel-soft px-3 py-2 text-sm">
+      <p className="m-0 font-semibold">{tr(`${name}-এর ভেতরের browser-এ Google login চলে না। উপরের ⋮ মেনু থেকে "Open in browser" বেছে নিন, বা নিচ থেকে খুলুন।`, `Google sign-in does not work in ${name}'s built-in browser. Choose "Open in browser" from the ⋮ menu, or use a button below.`)}</p>
+      <OpenElsewhere />
+    </div>
+  );
+}
+
+/**
+ * Gets sign-in ready once a sign-in button is on screen, so a tap opens Google's window at once
+ * (see warmAuth). Returns handlers that start it sooner if the learner reaches for the button first.
+ */
+export function useWarmAuth() {
+  useEffect(() => whenIdle(warmAuth, 1500), []);
+  return { onPointerDown: warmAuth, onFocus: warmAuth, onPointerEnter: warmAuth };
+}
 
 const GoogleMark = () => (
   <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
@@ -19,8 +74,9 @@ const Avatar = ({ photo, name, size = 28 }: { photo: string | null; name: string
 
 /** Header control: a Google sign-in button for guests, the learner's avatar once signed in. */
 export function AuthButton() {
-  const { user, status, sync } = useAuth();
+  const { user, status, sync, signInError } = useAuth();
   const [busy, setBusy] = useState(false);
+  const warm = useWarmAuth();
   if (user) {
     const dot = sync === 'error' ? 'var(--color-coral)' : sync === 'syncing' ? 'var(--color-parcel)' : 'var(--color-route)';
     return (
@@ -32,11 +88,14 @@ export function AuthButton() {
     );
   }
   return (
-    <button type="button" disabled={busy || status === 'loading'}
-      onClick={async () => { setBusy(true); await signInWithGoogle(); setBusy(false); }}
-      className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-surface px-3 font-bold disabled:cursor-wait disabled:opacity-60">
-      <GoogleMark /> {busy || status === 'loading' ? tr('অপেক্ষা…', 'Wait…') : tr('Login', 'Sign in')}
-    </button>
+    <span className="relative">
+      <button type="button" disabled={busy || status === 'loading'} {...warm}
+        onClick={async () => { setBusy(true); await signInWithGoogle(); setBusy(false); }}
+        className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-surface px-3 font-bold disabled:cursor-wait disabled:opacity-60">
+        <GoogleMark /> {busy || status === 'loading' ? tr('অপেক্ষা…', 'Wait…') : tr('Login', 'Sign in')}
+      </button>
+      {signInError && !busy && <span className="absolute right-0 top-full z-30 mt-2 w-[min(18rem,80vw)] font-normal"><SignInHelp code={signInError} /></span>}
+    </span>
   );
 }
 

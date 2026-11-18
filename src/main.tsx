@@ -21,7 +21,7 @@ useProgress.subscribe((s) => setSoundEnabled(s.settings.sound ?? true));
 applyTheme(useProgress.getState().settings.theme);
 useProgress.subscribe((s, prev) => { if (s.settings.theme !== prev.settings.theme) applyTheme(s.settings.theme); });
 
-// bring back a signed-in session (guests never download Firebase)
+// bring back a signed-in session (for guests, Firebase loads only when the landing page is idle: see warmAuth)
 resumeAuth();
 
 createRoot(document.getElementById('root')!).render(
