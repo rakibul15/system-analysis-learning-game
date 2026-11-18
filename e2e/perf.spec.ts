@@ -60,3 +60,27 @@ test('a level opens from the map without waiting on a download', async ({ page }
   // about 4 s. The budget leaves room for slow runners and still catches a lost prefetch.
   expect(Date.now() - t0).toBeLessThan(2000);
 });
+
+test('switching chapters on the map answers the tap at once (INP)', async ({ page }) => {
+  await seed(page);
+  // how long each click kept the page from painting, as the browser's Event Timing reports it (what INP is made of)
+  await page.addInitScript(() => {
+    const w = window as unknown as { __clicks: number[] };
+    w.__clicks = [];
+    new PerformanceObserver((l) => { for (const e of l.getEntries()) if (e.name === 'click') w.__clicks.push(e.duration); })
+      .observe({ type: 'event', durationThreshold: 16, buffered: true } as PerformanceObserverInit);
+  });
+  await slowCpu(page);
+  await page.goto('./');
+  await expect(page.getByRole('button', { name: /^Level ১,/ })).toBeVisible();
+  await page.waitForLoadState('networkidle');
+  for (const ch of ['৩', '৪', '৫']) {
+    await page.getByRole('button', { name: new RegExp(`^অধ্যায় ${ch}`) }).click();
+    await expect(page.getByRole('heading', { level: 1 }).filter({ hasText: /\S/ }).first()).toBeVisible();
+    await page.waitForTimeout(600);
+  }
+  const worst = Math.max(0, ...await page.evaluate(() => (window as unknown as { __clicks: number[] }).__clicks));
+  // a chapter with eight stops used to take 3.8 s here (the map sampled its road through the DOM on every
+  // switch); now about 80 ms. The budget leaves room for slow CI runners.
+  expect(worst).toBeLessThan(400);
+});
