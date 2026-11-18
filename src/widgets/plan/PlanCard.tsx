@@ -19,6 +19,7 @@ function taskText(t: PlanTask): { title: string; note: string } {
     case 'mock': return { title: tr('৪৫ মিনিটের mock interview', '45-minute mock interview'), note: tr('Timer চালু, আসলের মতো', 'Timer on, like the real thing') };
     case 'read': return { title: tr(`DDIA অধ্যায় ${bn(t.chapter!)} পড়ুন`, `Read DDIA chapter ${t.chapter}`), note: tr('পড়া শেষে নিজের নোট', 'Write your own notes after') };
     case 'guided': return { title: tr('ধাপে ধাপে design', 'Step-by-step design'), note: tr('একটা পুরো সমস্যা, checklist সহ', 'One full problem, with a checklist') };
+    case 'placement': return { title: tr('Placement test: কোথা থেকে শুরু করবেন', 'Placement test: where to start'), note: tr('জানা অংশ খুলে যাবে, নতুন জায়গা থেকে শুরু', 'What you know opens up; start where it is new') };
   }
 }
 
@@ -32,6 +33,7 @@ function TaskLink({ t, children }: { t: PlanTask; children: React.ReactNode }) {
   if (t.kind === 'rebuild') return <Link to="/builder" search={{ memory: t.challengeId }} className={cls}>{children}</Link>;
   if (t.kind === 'mock') return <Link to="/mock" className={cls}>{children}</Link>;
   if (t.kind === 'read') return <Link to="/reading" className={cls}>{children}</Link>;
+  if (t.kind === 'placement') return <Link to="/placement" className={cls}>{children}</Link>;
   return <Link to="/practice" search={{ tab: 'guided' }} className={cls}>{children}</Link>;
 }
 

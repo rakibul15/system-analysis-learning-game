@@ -34,8 +34,25 @@ const isLevel = (v: unknown): v is Level => typeof v === 'object' && v !== null 
 
 const inflight = new Map<number, Promise<void>>();
 const done = new Set<number>();
+const banksDone = new Set<number>();
+const banksInflight = new Map<number, Promise<void>>();
 
 export const chapterLoaded = (ch: number) => done.has(ch);
+export const bankLoaded = (ch: number) => banksDone.has(ch);
+
+/** Only a chapter's question bank, without its lessons (the placement test needs no more). */
+export function loadBank(ch: number): Promise<void> {
+  if (banksDone.has(ch)) return Promise.resolve();
+  const questions = bank[ch];
+  if (!questions) return Promise.reject(new Error(`no chapter ${ch}`));
+  let p = banksInflight.get(ch);
+  if (!p) {
+    p = questions().then((levelBanks) => { register([], levelBanks); banksDone.add(ch); });
+    p.catch(() => banksInflight.delete(ch));
+    banksInflight.set(ch, p);
+  }
+  return p;
+}
 
 /** Fetches one chapter's content once; later calls share the same promise. A failed fetch can be retried. */
 export function loadChapter(ch: number): Promise<void> {
@@ -54,6 +71,7 @@ export function loadChapter(ch: number): Promise<void> {
       }
       register(levels, levelBanks);
       done.add(ch);
+      banksDone.add(ch);
     });
     p.catch(() => inflight.delete(ch));
     inflight.set(ch, p);

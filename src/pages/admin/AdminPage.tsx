@@ -366,8 +366,8 @@ function Learners({ data }: { data: AdminData }) {
       {shown.length === 0 && <p className="m-0 text-muted">{tr('কেউ নেই।', 'Nobody here.')}</p>}
       {shown.length > 0 && (
         <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-white">
-          <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-            <thead className="bg-[#F0F2EC]"><tr>{[tr('Learner', 'Learner'), tr('Level (পাস/খেলা)', 'Levels (passed/played)'), tr('Review card', 'Review cards'), tr('খেলার দিন', 'Days played'), tr('শেষ খেলা', 'Last played'), tr('শেষ দেখা', 'Last seen'), tr('উত্তর · report', 'Answers · reports')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
+          <table className="w-full min-w-[860px] border-collapse text-left text-sm">
+            <thead className="bg-[#F0F2EC]"><tr>{[tr('Learner', 'Learner'), tr('Level (পাস/খেলা)', 'Levels (passed/played)'), 'Placement', tr('Review card', 'Review cards'), tr('খেলার দিন', 'Days played'), tr('শেষ খেলা', 'Last played'), tr('শেষ দেখা', 'Last seen'), tr('উত্তর · report', 'Answers · reports')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
             <tbody>
               {shown.map((l) => (
                 <tr key={l.uid} className="border-t border-[#D7DED1] align-top">
@@ -380,6 +380,7 @@ function Learners({ data }: { data: AdminData }) {
                     <span className="font-mono text-xs text-muted">{l.uid}</span>
                   </td>
                   <td className="px-3 py-2 font-mono">{bn(l.summary?.passed ?? 0)}/{bn(l.summary?.played ?? 0)}</td>
+                  <td className="px-3 py-2">{l.summary?.placed == null ? '–' : tr(`${bn(l.summary.placed)}টা অধ্যায় জানা`, `${l.summary.placed} chapters known`)}</td>
                   <td className="px-3 py-2 font-mono">{bn(l.summary?.cards ?? 0)}</td>
                   <td className="px-3 py-2 font-mono">{bn(l.summary?.days ?? 0)}</td>
                   <td className="px-3 py-2">{l.summary?.lastDay ?? '–'}</td>

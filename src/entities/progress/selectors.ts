@@ -8,14 +8,24 @@ export type LevelState = 'done' | 'open' | 'locked';
 
 const chapterOf = (id: number) => chapters.find((c) => c.levels.includes(id))!;
 
+/** Chapters the placement test showed as known. */
+export const placedChapters = (p: Pick<ProgressData, 'placement'>) => new Set(p.placement?.mastered ?? []);
+
 /** Why a level is locked, in words, or null when it is open. */
 export function lockReason(id: number, p: ProgressData): string | null {
   if (p.settings.unlockAll || id === 1) return null;
   const ch = chapterOf(id);
+  const placed = placedChapters(p);
+  // a chapter shown as known in the placement test is open throughout
+  if (placed.has(ch.id)) return null;
   const first = ch.levels[0]!;
   if (id === first) {
+    // the chapter the placement test said to start from opens at its first level
+    if (p.placement?.start === ch.id) return null;
     const prevCh = ch.gate ? chapterOf(ch.gate) : chapters.find((c) => c.id === ch.id - 1)!;
     const gate = ch.gate ?? prevCh.levels[prevCh.levels.length - 1]!;
+    // a known chapter's last level counts as passed for the gate
+    if (placed.has(chapterOf(gate).id)) return null;
     return (p.levels[gate]?.best ?? 0) >= CHAPTER_GATE ? null : tr(`অধ্যায় ${toBn(prevCh.id)}-এর শেষ level (${toBn(gate)})-এ ${toBn(CHAPTER_GATE)}+ পেলে খুলবে`, `Opens at ${CHAPTER_GATE}+ on chapter ${prevCh.id}'s last level (${gate})`);
   }
   return (p.levels[id - 1]?.best ?? 0) >= PASS_MARK ? null : tr(`Level ${toBn(id - 1)}-এ ${toBn(PASS_MARK)}+ পেলে খুলবে`, `Opens at ${PASS_MARK}+ on level ${id - 1}`);

@@ -29,6 +29,20 @@ export interface SpeakAttempt { promptId: string; score: number; max: number; at
 /** Rebuild-from-memory schedule for one builder challenge (Leitner box like review cards). */
 export interface RebuildRecord { box: number; due: number; attempts: number; best: number }
 
+/**
+ * The placement test's outcome. Chapters in `mastered` have all their levels open and count
+ * as passed for chapter gates, but give no score or stars: those come only from playing.
+ */
+export interface PlacementRecord {
+  /** When the latest test was finished (ISO). */
+  at: string;
+  mastered: number[];
+  /** Chapters that got a verdict; the test may stop early. */
+  tested: number[];
+  /** Where to start: the first chapter not shown to be known, or null when all were. */
+  start: number | null;
+}
+
 /** One chapter of a reading track: 0 not started, 1 reading, 2 done; notes are the learner's own. */
 export interface ReadingRecord { status: 0 | 1 | 2; notes: string; updatedAt: string }
 
@@ -48,11 +62,17 @@ export interface ProgressData {
   rebuilds: Record<string, RebuildRecord>;
   /** Reading-track progress and notes, by chapter id. */
   reading: Record<string, ReadingRecord>;
-  settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number };
+  /** The placement test, once taken. */
+  placement: PlacementRecord | null;
+  /** skipPlacement: the learner chose to start at level 1 instead of the placement test. */
+  settings: { unlockAll: boolean; sound?: boolean; interviewDate?: string | null; dailyMinutes?: number; skipPlacement?: boolean };
 }
 
 interface ProgressActions {
   finishLevel: (levelId: number, run: { total: number; stars: 0 | 1 | 2 | 3; parts: LevelRecord['parts']; answers: AnswerLog[] }) => void;
+  /** Saves a placement result (merged with an earlier one) and turns its missed or guessed answers into review cards. */
+  finishPlacement: (result: Omit<PlacementRecord, 'at'>, answers: AnswerLog[]) => void;
+  setSkipPlacement: (on: boolean) => void;
   answerReview: (qid: string, correct: boolean, sure: boolean) => void;
   recordEstimationRound: (correct: number, total: number) => void;
   recordDesign: (a: DesignAttempt) => void;
@@ -80,8 +100,35 @@ export const emptyProgress = (): ProgressData => ({
   builds: {},
   rebuilds: {},
   reading: {},
+  placement: null,
   settings: { unlockAll: false },
 });
+
+/** Two placement results together: every chapter either showed as known; the later start, unless that chapter is now known. */
+export function mergePlacement(a: PlacementRecord | null, b: PlacementRecord | null): PlacementRecord | null {
+  if (!a || !b) return a ?? b;
+  const [older, newer] = a.at <= b.at ? [a, b] : [b, a];
+  const mastered = [...new Set([...a.mastered, ...b.mastered])].sort((x, y) => x - y);
+  const tested = [...new Set([...a.tested, ...b.tested])].sort((x, y) => x - y);
+  const candidates = [newer.start, older.start].filter((c): c is number => c !== null && !mastered.includes(c));
+  return { at: newer.at, mastered, tested, start: candidates[0] ?? null };
+}
+
+/** Review cards from answers: a sure right answer starts in box 2, anything else in box 1. */
+function withCards(cards: Record<string, ReviewCard>, answers: AnswerLog[], levelOf: (qid: string) => number, now = Date.now()) {
+  const out = { ...cards };
+  for (const a of answers) {
+    const old = out[a.qid];
+    const box = old ? nextBox(old.box, a.correct, a.sure) : a.correct && a.sure ? 1 : 0;
+    out[a.qid] = {
+      qid: a.qid, levelId: old?.levelId ?? levelOf(a.qid), box,
+      due: now + REVIEW_DAYS[box]! * DAY_MS,
+      lapses: (old?.lapses ?? 0) + (a.correct ? 0 : 1),
+      reviews: old?.reviews ?? 0,
+    };
+  }
+  return out;
+}
 
 /** Days until the next rebuild-from-memory, by box. */
 export const REBUILD_DAYS = [1, 3, 7, 21, 60] as const;
@@ -107,17 +154,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
           const prev = s.levels[levelId];
           const better = !prev || run.total >= prev.best;
           const now = Date.now();
-          const cards = { ...s.cards };
-          for (const a of run.answers) {
-            const old = cards[a.qid];
-            const box = old ? nextBox(old.box, a.correct, a.sure) : a.correct && a.sure ? 1 : 0;
-            cards[a.qid] = {
-              qid: a.qid, levelId, box,
-              due: now + REVIEW_DAYS[box]! * DAY_MS,
-              lapses: (old?.lapses ?? 0) + (a.correct ? 0 : 1),
-              reviews: old?.reviews ?? 0,
-            };
-          }
+          const cards = withCards(s.cards, run.answers, () => levelId, now);
           return {
             cards,
             days: withToday(s.days),
@@ -133,6 +170,14 @@ export const useProgress = create<ProgressData & ProgressActions>()(
             },
           };
         }),
+      finishPlacement: (result, answers) =>
+        set((s) => ({
+          days: withToday(s.days),
+          // like a level: every answer becomes a card; a sure right one starts a box higher
+          cards: withCards(s.cards, answers, (qid) => Number(/^l(\d+)-/.exec(qid)?.[1] ?? 0)),
+          placement: mergePlacement(s.placement, { ...result, at: new Date().toISOString() }),
+        })),
+      setSkipPlacement: (on) => set((s) => ({ settings: { ...s.settings, skipPlacement: on } })),
       answerReview: (qid, correct, sure) =>
         set((s) => {
           const old = s.cards[qid];
@@ -182,7 +227,7 @@ export const useProgress = create<ProgressData & ProgressActions>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({
         levels: s.levels, cards: s.cards, days: s.days, reviewXp: s.reviewXp,
-        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, rebuilds: s.rebuilds, reading: s.reading, settings: s.settings,
+        estimation: s.estimation, design: s.design, speak: s.speak, incidents: s.incidents, builds: s.builds, rebuilds: s.rebuilds, reading: s.reading, placement: s.placement, settings: s.settings,
       }),
       // v1 (the pilot) only stored the traffic level as level 3; it is level 1 now.
       migrate: (persisted, version) => {
@@ -203,6 +248,6 @@ export const useProgress = create<ProgressData & ProgressActions>()(
 );
 
 export function exportProgress(s: ProgressData): string {
-  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, settings } = s;
-  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, settings }, null, 2);
+  const { levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, placement, settings } = s;
+  return JSON.stringify({ app: 'system-analysis-learning-game', version: 3, exportedAt: new Date().toISOString(), levels, cards, days, reviewXp, estimation, design, speak, incidents, builds, rebuilds, reading, placement, settings }, null, 2);
 }

@@ -10,8 +10,13 @@ import { CityMap, type MapStopView } from '@/widgets/city-map/CityMap';
 import { tr } from '@/shared/lib/i18n';
 import { PlanCard } from '@/widgets/plan/PlanCard';
 
-/** Where to land: the chapter with the first open, unplayed level. */
+/** Where to land: the placement test's start chapter, else the chapter with the first open, unplayed level. */
 function startingPoint(p: ReturnType<typeof useProgress.getState>) {
+  const placed = p.placement?.start != null ? chapters.find((c) => c.id === p.placement!.start) : undefined;
+  if (placed) {
+    const i = placed.levels.findIndex((id) => levelState(id, p) === 'open');
+    if (i >= 0) return { chapter: placed.id, index: i };
+  }
   for (const c of chapters) {
     const i = c.levels.findIndex((id) => levelState(id, p) === 'open');
     if (i >= 0) return { chapter: c.id, index: i };
@@ -31,10 +36,27 @@ export function MapPage() {
   const rec = p.levels[S.level.id];
   const reason = lockReason(S.level.id, p);
   const due = dueCards(p).length;
+  const setSkipPlacement = useProgress((s) => s.setSkipPlacement);
+  // someone who has not played yet chooses: find out where to start, or begin at level 1
+  const fresh = Object.keys(p.levels).length === 0 && !p.placement && !p.settings.skipPlacement;
+  const placed = new Set(p.placement?.mastered ?? []);
 
   return (
     <AppShell>
       <main className="mx-auto box-border flex max-w-[1280px] flex-col gap-4 px-4 pb-10 pt-5 sm:px-8">
+        {fresh && (
+          <section aria-labelledby="start-where" className="flex flex-wrap items-center gap-4 rounded-[20px] border-[3px] border-ink bg-white p-5 shadow-[0_6px_0_#16252D]">
+            <div className="min-w-0 flex-[1_1_320px]">
+              <p className="m-0 text-sm font-bold text-route-deep">{tr('স্বাগতম!', 'Welcome!')}</p>
+              <h2 id="start-where" className="m-0 font-display text-2xl font-extrabold">{tr('কোথা থেকে শুরু করবেন?', 'Where would you like to start?')}</h2>
+              <p className="m-0 mt-1 max-w-[62ch] text-ink-soft">{tr('System design আগে থেকে কিছুটা জানলে ৫ মিনিটের placement test দিন: জানা অধ্যায় খুলে যাবে, শুরু করবেন নতুন জায়গা থেকে। একদম নতুন হলে Level ১ থেকে।', 'If you already know some system design, take the 5-minute placement test: chapters you know open up and you start where it gets new. New to it? Start at level 1.')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/placement" className="btn-press inline-flex min-h-[52px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-5 font-display text-lg font-extrabold text-ink no-underline shadow-[0_4px_0_#16252D]">{tr('Placement test · ৫ মিনিট', 'Placement test · 5 min')}</Link>
+              <button type="button" onClick={() => setSkipPlacement(true)} className="min-h-[52px] cursor-pointer rounded-2xl border-[2.5px] border-ink bg-white px-4 font-semibold">{tr('Level ১ থেকে শুরু', 'Start at level 1')}</button>
+            </div>
+          </section>
+        )}
         <PlanCard />
         <nav aria-label={tr('অধ্যায়', 'Chapters')} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
           {chapters.map((c) => {
@@ -49,7 +71,7 @@ export function MapPage() {
                 onClick={() => { setChapterId(c.id); setSel(Math.max(0, c.levels.findIndex((id) => levelState(id, p) === 'open'))); }}
                 className={`relative flex min-w-[150px] flex-none cursor-pointer flex-col items-start rounded-2xl border-[2.5px] px-3.5 py-2 text-left font-[inherit] ${active ? 'border-ink bg-ink text-white shadow-[0_4px_0_#FFC02E]' : 'border-ink bg-white text-ink'}`}
               >
-                <span className="text-xs font-bold opacity-80">{tr('অধ্যায়', 'Chapter')} {bn(c.id)} {firstLocked ? tr('· তালা', '· locked') : ''}</span>
+                <span className="text-xs font-bold opacity-80">{tr('অধ্যায়', 'Chapter')} {bn(c.id)} {firstLocked ? tr('· তালা', '· locked') : placed.has(c.id) ? tr('· জানা ✓', '· known ✓') : ''}</span>
                 <span className="font-display text-[15px] font-bold leading-tight">{c.title}</span>
                 <span className="mt-1 flex w-full gap-1">
                   {c.levels.map((id) => {

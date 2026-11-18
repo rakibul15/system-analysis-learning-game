@@ -24,6 +24,8 @@ interface Props {
   tone?: 'light' | 'boss';
   /** Where the question was asked, for the per-question statistics. */
   where?: Where;
+  /** Move on as soon as it is answered, without showing right or wrong (the placement test). */
+  instant?: boolean;
 }
 
 const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math.round(n * 10) / 10), { grouping: false });
@@ -32,7 +34,7 @@ const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math
  * One multiple-choice question with confidence marking.
  * Options are shuffled per question id (the content keeps the right one first).
  */
-export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light', where = 'other' }: Props) {
+export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light', where = 'other', instant = false }: Props) {
   // a fresh order every time the question is shown, so positions cannot be memorised
   const [nonce] = useState(() => Math.random().toString(36).slice(2));
   const order = useMemo(() => shuffledOrder(`${q.id}:${nonce}`, q.options.length), [q.id, q.options.length, nonce]);
@@ -107,6 +109,8 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               type="button"
               role="radio"
               aria-checked={isPicked}
+              // end-to-end builds only: lets a test answer right on purpose
+              data-right={import.meta.env.VITE_E2E === '1' && oi === 0 ? '' : undefined}
               disabled={done}
               onClick={() => setPicked(oi)}
               className={`flex min-h-[52px] w-full items-start gap-3 rounded-[14px] border-2 px-3.5 py-3 text-left font-[inherit] text-[16px] transition-colors enabled:cursor-pointer ${cls}`}
@@ -143,12 +147,13 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               data-testid="q-answer"
               disabled={!ready}
               onClick={() => {
-                setDone(true);
                 logAnswer({ q: q.id, c: correct ? 1 : 0, s: sure ? 1 : 0, o: optionKey(q.options[picked!] ?? ''), p: optionKey(q.prompt), w: where });
+                if (instant) onDone({ qid: q.id, correct, sure: !!sure, earned });
+                else setDone(true);
               }}
               className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
             >
-              {tr('উত্তর দিন', 'Answer')}
+              {instant ? continueLabel : tr('উত্তর দিন', 'Answer')}
             </button>
             {q.hint && onHint && (
               <button

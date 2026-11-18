@@ -26,6 +26,7 @@ const ReadingPage = lazyRouteComponent(() => import('@/pages/reading/ReadingPage
 const NotePage = lazyRouteComponent(() => import('@/pages/notes/NotePage'), 'NotePage');
 const DeepPage = lazyRouteComponent(() => import('@/pages/deep/DeepPage'), 'DeepPage');
 const AdminPage = lazyRouteComponent(() => import('@/pages/admin/AdminPage'), 'AdminPage');
+const PlacementPage = lazyRouteComponent(() => import('@/pages/placement/PlacementPage'), 'PlacementPage');
 
 
 function LoadError({ reset }: ErrorComponentProps) {
@@ -78,6 +79,7 @@ const deepRoute = createRoute({
 const readingRoute = createRoute({ getParentRoute: () => rootRoute, path: '/reading', component: ReadingPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin', component: AdminPage });
+const placementRoute = createRoute({ getParentRoute: () => rootRoute, path: '/placement', component: PlacementPage });
 
 const levelRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -91,7 +93,7 @@ const levelRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute, placementRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,

@@ -27,7 +27,7 @@ export const allPartNames = () => ['levels', 'activity', 'practice', 'reading', 
 export function splitProgress(p: ProgressData): Parts {
   const out: Record<string, unknown> = {
     levels: p.levels,
-    activity: { days: p.days, reviewXp: p.reviewXp, estimation: p.estimation, design: p.design, speak: p.speak },
+    activity: { days: p.days, reviewXp: p.reviewXp, estimation: p.estimation, design: p.design, speak: p.speak, placement: p.placement },
     practice: { incidents: p.incidents, builds: p.builds, rebuilds: p.rebuilds },
     reading: p.reading,
     settings: p.settings,

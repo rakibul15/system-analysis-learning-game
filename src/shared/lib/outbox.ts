@@ -6,7 +6,7 @@ import { lang, type Lang } from '@/shared/lib/i18n';
  * Nothing is lost offline or before sign-in; the queue is capped so it cannot grow forever.
  */
 
-export type Where = 'predict' | 'lesson' | 'mission' | 'boss' | 'review' | 'other';
+export type Where = 'predict' | 'lesson' | 'mission' | 'boss' | 'review' | 'placement' | 'other';
 /**
  * One answer: question, right (1/0), sure (1/0), which option (a short key of its text),
  * which version of the question (a short key of its prompt), where, when.

@@ -100,6 +100,21 @@ export function ProfilePage() {
           </div>
         </section>
 
+        <section aria-label="Placement test" className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border-[3px] border-ink bg-white p-6">
+          <div className="min-w-0 flex-[1_1_300px]">
+            <h2 className="m-0 font-display text-xl font-bold">Placement test</h2>
+            <p className="m-0 mt-1 text-ink-soft">
+              {p.placement
+                ? tr(
+                  `${p.placement.mastered.length ? `জানা অধ্যায়: ${p.placement.mastered.map((c) => bn(c)).join(', ')}, এগুলো খোলা।` : 'কোনো অধ্যায় এখনো জানা দেখায়নি।'} ${p.placement.start ? `শুরু: অধ্যায় ${bn(p.placement.start)}।` : ''}`,
+                  `${p.placement.mastered.length ? `Known chapters: ${p.placement.mastered.join(', ')}, open.` : 'No chapter showed as known yet.'} ${p.placement.start ? `Start: chapter ${p.placement.start}.` : ''}`,
+                )
+                : tr('জানা অধ্যায়গুলো বাদ দিতে চান? ৫ মিনিটের test দিলে ওগুলো খুলে যাবে।', 'Want to skip what you already know? A 5-minute test opens those chapters.')}
+            </p>
+          </div>
+          <Link to="/placement" className="btn-press inline-flex min-h-12 items-center rounded-xl border-2 border-ink bg-white px-4 font-semibold text-ink no-underline">{p.placement ? tr('আবার দিন', 'Take it again') : tr('Test দিন', 'Take the test')}</Link>
+        </section>
+
         <section aria-label={tr('এরপর কী শিখবেন', 'What to learn next')} className="flex flex-col gap-3 rounded-[24px] border-[3px] border-ink bg-white p-6">
           <h2 className="m-0 font-display text-xl font-bold">{tr('এরপর কী শিখবেন: দুর্বল ধারণা', 'What to learn next: weak concepts')}</h2>
           {weak.length === 0 ? (

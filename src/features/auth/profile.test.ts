@@ -7,10 +7,11 @@ const lvl = (best: number) => ({ best, stars: 1 as const, plays: 1, lastPlayedAt
 
 describe('progress summary for the profile', () => {
   it('is empty for a new learner', () => {
-    expect(summarize(emptyProgress())).toEqual({ passed: 0, played: 0, cards: 0, days: 0, lastDay: null });
+    expect(summarize(emptyProgress())).toEqual({ passed: 0, played: 0, cards: 0, days: 0, lastDay: null, placed: null });
   });
   it('counts passed and played levels, cards and days', () => {
     const p = { ...emptyProgress(), levels: { 1: lvl(PASS_MARK), 2: lvl(PASS_MARK - 1) }, cards: { a: {} as never, b: {} as never }, days: ['2026-11-03', '2026-11-01'] };
-    expect(summarize(p)).toEqual({ passed: 1, played: 2, cards: 2, days: 2, lastDay: '2026-11-03' });
+    expect(summarize(p)).toEqual({ passed: 1, played: 2, cards: 2, days: 2, lastDay: '2026-11-03', placed: null });
+    expect(summarize({ ...p, placement: { at: 'x', mastered: [1, 2], tested: [1, 2, 3], start: 3 } }).placed).toBe(2);
   });
 });

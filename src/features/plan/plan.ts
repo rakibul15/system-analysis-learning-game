@@ -1,12 +1,12 @@
 import { levelMetaList, levelMeta } from '@/content/meta';
 import type { ProgressData } from '@/entities/progress/store';
-import { dueCards } from '@/entities/progress/selectors';
+import { dueCards, placedChapters } from '@/entities/progress/selectors';
 import { dueRebuilds } from '@/features/rebuild/rebuild';
 import { DAY_MS, PASS_MARK, dayKey } from '@/shared/lib/scoring';
 import { chapters } from '@/features/reading/ddia';
 import { weakConcepts } from './concepts';
 
-export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'concept' | 'mock' | 'guided' | 'read';
+export type TaskKind = 'level' | 'review' | 'rebuild' | 'weak' | 'concept' | 'mock' | 'guided' | 'read' | 'placement';
 export interface PlanTask { id: string; kind: TaskKind; minutes: number; done: boolean; levelId?: number; count?: number; challengeId?: string; chapter?: number; concept?: { label: string; note?: string; deep?: string } }
 export type Phase = 'none' | 'learn' | 'final' | 'after';
 
@@ -27,6 +27,7 @@ export const LEVEL_MIN = 15;
 export const REBUILD_MIN = 8;
 export const READ_MIN = 25;
 export const CONCEPT_MIN = 10;
+export const PLACEMENT_MIN = 7;
 const REVIEW_MIN_EACH = 0.5;
 const FINAL_DAYS = 2;
 
@@ -42,7 +43,9 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
   const passed = (id: number) => (p.levels[id]?.best ?? 0) >= PASS_MARK;
   const playedToday = (id: number) => !!p.levels[id] && dayKey(new Date(p.levels[id]!.lastPlayedAt)) === today;
   const order = levelMetaList.map((l) => l.id);
-  const remainingIds = order.filter((id) => !passed(id));
+  // chapters the placement test showed as known are open but optional: they are not part of the path
+  const placed = placedChapters(p);
+  const remainingIds = order.filter((id) => !passed(id) && !placed.has(levelMeta[id]!.chapter));
   const doneToday = order.filter((id) => passed(id) && playedToday(id));
 
   const reviewsDue = Math.min(20, dueCards(p, now).length);
@@ -58,6 +61,9 @@ export function planToday(p: ProgressData, now = Date.now()): DayPlan {
   const target = phase === 'final' ? 0 : phase === 'learn' ? needPerDay : Math.min(fitPerDay, 2);
 
   const tasks: PlanTask[] = [];
+  // someone who has not played yet can first find out where to start
+  const fresh = Object.keys(p.levels).length === 0 && !p.placement && !p.settings.skipPlacement;
+  if (fresh) tasks.push({ id: 'placement', kind: 'placement', minutes: PLACEMENT_MIN, done: false });
   if (reviewsDue > 0) tasks.push({ id: 'review', kind: 'review', minutes: Math.max(2, Math.ceil(reviewsDue * REVIEW_MIN_EACH)), done: false, count: reviewsDue });
   for (const r of rebuilds) tasks.push({ id: `rebuild:${r.challenge.id}`, kind: 'rebuild', minutes: REBUILD_MIN, done: false, challengeId: r.challenge.id });
 
