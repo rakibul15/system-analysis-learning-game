@@ -29,6 +29,7 @@ const NotePage = lazyRouteComponent(() => import('@/pages/notes/NotePage'), 'Not
 const DeepPage = lazyRouteComponent(() => import('@/pages/deep/DeepPage'), 'DeepPage');
 const AdminPage = lazyRouteComponent(() => import('@/pages/admin/AdminPage'), 'AdminPage');
 const PlacementPage = lazyRouteComponent(() => import('@/pages/placement/PlacementPage'), 'PlacementPage');
+const GamePage = lazyRouteComponent(() => import('@/pages/game/GamePage'), 'GamePage');
 
 
 /** A screen failed: a download that did not arrive (offline, or a new version) or a crash in its code. */
@@ -100,8 +101,20 @@ const levelRoute = createRoute({
   },
 });
 
+/** "ParcelGo বাঁচাও" (a preview): a scenario's waves, played on its own screen. */
+const gameRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/game/$scenarioId',
+  loader: ({ params }) => Promise.all([import('@/game/scenarios').then((m) => m.scenarios[params.scenarioId] ?? null), GamePage.preload?.()]).then(([sc]) => sc),
+  component: function GameRouteView() {
+    const sc = gameRoute.useLoaderData();
+    if (!sc) return <NotFound />;
+    return <GamePage key={sc.id} sc={sc} />;
+  },
+});
+
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute, placementRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute, placementRoute, gameRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,
