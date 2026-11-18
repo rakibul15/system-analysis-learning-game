@@ -7,6 +7,7 @@ import { tr } from '@/shared/lib/i18n';
 import { LoadFailed, PageLoading } from '@/shared/ui/Loading';
 import { AuthGate } from './AuthGate';
 import { ReaderHost } from '@/features/books/ReaderHost';
+import { UpdateNotice } from '@/shared/ui/UpdateNotice';
 
 /*
  * Only the map is in the first download. Every other screen, and each chapter's
@@ -42,7 +43,7 @@ function NotFound() {
   );
 }
 
-const rootRoute = createRootRoute({ component: () => <AuthGate><Outlet /><ReaderHost /></AuthGate>, notFoundComponent: NotFound });
+const rootRoute = createRootRoute({ component: () => <><AuthGate><Outlet /><ReaderHost /></AuthGate><UpdateNotice /></>, notFoundComponent: NotFound });
 
 const mapRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: MapPage });
 const reviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/review', component: ReviewPage });

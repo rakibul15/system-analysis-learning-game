@@ -11,7 +11,9 @@ export default defineConfig({
     tailwindcss(),
     // installable and fully playable offline once visited
     VitePWA({
-      registerType: 'autoUpdate',
+      // a new version waits until the learner reloads (see UpdateNotice), so an open tab keeps its own files
+      registerType: 'prompt',
+      injectRegister: false,
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
         name: 'ParcelGo · System design শেখার খেলা',
