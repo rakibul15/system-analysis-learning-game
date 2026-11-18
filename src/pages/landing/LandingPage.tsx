@@ -19,7 +19,7 @@ function SignInButton({ big = false }: { big?: boolean }) {
   return (
     <div className="flex flex-col items-start gap-2">
       <button type="button" disabled={waiting} onClick={async () => { setBusy(true); await signInWithGoogle(); setBusy(false); }}
-        className={`btn-press flex cursor-pointer items-center gap-3 rounded-2xl border-[3px] border-ink bg-white font-bold shadow-press disabled:cursor-wait disabled:opacity-70 ${big ? 'min-h-14 px-6 text-lg' : 'min-h-11 px-4'}`}>
+        className={`btn-press flex cursor-pointer items-center gap-3 rounded-2xl border-[3px] border-ink bg-surface font-bold shadow-press disabled:cursor-wait disabled:opacity-70 ${big ? 'min-h-14 px-6 text-lg' : 'min-h-11 px-4'}`}>
         <G /> {waiting ? tr('Google খুলছে…', 'Opening Google…') : tr('Google দিয়ে শুরু করুন', 'Start with Google')}
       </button>
       {big && error && <p role="alert" className="m-0 text-sm font-semibold text-coral-deep">{tr('Login হয়নি, আবার চেষ্টা করুন।', 'Sign-in failed, please try again.')}</p>}
@@ -91,7 +91,7 @@ export function LandingPage() {
         </span>
         <span className="flex items-center gap-2">
           <button type="button" onClick={() => switchLang(isEn ? 'bn' : 'en')} lang={isEn ? 'bn' : 'en'} aria-label={isEn ? 'বাংলায় দেখুন' : 'Switch to English'}
-            className="h-11 min-w-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-white px-2 font-bold">{isEn ? 'বাং' : 'EN'}</button>
+            className="h-11 min-w-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-surface px-2 font-bold">{isEn ? 'বাং' : 'EN'}</button>
           <span className="hidden sm:block"><SignInButton /></span>
         </span>
       </header>
@@ -109,12 +109,12 @@ export function LandingPage() {
             <SignInButton big />
             <p className="m-0 text-sm text-muted">{tr('বিনামূল্যে · ফোন আর laptop দুটোতেই চলে · progress আপনার account-এ save থাকে', 'Free · works on phone and laptop · progress is saved to your account')}</p>
           </div>
-          <div className="min-w-0 rounded-[30px] border-[3px] border-ink bg-white p-3 shadow-block"><HeroMap /></div>
+          <div className="min-w-0 rounded-[30px] border-[3px] border-ink bg-surface p-3 shadow-block"><HeroMap /></div>
         </section>
 
         <section aria-label={tr('সংখ্যায়', 'In numbers')} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.t} className="rounded-2xl border-[3px] border-ink bg-white px-4 py-3">
+            <div key={s.t} className="rounded-2xl border-[3px] border-ink bg-surface px-4 py-3">
               <div className="font-display text-3xl font-extrabold">{bn(s.n)}</div>
               <div className="font-semibold text-muted">{s.t}</div>
             </div>
@@ -125,7 +125,7 @@ export function LandingPage() {
           <h2 className="m-0 font-display text-[28px] font-extrabold [text-wrap:balance]">{tr('পড়ে নয়, খেলে মনে থাকে', 'You remember it because you played it')}</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {FEATURES.map((f) => (
-              <article key={f.title} className="flex gap-4 rounded-[22px] border-[3px] border-ink bg-white p-5">
+              <article key={f.title} className="flex gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-5">
                 <span aria-hidden="true" className="grid h-12 w-12 flex-none place-items-center rounded-xl border-[2.5px] border-ink bg-parcel text-xl font-extrabold">{f.icon}</span>
                 <div className="min-w-0">
                   <h3 className="m-0 font-display text-lg font-bold">{f.title}</h3>
@@ -144,7 +144,7 @@ export function LandingPage() {
               [tr('Level ১ থেকে শুরু', 'Start at level 1'), tr('"প্রথম ভিড়": একটা server-এ হঠাৎ হাজার অর্ডার এলে কী হয়?', '"First rush": what happens when a single server suddenly gets a thousand orders?')],
               [tr('প্রতিদিন একটু', 'A little every day'), tr('Streak রাখুন, review করুন। যেকোনো device-এ login করলেই progress পাবেন।', 'Keep the streak and do your reviews. Sign in on any device and your progress is there.')],
             ].map(([t, d], i) => (
-              <li key={t} className="flex gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5">
+              <li key={t} className="flex gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5">
                 <span className="grid h-10 w-10 flex-none place-items-center rounded-full border-[2.5px] border-ink bg-route-soft font-display text-lg font-extrabold">{bn(i + 1)}</span>
                 <div className="min-w-0"><div className="font-bold">{t}</div><p className="m-0 mt-1 text-ink-soft">{d}</p></div>
               </li>

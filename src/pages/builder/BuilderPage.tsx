@@ -26,8 +26,8 @@ const COLOR: Record<PartKind, string> = {
 const FLOW_COLOR = ['#2F6FDE', '#E0483E', '#0B8A7A', '#B8730A'];
 const STATUS: Record<FlowStatus, { text: string; cls: string }> = {
   ok: { text: tr('চলছে', 'Working'), cls: 'bg-route-soft text-route-deep' },
-  slow: { text: tr('চলছে, তবে ধীরে', 'Working, but slowly'), cls: 'bg-parcel-soft text-[#7A4D00]' },
-  queued: { text: tr('Queue-তে জমা, পরে যাবে', 'Held in the queue, will go later'), cls: 'bg-[#EDE6F8] text-[#4B2F7A]' },
+  slow: { text: tr('চলছে, তবে ধীরে', 'Working, but slowly'), cls: 'bg-parcel-soft text-parcel-deep' },
+  queued: { text: tr('Queue-তে জমা, পরে যাবে', 'Held in the queue, will go later'), cls: 'bg-violet-soft text-violet-deep' },
   down: { text: tr('বন্ধ', 'Down'), cls: 'bg-coral-soft text-coral-deep' },
 };
 
@@ -56,22 +56,22 @@ export function BuilderPage() {
             </div>
             <div role="tablist" aria-label={tr('ধরন', 'Kind')} className="flex flex-wrap gap-2">
               {([['design', tr('Design challenge', 'Design challenges')], ['db', tr('Database design', 'Database design')], ['migrate', tr('Migration', 'Migrations')]] as const).map(([k, l]) => (
-                <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+                <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
               ))}
             </div>
             {section === 'migrate' ? <MigrationLab /> : section === 'db' ? <DbDesignLab /> : <>
             {due.length > 0 && (
-              <section className="rounded-[20px] border-[3px] border-ink bg-[#EDE6F8] p-4">
+              <section className="rounded-[20px] border-[3px] border-ink bg-violet-soft p-4">
                 <h2 className="m-0 font-display text-lg font-bold">{tr('আজ না দেখে আবার আঁকুন', 'Redraw from memory today')}</h2>
                 <p className="m-0 mt-1 text-sm text-ink-soft">{tr('নিয়ম লুকানো থাকবে, শুধু সমস্যাটা। পুরো ঠিক হলে পরের বার আরও দেরিতে আসবে।', 'The rules stay hidden, only the problem shows. Get it fully right and it comes back later next time.')}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {due.map((r) => <button key={r.challenge.id} type="button" onClick={() => setOpen({ c: r.challenge, memory: true })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold shadow-[0_3px_0_#16252D]">{r.challenge.title}</button>)}
+                  {due.map((r) => <button key={r.challenge.id} type="button" onClick={() => setOpen({ c: r.challenge, memory: true })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold shadow-[0_3px_0_var(--color-shadow)]">{r.challenge.title}</button>)}
                 </div>
               </section>
             )}
             <div className="grid gap-3 sm:grid-cols-2">
               {challenges.map((c) => (
-                <button key={c.id} type="button" onClick={() => setOpen({ c, memory: false })} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+                <button key={c.id} type="button" onClick={() => setOpen({ c, memory: false })} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-[18px] border-[2.5px] border-ink bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
                   <span className="text-xs font-bold text-route-deep">{tr(`Level ${bn(c.level)}-এর বিষয়`, `Topic of level ${c.level}`)}</span>
                   <span className="font-display text-lg font-bold">{c.title}</span>
                   <span className="text-sm text-ink-soft">{c.brief}</span>
@@ -169,7 +169,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
   const shownRules = memory && !checked;
   return (
     <div className="flex flex-col gap-4">
-      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">{tr('← সব challenge', '← All challenges')}</button>
+      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 py-2 font-bold">{tr('← সব challenge', '← All challenges')}</button>
       <div>
         <p className="m-0 text-xs font-bold text-route-deep">Architecture builder · Level {bn(c.level)}{memory ? tr(' · না দেখে আঁকা', ' · from memory') : ''}</p>
         <h1 className="m-0 font-display text-[28px] font-extrabold">{c.title}</h1>
@@ -179,12 +179,12 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
       <div role="tablist" aria-label={tr('Mode', 'Mode')} className="flex flex-wrap gap-2">
         {([['build', tr('আঁকুন', 'Build')], ['chaos', tr('ভাঙুন ও চালান', 'Break it and run')], ['cost', tr('খরচ ও capacity', 'Cost and capacity')]] as const).map(([m, l]) => (
           <button key={m} role="tab" type="button" aria-selected={mode === m} onClick={() => switchMode(m)}
-            className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${mode === m ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+            className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${mode === m ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
         {mode !== 'chaos' ? (
-          <section aria-label={tr('অংশ', 'Parts')} className="flex flex-wrap content-start gap-2 rounded-[20px] border-[3px] border-ink bg-white p-3 lg:flex-col">
+          <section aria-label={tr('অংশ', 'Parts')} className="flex flex-wrap content-start gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-3 lg:flex-col">
             <span className="w-full text-xs font-bold text-muted">{tr('যোগ করুন', 'Add')}</span>
             {c.palette.filter((k) => k !== 'client').map((k) => (
               <button key={k} type="button" onClick={() => add(k)} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink px-3 text-left text-sm font-semibold" style={{ background: COLOR[k] }}>+ {PARTS[k].label}{mode === 'cost' && <span className="ml-1 font-mono text-xs">${SPEC[k].cost}</span>}</button>
@@ -192,10 +192,10 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
             <button type="button" disabled={!sel || g.nodes.find((n) => n.id === sel)?.kind === 'client'} onClick={remove} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-coral px-3 text-sm font-bold text-white disabled:opacity-40">{tr('বাছাই করা অংশ মুছুন', 'Delete the selected part')}</button>
           </section>
         ) : (
-          <section aria-label={tr('ভাঙার নিয়ন্ত্রণ', 'Failure controls')} className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-white p-3 text-sm">
+          <section aria-label={tr('ভাঙার নিয়ন্ত্রণ', 'Failure controls')} className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-3 text-sm">
             <p className="m-0 font-semibold">{tr('Canvas-এ যেকোনো অংশে click করে বন্ধ করুন। আবার click করলে চালু।', 'Click any part on the canvas to switch it off. Click again to bring it back.')}</p>
-            <button type="button" onClick={() => { setDown(new Set()); }} disabled={!down.size} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-semibold disabled:opacity-40">{tr('সব আবার চালু', 'Restore everything')}</button>
-            <button type="button" onClick={() => { setScan(singlePoints(g, c.id)); play('tap'); }} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-3 font-bold shadow-[0_3px_0_#16252D]">{tr('একে একে সব ভেঙে দেখুন', 'Break each part in turn')}</button>
+            <button type="button" onClick={() => { setDown(new Set()); }} disabled={!down.size} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 font-semibold disabled:opacity-40">{tr('সব আবার চালু', 'Restore everything')}</button>
+            <button type="button" onClick={() => { setScan(singlePoints(g, c.id)); play('tap'); }} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-3 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('একে একে সব ভেঙে দেখুন', 'Break each part in turn')}</button>
             {scan && (
               <div className="pop-in rounded-xl border-2 border-ink p-2" role="status">
                 {scan.length === 0
@@ -209,7 +209,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
             )}
           </section>
         )}
-        <section aria-label="Canvas" className="relative min-w-0 overflow-x-auto rounded-[20px] border-[3px] border-ink bg-[#F7F8F3]">
+        <section aria-label="Canvas" className="relative min-w-0 overflow-x-auto rounded-[20px] border-[3px] border-ink bg-surface-sunk">
           <p className="m-0 px-3 pt-2 text-xs text-muted">
             {mode === 'chaos' ? tr('রঙিন বিন্দু = request; লাল ✕ = বন্ধ অংশ', 'Coloured dots are requests; a red ✕ is a part that is down')
               : sel ? tr('এবার যেখানে তীর যাবে সেটায় click করুন (আবার click করলে তীর মুছে যায়)', 'Now click where the arrow should go (clicking again removes it)') : tr('তীর টানতে: আগে উৎস, তারপর গন্তব্যে click', 'To draw an arrow: click the source, then the target')}
@@ -241,27 +241,27 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
           </svg>
         </section>
         {mode === 'build' ? (
-          <section aria-label={tr('নিয়ম', 'Rules')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4">
+          <section aria-label={tr('নিয়ম', 'Rules')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-surface p-4">
             <h2 className="m-0 font-display text-lg font-bold">{tr('যা লাগবে', 'Requirements')}</h2>
             {shownRules ? (
-              <p className="m-0 rounded-lg bg-[#EDE6F8] px-3 py-2 text-sm">{tr(`${bn(c.rules.length)}টা নিয়ম লুকানো। সমস্যাটা পড়ে মনে করে আঁকুন, তারপর যাচাই।`, `${c.rules.length} rules are hidden. Read the problem, draw from memory, then check.`)}</p>
+              <p className="m-0 rounded-lg bg-violet-soft px-3 py-2 text-sm">{tr(`${bn(c.rules.length)}টা নিয়ম লুকানো। সমস্যাটা পড়ে মনে করে আঁকুন, তারপর যাচাই।`, `${c.rules.length} rules are hidden. Read the problem, draw from memory, then check.`)}</p>
             ) : (
               <ol className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
                 {c.rules.map((r, i) => (
-                  <li key={r.text} className={`flex gap-2 rounded-lg px-2 py-1.5 ${checked ? (checked[i] ? 'bg-route-soft' : 'bg-coral-soft') : 'bg-[#F0F2EC]'}`}>
+                  <li key={r.text} className={`flex gap-2 rounded-lg px-2 py-1.5 ${checked ? (checked[i] ? 'bg-route-soft' : 'bg-coral-soft') : 'bg-surface-2'}`}>
                     <span className="font-bold">{checked ? (checked[i] ? '✓' : '✕') : bn(i + 1)}</span><span>{r.text}</span>
                   </li>
                 ))}
               </ol>
             )}
-            <button type="button" onClick={check} className="btn-press mt-1 min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_#16252D]">{tr('যাচাই করুন', 'Check')}</button>
+            <button type="button" onClick={check} className="btn-press mt-1 min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_var(--color-shadow)]">{tr('যাচাই করুন', 'Check')}</button>
             {checked && <p className="m-0 text-center font-mono text-xl font-bold">{bn(checked.filter(Boolean).length)}/{bn(checked.length)}</p>}
             {checked && memory && <p className="m-0 text-center text-sm">{checked.every(Boolean) ? tr('মনে থেকে পুরো ঠিক! পরের বার আরও দেরিতে আসবে।', 'Fully right from memory! It will come back later next time.') : tr('কিছু বাদ গেছে। কাল আবার আসবে।', 'Something was missed. It comes back tomorrow.')}</p>}
           </section>
         ) : mode === 'cost' ? (
           <CostPanel report={report} sla={sla} />
         ) : (
-          <section aria-label={tr('Request-এর অবস্থা', 'Request status')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4" aria-live="polite">
+          <section aria-label={tr('Request-এর অবস্থা', 'Request status')} className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-surface p-4" aria-live="polite">
             <h2 className="m-0 font-display text-lg font-bold">{tr('Request-গুলো', 'Requests')}</h2>
             {results.map((r, i) => (
               <div key={r.flow.id} className="flex flex-col gap-1 rounded-xl border-2 border-ink p-2">
@@ -313,7 +313,7 @@ function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: C
   const passed = checked.filter(Boolean).length;
   const verdict = passed === checked.length ? 'right' : passed >= checked.length - 1 ? 'close' : 'wrong';
   return (
-    <section aria-label={tr('উত্তর', 'Answer')} aria-live="polite" className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5">
+    <section aria-label={tr('উত্তর', 'Answer')} aria-live="polite" className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5">
       <div className={`rounded-xl px-4 py-3 font-display text-xl font-extrabold ${verdict === 'right' ? 'bg-route text-white' : verdict === 'close' ? 'bg-parcel' : 'bg-coral text-white'}`}>
         {verdict === 'right' ? tr('ঠিক! সব নিয়ম পূরণ হয়েছে।', 'Right! Every rule is met.') : verdict === 'close' ? tr(`প্রায় ঠিক: ${bn(checked.length - passed)}টা জিনিস বাকি`, `Almost: ${checked.length - passed} thing left`) : tr(`এখনো ভুল: ${bn(checked.length - passed)}টা নিয়ম ভাঙছে`, `Not yet: ${checked.length - passed} rules broken`)}
       </div>
@@ -326,10 +326,10 @@ function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: C
               <div key={j} className="mt-2 grid gap-1 text-[15px]">
                 <p className="m-0"><b>{tr('কোথায়:', 'Where:')}</b> {f.where}</p>
                 <p className="m-0"><b>{tr('কী করবেন:', 'What to do:')}</b> {f.fix}</p>
-                {f.apply && <button type="button" onClick={() => onFix(f)} className="btn-press mt-1 min-h-10 w-fit cursor-pointer rounded-lg border-2 border-ink bg-white px-3 text-sm font-bold shadow-[0_2px_0_#16252D]">{tr('আমার হয়ে ঠিক করুন', 'Fix it for me')}</button>}
+                {f.apply && <button type="button" onClick={() => onFix(f)} className="btn-press mt-1 min-h-10 w-fit cursor-pointer rounded-lg border-2 border-ink bg-surface px-3 text-sm font-bold shadow-[0_2px_0_var(--color-shadow)]">{tr('আমার হয়ে ঠিক করুন', 'Fix it for me')}</button>}
               </div>
             ))}
-            <p className="m-0 mt-2 rounded-lg bg-white/70 px-3 py-2 text-sm"><b>{tr('কেন জরুরি:', 'Why it matters:')}</b> {r.why}</p>
+            <p className="m-0 mt-2 rounded-lg bg-surface/70 px-3 py-2 text-sm"><b>{tr('কেন জরুরি:', 'Why it matters:')}</b> {r.why}</p>
           </li>
         ))}
       </ol>
@@ -343,9 +343,9 @@ function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: C
           <>
             <p className="m-0 font-bold">{tr('একটা সঠিক design', 'One correct design')}</p>
             <p className="m-0 mt-1 text-sm text-ink-soft">{c.reference.note} {tr('নিয়ম পূরণ করলে অন্য design-ও সমান সঠিক।', 'Any other design that meets every rule is just as right.')}</p>
-            <div className="mt-2 overflow-x-auto rounded-lg bg-[#F7F8F3]"><MiniGraph g={referenceGraph(c)} label={tr('Model design', 'Model design')} /></div>
+            <div className="mt-2 overflow-x-auto rounded-lg bg-surface-sunk"><MiniGraph g={referenceGraph(c)} label={tr('Model design', 'Model design')} /></div>
           </>
-        ) : <button type="button" onClick={() => setShowModel(true)} className="min-h-10 cursor-pointer rounded-lg border-2 border-ink bg-white px-3 font-semibold">{tr('Model design দেখুন', 'Show a model design')}</button>}
+        ) : <button type="button" onClick={() => setShowModel(true)} className="min-h-10 cursor-pointer rounded-lg border-2 border-ink bg-surface px-3 font-semibold">{tr('Model design দেখুন', 'Show a model design')}</button>}
       </div>
     </section>
   );
@@ -355,7 +355,7 @@ const KIND_LABEL = (k: PartKind) => PARTS[k].label;
 
 /** Monthly cost, per-tier load and the service-level targets for the current design. */
 function CostPanel({ report, sla }: { report: ReturnType<typeof capacityReport> | null; sla: (typeof slaByChallenge)[string] | undefined }) {
-  if (!report || !sla) return <section className="rounded-[20px] border-[3px] border-ink bg-white p-4">{tr('এই challenge-এর জন্য খরচের হিসাব নেই।', 'No cost model for this challenge.')}</section>;
+  if (!report || !sla) return <section className="rounded-[20px] border-[3px] border-ink bg-surface p-4">{tr('এই challenge-এর জন্য খরচের হিসাব নেই।', 'No cost model for this challenge.')}</section>;
   const rows: { ok: boolean; label: string; value: string }[] = [
     { ok: report.checks.capacity, label: tr('কোনো অংশ ১০০% পার হয়নি', 'No part above 100%'), value: report.bottleneck ? `${KIND_LABEL(report.bottleneck.kind)} ${bn(Math.round(report.bottleneck.util * 100))}%` : '—' },
     { ok: report.checks.p99, label: `p99 ≤ ${bn(sla.p99)} ms`, value: report.p99 >= 5000 ? tr('timeout', 'timeouts') : `${bn(report.p99)} ms` },
@@ -363,7 +363,7 @@ function CostPanel({ report, sla }: { report: ReturnType<typeof capacityReport> 
     { ok: report.checks.cost, label: tr(`বাজেট $${bn(sla.budget)}/মাস`, `Budget $${sla.budget}/month`), value: `$${bn(report.cost)}` },
   ];
   return (
-    <section aria-label={tr('খরচ ও capacity', 'Cost and capacity')} aria-live="polite" className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-white p-4">
+    <section aria-label={tr('খরচ ও capacity', 'Cost and capacity')} aria-live="polite" className="flex flex-col gap-2 self-start rounded-[20px] border-[3px] border-ink bg-surface p-4">
       <h2 className="m-0 font-display text-lg font-bold">{tr('লক্ষ্য', 'Targets')}</h2>
       <p className="m-0 text-xs text-muted">{tr(`সেকেন্ডে ${bn(sla.rps)} request, ${bn(Math.round(sla.readShare * 100))}% পড়া`, `${sla.rps} requests a second, ${Math.round(sla.readShare * 100)}% reads`)}</p>
       <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-sm">
@@ -381,7 +381,7 @@ function CostPanel({ report, sla }: { report: ReturnType<typeof capacityReport> 
         {report.tiers.map((t) => (
           <li key={t.kind}>
             <div className="flex justify-between"><span>{KIND_LABEL(t.kind)} × {bn(t.count)}</span><span className="font-mono">{bn(Math.round(t.util * 100))}%</span></div>
-            <div className="h-2 overflow-hidden rounded-full bg-[#E3E6DF]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, t.util * 100)}%`, background: t.util >= 1 ? '#E0483E' : t.util >= 0.7 ? '#FFC02E' : '#0B8A7A' }} /></div>
+            <div className="h-2 overflow-hidden rounded-full bg-locked"><div className="h-full rounded-full" style={{ width: `${Math.min(100, t.util * 100)}%`, background: t.util >= 1 ? '#E0483E' : t.util >= 0.7 ? '#FFC02E' : '#0B8A7A' }} /></div>
           </li>
         ))}
       </ul>

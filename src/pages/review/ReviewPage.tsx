@@ -48,7 +48,7 @@ export function ReviewPage() {
             <p className="m-0 mt-1 text-ink-soft">{tr('নিশ্চিত হয়ে ঠিক বললে প্রশ্ন পরের ঘরে যায় (আরও দেরিতে ফেরে); ভুল হলে প্রথম ঘরে, কাল আবার।', 'Right and sure moves a question to the next box (it returns later); wrong sends it back to the first box, due tomorrow.')}</p>
           </section>
         )}
-        <section className="rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+        <section className="rounded-[22px] border-[3px] border-ink bg-surface p-6 shadow-block">
           <p className="m-0 text-sm font-bold text-route-deep">Spaced repetition</p>
           <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('আজকের review', 'Today\'s review')}</h1>
           {all.length === 0 ? (
@@ -59,10 +59,10 @@ export function ReviewPage() {
                 {due.length ? tr(`${bn(due.length)}টা প্রশ্ন আজ ফিরে এসেছে।`, `${due.length} questions came back today.`) : tr(`আজ কিছু বাকি নেই।${nextDue ? ` পরেরটা আসবে ${bn(Math.max(1, Math.ceil((nextDue.due - Date.now()) / DAY_MS)))} দিনের মধ্যে।` : ''}`, `Nothing left for today.${nextDue ? ` The next one is due within ${Math.max(1, Math.ceil((nextDue.due - Date.now()) / DAY_MS))} days.` : ''}`)}
               </p>
               <div className="flex flex-wrap gap-3">
-                <button type="button" disabled={!due.length} onClick={() => start(due)} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold shadow-[0_5px_0_#16252D] disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="button" disabled={!due.length} onClick={() => start(due)} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold shadow-[0_5px_0_var(--color-shadow)] disabled:cursor-not-allowed disabled:opacity-50">
                   {tr('শুরু করুন', 'Start')}{due.length ? ` · ${bn(Math.min(SESSION, due.length))}` : ''}
                 </button>
-                <button type="button" onClick={() => start(weakest)} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-white px-6 font-bold shadow-[0_5px_0_#16252D]">
+                <button type="button" onClick={() => start(weakest)} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-surface px-6 font-bold shadow-[0_5px_0_var(--color-shadow)]">
                   {tr('দুর্বল ১০টা আগেভাগে', 'Your 10 weakest, early')}
                 </button>
               </div>
@@ -73,7 +73,7 @@ export function ReviewPage() {
         <RebuildSection />
 
         {all.length > 0 && (
-          <section className="rounded-[22px] border-[2.5px] border-ink bg-white p-6">
+          <section className="rounded-[22px] border-[2.5px] border-ink bg-surface p-6">
             <h2 className="m-0 mb-3 font-display text-xl font-bold">{tr('কোন ঘরে কতগুলো', 'How many in each box')}</h2>
             <div className="grid grid-cols-5 gap-2 text-center">
               {byBox.map((n, b) => (
@@ -99,14 +99,14 @@ function RebuildSection() {
   if (!queue.length) return null;
   const next = queue.find((r) => r.due > Date.now());
   return (
-    <section className="rounded-[22px] border-[3px] border-ink bg-[#EDE6F8] p-6">
-      <p className="m-0 text-sm font-bold text-[#4B2F7A]">Rebuild from memory</p>
+    <section className="rounded-[22px] border-[3px] border-ink bg-violet-soft p-6">
+      <p className="m-0 text-sm font-bold text-violet-deep">Rebuild from memory</p>
       <h2 className="m-0 font-display text-2xl font-extrabold">{tr('না দেখে আবার আঁকুন', 'Redraw it from memory')}</h2>
       <p className="m-0 mt-1 text-ink-soft">{tr('যে level পাস করেছেন তার architecture খালি canvas-এ আবার আঁকুন, নিয়ম লুকানো। পুরো ঠিক হলে পরের বার ৩, ৭, ২১, ৬০ দিন পরে আসে।', 'Redraw the architecture of a level you passed on a blank canvas, with the rules hidden. Fully right, and it returns after 3, 7, 21, then 60 days.')}</p>
       {due.length ? (
         <div className="mt-3 flex flex-wrap gap-2">
           {due.map((r) => (
-            <Link key={r.challenge.id} to="/builder" search={{ memory: r.challenge.id }} className="btn-press flex min-h-12 items-center rounded-xl border-2 border-ink bg-white px-4 font-semibold text-ink no-underline shadow-[0_3px_0_#16252D]">
+            <Link key={r.challenge.id} to="/builder" search={{ memory: r.challenge.id }} className="btn-press flex min-h-12 items-center rounded-xl border-2 border-ink bg-surface px-4 font-semibold text-ink no-underline shadow-[0_3px_0_var(--color-shadow)]">
               {r.challenge.title}{r.first ? tr(' · প্রথমবার', ' · first time') : ''}
             </Link>
           ))}
@@ -128,9 +128,9 @@ function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: Revie
       <main className="mx-auto box-border flex max-w-[820px] flex-col gap-4 px-4 pb-12 pt-6 sm:px-8">
         <div className="flex items-center justify-between gap-3">
           <p className="m-0 font-bold text-route-deep">Review {bn(k + 1)}/{bn(total)}</p>
-          <button type="button" onClick={onStop} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-semibold">{tr('থামুন', 'Stop')}</button>
+          <button type="button" onClick={onStop} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 font-semibold">{tr('থামুন', 'Stop')}</button>
         </div>
-        <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? '#0B8A7A' : i === k ? '#FFC02E' : '#D7DED1' }} />)}</div>
+        <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? 'var(--color-route)' : i === k ? 'var(--color-parcel)' : 'var(--color-line)' }} />)}</div>
         {q ? (
           <QuestionCard
             where="review"
@@ -140,7 +140,7 @@ function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: Revie
             onDone={(r) => onAnswer(r)}
           />
         ) : (
-          <button type="button" onClick={() => onAnswer({ correct: true, sure: false })} className="min-h-12 rounded-xl border-2 border-ink bg-white">{tr('এই প্রশ্ন আর নেই, পরেরটা', 'This question no longer exists, next one')}</button>
+          <button type="button" onClick={() => onAnswer({ correct: true, sure: false })} className="min-h-12 rounded-xl border-2 border-ink bg-surface">{tr('এই প্রশ্ন আর নেই, পরেরটা', 'This question no longer exists, next one')}</button>
         )}
       </main>
     </AppShell>

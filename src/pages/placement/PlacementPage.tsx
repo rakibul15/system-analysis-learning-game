@@ -37,7 +37,7 @@ function Intro({ onStart }: { onStart: () => void }) {
   const setSkip = useProgress((s) => s.setSkipPlacement);
   const navigate = useNavigate();
   return (
-    <section className="rounded-[24px] border-[3px] border-ink bg-white p-6 shadow-block">
+    <section className="rounded-[24px] border-[3px] border-ink bg-surface p-6 shadow-block">
       <p className="m-0 text-sm font-bold text-route-deep">Placement test</p>
       <h1 className="m-0 mt-1 font-display text-[30px] font-extrabold [text-wrap:balance]">{tr('কোথা থেকে শুরু করবেন, ৫ মিনিটে জেনে নিন', 'Find out where to start, in 5 minutes')}</h1>
       <ul className="m-0 mt-4 flex flex-col gap-2 pl-5 text-ink-soft">
@@ -48,8 +48,8 @@ function Intro({ onStart }: { onStart: () => void }) {
       </ul>
       {placement && <p className="m-0 mt-4 rounded-xl bg-route-soft px-3 py-2 text-sm font-semibold text-route-deep">{tr(`আগের বার: ${placement.mastered.length ? `অধ্যায় ${placement.mastered.map((c) => bn(c)).join(', ')} খুলেছে` : 'কোনো অধ্যায় খোলেনি'}।`, `Last time: ${placement.mastered.length ? `chapters ${placement.mastered.join(', ')} opened` : 'no chapter opened'}.`)}</p>}
       <div className="mt-5 flex flex-wrap gap-3">
-        <button type="button" onClick={onStart} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold shadow-[0_5px_0_#16252D]">{tr('শুরু করুন', 'Start')}</button>
-        <button type="button" onClick={() => { setSkip(true); void navigate({ to: '/level/$levelId', params: { levelId: '1' } }); }} className="min-h-[54px] cursor-pointer rounded-2xl border-[2.5px] border-ink bg-white px-5 font-semibold">{tr('বাদ দিন, Level ১ থেকে শুরু', 'Skip it, start at level 1')}</button>
+        <button type="button" onClick={onStart} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold shadow-[0_5px_0_var(--color-shadow)]">{tr('শুরু করুন', 'Start')}</button>
+        <button type="button" onClick={() => { setSkip(true); void navigate({ to: '/level/$levelId', params: { levelId: '1' } }); }} className="min-h-[54px] cursor-pointer rounded-2xl border-[2.5px] border-ink bg-surface px-5 font-semibold">{tr('বাদ দিন, Level ১ থেকে শুরু', 'Skip it, start at level 1')}</button>
       </div>
     </section>
   );
@@ -113,7 +113,7 @@ function Test({ onFinish }: { onFinish: (r: PlacementResult, cards: number) => v
           {CORE_CHAPTERS.map((c) => {
             const v = state.verdicts[c];
             const now = c === chapter;
-            return <li key={c} title={`${tr('অধ্যায়', 'Chapter')} ${bn(c)}`} className="h-2.5 flex-1 rounded-full" style={{ background: v === 'mastered' ? '#0B8A7A' : v === 'weak' ? '#E0483E' : now ? '#FFC02E' : '#D7DED1' }} />;
+            return <li key={c} title={`${tr('অধ্যায়', 'Chapter')} ${bn(c)}`} className="h-2.5 flex-1 rounded-full" style={{ background: v === 'mastered' ? 'var(--color-route)' : v === 'weak' ? 'var(--color-coral)' : now ? 'var(--color-parcel)' : 'var(--color-line)' }} />;
           })}
         </ol>
       </div>
@@ -139,11 +139,11 @@ function Result({ r, cards, onAgain }: { r: PlacementResult; cards: number; onAg
   const status = (c: number) => (r.mastered.includes(c) ? 'mastered' : c === r.start ? 'start' : 'later');
   const look = {
     mastered: [tr('জানা, খুলে গেছে', 'Known, now open'), 'bg-route-soft text-route-deep', '✓'],
-    start: [tr('এখান থেকে শুরু', 'Start here'), 'bg-parcel-soft text-[#7A4D00]', '→'],
-    later: [r.tested.length ? tr('পরে, খেলে খেলে খুলবে', 'Later, opens as you play') : '', 'bg-[#F0F2EC] text-muted', '·'],
+    start: [tr('এখান থেকে শুরু', 'Start here'), 'bg-parcel-soft text-parcel-deep', '→'],
+    later: [r.tested.length ? tr('পরে, খেলে খেলে খুলবে', 'Later, opens as you play') : '', 'bg-surface-2 text-muted', '·'],
   } as const;
   return (
-    <section className="flex flex-col gap-4 rounded-[24px] border-[3px] border-ink bg-white p-6 shadow-block">
+    <section className="flex flex-col gap-4 rounded-[24px] border-[3px] border-ink bg-surface p-6 shadow-block">
       <p className="m-0 text-sm font-bold text-route-deep">{tr('Placement-এর ফল', 'Placement result')}</p>
       <h1 className="m-0 font-display text-[28px] font-extrabold [text-wrap:balance]">
         {start ? tr(`অধ্যায় ${bn(start.id)} থেকে শুরু করুন`, `Start at chapter ${start.id}`) : tr('মূল ছয় অধ্যায়ই জানা! এবার bonus অধ্যায় আর review।', 'You know all six core chapters! Now the bonus chapter and review.')}
@@ -166,9 +166,9 @@ function Result({ r, cards, onAgain }: { r: PlacementResult; cards: number; onAg
       </p>
       <div className="flex flex-wrap gap-3">
         {start
-          ? <Link to="/level/$levelId" params={{ levelId: String(start.levels[0]) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_#16252D]">{tr(`Level ${bn(start.levels[0]!)} থেকে শুরু →`, `Start at level ${start.levels[0]} →`)}</Link>
-          : <Link to="/review" className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_#16252D]">{tr('Review শুরু →', 'Start reviewing →')}</Link>}
-        <Link to="/" className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink bg-white px-5 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
+          ? <Link to="/level/$levelId" params={{ levelId: String(start.levels[0]) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr(`Level ${bn(start.levels[0]!)} থেকে শুরু →`, `Start at level ${start.levels[0]} →`)}</Link>
+          : <Link to="/review" className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">{tr('Review শুরু →', 'Start reviewing →')}</Link>}
+        <Link to="/" className="inline-flex min-h-[54px] items-center rounded-2xl border-[2.5px] border-ink bg-surface px-5 font-semibold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</Link>
         <button type="button" onClick={onAgain} className="min-h-[54px] cursor-pointer rounded-2xl border-0 bg-transparent px-2 font-semibold text-route-deep underline">{tr('আবার দিন', 'Take it again')}</button>
       </div>
     </section>

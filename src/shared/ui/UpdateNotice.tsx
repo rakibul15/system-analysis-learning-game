@@ -30,11 +30,11 @@ export function UpdateNotice() {
   if (!needRefresh || later) return null;
   return (
     <div role="status" aria-live="polite" className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-[max(16px,env(safe-area-inset-bottom,0px))]">
-      <div className="pop-in flex w-full max-w-[520px] flex-wrap items-center gap-3 rounded-2xl border-[3px] border-ink bg-white p-3 shadow-[0_5px_0_#16252D]">
+      <div className="pop-in flex w-full max-w-[520px] flex-wrap items-center gap-3 rounded-2xl border-[3px] border-ink bg-surface p-3 shadow-[0_5px_0_var(--color-shadow)]">
         <p className="m-0 min-w-0 flex-1 font-semibold">{tr('ParcelGo-র নতুন version এসেছে।', 'A new version of ParcelGo is ready.')} <span className="font-normal text-ink-soft">{tr('হাতের level শেষ করে reload করুন।', 'Finish the level in hand, then reload.')}</span></p>
         <div className="flex gap-2">
           <button type="button" onClick={() => void updateServiceWorker(true)} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold">{tr('Reload', 'Reload')}</button>
-          <button type="button" onClick={() => setLater(true)} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-semibold">{tr('পরে', 'Later')}</button>
+          <button type="button" onClick={() => setLater(true)} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 font-semibold">{tr('পরে', 'Later')}</button>
         </div>
       </div>
     </div>

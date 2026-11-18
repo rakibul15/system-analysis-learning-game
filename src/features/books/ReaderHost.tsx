@@ -9,7 +9,7 @@ export function ReaderHost() {
   const ref = useReader((s) => s.ref);
   if (!ref) return null;
   return (
-    <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-[#2B3A41] font-semibold text-white">{tr('Reader আসছে…', 'Opening the reader…')}</div>}>
+    <Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-night-chip-2 font-semibold text-white">{tr('Reader আসছে…', 'Opening the reader…')}</div>}>
       <BookReader />
     </Suspense>
   );

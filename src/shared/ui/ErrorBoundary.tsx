@@ -32,7 +32,7 @@ export function CrashFallback({ onRetry }: { onRetry?: () => void }) {
         <p className="m-0 font-display text-xl font-extrabold">{tr('এখানে কিছু একটা ভেঙে গেছে', 'Something broke here')}</p>
         <p className="m-0 text-muted">{tr('দোষটা আমাদের। খবরটা আমাদের কাছে পাঠানো হচ্ছে, আপনার progress ঠিক আছে।', 'Our fault. We are being told about it, and your progress is safe.')}</p>
         <div className="flex flex-wrap justify-center gap-2">
-          {onRetry && <button type="button" onClick={onRetry} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-bold">{tr('আবার চেষ্টা', 'Try again')}</button>}
+          {onRetry && <button type="button" onClick={onRetry} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-bold">{tr('আবার চেষ্টা', 'Try again')}</button>}
           {/* a plain link: this can show outside the router */}
           <a href="#/" onClick={() => setTimeout(() => location.reload(), 0)} className="btn-press inline-flex min-h-11 items-center rounded-xl border-2 border-ink bg-parcel px-4 font-bold text-ink no-underline">{tr('শহরে ফিরুন', 'Back to the city')}</a>
         </div>

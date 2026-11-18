@@ -11,11 +11,11 @@ import { ddiaChapterRef } from '@/features/books/catalog';
 import { useReader } from '@/features/books/shelf';
 
 const STATUS = [tr('পড়িনি', 'Not started'), tr('পড়ছি', 'Reading'), tr('শেষ', 'Done')] as const;
-const STATUS_CLS = ['bg-white', 'bg-parcel-soft', 'bg-route-soft'] as const;
+const STATUS_CLS = ['bg-surface', 'bg-parcel-soft', 'bg-route-soft'] as const;
 const NOTE_HINT = tr('মূল ধারণা:\n\nকোথায় trade-off:\n\nCarryBee / ParcelGo-তে কোথায় দেখেছি:\n\nএখনো যা বুঝিনি:', 'Core idea:\n\nWhere the trade-off is:\n\nWhere I have seen it at work:\n\nWhat I still do not get:');
 
 function PracticeLink({ p }: { p: Practice }) {
-  const cls = 'inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-white px-3 text-sm font-semibold text-ink no-underline hover:bg-[#F0F2EC]';
+  const cls = 'inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-surface px-3 text-sm font-semibold text-ink no-underline hover:bg-surface-2';
   if (p.kind === 'level') return <Link to="/level/$levelId" params={{ levelId: String(p.id) }} className={cls}>Level {bn(p.id)} · {levelMeta[p.id]?.title}</Link>;
   if (p.kind === 'incident') return <Link to="/incident" className={cls}>Incident · {incidents.find((i) => i.id === p.id)?.title ?? p.id}</Link>;
   if (p.kind === 'builder') return <Link to="/builder" className={cls}>{tr('Builder · খরচ ও capacity', 'Builder · cost and capacity')}</Link>;
@@ -46,15 +46,15 @@ export function ReadingPage() {
     <AppShell>
       <main className="mx-auto box-border flex max-w-[960px] flex-col gap-5 px-4 pb-12 pt-6 sm:px-8">
         <Link to="/study" className="self-start font-semibold text-route-deep">{tr('← পড়া', '← Study')}</Link>
-        <section className="rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-block">
+        <section className="rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-block">
           <p className="m-0 text-sm font-bold text-route-deep">{tr('বই পড়ার track', 'Reading track')} · {BOOK.edition}</p>
           <h1 className="m-0 font-display text-[28px] font-extrabold leading-tight [text-wrap:balance] sm:text-[32px]">{BOOK.title}</h1>
           <p className="m-0 mt-1 text-ink-soft">{BOOK.authors}</p>
           <p className="m-0 mt-2 max-w-[68ch] text-ink-soft">{tr(`১৪টা অধ্যায়, মোটামুটি ${bn(TOTAL_WEEKS)} সপ্তাহ। প্রতিটা অধ্যায়ে পড়ার সময় খোঁজার প্রশ্ন, app-এ মিল থাকা অনুশীলন, আর আপনার নোট। নোট আপনার account-এ save থাকে। বইয়ের লেখা এখানে নেই: নিজের কপি পাশে খুলে পড়ুন।`, `14 chapters, about ${TOTAL_WEEKS} weeks. For each chapter: questions to look for while reading, matching practice in this app, and your notes. Notes are saved to your account. The book's text is not here: read your own copy alongside.`)}</p>
-          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-[#E3E6DF]" aria-hidden="true"><div className="h-full rounded-full bg-route" style={{ width: `${(done / chapters.length) * 100}%` }} /></div>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-locked" aria-hidden="true"><div className="h-full rounded-full bg-route" style={{ width: `${(done / chapters.length) * 100}%` }} /></div>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
             <span className="font-mono text-sm font-bold">{bn(done)}/{bn(chapters.length)} {tr('অধ্যায় শেষ', 'chapters done')}</span>
-            <button type="button" onClick={exportNotes} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 text-sm font-semibold">{tr('সব নোট download (.md)', 'Download all notes (.md)')}</button>
+            <button type="button" onClick={exportNotes} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 text-sm font-semibold">{tr('সব নোট download (.md)', 'Download all notes (.md)')}</button>
           </div>
         </section>
 
@@ -79,7 +79,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
   return (
     <article className={`rounded-[18px] border-[2.5px] border-ink ${STATUS_CLS[status]}`}>
       <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full cursor-pointer items-center gap-3 rounded-[16px] border-0 bg-transparent p-4 text-left font-[inherit] text-ink">
-        <span className={`grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-ink font-display text-lg font-extrabold ${status === 2 ? 'bg-route text-white' : 'bg-white'}`}>{status === 2 ? '✓' : bn(c.n)}</span>
+        <span className={`grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-ink font-display text-lg font-extrabold ${status === 2 ? 'bg-route text-white' : 'bg-surface'}`}>{status === 2 ? '✓' : bn(c.n)}</span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-[17px] font-bold leading-snug">{c.title}</span>
           <span className="block text-xs text-muted">{tr(`পাতা ${bn(c.pages[0])}–${bn(c.pages[1])} · ~${bn(c.weeks)} সপ্তাহ`, `Pages ${c.pages[0]}–${c.pages[1]} · ~${c.weeks} week${c.weeks > 1 ? 's' : ''}`)} · {STATUS[status]}{rec?.notes?.trim() ? tr(' · নোট আছে', ' · has notes') : ''}</span>
@@ -91,10 +91,10 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
           <div role="radiogroup" aria-label={tr('অবস্থা', 'Status')} className="flex flex-wrap gap-2">
             {STATUS.map((l, i) => (
               <button key={l} type="button" role="radio" aria-checked={status === i} onClick={() => setReading(c.id, { status: i as 0 | 1 | 2 })}
-                className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+                className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
             ))}
           </div>
-          <button type="button" onClick={() => { openBook(ddiaChapterRef(c.n, c.pages)); if (status === 0) setReading(c.id, { status: 1 }); }} className="btn-press flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-[#EDE6F8] px-4 font-bold shadow-[0_3px_0_#16252D]">📖 {tr(`বইয়ে খুলুন · পাতা ${bn(c.pages[0], { grouping: false })}`, `Open in the book · page ${c.pages[0]}`)}</button>
+          <button type="button" onClick={() => { openBook(ddiaChapterRef(c.n, c.pages)); if (status === 0) setReading(c.id, { status: 1 }); }} className="btn-press flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-violet-soft px-4 font-bold shadow-[0_3px_0_var(--color-shadow)]">📖 {tr(`বইয়ে খুলুন · পাতা ${bn(c.pages[0], { grouping: false })}`, `Open in the book · page ${c.pages[0]}`)}</button>
           <div>
             <h3 className="m-0 text-sm font-bold">{tr('পড়ার সময় খুঁজুন', 'Look for while reading')}</h3>
             <ul className="m-0 mt-1 list-disc pl-5 text-[15px]">{c.look.map((q) => <li key={q}>{q}</li>)}</ul>
@@ -105,11 +105,11 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
           </div>
           <label className="flex flex-col gap-1 text-sm font-bold">{tr('আমার নোট', 'My notes')}
             <textarea value={draft} onChange={(e) => setDraft(e.target.value)} onBlur={() => { if (dirty) setReading(c.id, { notes: draft, status: status === 0 ? 1 : status }); }}
-              rows={7} placeholder={NOTE_HINT} className="rounded-xl border-2 border-ink bg-white p-3 font-[inherit] text-[15px] font-normal" />
+              rows={7} placeholder={NOTE_HINT} className="rounded-xl border-2 border-ink bg-surface p-3 font-[inherit] text-[15px] font-normal" />
           </label>
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" disabled={!dirty} onClick={() => setReading(c.id, { notes: draft, status: status === 0 ? 1 : status })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold shadow-[0_3px_0_#16252D] disabled:cursor-default disabled:opacity-50">{dirty ? tr('নোট save করুন', 'Save notes') : tr('Save হয়েছে ✓', 'Saved ✓')}</button>
-            {status !== 2 && <button type="button" onClick={() => setReading(c.id, { notes: draft, status: 2 })} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('অধ্যায় শেষ ✓', 'Chapter done ✓')}</button>}
+            <button type="button" disabled={!dirty} onClick={() => setReading(c.id, { notes: draft, status: status === 0 ? 1 : status })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold shadow-[0_3px_0_var(--color-shadow)] disabled:cursor-default disabled:opacity-50">{dirty ? tr('নোট save করুন', 'Save notes') : tr('Save হয়েছে ✓', 'Saved ✓')}</button>
+            {status !== 2 && <button type="button" onClick={() => setReading(c.id, { notes: draft, status: 2 })} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('অধ্যায় শেষ ✓', 'Chapter done ✓')}</button>}
           </div>
         </div>
       )}

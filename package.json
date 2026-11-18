@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "gen:meta": "node scripts/gen-meta.mjs",
     "check:bundle": "node scripts/check-bundle.mjs",
+    "check:colors": "node scripts/check-colors.mjs",
     "build:e2e": "VITE_E2E=1 vite build --outDir dist-e2e",
     "e2e": "playwright test"
   },
