@@ -26,6 +26,18 @@
   --shadow-press: 0 4px 0 var(--color-ink);
 }
 
+/*
+ * Motion: every animation uses these three speeds and two curves, so the whole game moves in one rhythm.
+ *   fast  — a press, a tap answered        base — a card or stop settling        slow — a page or a celebration
+ */
+:root {
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --dur-slow: 400ms;
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+
 html, body, #root { min-height: 100%; }
 body {
   margin: 0;
@@ -35,8 +47,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* taps answer at once: no double-tap-to-zoom wait; the pressed look (btn-press) replaces the grey flash */
+a, button, [role='button'], [role='tab'], input, select, label, summary { touch-action: manipulation; }
+a, button, [role='button'], [role='tab'], summary { -webkit-tap-highlight-color: transparent; }
+
 /* chunky pressable button feel */
-.btn-press { transition: transform .12s cubic-bezier(.34,1.56,.64,1), box-shadow .12s; }
+.btn-press { transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast); }
 .btn-press:hover { transform: translateY(-2px); }
 .btn-press:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--color-ink) !important; }
 
@@ -70,6 +86,48 @@ body {
   .amb-drift, .amb-drift-slow, .amb-spin, .amb-spin-fast, .amb-sway, .amb-blink, .amb-ants, .amb-water, .amb-smoke { animation: none; }
 }
 
+/* the city map (CityMap): idle motion is CSS only, and pauses while the map is off screen */
+.city-map[data-offscreen] *, .city-map[data-offscreen] *::before, .city-map[data-offscreen] *::after { animation-play-state: paused !important; }
+/* after a while without a touch the scenery holds still (water, trees, the parked van); the next stop keeps bobbing */
+.city-map[data-resting] .amb-water, .city-map[data-resting] .amb-sway, .city-map[data-resting] .map-van-bob { animation-play-state: paused; }
+.city-map[data-resting] [data-driving] .map-van-bob { animation-play-state: running; }
+.map-stop { transition: scale var(--dur-base) var(--ease-spring); }
+/* an open stop bounces like a ball: up slowing down, down speeding up */
+.map-stop-bob { animation: map-stop-bob .98s infinite; }
+@keyframes map-stop-bob {
+  0%, 100% { translate: 0 0; animation-timing-function: cubic-bezier(.3, .6, .6, 1); }
+  50% { translate: 0 -12%; animation-timing-function: cubic-bezier(.4, 0, .7, .4); }
+}
+.map-van-bob { --bob: -3.5%; animation: map-van-bob 1.05s ease-in-out infinite; }
+[data-driving] .map-van-bob { --bob: -7%; animation-duration: .2s; }
+@keyframes map-van-bob { 50% { translate: 0 var(--bob); } }
+.map-toast { animation: map-toast 2.2s var(--ease-out) both; }
+@keyframes map-toast {
+  0% { opacity: 0; translate: 0 30px; }
+  12% { opacity: 1; translate: 0 0; animation-timing-function: linear; }
+  85% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map-stop { transition: none; }
+  .map-stop-bob, .map-van-bob { animation: none; }
+  @keyframes map-toast { 0%, 85% { opacity: 1; } 100% { opacity: 0; } }
+}
+
+/*
+ * Page changes: the router wraps each navigation in a view transition (defaultViewTransition), so the
+ * old page fades out as the new one rises in. A map stop and the level's badge share a name, so the
+ * stop grows into the badge. Browsers without view transitions just swap the page.
+ */
+::view-transition-old(root) { animation: vt-out var(--dur-base) var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-in var(--dur-slow) var(--ease-out) both; }
+::view-transition-group(*) { animation-duration: var(--dur-slow); animation-timing-function: var(--ease-out); }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; translate: 0 12px; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
 /* lesson: dots moving along a flow */
 .flow-dot {
   position: absolute;
@@ -88,9 +146,9 @@ body {
   88% { opacity: 1; }
   100% { left: var(--x2); top: var(--y2); opacity: 0; }
 }
-.node-in { animation: node-in .45s cubic-bezier(.34,1.56,.64,1) both; }
+.node-in { animation: node-in .45s var(--ease-spring) both; }
 @keyframes node-in { from { opacity: 0; transform: translate(-50%,-50%) scale(.6); } to { opacity: 1; transform: translate(-50%,-50%) scale(1); } }
-.pop-in { animation: pop-in .4s cubic-bezier(.34,1.56,.64,1) both; }
+.pop-in { animation: pop-in var(--dur-slow) var(--ease-spring) both; }
 @keyframes deep-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .deep-draw { animation: deep-draw .5s ease-out both; }
 @keyframes pop-in { from { opacity: 0; transform: scale(.85) translateY(8px); } to { opacity: 1; transform: none; } }

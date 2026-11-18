@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { Chapter } from '@/content/schema';
 import type { LevelMeta } from '@/content/meta';
-import { bn, easeBack } from '@/shared/lib/bn';
+import { bn } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
 import { tr } from '@/shared/lib/i18n';
 
@@ -42,10 +42,22 @@ interface Props {
   onSelect: (index: number) => void;
 }
 
-/** One chapter as a living little city: road, buildings per level, the van that drives to the selected stop. */
-/** The system "reduce motion" setting; read on each frame so a change applies at once. */
+/** The system "reduce motion" setting; read when something is about to move, so a change applies at once. */
 const reduceMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** How long the "still locked" note stays up (ms); its CSS animation (map-toast) lasts as long. */
+const LOCK_NOTE_MS = 2200;
+/** The scenery rests this long after the learner last touched or scrolled (ms). */
+export const SCENERY_REST_MS = 8000;
+
+/**
+ * One chapter as a living little city: road, buildings per level, the van that drives to the selected stop.
+ *
+ * Nothing here re-renders per frame. The idle motion (the next stop's bob, swaying trees, water, the van's
+ * idle bob) is CSS, paused while the map is off screen. Only the van's drive along the road runs in
+ * JavaScript, and only while it drives: it writes the van's position straight to the DOM and stops
+ * when the van arrives.
+ */
 export function CityMap({ chapter, stops, selected, onSelect }: Props) {
   const pts = useMemo(() => layout(stops.length), [stops.length]);
   const road = useMemo(() => smoothPath([{ x: -80, y: pts[0]!.y + 40 }, ...pts, { x: 1700, y: pts[pts.length - 1]!.y - 60 }]), [pts]);
@@ -56,66 +68,119 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
       return { x: 60 + r() * 1480, y: top ? 70 + r() * 150 : 790 + r() * 80, s: 0.7 + r() * 0.6, b: r() < 0.5 };
     });
   }, [chapter.id]);
+  const rootEl = useRef<HTMLDivElement>(null);
   const roadEl = useRef<SVGPathElement>(null);
-  const anim = useRef({ clock: 0, lens: null as number[] | null, key: '', total: 0, vanL: 0, dir: 1, moving: 0, pickAt: -9, lockAt: -9 });
-  const sel = useRef(selected);
-  sel.current = selected;
-  const [, tick] = useReducer((n: number) => n + 1, 0);
+  const vanEl = useRef<HTMLDivElement>(null);
+  const drive = useRef({ lens: [] as number[], total: 0, vanL: 0, dir: 1, raf: 0, last: 0 });
+  const [lockNote, setLockNote] = useState(0);
+  // only the next stop to play bobs: one moving thing draws the eye, several only add noise
+  const nextOpen = stops.findIndex((s) => s.state === 'open');
+  // the van's first paint only: after that placeVan owns its position, and these props never change,
+  // so a re-render (a new selection) cannot snap it to the stop before it has driven there
+  const [start] = useState(() => pts[selected]!);
+
+  /** Puts the van at its current length along the road, facing its direction (tilted to the road only while driving). */
+  const placeVan = (moving: boolean) => {
+    const r = roadEl.current, v = vanEl.current, d = drive.current;
+    if (!r || !v || !d.total) return;
+    const p = r.getPointAtLength(d.vanL);
+    const q = r.getPointAtLength(Math.min(d.total, d.vanL + 6));
+    const ang = moving ? Math.max(-30, Math.min(30, (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI)) : 0;
+    v.style.left = `${p.x / 16}%`;
+    v.style.top = `${p.y / 9 - 6.5}%`;
+    v.style.transform = `translate(-50%,-50%) scaleX(${d.dir}) rotate(${ang.toFixed(1)}deg)`;
+    v.toggleAttribute('data-driving', moving);
+  };
+
+  // where each stop sits along the road (once per layout), and the van parked at the selected stop
+  useLayoutEffect(() => {
+    const r = roadEl.current, d = drive.current;
+    if (!r) return;
+    d.total = r.getTotalLength();
+    d.lens = pts.map((s) => {
+      let best = { dist: Infinity, l: 0 };
+      for (let i = 0; i <= 500; i++) {
+        const l = (d.total * i) / 500;
+        const p = r.getPointAtLength(l);
+        const dist = (p.x - s.x) ** 2 + (p.y - s.y) ** 2;
+        if (dist < best.dist) best = { dist, l };
+      }
+      return best.l;
+    });
+    d.vanL = d.lens[selected] ?? 0;
+    d.dir = 1;
+    placeVan(false);
+    return () => cancelAnimationFrame(d.raf);
+  }, [pts, road]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // drive to a newly selected stop
+  useEffect(() => {
+    const d = drive.current;
+    const target = d.lens[selected];
+    if (target === undefined) return;
+    cancelAnimationFrame(d.raf);
+    if (reduceMotion()) { d.vanL = target; d.dir = 1; placeVan(false); return; }
+    d.last = 0;
+    const step = (ts: number) => {
+      const dt = d.last ? Math.min(0.05, (ts - d.last) / 1000) : 0;
+      d.last = ts;
+      const left = target - d.vanL;
+      if (Math.abs(left) <= 1) { d.vanL = target; d.dir = 1; placeVan(false); return; }
+      const v = Math.max(160, Math.min(1000, Math.abs(left) * 2.6)) * dt;
+      d.dir = left > 0 ? 1 : -1;
+      d.vanL += Math.abs(left) < v ? left : d.dir * v;
+      placeVan(true);
+      d.raf = requestAnimationFrame(step);
+    };
+    d.raf = requestAnimationFrame(step);
+  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // idle CSS motion pauses while the map is off screen
+  useEffect(() => {
+    const el = rootEl.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => el.toggleAttribute('data-offscreen', !e!.isIntersecting));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // the scenery (water, trees, the parked van's bob) comes alive when the learner touches or scrolls,
+  // and comes to rest after a while; the next stop keeps bobbing, since it invites the next tap
+  useEffect(() => {
+    const el = rootEl.current;
+    if (!el) return;
+    let t = 0;
+    const wake = () => {
+      el.removeAttribute('data-resting');
+      window.clearTimeout(t);
+      t = window.setTimeout(() => el.setAttribute('data-resting', ''), SCENERY_REST_MS);
+    };
+    wake();
+    const opts = { passive: true } as const;
+    const events = ['pointerdown', 'pointermove', 'keydown', 'focusin'] as const;
+    for (const ev of events) el.addEventListener(ev, wake, opts);
+    window.addEventListener('scroll', wake, opts);
+    return () => {
+      window.clearTimeout(t);
+      for (const ev of events) el.removeEventListener(ev, wake);
+      window.removeEventListener('scroll', wake);
+    };
+  }, []);
 
   useEffect(() => {
-    let raf = 0, last = 0;
-    const loop = (ts: number) => {
-      const dt = last ? Math.min(0.05, (ts - last) / 1000) : 0;
-      last = ts;
-      const a = anim.current;
-      a.clock += dt;
-      const r = roadEl.current;
-      const key = `${chapter.id}-${stops.length}`;
-      if (r && a.key !== key) {
-        a.key = key;
-        a.total = r.getTotalLength();
-        a.lens = pts.map((s) => {
-          let best = { d: Infinity, l: 0 };
-          for (let i = 0; i <= 500; i++) {
-            const l = (a.total * i) / 500;
-            const p = r.getPointAtLength(l);
-            const d = (p.x - s.x) ** 2 + (p.y - s.y) ** 2;
-            if (d < best.d) best = { d, l };
-          }
-          return best.l;
-        });
-        a.vanL = a.lens[sel.current] ?? 0;
-      }
-      if (a.lens) {
-        const d = (a.lens[sel.current] ?? 0) - a.vanL;
-        if (Math.abs(d) > 1) {
-          const v = Math.max(160, Math.min(1000, Math.abs(d) * 2.6)) * dt;
-          a.dir = d > 0 ? 1 : -1; a.moving = 1;
-          a.vanL += Math.abs(d) < v ? d : a.dir * v;
-        } else { a.moving *= Math.exp(-dt * 8); a.dir = 1; }
-      }
-      tick();
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [chapter.id, stops.length, pts]);
+    if (!lockNote) return;
+    const t = setTimeout(() => setLockNote(0), LOCK_NOTE_MS);
+    return () => clearTimeout(t);
+  }, [lockNote]);
 
-  useEffect(() => { anim.current.pickAt = anim.current.clock; }, [selected]);
-
-  const a = anim.current;
-  const calm = reduceMotion();
-  let van = { x: pts[selected]!.x / 16, y: pts[selected]!.y / 9, ang: 0 };
-  if (roadEl.current && a.lens) {
-    const p = roadEl.current.getPointAtLength(a.vanL);
-    const q = roadEl.current.getPointAtLength(Math.min(a.total, a.vanL + 6));
-    van = { x: p.x / 16, y: p.y / 9, ang: Math.max(-30, Math.min(30, (Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI)) };
-  }
-  const bob = Math.abs(Math.sin(a.clock * (a.moving > 0.3 ? 16 : 3))) * (a.moving > 0.3 ? 0.5 : 0.25);
-  const lockAge = a.clock - a.lockAt;
+  const tapLocked = (el: HTMLElement) => {
+    setLockNote(Date.now());
+    if (reduceMotion() || typeof el.animate !== 'function') return;
+    el.animate([{ translate: '0 0' }, { translate: '-8px 0' }, { translate: '7px 0' }, { translate: '-5px 0' }, { translate: '3px 0' }, { translate: '0 0' }], { duration: 450, easing: 'ease-out' });
+  };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border-[3px] border-ink shadow-[0_8px_0_#16252D]" style={{ aspectRatio: '16 / 9', minHeight: 300, containerType: 'inline-size', background: chapter.ground }}>
+    <div ref={rootEl} className="city-map relative overflow-hidden rounded-3xl border-[3px] border-ink shadow-[0_8px_0_#16252D]" style={{ aspectRatio: '16 / 9', minHeight: 300, containerType: 'inline-size', background: chapter.ground }}>
       <svg viewBox="0 0 1600 900" preserveAspectRatio="none" aria-hidden="true" className="absolute inset-0 h-full w-full">
         <rect width="1600" height="900" fill={chapter.ground} />
         <ellipse cx="380" cy="230" rx="300" ry="120" fill="#FFFFFF" opacity="0.28" />
@@ -151,12 +216,8 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
 
       {stops.map((s, i) => {
         const p = pts[i]!;
-        // open stops bob up and down to invite a tap, unless the device asks for less motion
         const isSel = i === selected;
         const x = p.x / 16, y = p.y / 9;
-        const bounce = s.state === 'open' && !calm ? Math.abs(Math.sin(a.clock * 3.2 + i)) * 1.3 : 0;
-        const shake = s.state === 'locked' && isSel && lockAge < 0.5 ? Math.sin(lockAge * 60) * (0.5 - lockAge) * 2.4 : 0;
-        const pop = isSel ? 0.92 + 0.26 * easeBack((a.clock - a.pickAt) / 0.3) : 1;
         const faded = s.state === 'locked';
         const bg = s.state === 'done' ? chapter.accent : s.state === 'open' ? '#FFC02E' : '#E3E6DF';
         const label = { done: tr('পাস', 'passed'), open: tr('খেলা যায়', 'open'), locked: tr('তালাবদ্ধ', 'locked') }[s.state];
@@ -171,15 +232,17 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
                 ))}
               </span>
             )}
+            {/* the next open stop bobs up and down to invite a tap (CSS: map-stop-bob), unless the device asks for less motion */}
             <button
               type="button"
-              onClick={() => { if (s.state === 'locked') a.lockAt = a.clock; onSelect(i); }}
+              onClick={(e) => { if (s.state === 'locked') tapLocked(e.currentTarget); onSelect(i); }}
               aria-label={`Level ${bn(s.level.id)}, ${s.level.title}, ${label}`}
               aria-pressed={isSel}
-              className="absolute box-border cursor-pointer rounded-full p-0 font-display font-extrabold leading-none"
+              className={`map-stop absolute box-border cursor-pointer rounded-full p-0 font-display font-extrabold leading-none ${i === nextOpen ? 'map-stop-bob' : ''}`}
               style={{
-                left: `${x + shake}%`, top: `${y - bounce}%`, width: '6.2%', aspectRatio: '1', zIndex: 3,
-                transform: `translate(-50%,-50%) scale(${pop.toFixed(3)})`,
+                left: `${x}%`, top: `${y}%`, width: '6.2%', aspectRatio: '1', zIndex: 3,
+                transform: 'translate(-50%,-50%)', scale: isSel ? '1.18' : '1',
+                viewTransitionName: isSel ? `level-badge-${s.level.id}` : undefined,
                 border: `max(2.5px,0.34cqw) solid ${faded ? '#7C8A84' : INK}`, background: bg,
                 color: s.state === 'done' ? '#FFFFFF' : faded ? '#5D6B66' : INK, fontSize: 'max(14px,2.4cqw)',
                 boxShadow: `0 max(3px,0.5cqw) 0 ${faded ? '#7C8A84' : INK}${isSel ? `,0 0 0 max(4px,0.6cqw) #FFFFFF,0 0 0 max(6px,0.85cqw) ${INK}` : ''}`,
@@ -194,16 +257,19 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
         );
       })}
 
-      <div aria-hidden="true" className="pointer-events-none absolute z-[4]" style={{ left: `${van.x}%`, top: `${van.y - 6.5 - bob}%`, width: '7%', transform: `translate(-50%,-50%) scaleX(${a.dir}) rotate(${(a.moving > 0.3 ? van.ang : 0).toFixed(1)}deg)`, filter: 'drop-shadow(0 max(3px,0.4cqw) 0 rgba(22,37,45,.3))' }}>
-        <svg viewBox="0 0 120 70" className="block h-auto w-full"><rect x="4" y="10" width="72" height="42" rx="6" fill="#FFC02E" stroke={INK} strokeWidth="5" /><path d="M76 22h22l16 16v14H76z" fill="#FFFFFF" stroke={INK} strokeWidth="5" strokeLinejoin="round" /><path d="M84 28h12l8 9H84z" fill="#BFE0F5" stroke={INK} strokeWidth="3" /><circle cx="28" cy="54" r="11" fill={INK} /><circle cx="92" cy="54" r="11" fill={INK} /><circle cx="28" cy="54" r="4" fill="#FFFFFF" /><circle cx="92" cy="54" r="4" fill="#FFFFFF" /><path d="M18 24h44M18 34h30" stroke={INK} strokeWidth="4" strokeLinecap="round" /></svg>
+      {/* position and direction are written by placeVan; the first paint parks it at the selected stop */}
+      <div ref={vanEl} aria-hidden="true" className="pointer-events-none absolute z-[4]" style={{ left: `${start.x / 16}%`, top: `${start.y / 9 - 6.5}%`, width: '7%', transform: 'translate(-50%,-50%)', filter: 'drop-shadow(0 max(3px,0.4cqw) 0 rgba(22,37,45,.3))' }}>
+        <div className="map-van-bob">
+          <svg viewBox="0 0 120 70" className="block h-auto w-full"><rect x="4" y="10" width="72" height="42" rx="6" fill="#FFC02E" stroke={INK} strokeWidth="5" /><path d="M76 22h22l16 16v14H76z" fill="#FFFFFF" stroke={INK} strokeWidth="5" strokeLinejoin="round" /><path d="M84 28h12l8 9H84z" fill="#BFE0F5" stroke={INK} strokeWidth="3" /><circle cx="28" cy="54" r="11" fill={INK} /><circle cx="92" cy="54" r="11" fill={INK} /><circle cx="28" cy="54" r="4" fill="#FFFFFF" /><circle cx="92" cy="54" r="4" fill="#FFFFFF" /><path d="M18 24h44M18 34h30" stroke={INK} strokeWidth="4" strokeLinecap="round" /></svg>
+        </div>
       </div>
 
       <div className="absolute left-[2%] top-[3%] rounded-[14px] bg-white" style={{ padding: '0.35em 1em', border: `max(2px,0.25cqw) solid ${INK}`, boxShadow: `0 max(3px,0.4cqw) 0 ${INK}`, fontSize: 'max(12px,1.45cqw)' }}>
         <div className="text-[0.8em] font-bold" style={{ color: chapter.accent }}>{tr('অধ্যায়', 'Chapter')} {bn(chapter.id)} · {bn(stops.filter((s) => s.state === 'done').length)}/{bn(stops.length)} {tr('পাস', 'passed')}</div>
         <h1 className="m-0 font-display text-[1.45em] font-extrabold leading-[1.15]">{chapter.title}</h1>
       </div>
-      <div role="status" className="pointer-events-none absolute bottom-[4%] left-1/2 whitespace-nowrap rounded-full bg-ink font-bold text-white" style={{ padding: '0.4em 1.1em', fontSize: 'max(12px,1.45cqw)', opacity: lockAge < 2.2 ? Math.min(1, (2.2 - lockAge) * 4) : 0, transform: `translate(-50%, ${((1 - easeBack(lockAge / 0.3)) * 30).toFixed(1)}px)` }}>
-        {lockAge < 2.2 ? tr('এই level এখনো তালাবদ্ধ', 'This level is still locked') : ''}
+      <div role="status" className="pointer-events-none absolute bottom-[4%] left-1/2 whitespace-nowrap" style={{ transform: 'translateX(-50%)', fontSize: 'max(12px,1.45cqw)' }}>
+        {lockNote > 0 && <span key={lockNote} className="map-toast block rounded-full bg-ink font-bold text-white" style={{ padding: '0.4em 1.1em' }}>{tr('এই level এখনো তালাবদ্ধ', 'This level is still locked')}</span>}
       </div>
     </div>
   );

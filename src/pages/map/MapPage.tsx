@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { Link, useRouter } from '@tanstack/react-router';
 import { chapters, levelMeta } from '@/content/meta';
+import { whenIdle } from '@/shared/lib/idle';
 import { dueCards, levelState, lockReason, masteryOf } from '@/entities/progress/selectors';
 import { useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
@@ -40,6 +41,16 @@ export function MapPage() {
   // someone who has not played yet chooses: find out where to start, or begin at level 1
   const fresh = Object.keys(p.levels).length === 0 && !p.placement && !p.settings.skipPlacement;
   const placed = new Set(p.placement?.mastered ?? []);
+
+  // fetch the selected level (its page's code and its chapter) while the learner looks at the map, so Play opens at once
+  const router = useRouter();
+  const playable = !reason;
+  useEffect(() => {
+    if (!playable) return;
+    return whenIdle(() => {
+      void router.preloadRoute({ to: '/level/$levelId', params: { levelId: String(S.level.id) } }).catch(() => { /* fetched again on Play */ });
+    });
+  }, [router, S.level.id, playable]);
 
   return (
     <AppShell>

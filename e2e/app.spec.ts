@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Route } from '@playwright/test';
 import { playLevel, seed, answerAsGuess } from './helpers';
 
 const chapterChunk = /\/assets\/ch\d-[^/]*\.js$/;
@@ -10,14 +10,24 @@ test('a guest sees the landing page', async ({ page }) => {
   await expect(page.getByRole('main').getByRole('button', { name: /Google/ }).first()).toBeVisible();
 });
 
-test('the map opens without downloading any chapter content', async ({ page }) => {
+test('the map shows without chapter content, then fetches only the selected level\'s chapter', async ({ page }) => {
+  // chapter downloads are held back until the map is on screen: if the map needed them, it would never show
   const fetched: string[] = [];
-  page.on('request', (r) => { if (chapterChunk.test(new URL(r.url()).pathname)) fetched.push(r.url()); });
+  const held: Route[] = [];
+  let release = false;
+  await page.route((url) => chapterChunk.test(url.pathname), (route) => {
+    fetched.push(new URL(route.request().url()).pathname);
+    if (release) void route.continue(); else held.push(route);
+  });
   await seed(page);
   await page.goto('./');
   await expect(page.getByRole('button', { name: /^Level ১,/ })).toBeVisible();
+  release = true;
+  for (const r of held) await r.continue();
   await page.waitForLoadState('networkidle');
-  expect(fetched).toEqual([]);
+  // a fresh learner starts at level 1, so chapter 1 (its lessons and questions) is fetched ahead, and nothing else
+  expect(fetched.length).toBeGreaterThan(0);
+  for (const f of fetched) expect(f).toMatch(/\/ch1-/);
 });
 
 test('opening a level from the map loads its chapter', async ({ page }) => {

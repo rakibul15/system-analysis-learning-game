@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useRouter } from '@tanstack/react-router';
 import { chapters, levelMeta } from '@/content/meta';
 import type { Level } from '@/content/schema';
 import { masteryOf, lockReason } from '@/entities/progress/selectors';
@@ -16,6 +16,7 @@ import { tr } from '@/shared/lib/i18n';
 import { BookRefs } from '@/features/books/BookRefs';
 import { levelRefs } from '@/features/books/catalog';
 import { conceptLabel, drawBoss } from '@/content/bank';
+import { whenIdle } from '@/shared/lib/idle';
 
 type Step = 'briefing' | 'predict' | 'lesson' | 'summary' | 'play' | 'boss' | 'result';
 const FLOW: { id: Step; label: string }[] = [
@@ -82,7 +83,7 @@ export function LevelPage({ level }: { level: Level }) {
       <main className="mx-auto box-border flex max-w-[1080px] flex-col gap-5 px-4 pb-12 pt-6 sm:px-8">
         {step === 'briefing' && (
           <section className="pop-in grid gap-5 rounded-[26px] border-[3px] border-ink bg-white p-6 shadow-block sm:grid-cols-[auto_1fr] sm:p-8">
-            <div className="grid h-28 w-28 place-items-center rounded-full border-[3px] border-ink font-display text-[56px] font-extrabold leading-none shadow-[0_5px_0_#16252D]" style={{ background: chapter.accent, color: '#FFFFFF' }}>
+            <div className="grid h-28 w-28 place-items-center rounded-full border-[3px] border-ink font-display text-[56px] font-extrabold leading-none shadow-[0_5px_0_#16252D]" style={{ background: chapter.accent, color: '#FFFFFF', viewTransitionName: `level-badge-${level.id}` }}>
               {bn(level.id)}
             </div>
             <div className="min-w-0">
@@ -258,6 +259,15 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
   const [t0] = useState(() => performance.now());
   const [, force] = useState(0);
 
+  // the next level's content arrives while the learner reads the result
+  const router = useRouter();
+  useEffect(() => {
+    if (!nextId) return;
+    return whenIdle(() => {
+      void router.preloadRoute({ to: '/level/$levelId', params: { levelId: String(nextId) } }).catch(() => { /* fetched again when opened */ });
+    });
+  }, [router, nextId]);
+
   useEffect(() => {
     if (saved.current) return;
     saved.current = true;
@@ -295,7 +305,7 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
         {rows.map(([label, got, max]) => (
           <div key={label}>
             <div className="flex justify-between text-sm font-semibold"><span>{label}</span><span className="font-mono">{bn(Math.round(got * 10) / 10, { grouping: false })}/{bn(max)}</span></div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-locked"><div className="h-full rounded-full bg-route transition-[width] duration-700" style={{ width: `${(got / max) * 100}%` }} /></div>
+            <div className="h-2.5 overflow-hidden rounded-full bg-locked"><div className="h-full origin-left rounded-full bg-route transition-transform duration-700" style={{ transform: `scaleX(${Math.max(0, Math.min(1, got / max))})` }} /></div>
           </div>
         ))}
       </div>
