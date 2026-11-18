@@ -268,6 +268,12 @@ const EXTRA_SIMS: { id: SimulatorId; title: string; concept: string }[] = [
   { id: 'overload', title: tr('Flash sale-এর ভিড়', 'The flash-sale crush'), concept: tr('Load shedding আর priority', 'Load shedding and priority') },
 ];
 
+/** The "ParcelGo বাঁচাও" preview scenarios (src/game/scenarios). */
+const GAMES = [
+  { id: 'lb', level: 1, title: tr('প্রথম ভিড়', 'The first rush'), concept: tr('Load balancer আর health check', 'Load balancer and health check') },
+  { id: 'ratelimit', level: 4, title: tr('Bot-এর বন্যা', 'The bot flood'), concept: tr('Rate limit: কতটা কড়া হবে?', 'Rate limiting: how strict?') },
+];
+
 function SimulatorLab() {
   const [open, setOpen] = useState<SimulatorId | null>(null);
   const [last, setLast] = useState<string | null>(null);
@@ -286,6 +292,20 @@ function SimulatorLab() {
   return (
     <div className="flex flex-col gap-3">
       {last && <p className="m-0 rounded-xl bg-route-soft px-4 py-2 font-semibold">{last}</p>}
+      <section aria-labelledby="game-preview" className="flex flex-col gap-2 rounded-[22px] border-[3px] border-ink bg-parcel-soft p-4">
+        <p className="m-0 text-sm font-bold"><span className="mr-2 rounded-full bg-ink px-2 py-0.5 text-on-ink">{tr('নতুন', 'New')}</span>{tr('নমুনা: খেলে দেখে মত দিন', 'A preview: play it and tell us what you think')}</p>
+        <h2 id="game-preview" className="m-0 font-display text-2xl font-extrabold">ParcelGo {tr('বাঁচাও', 'under fire')}</h2>
+        <p className="m-0 max-w-[60ch] text-ink-soft">{tr('ঢেউয়ের পর ঢেউ traffic আসে। Server, load balancer, health check, rate limiter কিনে ParcelGo-কে দাঁড় করিয়ে রাখুন। ভেঙে পড়লে খেলা থামে আর জিজ্ঞেস করে: কেন?', 'Wave after wave of traffic. Buy servers, a load balancer, a health check and a rate limiter to keep ParcelGo standing. When it breaks, the game stops and asks: why?')}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {GAMES.map((g) => (
+            <Link key={g.id} to="/game/$scenarioId" params={{ scenarioId: g.id }} className="btn-press flex flex-col items-start gap-0.5 rounded-2xl border-[2.5px] border-ink bg-surface p-3 text-ink no-underline shadow-[0_4px_0_var(--color-shadow)]">
+              <span className="text-sm font-bold text-route-deep">Level {bn(g.level)}</span>
+              <span className="font-display text-lg font-extrabold">{g.title}</span>
+              <span className="text-sm text-muted">{g.concept}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
       <div className="grid gap-3 sm:grid-cols-2">
         {EXTRA_SIMS.map((x) => (
           <button key={x.id} type="button" onClick={() => setOpen(x.id)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-coral bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
