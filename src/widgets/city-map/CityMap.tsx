@@ -43,6 +43,9 @@ interface Props {
 }
 
 /** One chapter as a living little city: road, buildings per level, the van that drives to the selected stop. */
+/** The system "reduce motion" setting; read on each frame so a change applies at once. */
+const reduceMotion = () => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export function CityMap({ chapter, stops, selected, onSelect }: Props) {
   const pts = useMemo(() => layout(stops.length), [stops.length]);
   const road = useMemo(() => smoothPath([{ x: -80, y: pts[0]!.y + 40 }, ...pts, { x: 1700, y: pts[pts.length - 1]!.y - 60 }]), [pts]);
@@ -101,6 +104,7 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
   useEffect(() => { anim.current.pickAt = anim.current.clock; }, [selected]);
 
   const a = anim.current;
+  const calm = reduceMotion();
   let van = { x: pts[selected]!.x / 16, y: pts[selected]!.y / 9, ang: 0 };
   if (roadEl.current && a.lens) {
     const p = roadEl.current.getPointAtLength(a.vanL);
@@ -147,9 +151,10 @@ export function CityMap({ chapter, stops, selected, onSelect }: Props) {
 
       {stops.map((s, i) => {
         const p = pts[i]!;
+        // open stops bob up and down to invite a tap, unless the device asks for less motion
         const isSel = i === selected;
         const x = p.x / 16, y = p.y / 9;
-        const bounce = s.state === 'open' ? Math.abs(Math.sin(a.clock * 3.2 + i)) * 1.3 : 0;
+        const bounce = s.state === 'open' && !calm ? Math.abs(Math.sin(a.clock * 3.2 + i)) * 1.3 : 0;
         const shake = s.state === 'locked' && isSel && lockAge < 0.5 ? Math.sin(lockAge * 60) * (0.5 - lockAge) * 2.4 : 0;
         const pop = isSel ? 0.92 + 0.26 * easeBack((a.clock - a.pickAt) / 0.3) : 1;
         const faded = s.state === 'locked';

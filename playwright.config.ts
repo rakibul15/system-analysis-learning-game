@@ -19,6 +19,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     // the offline cache would serve old files between runs
     serviceWorkers: 'block',
+    // the map's stops bob to invite a tap; a moving button is never "stable" enough to click
+    reducedMotion: 'reduce',
   },
   projects: [
     { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
