@@ -107,8 +107,9 @@ export const router = createRouter({
   scrollRestoration: true,
   // a link's page (and its content) starts loading when a finger or pointer lands on it, before the click
   defaultPreload: 'intent',
-  // pages cross-fade, and a map stop grows into the level's badge (styles.css: view transitions)
-  defaultViewTransition: true,
+  // switching screens from the menu is instant, like a phone's tab bar; only going into a level and back
+  // animates (those links ask for viewTransition): the map stop grows into the level's badge
+  defaultViewTransition: false,
   defaultPendingComponent: () => <PageLoading />,
   defaultPendingMs: 150,
   defaultErrorComponent: LoadError,

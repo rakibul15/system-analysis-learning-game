@@ -111,3 +111,25 @@ test('dark mode: chosen in the profile, kept after a reload, and game boards sta
   await page.getByRole('radio', { name: /^আলো/ }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 });
+
+test('menu switches are instant; only going into a level animates', async ({ page }) => {
+  // count the page transitions the app starts (view transitions)
+  await page.addInitScript(() => {
+    const w = window as unknown as { __vt: number };
+    w.__vt = 0;
+    const doc = document as unknown as { startViewTransition?: (cb: () => void) => unknown };
+    const start = doc.startViewTransition?.bind(document);
+    if (start) doc.startViewTransition = (cb) => { w.__vt++; return start(cb); };
+  });
+  await seed(page);
+  await page.goto('./');
+  const transitions = () => page.evaluate(() => (window as unknown as { __vt: number }).__vt);
+  for (const [name, url] of [['Practice', /#\/practice/], ['Review', /#\/review/], ['শহর', /#\/$/]] as const) {
+    await page.getByRole('link', { name, exact: true }).first().click();
+    await expect(page).toHaveURL(url);
+  }
+  expect(await transitions()).toBe(0);
+  await page.getByRole('link', { name: /খেলুন|আবার খেলুন/ }).click();
+  await expect(page.getByRole('button', { name: 'শুরু করুন' })).toBeVisible();
+  expect(await transitions()).toBe(1);
+});

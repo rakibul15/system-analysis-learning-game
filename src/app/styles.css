@@ -227,15 +227,15 @@ a, button, [role='button'], [role='tab'], summary { -webkit-tap-highlight-color:
 }
 
 /*
- * Page changes: the router wraps each navigation in a view transition (defaultViewTransition), so the
- * old page fades out as the new one rises in. A map stop and the level's badge share a name, so the
- * stop grows into the badge. Browsers without view transitions just swap the page.
+ * Going into a level and back (the only links that ask for a view transition; menu switches are instant):
+ * the page cross-fades briefly while the map stop grows into the level's badge. Nothing slides, so the
+ * header never seems to jump. Browsers without view transitions just swap the page.
  */
 ::view-transition-old(root) { animation: vt-out var(--dur-base) var(--ease-out) both; }
-::view-transition-new(root) { animation: vt-in var(--dur-slow) var(--ease-out) both; }
+::view-transition-new(root) { animation: vt-in var(--dur-base) var(--ease-out) both; }
 ::view-transition-group(*) { animation-duration: var(--dur-slow); animation-timing-function: var(--ease-out); }
 @keyframes vt-out { to { opacity: 0; } }
-@keyframes vt-in { from { opacity: 0; translate: 0 12px; } }
+@keyframes vt-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }

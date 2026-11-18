@@ -124,7 +124,7 @@ export function MapPage() {
             {reason ? (
               <p className="m-0 rounded-[14px] border-[2.5px] border-dashed border-line-strong px-4 py-3 font-semibold text-muted">{tr('তালাবদ্ধ', 'Locked')} · {reason}</p>
             ) : (
-              <Link to="/level/$levelId" params={{ levelId: String(S.level.id) }} className="btn-press inline-flex min-h-[52px] items-center justify-center rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[21px] font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
+              <Link to="/level/$levelId" params={{ levelId: String(S.level.id) }} viewTransition className="btn-press inline-flex min-h-[52px] items-center justify-center rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[21px] font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
                 {rec ? tr('আবার খেলুন', 'Play again') : tr('খেলুন', 'Play')} · ~{bn(S.level.minutes)} {tr('মিনিট', 'min')}
               </Link>
             )}
