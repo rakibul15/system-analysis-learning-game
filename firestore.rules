@@ -63,6 +63,18 @@ service cloud.firestore {
         && request.resource.data.disabled.size() <= 500;
     }
 
+    // Who a learner is (name and email from Google) and a short progress summary, so an admin
+    // can contact them or check their progress is in the cloud. Learners are told this at sign-in.
+    match /profiles/{uid} {
+      allow read: if owner(uid) || isAdmin();
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasOnly(['name', 'email', 'lang', 'summary', 'lastSeenAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 200
+        && request.resource.data.email == request.auth.token.get('email', '')
+        && request.resource.data.lang in ['bn', 'en']
+        && request.resource.data.summary is map;
+    }
+
     match /admins/{uid} {
       allow read: if owner(uid);
     }

@@ -1,17 +1,24 @@
 import { setDisabled } from '@/content/disabled';
 import { firebase } from '@/features/auth/auth';
 import type { AnswerEvent, Report } from '@/shared/lib/outbox';
+import type { Profile } from '@/features/auth/profile';
 
 /* What the admin view reads and writes in Firestore (see firestore.rules). */
 
 export type ReportStatus = 'open' | 'working' | 'fixed' | 'wontfix';
 export const STATUSES: ReportStatus[] = ['open', 'working', 'fixed', 'wontfix'];
-export type StoredReport = Report & { id: string; status: ReportStatus; adminNote?: string; at?: { seconds: number } };
+export type StoredReport = Report & { id: string; uid?: string; status: ReportStatus; adminNote?: string; at?: { seconds: number } };
+export type Learner = Profile & { uid: string; lastSeenAt?: { seconds: number } };
+export type Batch = { uid?: string; lang: string; items: AnswerEvent[] };
 export interface Disabled { reason: string; /** When it was turned off (ms). */ at?: number }
 export interface AdminData {
   reports: StoredReport[];
-  batches: { lang: string; items: AnswerEvent[] }[];
+  batches: Batch[];
   disabled: Record<string, Disabled>;
+  /** Signed-in learners, most recently seen first. */
+  learners: Learner[];
+  /** Why the learner list could not be read (e.g. the rules for it are not deployed). */
+  learnersError?: string;
 }
 
 /*
@@ -37,19 +44,24 @@ export async function isAdmin(uid: string): Promise<boolean> {
 
 export async function loadAdminData(): Promise<AdminData> {
   const fx = fixture();
-  if (fx) { setDisabled(Object.keys(fx.disabled)); return { ...fx, reports: fx.reports.map((r) => ({ ...r, status: status(r.status) })) }; }
+  if (fx) { setDisabled(Object.keys(fx.disabled)); return { ...fx, learners: fx.learners ?? [], reports: fx.reports.map((r) => ({ ...r, status: status(r.status) })) }; }
   const { store, db } = await firebase();
-  const [r, q, c] = await Promise.all([
+  const [r, q, c, people] = await Promise.all([
     store.getDocs(store.query(store.collection(db, 'reports'), store.orderBy('at', 'desc'), store.limit(300))),
     store.getDocs(store.query(store.collection(db, 'qlog'), store.orderBy('at', 'desc'), store.limit(2000))),
     store.getDoc(store.doc(db, 'config', 'questions')),
+    // the learner list must not take the rest of the page down with it
+    store.getDocs(store.query(store.collection(db, 'profiles'), store.orderBy('lastSeenAt', 'desc'), store.limit(1000)))
+      .then((x) => ({ ok: true as const, x }), (e: unknown) => ({ ok: false as const, e })),
   ]);
   const disabled = ((c.data() as { disabled?: Record<string, Disabled> } | undefined)?.disabled) ?? {};
   setDisabled(Object.keys(disabled));
   return {
     reports: r.docs.map((d) => { const x = d.data() as Omit<StoredReport, 'id'>; return { ...x, id: d.id, status: status(x.status) }; }),
-    batches: q.docs.map((d) => d.data() as { lang: string; items: AnswerEvent[] }),
+    batches: q.docs.map((d) => d.data() as Batch),
     disabled,
+    learners: people.ok ? people.x.docs.map((d) => ({ ...(d.data() as Omit<Learner, 'uid'>), uid: d.id })) : [],
+    ...(people.ok ? {} : { learnersError: people.e instanceof Error ? people.e.message : String(people.e) }),
   };
 }
 

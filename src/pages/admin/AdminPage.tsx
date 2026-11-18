@@ -4,7 +4,7 @@ import { questionInfo } from '@/content/bank';
 import { chapterOf, conceptLabel, levelMeta } from '@/content/meta';
 import { useChapters } from '@/content/useChapters';
 import { useAuth } from '@/features/auth/auth';
-import { isAdmin, loadAdminData, setQuestionOff, STATUSES, updateReports, usingFixture, type AdminData, type Disabled, type ReportStatus, type StoredReport } from '@/features/stats/admin';
+import { isAdmin, loadAdminData, setQuestionOff, STATUSES, updateReports, usingFixture, type AdminData, type Disabled, type Learner, type ReportStatus, type StoredReport } from '@/features/stats/admin';
 import { aggregate, flagsFor, MIN_ANSWERS, type Flag, type QStat } from '@/features/stats/aggregate';
 import { issueUrl } from '@/features/stats/issue';
 import { bn } from '@/shared/lib/bn';
@@ -45,7 +45,7 @@ const btn = 'btn-press inline-flex min-h-11 cursor-pointer items-center justify-
 export function AdminPage() {
   const user = useAuth((s) => s.user);
   const [state, setState] = useState<State>({ kind: 'loading' });
-  const [tab, setTab] = useState<'reports' | 'questions'>('reports');
+  const [tab, setTab] = useState<'reports' | 'questions' | 'learners'>('reports');
 
   useEffect(() => {
     if (!user && !usingFixture()) { setState({ kind: 'denied', why: tr('আগে admin account দিয়ে sign in করুন।', 'Sign in with an admin account first.') }); return; }
@@ -80,15 +80,18 @@ export function AdminPage() {
               {([
                 ['reports', `${tr('সমস্যা', 'Reports')} · ${bn(new Set(state.data.reports.filter((r) => r.status === 'open').map((r) => r.qid)).size)}`],
                 ['questions', `${tr('প্রশ্নের হিসাব', 'Answer statistics')}${Object.keys(state.data.disabled).length ? ` · ${bn(Object.keys(state.data.disabled).length)} ${tr('বন্ধ', 'off')}` : ''}`],
+                ['learners', `${tr('Learner', 'Learners')} · ${bn(state.data.learners.length)}`],
               ] as const).map(([k, l]) => (
                 <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
                   className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
               ))}
             </div>
-            {tab === 'reports'
-              ? <Reports data={state.data} toggleOff={toggleOff}
-                  onUpdated={(ids, status, adminNote) => set((d) => ({ ...d, reports: d.reports.map((r) => (ids.includes(r.id) ? { ...r, status, adminNote } : r)) }))} />
-              : <Questions data={state.data} toggleOff={toggleOff} />}
+            {tab === 'reports' && (
+              <Reports data={state.data} toggleOff={toggleOff}
+                onUpdated={(ids, status, adminNote) => set((d) => ({ ...d, reports: d.reports.map((r) => (ids.includes(r.id) ? { ...r, status, adminNote } : r)) }))} />
+            )}
+            {tab === 'questions' && <Questions data={state.data} toggleOff={toggleOff} />}
+            {tab === 'learners' && <Learners data={state.data} />}
           </>
         )}
       </main>
@@ -138,6 +141,7 @@ function Reports({ data, onUpdated, toggleOff }: { data: AdminData; onUpdated: (
   }, [data.reports, status, kind, level]);
   const levels = useMemo(() => [...new Set(data.reports.map((r) => levelOfQid(r.qid)))].filter(Boolean).sort((a, b) => a - b), [data.reports]);
   const stats = useMemo(() => new Map(aggregate(data.batches, lang).map((s) => [s.qid, s])), [data.batches]);
+  const who = useMemo(() => new Map(data.learners.map((l) => [l.uid, l])), [data.learners]);
 
   const select = 'min-h-11 rounded-xl border-2 border-ink bg-white px-2 font-[inherit]';
   return (
@@ -163,12 +167,12 @@ function Reports({ data, onUpdated, toggleOff }: { data: AdminData; onUpdated: (
         </label>
       </div>
       {groups.length === 0 && <p className="m-0 text-muted">{tr('এই filter-এ কোনো report নেই।', 'No reports match.')}</p>}
-      {groups.map(([qid, rs]) => <ReportGroup key={qid} qid={qid} reports={rs} stat={stats.get(qid)} off={data.disabled[qid]} onUpdated={onUpdated} toggleOff={toggleOff} />)}
+      {groups.map(([qid, rs]) => <ReportGroup key={qid} qid={qid} reports={rs} stat={stats.get(qid)} off={data.disabled[qid]} who={who} onUpdated={onUpdated} toggleOff={toggleOff} />)}
     </section>
   );
 }
 
-function ReportGroup({ qid, reports, stat, off, onUpdated, toggleOff }: { qid: string; reports: StoredReport[]; stat?: QStat; off?: Disabled; onUpdated: (ids: string[], s: ReportStatus, note: string) => void; toggleOff: ToggleOff }) {
+function ReportGroup({ qid, reports, stat, off, who, onUpdated, toggleOff }: { qid: string; reports: StoredReport[]; stat?: QStat; off?: Disabled; who: Map<string, Learner>; onUpdated: (ids: string[], s: ReportStatus, note: string) => void; toggleOff: ToggleOff }) {
   const first = reports[0]!;
   const current: ReportStatus = reports.some((r) => r.status === 'open') ? 'open' : reports.some((r) => r.status === 'working') ? 'working' : first.status;
   const [note, setNote] = useState(first.adminNote ?? '');
@@ -204,6 +208,7 @@ function ReportGroup({ qid, reports, stat, off, onUpdated, toggleOff }: { qid: s
             <span className="font-bold">{KIND[r.kind] ?? r.kind}</span>
             <span className="text-muted"> · {r.lang}{r.at ? ` · ${new Date(r.at.seconds * 1000).toLocaleDateString()}` : ''}{r.status !== current ? ` · ${STATUS[r.status][0]}` : ''}</span>
             {r.note && <span className="block">“{r.note}”</span>}
+            {r.uid && who.get(r.uid) && <span className="block text-xs text-muted">{tr('পাঠিয়েছেন', 'From')}: {who.get(r.uid)!.name} · <a href={`mailto:${who.get(r.uid)!.email}`} className="text-route-deep">{who.get(r.uid)!.email}</a></span>}
           </li>
         ))}
       </ul>
@@ -326,6 +331,66 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
           </tbody>
         </table>
       </div>
+    </section>
+  );
+}
+
+/** Everyone who signed in: who they are, how far they got, and how to reach them. */
+function Learners({ data }: { data: AdminData }) {
+  const [q, setQ] = useState('');
+  const [copied, setCopied] = useState<string | null>(null);
+  const activity = useMemo(() => {
+    const answers = new Map<string, number>();
+    for (const b of data.batches) if (b.uid) answers.set(b.uid, (answers.get(b.uid) ?? 0) + b.items.length);
+    const reports = new Map<string, number>();
+    for (const r of data.reports) if (r.uid) reports.set(r.uid, (reports.get(r.uid) ?? 0) + 1);
+    return { answers, reports };
+  }, [data.batches, data.reports]);
+  const needle = q.trim().toLowerCase();
+  const shown = data.learners.filter((l) => !needle || l.name.toLowerCase().includes(needle) || l.email.toLowerCase().includes(needle) || l.uid.toLowerCase().startsWith(needle));
+  const copy = async (text: string) => {
+    try { await navigator.clipboard.writeText(text); setCopied(text); } catch { setCopied(null); }
+  };
+  // YYYY-MM-DD in local time, like the last-played column
+  const seen = (l: Learner) => (l.lastSeenAt ? new Date(l.lastSeenAt.seconds * 1000).toLocaleDateString('en-CA') : '–');
+
+  return (
+    <section className="flex flex-col gap-3">
+      {data.learnersError && <p className="m-0 rounded-2xl border-2 border-coral bg-coral-soft p-4 font-semibold" role="alert">{tr('Learner তালিকা পড়া গেল না:', 'Could not read the learner list:')} {data.learnersError}</p>}
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="flex min-w-0 flex-1 items-center gap-2 font-semibold">{tr('খুঁজুন', 'Search')}
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('নাম, email বা id', 'Name, email or id')} className="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-ink bg-white px-3 font-[inherit]" />
+        </label>
+        <span className="text-sm text-muted">{tr('Login করার পরের প্রথম sync-এ profile তৈরি হয়; তার আগের learner এখানে নেই।', 'A profile is made on the first sync after sign-in; learners not seen since then are not listed.')}</span>
+      </div>
+      {shown.length === 0 && <p className="m-0 text-muted">{tr('কেউ নেই।', 'Nobody here.')}</p>}
+      {shown.length > 0 && (
+        <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-white">
+          <table className="w-full min-w-[760px] border-collapse text-left text-sm">
+            <thead className="bg-[#F0F2EC]"><tr>{[tr('Learner', 'Learner'), tr('Level (পাস/খেলা)', 'Levels (passed/played)'), tr('Review card', 'Review cards'), tr('খেলার দিন', 'Days played'), tr('শেষ খেলা', 'Last played'), tr('শেষ দেখা', 'Last seen'), tr('উত্তর · report', 'Answers · reports')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
+            <tbody>
+              {shown.map((l) => (
+                <tr key={l.uid} className="border-t border-[#D7DED1] align-top">
+                  <td className="px-3 py-2">
+                    <span className="block font-semibold">{l.name}{l.lang === 'en' ? ' · EN' : ''}</span>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <a href={`mailto:${l.email}`} className="break-all text-route-deep">{l.email}</a>
+                      <button type="button" onClick={() => void copy(l.email)} className="min-h-8 cursor-pointer rounded-lg border-2 border-ink bg-white px-2 text-xs font-semibold">{copied === l.email ? tr('কপি হয়েছে', 'Copied') : tr('কপি', 'Copy')}</button>
+                    </span>
+                    <span className="font-mono text-xs text-muted">{l.uid}</span>
+                  </td>
+                  <td className="px-3 py-2 font-mono">{bn(l.summary?.passed ?? 0)}/{bn(l.summary?.played ?? 0)}</td>
+                  <td className="px-3 py-2 font-mono">{bn(l.summary?.cards ?? 0)}</td>
+                  <td className="px-3 py-2 font-mono">{bn(l.summary?.days ?? 0)}</td>
+                  <td className="px-3 py-2">{l.summary?.lastDay ?? '–'}</td>
+                  <td className="px-3 py-2">{seen(l)}</td>
+                  <td className="px-3 py-2 font-mono">{bn(activity.answers.get(l.uid) ?? 0)} · {bn(activity.reports.get(l.uid) ?? 0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </section>
   );
 }
