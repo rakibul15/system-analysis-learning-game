@@ -12,7 +12,7 @@ describe('question statistics', () => {
       { lang: 'en', items: [ans('l1-b1', 1, 0, 'Ren')] },
     ]);
     const b1 = stats.find((s) => s.qid === 'l1-b1')!;
-    expect(b1).toMatchObject({ n: 3, right: 2, sure: 2, sureWrong: 1, picks: { R: 1, W1: 1, Ren: 1 }, where: { boss: 3 } });
+    expect(b1).toMatchObject({ n: 3, right: 2, sure: 2, sureWrong: 1, picks: { R: 1, W1: 1, Ren: 1 }, where: { boss: 3 }, older: 0 });
     expect(aggregate([{ lang: 'en', items: [ans('x', 1, 1, 'a')] }], 'bn')).toEqual([]);
   });
 
@@ -27,5 +27,11 @@ describe('question statistics', () => {
     expect(flagsFor(easy!, keys)).toEqual(['easy', 'dead-option']);
     const [hard] = aggregate([{ lang: 'bn', items: [...many(5, ans('h', 1, 0, 'R')), ...many(18, ans('h', 0, 1, 'A')), ...many(1, ans('h', 0, 0, 'B')), ...many(1, ans('h', 0, 0, 'C'))] }]);
     expect(flagsFor(hard!, keys)).toEqual(['hard', 'sure-wrong', 'one-trap']);
+  });
+
+  it('counts answers to an earlier wording apart, so a fixed question starts clean', () => {
+    const v = (p: string) => (q: AnswerEvent) => ({ ...q, p });
+    const [s] = aggregate([{ lang: 'bn', items: [v('old')(ans('q', 0, 1, 'W')), v('old')(ans('q', 0, 1, 'W')), v('new')(ans('q', 1, 1, 'R')), ans('q', 1, 0, 'R')] }], 'bn', () => 'new');
+    expect(s).toMatchObject({ n: 2, right: 2, sureWrong: 0, older: 2 });
   });
 });

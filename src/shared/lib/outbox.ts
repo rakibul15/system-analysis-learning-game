@@ -7,8 +7,11 @@ import { lang, type Lang } from '@/shared/lib/i18n';
  */
 
 export type Where = 'predict' | 'lesson' | 'mission' | 'boss' | 'review' | 'other';
-/** One answer: question, right (1/0), sure (1/0), which option (a short key of its text), where, when. */
-export interface AnswerEvent { q: string; c: 0 | 1; s: 0 | 1; o: string; w: Where; t: number }
+/**
+ * One answer: question, right (1/0), sure (1/0), which option (a short key of its text),
+ * which version of the question (a short key of its prompt), where, when.
+ */
+export interface AnswerEvent { q: string; c: 0 | 1; s: 0 | 1; o: string; p?: string; w: Where; t: number }
 export type ReportKind = 'wrong' | 'unclear' | 'typo' | 'other';
 export interface Report { qid: string; levelId: number; kind: ReportKind; note: string; prompt: string; options: string[]; t: number; lang: Lang }
 

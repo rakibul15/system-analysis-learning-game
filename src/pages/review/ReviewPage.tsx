@@ -36,7 +36,7 @@ export function ReviewPage() {
   if (session && k < session.length) {
     if (content.state !== 'ready') return <AppShell>{content.state === 'error' ? <LoadFailed onRetry={content.retry} /> : <PageLoading />}</AppShell>;
     const card = session[k]!;
-    return <ReviewStep key={`${card.qid}-${k}`} card={card} k={k} total={session.length} session={session} onStop={() => setSession(null)} onAnswer={(r) => { answerReview(card.qid, r.correct, r.sure); if (r.correct) setRight((n) => n + 1); setK(k + 1); }} />;
+    return <ReviewStep key={`${card.qid}-${k}`} card={card} k={k} total={session.length} session={session} onStop={() => setSession(null)} onAnswer={(r) => { if (!r.skipped) answerReview(card.qid, r.correct, r.sure); if (r.correct) setRight((n) => n + 1); setK(k + 1); }} />;
   }
 
   return (
@@ -119,7 +119,7 @@ function RebuildSection() {
 }
 
 /** One review question: a different question on the same concept when the bank has one. */
-function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: ReviewCard; k: number; total: number; session: ReviewCard[]; onStop: () => void; onAnswer: (r: { correct: boolean; sure: boolean }) => void }) {
+function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: ReviewCard; k: number; total: number; session: ReviewCard[]; onStop: () => void; onAnswer: (r: { correct: boolean; sure: boolean; skipped?: boolean }) => void }) {
   const q = useMemo(() => reviewVariant(card.qid, questionsById[card.qid]?.q ?? bankQuestion(card.qid)), [card.qid]);
   const levelId = questionsById[card.qid]?.levelId ?? card.levelId;
   const concept = conceptLabel(card.qid);

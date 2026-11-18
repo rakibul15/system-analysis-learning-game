@@ -6,8 +6,9 @@ import { bn } from '@/shared/lib/bn';
 import { confidenceFactor, shuffledOrder } from '@/shared/lib/scoring';
 import { logAnswer, optionKey, type Where } from '@/shared/lib/outbox';
 import { ReportProblem } from './ReportProblem';
+import { useDisabled } from '@/content/disabled';
 
-export interface AnswerResult { qid: string; correct: boolean; sure: boolean; earned: number }
+export interface AnswerResult { qid: string; correct: boolean; sure: boolean; earned: number; /** The question was turned off by an admin and skipped. */ skipped?: boolean }
 
 interface Props {
   q: Question;
@@ -39,6 +40,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   const [sure, setSure] = useState<boolean | null>(null);
   const [done, setDone] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const off = useDisabled().has(q.id);
 
   useEffect(() => {
     setPicked(null); setSure(null); setDone(false); setShowHint(false);
@@ -61,6 +63,26 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   const ready = picked !== null && sure !== null;
   const boss = tone === 'boss';
   const letters = isEn ? ['A', 'B', 'C', 'D'] : ['ক', 'খ', 'গ', 'ঘ'];
+
+  if (off) {
+    // turned off by an admin: the learner is not asked it, and loses nothing
+    return (
+      <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-[#1D2E37] text-white shadow-[0_6px_0_#E0483E]' : 'border-ink bg-white shadow-block'}`} data-testid="q-skipped">
+        <p className={`m-0 text-[13px] font-bold ${boss ? 'text-parcel' : 'text-route-deep'}`}>{label}</p>
+        <p className="m-0 mt-2 font-display text-xl font-bold">{tr('এই প্রশ্নটা এখন ঠিক করা হচ্ছে', 'This question is being fixed')}</p>
+        <p className={`m-0 mt-1 ${boss ? 'text-[#C9D6DC]' : 'text-ink-soft'}`}>{tr('এতে একটা সমস্যা পাওয়া গেছে, তাই আপাতত বাদ। এর পুরো নম্বর পাবেন।', 'A problem was found in it, so it is left out for now. You get its full points.')}</p>
+        <button
+          type="button"
+          autoFocus
+          data-testid="q-continue"
+          onClick={() => onDone({ qid: q.id, correct: true, sure: true, earned: points, skipped: true })}
+          className="btn-press mt-4 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-white font-display text-lg font-extrabold text-ink shadow-[0_4px_0_#16252D]"
+        >
+          {continueLabel}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-[#1D2E37] text-white shadow-[0_6px_0_#E0483E]' : 'border-ink bg-white shadow-block'}`}>
@@ -122,7 +144,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               disabled={!ready}
               onClick={() => {
                 setDone(true);
-                logAnswer({ q: q.id, c: correct ? 1 : 0, s: sure ? 1 : 0, o: optionKey(q.options[picked!] ?? ''), w: where });
+                logAnswer({ q: q.id, c: correct ? 1 : 0, s: sure ? 1 : 0, o: optionKey(q.options[picked!] ?? ''), p: optionKey(q.prompt), w: where });
               }}
               className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
             >
