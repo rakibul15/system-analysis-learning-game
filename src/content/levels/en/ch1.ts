@@ -21,7 +21,7 @@ export const l1 = level({
   title: 'The first rush', concept: 'Load balancer · Replication',
   story: 'When the site falls, everything stops',
   briefing: 'ParcelGo, day one: the web app and the database share a single server. Orders surge before Eid, the server slows, then falls over. The whole shop is closed. Today you learn how to stop one broken part from halting the whole business.',
-  ref: refs.p1,
+  ref: refs.v1_1,
   predict: ['With everything on one server, what is the biggest risk?', ['If it falls, the whole site is down', 'Deploying code takes much longer', 'The database cannot build any index', 'More users break the CSS files']],
   nodes: [
     ['u', 'Customer', 'user', 8, 50], ['one', 'One server', 'server', 50, 50],
@@ -86,7 +86,7 @@ export const l2 = level({
   title: 'The quick shelf', concept: 'Cache · CDN',
   story: 'Pages are slow, the DB is struggling',
   briefing: 'The same product page is opened a hundred thousand times a day, and every time it is read from the database. The DB is gasping and pages take 3 seconds. Time to keep the things people ask for most on a shelf within reach.',
-  ref: refs.p1,
+  ref: refs.v1_1,
   predict: ['The same page is opened again and again, read from the DB each time. What helps most?', ['Keep it in a cache', 'Add more columns to the table', 'Restart the server every hour', 'Use fewer images on the page']],
   nodes: [
     ['u', 'Customer', 'user', 8, 55], ['cdn', 'CDN', 'cdn', 30, 18], ['web', 'Web server', 'server', 36, 60],
@@ -125,7 +125,7 @@ export const l3 = level({
   title: 'The investor\'s question', concept: 'Estimation · Interview framework',
   story: 'An investor asks how many servers you need',
   briefing: 'At the investor meeting: "With ten million customers, how many servers and how much storage?" No calculator, in your head, in five minutes. You will also learn how to split the 45 minutes of an interview.',
-  ref: refs.p1,
+  ref: refs.v1_2,
   predict: ['10 million DAU, 10 requests each per day. Average QPS, roughly?', ['~1,200', '~120', '~12,000', '~10 million']],
   nodes: [
     ['dau', 'DAU', 'user', 10, 40], ['req', 'Requests/day', 'step', 30, 40], ['qps', 'QPS', 'step', 50, 40],
@@ -165,7 +165,7 @@ export const l4 = level({
   title: 'Bot flood', concept: 'Rate limiter',
   story: 'A bot is flooding the API',
   briefing: '2 a.m.: a thousand requests a second from one IP. Real customers cannot place orders. You need a doorkeeper out front who counts people in.',
-  ref: refs.p1,
+  ref: refs.v1_4,
   predict: ['A thousand requests a second from one IP. First move?', ['Add a rate limiter to block the excess', 'Add more servers to absorb it', 'Switch to a faster database', 'Clear the cache and refill it']],
   nodes: [
     ['bot', 'Bot', 'bot', 8, 28], ['u', 'Customer', 'user', 8, 72], ['rl', 'Rate limiter', 'lb', 40, 50],

@@ -21,7 +21,7 @@ export const l1 = level({
   title: 'প্রথম ভিড়', concept: 'Load balancer · Replication',
   story: 'Site পড়ে গেলে সব বন্ধ',
   briefing: 'ParcelGo-র প্রথম দিন: একটা server-এই web আর database। ঈদের আগে order বাড়ল, server ধীর হল, তারপর পড়ে গেল। পুরো দোকান বন্ধ। আজ শিখবেন কীভাবে এক জায়গার ভাঙন পুরো ব্যবসা থামিয়ে না দেয়।',
-  ref: refs.p1,
+  ref: refs.v1_1,
   predict: ['একটা server-এ সব থাকলে সবচেয়ে বড় ঝুঁকি কী?', ['Server পড়লে পুরো site বন্ধ', 'Code deploy করতে বেশি সময় লাগে', 'Database-এ index বানানো যায় না', 'User বাড়লে CSS file ভেঙে যায়']],
   nodes: [
     ['u', 'Customer', 'user', 8, 50], ['one', 'একটা server', 'server', 50, 50],
@@ -86,7 +86,7 @@ export const l2 = level({
   title: 'দ্রুত তাক', concept: 'Cache · CDN',
   story: 'Page ধীর, DB-তে চাপ',
   briefing: 'একই product page দিনে লাখবার খোলা হয়, আর প্রতিবার database থেকে পড়া হয়। DB হাঁপিয়ে উঠেছে, page খুলতে ৩ সেকেন্ড। বারবার চাওয়া জিনিস হাতের কাছের তাকে রাখার সময়।',
-  ref: refs.p1,
+  ref: refs.v1_1,
   predict: ['একই page বারবার খোলা হচ্ছে, প্রতিবার DB থেকে পড়া। কী করলে সবচেয়ে বেশি লাভ?', ['Cache-এ রেখে দেওয়া', 'Table-এ আরও column যোগ', 'প্রতি ঘণ্টায় server restart', 'Page-এ ছবি কমিয়ে দেওয়া']],
   nodes: [
     ['u', 'Customer', 'user', 8, 55], ['cdn', 'CDN', 'cdn', 30, 18], ['web', 'Web server', 'server', 36, 60],
@@ -125,7 +125,7 @@ export const l3 = level({
   title: 'Investor-এর প্রশ্ন', concept: 'Estimation · Interview framework',
   story: 'Investor জিজ্ঞেস করছে কত server লাগবে',
   briefing: 'Investor meeting-এ প্রশ্ন: "এক কোটি customer হলে কত server আর কত storage লাগবে?" Calculator ছাড়া, মুখে মুখে, পাঁচ মিনিটে। সাথে শিখবেন interview-এর ৪৫ মিনিট কীভাবে ভাগ করবেন।',
-  ref: refs.p1,
+  ref: refs.v1_2,
   predict: ['১ কোটি DAU, প্রতিজন দিনে ১০টা request। গড় QPS মোটামুটি?', ['~১,২০০', '~১২০', '~১২,০০০', '~১ কোটি']],
   nodes: [
     ['dau', 'DAU', 'user', 10, 40], ['req', 'দিনে request', 'step', 30, 40], ['qps', 'QPS', 'step', 50, 40],
@@ -165,7 +165,7 @@ export const l4 = level({
   title: 'Bot-এর বন্যা', concept: 'Rate limiter',
   story: 'একটা bot API ভাসিয়ে দিচ্ছে',
   briefing: 'রাত ২টায় একটা IP থেকে সেকেন্ডে হাজার request। আসল customer order দিতে পারছে না। সামনে একজন দারোয়ান দরকার, যে গুনে গুনে ঢুকতে দেবে।',
-  ref: refs.p1,
+  ref: refs.v1_4,
   predict: ['এক IP থেকে সেকেন্ডে হাজার request। প্রথম কাজ?', ['Rate limiter বসিয়ে বাড়তি আটকানো', 'আরও server যোগ করে সামলানো', 'Database বদলে দ্রুত কোনোটা', 'Cache মুছে নতুন করে ভরা']],
   nodes: [
     ['bot', 'Bot', 'bot', 8, 28], ['u', 'Customer', 'user', 8, 72], ['rl', 'Rate limiter', 'lb', 40, 50],

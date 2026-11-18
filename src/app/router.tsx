@@ -30,6 +30,7 @@ const DeepPage = lazyRouteComponent(() => import('@/pages/deep/DeepPage'), 'Deep
 const AdminPage = lazyRouteComponent(() => import('@/pages/admin/AdminPage'), 'AdminPage');
 const PlacementPage = lazyRouteComponent(() => import('@/pages/placement/PlacementPage'), 'PlacementPage');
 const GamePage = lazyRouteComponent(() => import('@/pages/game/GamePage'), 'GamePage');
+const XuPage = lazyRouteComponent(() => import('@/pages/xu/XuPage'), 'XuPage');
 
 
 /** A screen failed: a download that did not arrive (offline, or a new version) or a crash in its code. */
@@ -101,6 +102,18 @@ const levelRoute = createRoute({
   },
 });
 
+/** Our note on one chapter of Alex Xu's volumes (v1-4 is Vol 1, chapter 4). */
+const xuRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/xu/$noteId',
+  loader: ({ params }) => Promise.all([import('@/content/xu').then((m) => m.loadXu(params.noteId)), XuPage.preload?.()]).then(([x]) => x ?? null),
+  component: function XuView() {
+    const x = xuRoute.useLoaderData();
+    if (!x) return <NotFound />;
+    return <XuPage key={x.meta.id} meta={x.meta} note={x.note} />;
+  },
+});
+
 /** "ParcelGo বাঁচাও" (a preview): a scenario's waves, played on its own screen. */
 const gameRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -114,7 +127,7 @@ const gameRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute, placementRoute, gameRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute, placementRoute, gameRoute, xuRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,

@@ -55,7 +55,7 @@ export interface FlowLink {
 interface Particle { id: number; link: number; t: number; drop: boolean; mix: boolean; fall: number }
 
 /** Boxes joined by lines, with dots streaming along each line at its rate. */
-export function Flow({ nodes, links, h = 56, label }: { nodes: FlowNode[]; links: FlowLink[]; h?: number; label: string }) {
+export function Flow({ nodes, links, h = 56, label, fresh }: { nodes: FlowNode[]; links: FlowLink[]; h?: number; label: string; /** boxes new to this picture: they pop in, outlined */ fresh?: string[] }) {
   const reduced = useReducedMotion();
   const ps = useRef<Particle[]>([]);
   const acc = useRef<number[]>([]);
@@ -100,7 +100,8 @@ export function Flow({ nodes, links, h = 56, label }: { nodes: FlowNode[]; links
       {nodes.map((n) => {
         const w = n.w ?? 17;
         return (
-          <g key={n.id} className={n.tone === 'hot' ? 'sim-pulse' : undefined} style={{ transformOrigin: `${n.x}px ${n.y}px` }}>
+          <g key={n.id} className={fresh?.includes(n.id) ? 'flow-fresh' : n.tone === 'hot' ? 'sim-pulse' : undefined} style={{ transformOrigin: `${n.x}px ${n.y}px` }}>
+            {fresh?.includes(n.id) && <rect x={n.x - w / 2 - 1} y={n.y - 5.2} width={w + 2} height="10.4" rx="2.4" fill="none" stroke={PARCEL} strokeWidth="1" />}
             <rect x={n.x - w / 2} y={n.y - 4.2} width={w} height="8.4" rx="1.8" fill={fill(n.tone)} stroke={n.tone === 'down' ? CORAL : INK} strokeWidth={n.tone === 'down' ? 0.8 : 0.5} />
             <text x={n.x} y={n.y + (n.sub ? -0.4 : 0.9)} textAnchor="middle" fontSize="2.5" fontWeight="700" fill={INK}>{n.tone === 'down' ? '✕ ' : ''}{n.label}</text>
             {n.sub && <text x={n.x} y={n.y + 2.6} textAnchor="middle" fontSize="2" fill="#4A5A62">{n.sub}</text>}

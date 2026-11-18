@@ -9,6 +9,8 @@ import { tr } from '@/shared/lib/i18n';
 import { BOOK, chapters } from '@/features/reading/ddia';
 import { useProgress } from '@/entities/progress/store';
 import { AppShell } from '@/shared/ui/AppShell';
+import { xuChapters } from '@/content/xu';
+import { ChapterLink } from '@/widgets/note/ChapterLink';
 
 import { PARTS, type Part } from './parts';
 export { PARTS, type Part };
@@ -21,8 +23,9 @@ export function StudyPage() {
         <div>
           <p className="m-0 text-sm font-bold text-route-deep">{tr('পড়া', 'Study')}</p>
           <h1 className="m-0 font-display text-[32px] font-extrabold">{tr('ছবিতে system design', 'System design in pictures')}</h1>
-          <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with diagrams and self-check questions. Works offline too.')}</p>
+          <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, চলন্ত ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with moving pictures and self-check questions. Works offline too.')}</p>
         </div>
+        <XuChapters />
         <section className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="m-0 font-display text-xl font-bold">{tr('আমাদের নোট · দুই বই মিলিয়ে', 'Our notes · both books combined')}</h2>
@@ -38,7 +41,7 @@ export function StudyPage() {
         </section>
         <ReadingTrackCard />
         <div className="grid gap-3 sm:grid-cols-2">
-          {PARTS.map((p) => (
+          {PARTS.filter((p) => p === 'hub' || p === 'p7').map((p) => (
             <Link key={p} to="/study/$part" params={{ part: p }} className="btn-press flex flex-col gap-1 rounded-[18px] border-[2.5px] border-ink bg-surface p-4 text-ink no-underline shadow-[0_4px_0_var(--color-shadow)]">
               <span className="font-display text-lg font-bold">{refs[p].label}</span>
               <span className="text-sm text-muted">{p === 'hub' ? tr('সব অংশের সূচি আর এক পাতার cheat sheet', 'Index of every part and a one-page cheat sheet') : tr('পড়তে খুলুন →', 'Open to read →')}</span>
@@ -107,6 +110,26 @@ function MyBooks() {
           <iframe title={open.name} src={open.url} className="h-[80vh] w-full rounded-xl border-2 border-ink" />
         </div>
       )}
+    </section>
+  );
+}
+
+/** Alex Xu's two volumes, chapter by chapter: our new notes, and the older pages for chapters not rewritten yet. */
+function XuChapters() {
+  const done = xuChapters.filter((c) => c.load).length;
+  return (
+    <section aria-labelledby="xu-chapters" className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-surface p-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 id="xu-chapters" className="m-0 font-display text-xl font-bold">{tr('Alex Xu-র দুই খণ্ড, অধ্যায় ধরে', 'Alex Xu\'s two volumes, chapter by chapter')}</h2>
+        <span className="text-sm font-semibold text-muted">{tr(`নতুন নোট ${bn(done)}/${bn(xuChapters.length)}`, `New notes ${done}/${xuChapters.length}`)}</span>
+      </div>
+      <p className="m-0 text-sm text-ink-soft">{tr('নতুন নোটে চলন্ত ছবি: request কোন পথে যায়, design কীভাবে বড় হয়, আর নিজে চালিয়ে দেখার মতো ছোট খেলা। বাকি অধ্যায়গুলো এখনো পুরোনো পাতায়, একে একে নতুন হচ্ছে।', 'The new notes have moving pictures: where a request goes, how a design grows, and small things to try yourself. The other chapters are still on the older pages, and are being rewritten one by one.')}</p>
+      {(['xu1', 'xu2'] as const).map((book) => (
+        <div key={book} className="flex flex-col gap-2">
+          <h3 className="m-0 text-sm font-bold uppercase tracking-wide text-muted">{book === 'xu1' ? tr('খণ্ড ১', 'Volume 1') : tr('খণ্ড ২', 'Volume 2')}</h3>
+          <div className="grid gap-2 sm:grid-cols-2">{xuChapters.filter((c) => c.book === book).map((c) => <ChapterLink key={c.id} c={c} />)}</div>
+        </div>
+      ))}
     </section>
   );
 }
