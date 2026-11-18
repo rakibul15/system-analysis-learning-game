@@ -18,11 +18,13 @@ export interface ProgressSummary {
   days: number;
   /** Last day played (YYYY-MM-DD), or null. */
   lastDay: string | null;
+  /** Chapters the placement test showed as known, or null when it was never taken. */
+  placed: number | null;
 }
 
 export interface Profile { name: string; email: string; lang: string; summary: ProgressSummary }
 
-export function summarize(p: Pick<ProgressData, 'levels' | 'cards' | 'days'>): ProgressSummary {
+export function summarize(p: Pick<ProgressData, 'levels' | 'cards' | 'days'> & { placement?: ProgressData['placement'] }): ProgressSummary {
   const levels = Object.values(p.levels);
   const days = [...p.days].sort();
   return {
@@ -31,5 +33,6 @@ export function summarize(p: Pick<ProgressData, 'levels' | 'cards' | 'days'>): P
     cards: Object.keys(p.cards).length,
     days: days.length,
     lastDay: days[days.length - 1] ?? null,
+    placed: p.placement ? p.placement.mastered.length : null,
   };
 }

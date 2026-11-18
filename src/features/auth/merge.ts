@@ -1,4 +1,4 @@
-import { emptyProgress, type LevelRecord, type ProgressData, type ReadingRecord, type RebuildRecord, type ReviewCard } from '@/entities/progress/store';
+import { emptyProgress, mergePlacement, type LevelRecord, type PlacementRecord, type ProgressData, type ReadingRecord, type RebuildRecord, type ReviewCard } from '@/entities/progress/store';
 
 /** Keep only the saved fields, filling anything missing with defaults. */
 export function normalize(data: unknown): ProgressData {
@@ -16,8 +16,17 @@ export function normalize(data: unknown): ProgressData {
     builds: d.builds ?? {},
     rebuilds: d.rebuilds ?? {},
     reading: d.reading ?? {},
+    placement: placementOf(d.placement),
     settings: { ...e.settings, ...d.settings },
   };
+}
+
+const nums = (x: unknown) => (Array.isArray(x) ? x.filter((n): n is number => Number.isInteger(n)) : []);
+function placementOf(x: unknown): PlacementRecord | null {
+  if (!x || typeof x !== 'object') return null;
+  const p = x as Partial<PlacementRecord>;
+  if (typeof p.at !== 'string') return null;
+  return { at: p.at, mastered: nums(p.mastered), tested: nums(p.tested), start: Number.isInteger(p.start) ? p.start! : null };
 }
 
 const maxMap = (a: Record<string, number>, b: Record<string, number>) => {
@@ -94,6 +103,7 @@ export function mergeProgress(aIn: unknown, bIn: unknown): ProgressData {
     builds: maxMap(a.builds, b.builds),
     rebuilds,
     reading,
+    placement: mergePlacement(a.placement, b.placement),
     settings: { ...b.settings, ...a.settings },
   };
 }

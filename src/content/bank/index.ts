@@ -21,6 +21,8 @@ const itemQ = (it: BankItem, rand: () => number): Question => {
   return { id: it.id, prompt: it.prompt, options: [right!, ...chosen], explain: it.explain };
 };
 const genQ = (g: Generator, rand: () => number): Question => ({ id: g.id, ...g.make(rand) });
+/** One written bank question as asked (distractors rotated in), and one generated question. */
+export { itemQ as bankItemQuestion, genQ as bankGenQuestion };
 const candQ = (c: Cand, rand: () => number): Question => (c.kind === 'fixed' ? c.q : c.kind === 'item' ? itemQ(c.item, rand) : genQ(c.gen, rand));
 const candId = (c: Cand) => (c.kind === 'fixed' ? c.q.id : c.kind === 'item' ? c.item.id : c.gen.id);
 
