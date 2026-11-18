@@ -71,7 +71,7 @@ function MyBooks() {
     <section className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-surface p-5">
       <h2 className="m-0 font-display text-xl font-bold">{tr('আমার বই', 'My books')}</h2>
       <p className="m-0 text-sm text-ink-soft">{tr('নিজের বইয়ের PDF এখানে রাখুন। প্রতিটা PDF কোন বই সেটা ঠিক থাকলে, খেলার প্রতিটা topic-এর "বইয়ে পড়ুন" থেকে সোজা ঠিক পাতায় খুলবে। File শুধু এই browser-এ থাকে, কোথাও upload হয় না।', 'Keep the PDFs of your books here. When each PDF is matched to its book, every topic\'s "Read it in the book" opens it straight at the right page. Files stay in this browser only and are never uploaded.')}</p>
-      <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel px-4 font-bold">
+      <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel text-night px-4 font-bold">
         {tr('PDF যোগ করুন', 'Add a PDF')}
         <input type="file" accept="application/pdf" className="sr-only" onChange={async (e) => {
           const f = e.target.files?.[0]; e.target.value = '';

@@ -60,7 +60,7 @@ export function PlanCard() {
           {MINUTES.map((m) => <option key={m} value={m}>{tr(`${bn(m)} মিনিট`, `${m} minutes`)}</option>)}
         </select>
       </label>
-      <button type="submit" className="btn-press min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-parcel px-5 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('Plan বানান', 'Make the plan')}</button>
+      <button type="submit" className="btn-press min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-parcel text-night px-5 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('Plan বানান', 'Make the plan')}</button>
       {hasDate && <button type="button" onClick={() => { setPlan(null, minutes); setDate(''); setEditing(false); }} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('তারিখ মুছুন', 'Clear date')}</button>}
     </form>
   );

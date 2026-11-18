@@ -56,7 +56,7 @@ export function BuilderPage() {
             </div>
             <div role="tablist" aria-label={tr('ধরন', 'Kind')} className="flex flex-wrap gap-2">
               {([['design', tr('Design challenge', 'Design challenges')], ['db', tr('Database design', 'Database design')], ['migrate', tr('Migration', 'Migrations')]] as const).map(([k, l]) => (
-                <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
+                <button key={k} role="tab" type="button" aria-selected={section === k} onClick={() => setSection(k)} className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${section === k ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{l}</button>
               ))}
             </div>
             {section === 'migrate' ? <MigrationLab /> : section === 'db' ? <DbDesignLab /> : <>
@@ -179,7 +179,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
       <div role="tablist" aria-label={tr('Mode', 'Mode')} className="flex flex-wrap gap-2">
         {([['build', tr('আঁকুন', 'Build')], ['chaos', tr('ভাঙুন ও চালান', 'Break it and run')], ['cost', tr('খরচ ও capacity', 'Cost and capacity')]] as const).map(([m, l]) => (
           <button key={m} role="tab" type="button" aria-selected={mode === m} onClick={() => switchMode(m)}
-            className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${mode === m ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
+            className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${mode === m ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{l}</button>
         ))}
       </div>
       <div className="grid gap-4 lg:grid-cols-[190px_minmax(0,1fr)_270px]">
@@ -195,7 +195,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
           <section aria-label={tr('ভাঙার নিয়ন্ত্রণ', 'Failure controls')} className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-3 text-sm">
             <p className="m-0 font-semibold">{tr('Canvas-এ যেকোনো অংশে click করে বন্ধ করুন। আবার click করলে চালু।', 'Click any part on the canvas to switch it off. Click again to bring it back.')}</p>
             <button type="button" onClick={() => { setDown(new Set()); }} disabled={!down.size} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 font-semibold disabled:opacity-40">{tr('সব আবার চালু', 'Restore everything')}</button>
-            <button type="button" onClick={() => { setScan(singlePoints(g, c.id)); play('tap'); }} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-3 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('একে একে সব ভেঙে দেখুন', 'Break each part in turn')}</button>
+            <button type="button" onClick={() => { setScan(singlePoints(g, c.id)); play('tap'); }} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel text-night px-3 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('একে একে সব ভেঙে দেখুন', 'Break each part in turn')}</button>
             {scan && (
               <div className="pop-in rounded-xl border-2 border-ink p-2" role="status">
                 {scan.length === 0
@@ -209,7 +209,7 @@ function Board({ c, memory, onBack }: { c: Challenge; memory: boolean; onBack: (
             )}
           </section>
         )}
-        <section aria-label="Canvas" className="relative min-w-0 overflow-x-auto rounded-[20px] border-[3px] border-ink bg-surface-sunk">
+        <section aria-label="Canvas" className="keep-light relative min-w-0 overflow-x-auto rounded-[20px] border-[3px] border-ink bg-surface-sunk">
           <p className="m-0 px-3 pt-2 text-xs text-muted">
             {mode === 'chaos' ? tr('রঙিন বিন্দু = request; লাল ✕ = বন্ধ অংশ', 'Coloured dots are requests; a red ✕ is a part that is down')
               : sel ? tr('এবার যেখানে তীর যাবে সেটায় click করুন (আবার click করলে তীর মুছে যায়)', 'Now click where the arrow should go (clicking again removes it)') : tr('তীর টানতে: আগে উৎস, তারপর গন্তব্যে click', 'To draw an arrow: click the source, then the target')}
@@ -314,7 +314,7 @@ function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: C
   const verdict = passed === checked.length ? 'right' : passed >= checked.length - 1 ? 'close' : 'wrong';
   return (
     <section aria-label={tr('উত্তর', 'Answer')} aria-live="polite" className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5">
-      <div className={`rounded-xl px-4 py-3 font-display text-xl font-extrabold ${verdict === 'right' ? 'bg-route text-white' : verdict === 'close' ? 'bg-parcel' : 'bg-coral text-white'}`}>
+      <div className={`rounded-xl px-4 py-3 font-display text-xl font-extrabold ${verdict === 'right' ? 'bg-route text-white' : verdict === 'close' ? 'bg-parcel text-night' : 'bg-coral text-white'}`}>
         {verdict === 'right' ? tr('ঠিক! সব নিয়ম পূরণ হয়েছে।', 'Right! Every rule is met.') : verdict === 'close' ? tr(`প্রায় ঠিক: ${bn(checked.length - passed)}টা জিনিস বাকি`, `Almost: ${checked.length - passed} thing left`) : tr(`এখনো ভুল: ${bn(checked.length - passed)}টা নিয়ম ভাঙছে`, `Not yet: ${checked.length - passed} rules broken`)}
       </div>
       {verdict !== 'right' && <p className="m-0 text-sm text-ink-soft">{tr('Canvas-এ লাল দাগ দেওয়া অংশ আর তীরগুলোই সমস্যা।', 'The parts and arrows outlined in red on the canvas are the problem.')}</p>}
@@ -343,7 +343,7 @@ function Answer({ c, checked, findings, onFix, showModel, setShowModel }: { c: C
           <>
             <p className="m-0 font-bold">{tr('একটা সঠিক design', 'One correct design')}</p>
             <p className="m-0 mt-1 text-sm text-ink-soft">{c.reference.note} {tr('নিয়ম পূরণ করলে অন্য design-ও সমান সঠিক।', 'Any other design that meets every rule is just as right.')}</p>
-            <div className="mt-2 overflow-x-auto rounded-lg bg-surface-sunk"><MiniGraph g={referenceGraph(c)} label={tr('Model design', 'Model design')} /></div>
+            <div className="keep-light mt-2 overflow-x-auto rounded-lg bg-surface-sunk"><MiniGraph g={referenceGraph(c)} label={tr('Model design', 'Model design')} /></div>
           </>
         ) : <button type="button" onClick={() => setShowModel(true)} className="min-h-10 cursor-pointer rounded-lg border-2 border-ink bg-surface px-3 font-semibold">{tr('Model design দেখুন', 'Show a model design')}</button>}
       </div>

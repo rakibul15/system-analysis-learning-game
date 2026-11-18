@@ -24,7 +24,7 @@ export function LoadFailed({ onRetry }: { onRetry?: () => void }) {
         <p className="m-0 text-muted">{tr('Internet আছে কিনা দেখুন। নতুন version এসে থাকলে page reload করলেই ঠিক হবে।', 'Check your connection. If a new version came out, reloading the page fixes it.')}</p>
         <div className="flex gap-2">
           {onRetry && <button type="button" onClick={onRetry} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-bold">{tr('আবার চেষ্টা', 'Try again')}</button>}
-          <button type="button" onClick={() => location.reload()} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold">{tr('Reload', 'Reload')}</button>
+          <button type="button" onClick={() => location.reload()} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel text-night px-4 font-bold">{tr('Reload', 'Reload')}</button>
         </div>
       </div>
     </main>

@@ -91,7 +91,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
           <div role="radiogroup" aria-label={tr('অবস্থা', 'Status')} className="flex flex-wrap gap-2">
             {STATUS.map((l, i) => (
               <button key={l} type="button" role="radio" aria-checked={status === i} onClick={() => setReading(c.id, { status: i as 0 | 1 | 2 })}
-                className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
+                className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-4 text-sm font-bold ${status === i ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{l}</button>
             ))}
           </div>
           <button type="button" onClick={() => { openBook(ddiaChapterRef(c.n, c.pages)); if (status === 0) setReading(c.id, { status: 1 }); }} className="btn-press flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-violet-soft px-4 font-bold shadow-[0_3px_0_var(--color-shadow)]">📖 {tr(`বইয়ে খুলুন · পাতা ${bn(c.pages[0], { grouping: false })}`, `Open in the book · page ${c.pages[0]}`)}</button>
@@ -108,7 +108,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
               rows={7} placeholder={NOTE_HINT} className="rounded-xl border-2 border-ink bg-surface p-3 font-[inherit] text-[15px] font-normal" />
           </label>
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" disabled={!dirty} onClick={() => setReading(c.id, { notes: draft, status: status === 0 ? 1 : status })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold shadow-[0_3px_0_var(--color-shadow)] disabled:cursor-default disabled:opacity-50">{dirty ? tr('নোট save করুন', 'Save notes') : tr('Save হয়েছে ✓', 'Saved ✓')}</button>
+            <button type="button" disabled={!dirty} onClick={() => setReading(c.id, { notes: draft, status: status === 0 ? 1 : status })} className="btn-press min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel text-night px-4 font-bold shadow-[0_3px_0_var(--color-shadow)] disabled:cursor-default disabled:opacity-50">{dirty ? tr('নোট save করুন', 'Save notes') : tr('Save হয়েছে ✓', 'Saved ✓')}</button>
             {status !== 2 && <button type="button" onClick={() => setReading(c.id, { notes: draft, status: 2 })} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('অধ্যায় শেষ ✓', 'Chapter done ✓')}</button>}
           </div>
         </div>

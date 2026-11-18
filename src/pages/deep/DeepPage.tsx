@@ -63,7 +63,7 @@ function Player({ t }: { t: Timeline }) {
       <section aria-label={tr('Timeline', 'Timeline')} className="overflow-x-auto rounded-[20px] border-[3px] border-ink bg-surface p-3">
         <div className="min-w-[340px]">
           <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${t.lanes.length}, minmax(0, 1fr))` }}>
-            {t.lanes.map((l) => <div key={l.id} className="rounded-lg bg-ink px-1 py-1.5 text-center text-xs font-bold text-white sm:text-sm">{l.label}</div>)}
+            {t.lanes.map((l) => <div key={l.id} className="rounded-lg bg-ink px-1 py-1.5 text-center text-xs font-bold text-on-ink sm:text-sm">{l.label}</div>)}
           </div>
           <div className="relative mt-1">
             <div aria-hidden="true" className="pointer-events-none absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${t.lanes.length}, minmax(0, 1fr))` }}>

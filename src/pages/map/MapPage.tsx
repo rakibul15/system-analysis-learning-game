@@ -63,7 +63,7 @@ export function MapPage() {
               <p className="m-0 mt-1 max-w-[62ch] text-ink-soft">{tr('System design আগে থেকে কিছুটা জানলে ৫ মিনিটের placement test দিন: জানা অধ্যায় খুলে যাবে, শুরু করবেন নতুন জায়গা থেকে। একদম নতুন হলে Level ১ থেকে।', 'If you already know some system design, take the 5-minute placement test: chapters you know open up and you start where it gets new. New to it? Start at level 1.')}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link to="/placement" className="btn-press inline-flex min-h-[52px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-5 font-display text-lg font-extrabold text-ink no-underline shadow-[0_4px_0_var(--color-shadow)]">{tr('Placement test · ৫ মিনিট', 'Placement test · 5 min')}</Link>
+              <Link to="/placement" className="btn-press inline-flex min-h-[52px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-5 font-display text-lg font-extrabold text-night no-underline shadow-[0_4px_0_var(--color-shadow)]">{tr('Placement test · ৫ মিনিট', 'Placement test · 5 min')}</Link>
               <button type="button" onClick={() => setSkipPlacement(true)} className="min-h-[52px] cursor-pointer rounded-2xl border-[2.5px] border-ink bg-surface px-4 font-semibold">{tr('Level ১ থেকে শুরু', 'Start at level 1')}</button>
             </div>
           </section>
@@ -80,14 +80,14 @@ export function MapPage() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => { setChapterId(c.id); setSel(Math.max(0, c.levels.findIndex((id) => levelState(id, p) === 'open'))); }}
-                className={`relative flex min-w-[150px] flex-none cursor-pointer flex-col items-start rounded-2xl border-[2.5px] px-3.5 py-2 text-left font-[inherit] ${active ? 'border-ink bg-ink text-white shadow-[0_4px_0_var(--color-parcel)]' : 'border-ink bg-surface text-ink'}`}
+                className={`relative flex min-w-[150px] flex-none cursor-pointer flex-col items-start rounded-2xl border-[2.5px] px-3.5 py-2 text-left font-[inherit] ${active ? 'border-ink bg-ink text-on-ink shadow-[0_4px_0_var(--color-parcel)]' : 'border-ink bg-surface text-ink'}`}
               >
                 <span className="text-xs font-bold opacity-80">{tr('অধ্যায়', 'Chapter')} {bn(c.id)} {firstLocked ? tr('· তালা', '· locked') : placed.has(c.id) ? tr('· জানা ✓', '· known ✓') : ''}</span>
                 <span className="font-display text-[15px] font-bold leading-tight">{c.title}</span>
                 <span className="mt-1 flex w-full gap-1">
                   {c.levels.map((id) => {
                     const st = levelState(id, p);
-                    return <span key={id} className="h-1.5 flex-1 rounded-full" style={{ background: st === 'done' ? c.accent : st === 'open' ? 'var(--color-parcel)' : active ? 'var(--color-night-line)' : 'var(--color-locked)' }} />;
+                    return <span key={id} className="h-1.5 flex-1 rounded-full" style={{ background: st === 'done' ? c.accent : st === 'open' ? 'var(--color-parcel)' : active ? 'var(--color-on-ink-line)' : 'var(--color-locked)' }} />;
                   })}
                 </span>
                 <span className="sr-only">{bn(done)}/{bn(c.levels.length)} {tr('পাস', 'passed')}</span>
@@ -124,13 +124,13 @@ export function MapPage() {
             {reason ? (
               <p className="m-0 rounded-[14px] border-[2.5px] border-dashed border-line-strong px-4 py-3 font-semibold text-muted">{tr('তালাবদ্ধ', 'Locked')} · {reason}</p>
             ) : (
-              <Link to="/level/$levelId" params={{ levelId: String(S.level.id) }} className="btn-press inline-flex min-h-[52px] items-center justify-center rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[21px] font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">
+              <Link to="/level/$levelId" params={{ levelId: String(S.level.id) }} className="btn-press inline-flex min-h-[52px] items-center justify-center rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[21px] font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
                 {rec ? tr('আবার খেলুন', 'Play again') : tr('খেলুন', 'Play')} · ~{bn(S.level.minutes)} {tr('মিনিট', 'min')}
               </Link>
             )}
           </section>
           <aside className="flex min-w-0 flex-[1_1_300px] flex-col gap-3">
-            <Link to="/review" className="btn-press flex min-h-[64px] items-center justify-between gap-3 rounded-[18px] border-[3px] border-ink bg-ink px-4.5 py-2.5 text-white no-underline shadow-[0_5px_0_var(--color-route)]">
+            <Link to="/review" className="btn-press flex min-h-[64px] items-center justify-between gap-3 rounded-[18px] border-[3px] border-ink bg-night px-4.5 py-2.5 text-white no-underline shadow-[0_5px_0_var(--color-route)]">
               <span><span className="block font-display text-xl font-extrabold">{tr('আজকের review', 'Today\'s review')}</span><span className="text-sm text-on-night-soft">{due ? tr(`${bn(due)}টা প্রশ্ন অপেক্ষায়`, `${due} questions waiting`) : tr('আজ কিছু বাকি নেই', 'Nothing left for today')}</span></span>
               <span className="grid h-10 w-10 place-items-center rounded-full font-mono text-lg font-bold" style={{ background: due ? 'var(--color-coral)' : 'var(--color-night-chip)' }}>{bn(due)}</span>
             </Link>

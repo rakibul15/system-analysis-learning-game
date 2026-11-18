@@ -73,7 +73,7 @@ export function ChapterView({ refs }: { refs: BookRef[] }) {
         <div role="tablist" aria-label={tr('কোন অধ্যায়', 'Which chapter')} className="flex flex-wrap gap-2">
           {refs.map((r, i) => (
             <button key={i} type="button" role="tab" aria-selected={pick === i} onClick={() => setPick(i)}
-              className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-3 text-sm font-bold ${pick === i ? 'bg-ink text-white' : 'bg-surface'}`}>
+              className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-3 text-sm font-bold ${pick === i ? 'bg-ink text-on-ink' : 'bg-surface'}`}>
               {BOOKS[r.book].short} · {tr('অধ্যায়', 'Ch.')} {bn(r.chapter)}
             </button>
           ))}
@@ -150,7 +150,7 @@ function LazyPage({ doc, index, ratio, label }: { doc: PDFDocumentProxy; index: 
   return (
     <div ref={wrap} className="relative w-full max-w-[860px] overflow-hidden rounded bg-surface shadow-lg" style={{ aspectRatio: `1 / ${ratio}` }}>
       <canvas ref={canvas} className="block h-full w-full" />
-      <span className="absolute bottom-1 right-2 rounded bg-ink/70 px-1.5 text-[11px] font-bold text-white">{/^\d+$/.test(label) ? bn(Number(label), { grouping: false }) : label}</span>
+      <span className="absolute bottom-1 right-2 rounded bg-night/70 px-1.5 text-[11px] font-bold text-white">{/^\d+$/.test(label) ? bn(Number(label), { grouping: false }) : label}</span>
     </div>
   );
 }
@@ -191,7 +191,7 @@ export function AddBook({ bookId, untagged, onAdd, onTag }: { bookId: BookId; un
       <div className="flex w-full max-w-[520px] flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5">
         <h2 className="m-0 font-display text-xl font-extrabold">{info.title}</h2>
         <p className="m-0 text-ink-soft">{tr('এই বইয়ের PDF এখনো এই browser-এ নেই। একবার যোগ করলে প্রতিটা topic থেকে সোজা ঠিক পাতায় খুলবে। File শুধু এই browser-এ থাকে, কোথাও upload হয় না।', 'This book\'s PDF is not in this browser yet. Add it once and every topic opens it straight at the right page. The file stays in this browser only and is never uploaded.')}</p>
-        <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel px-4 font-bold">
+        <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel text-night px-4 font-bold">
           {busy ? tr('রাখা হচ্ছে…', 'Saving…') : tr('PDF বেছে নিন', 'Choose the PDF')}
           <input type="file" accept="application/pdf" className="sr-only" onChange={async (e) => {
             const f = e.target.files?.[0]; e.target.value = '';

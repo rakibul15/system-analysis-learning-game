@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       to={n.to}
       activeOptions={{ exact: true }}
       className={`flex-none whitespace-nowrap rounded-full font-semibold text-ink no-underline hover:bg-surface-2 ${compact ? 'px-3 py-1.5 text-sm' : 'px-3.5 py-2'}`}
-      activeProps={{ className: 'bg-ink text-white hover:bg-ink' }}
+      activeProps={{ className: 'bg-ink text-on-ink hover:bg-ink' }}
     >
       {n.label}
       {n.to === '/review' && due > 0 && <span className="ml-1.5 inline-block min-w-5 rounded-full bg-coral px-1.5 text-center text-xs text-white">{bn(due)}</span>}

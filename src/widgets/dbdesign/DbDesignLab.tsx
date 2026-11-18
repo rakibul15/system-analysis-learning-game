@@ -24,7 +24,7 @@ export function DbDesignLab() {
   const [open, setOpen] = useState<DbScenario | null>(null);
   if (open) return <Session key={open.id} sc={open} onBack={() => setOpen(null)} />;
   return (
-    <div className="flex flex-col gap-4">
+    <div className="keep-light light-board flex flex-col gap-4">
       <div className="rounded-[20px] border-[3px] border-ink bg-white p-5">
         <h2 className="m-0 font-display text-xl font-bold">{tr('Database নিজে design করুন', 'Design the database yourself')}</h2>
         <p className="m-0 mt-1 max-w-[70ch] text-ink-soft">{tr('প্রতিটা field কোন table-এ যাবে ঠিক করুন, তারপর key, index, constraint, type আর store বাছুন। যাচাই করলে দেখবেন কোথায় ভুল, production-এ ঠিক কী ভাঙত, কেন, আর কী করতে হবে।', 'Decide which table each field belongs to, then choose keys, indexes, constraints, types and the store. Checking shows where it is wrong, exactly what would break in production, why, and what to do.')}</p>

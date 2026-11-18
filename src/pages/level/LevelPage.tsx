@@ -75,7 +75,7 @@ export function LevelPage({ level }: { level: Level }) {
             const cur = flowIndex(step);
             return (
               <li key={f.id} aria-current={k === cur ? 'step' : undefined}
-                className={k < cur ? 'rounded-full bg-route px-2.5 py-1 text-white' : k === cur ? 'rounded-full border-2 border-ink bg-parcel px-3 py-1 text-ink' : step === 'boss' ? 'rounded-full bg-night-chip px-2.5 py-1 text-on-night-quiet' : 'rounded-full bg-locked px-2.5 py-1 text-muted'}>
+                className={k < cur ? 'rounded-full bg-route px-2.5 py-1 text-white' : k === cur ? 'rounded-full border-2 border-ink bg-parcel px-3 py-1 text-night' : step === 'boss' ? 'rounded-full bg-night-chip px-2.5 py-1 text-on-night-quiet' : 'rounded-full bg-locked px-2.5 py-1 text-muted'}>
                 {f.label}
               </li>
             );
@@ -103,7 +103,7 @@ export function LevelPage({ level }: { level: Level }) {
               </ul>
               {locked && <p className="mb-0 mt-4 rounded-xl border-2 border-dashed border-line-strong px-4 py-3 font-semibold text-muted">{tr('তালাবদ্ধ:', 'Locked:')} {locked}{tr('। চাইলে প্রোফাইল থেকে "সব খুলে দিন" চালু করুন।', '. You can turn on "Unlock every level" in your profile.')}</p>}
               <div className="mt-6 flex flex-wrap gap-3">
-                <button type="button" disabled={!!locked} onClick={() => setStep('predict')} className="btn-press min-h-[56px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[22px] font-extrabold text-ink shadow-[0_5px_0_var(--color-shadow)] disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="button" disabled={!!locked} onClick={() => setStep('predict')} className="btn-press min-h-[56px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-[22px] font-extrabold text-night shadow-[0_5px_0_var(--color-shadow)] disabled:cursor-not-allowed disabled:opacity-50">
                   {tr('শুরু করুন', 'Start')}
                 </button>
                 <a href={level.ref.url} target="_blank" rel="noreferrer" className="inline-flex min-h-[56px] items-center rounded-2xl border-[2.5px] border-ink px-5 font-semibold text-ink no-underline hover:bg-surface-2">
@@ -135,14 +135,14 @@ export function LevelPage({ level }: { level: Level }) {
             <ol className="m-0 mt-3 flex list-none flex-col gap-3 p-0">
               {level.summary.map((s, k) => (
                 <li key={k} className="pop-in flex gap-3 text-[18px] leading-snug" style={{ animationDelay: `${k * 0.15}s` }}>
-                  <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ink font-bold text-white">{bn(k + 1)}</span>
+                  <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-ink font-bold text-on-ink">{bn(k + 1)}</span>
                   <span>{s}</span>
                 </li>
               ))}
             </ol>
             <p className="mb-0 mt-5 text-sm text-muted">{tr('Lesson-এ পেয়েছেন', 'Lesson score')} {bn(Math.round(parts.lesson * 10) / 10, { grouping: false })}/{bn(LEVEL_PARTS.lesson)} · {tr('বিস্তারিত:', 'More:')} <a href={level.ref.url} target="_blank" rel="noreferrer" className="font-semibold text-route-deep">{level.ref.label} ↗</a></p>
             <BookRefs level={level.id} refs={levelRefs[level.id]} title={tr('গভীরে বুঝতে বইয়ে পড়ুন', 'Read more in the book')} className="mt-4" />
-            <button type="button" onClick={() => setStep('play')} className="btn-press mt-5 min-h-[56px] w-full cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold text-ink shadow-[0_5px_0_var(--color-shadow)]">
+            <button type="button" onClick={() => setStep('play')} className="btn-press mt-5 min-h-[56px] w-full cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold text-night shadow-[0_5px_0_var(--color-shadow)]">
               {tr('এবার নিজে করুন →', 'Now you try →')}
             </button>
           </section>
@@ -191,7 +191,7 @@ export function LevelPage({ level }: { level: Level }) {
 
         {step === 'boss' && (
           <div className="flex flex-col gap-5">
-            <div className="pop-in rounded-[22px] border-[3px] border-ink bg-ink p-5 text-white shadow-[0_6px_0_var(--color-coral)]">
+            <div className="pop-in rounded-[22px] border-[3px] border-ink bg-night p-5 text-white shadow-[0_6px_0_var(--color-coral)]">
               <p className="m-0 text-sm font-bold text-parcel">{tr('ধাপ ৫ · Boss challenge', 'Step 5 · Boss challenge')}</p>
               <h2 className="m-0 mt-1 font-display text-[30px] font-extrabold">{level.story}</h2>
               <p className="mb-0 mt-1 text-on-night-soft">{tr('৫টা প্রশ্ন, ৫৫ নম্বর। Hint নিলে "hint ছাড়া" বোনাসের ১০ নম্বর যাবে।', '5 questions, 55 points. Taking a hint costs the 10-point no-hints bonus.')}</p>
@@ -338,7 +338,7 @@ function Result({ level, total, parts, answers, nextId, onRetry }: {
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-3">
         {nextId && nextOpen && (
-          <Link to="/level/$levelId" params={{ levelId: String(nextId) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-ink no-underline shadow-[0_5px_0_var(--color-shadow)]">
+          <Link to="/level/$levelId" params={{ levelId: String(nextId) }} className="btn-press inline-flex min-h-[54px] items-center rounded-2xl border-[3px] border-ink bg-parcel px-7 font-display text-xl font-extrabold text-night no-underline shadow-[0_5px_0_var(--color-shadow)]">
           {tr('পরের level →', 'Next level →')}
           </Link>
         )}

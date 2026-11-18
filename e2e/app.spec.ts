@@ -91,3 +91,23 @@ test('in English, a level loads the English lessons', async ({ page }) => {
   await answerAsGuess(page);
   await expect(page.getByText(/Step 3 · Lesson/)).toBeVisible();
 });
+
+test('dark mode: chosen in the profile, kept after a reload, and game boards stay light', async ({ page }) => {
+  await seed(page);
+  await page.goto('./#/profile');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.getByRole('radio', { name: /অন্ধকার/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const ground = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(await ground()).toBe('rgb(14, 23, 28)');
+  // set before the first paint on the next load (index.html), not only after the app starts
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  // the city map is a board drawn in its own colours: inside it the tokens keep their light values
+  await page.goto('./');
+  const inMap = await page.locator('.city-map').evaluate((el) => getComputedStyle(el).getPropertyValue('--color-ink').trim());
+  expect(inMap).toBe('#16252d');
+  await page.goto('./#/profile');
+  await page.getByRole('radio', { name: /^আলো/ }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});

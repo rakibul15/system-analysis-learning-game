@@ -22,7 +22,7 @@ export function MigrationLab() {
   const [open, setOpen] = useState<Scenario | null>(null);
   if (open) return <Session key={open.id} sc={open} onBack={() => setOpen(null)} />;
   return (
-    <div className="flex flex-col gap-4">
+    <div className="keep-light light-board flex flex-col gap-4">
       <div className="rounded-[20px] border-[3px] border-ink bg-white p-5">
         <h2 className="m-0 font-display text-xl font-bold">{tr('চলন্ত system বদলান', 'Change a running system')}</h2>
         <p className="m-0 mt-1 max-w-[70ch] text-ink-soft">{tr('নতুন কিছু বানানো সহজ; কঠিন হলো লাখো user চালু রেখে পুরনোটা বদলানো। ধাপগুলো সাজান, চালান, দেখুন data হারাল কি না, app বন্ধ হলো কি না, আর ভুল হলে ফেরার পথ ছিল কি না।', 'Building something new is easy; the hard part is changing the old while millions of users keep going. Order the steps, run them, and see whether data was lost, the app went down, or there was a way back if it went wrong.')}</p>

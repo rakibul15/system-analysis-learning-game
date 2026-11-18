@@ -81,13 +81,13 @@ function Session({ problem, onExit }: { problem: GuidedProblem; onExit: () => vo
           return (
             <li key={s.id} className="flex-none">
               <button type="button" disabled={!w.revealed && i > k} onClick={() => { setK(i); setHint(false); }} aria-current={i === k ? 'step' : undefined}
-                className={`min-h-10 cursor-pointer whitespace-nowrap rounded-full border-2 border-ink px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${state === 'now' ? 'bg-ink text-white' : state === 'done' ? 'bg-route-soft' : 'bg-surface'}`}>
+                className={`min-h-10 cursor-pointer whitespace-nowrap rounded-full border-2 border-ink px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${state === 'now' ? 'bg-ink text-on-ink' : state === 'done' ? 'bg-route-soft' : 'bg-surface'}`}>
                 {bn(i + 1)}. {STEP_TITLES[s.id]}
               </button>
             </li>
           );
         })}
-        <li className="flex-none"><button type="button" disabled={!work.every((w) => w.revealed)} onClick={() => setK(problem.steps.length)} className={`min-h-10 cursor-pointer whitespace-nowrap rounded-full border-2 border-ink px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${finished ? 'bg-ink text-white' : 'bg-surface'}`}>{tr('ফল', 'Result')}</button></li>
+        <li className="flex-none"><button type="button" disabled={!work.every((w) => w.revealed)} onClick={() => setK(problem.steps.length)} className={`min-h-10 cursor-pointer whitespace-nowrap rounded-full border-2 border-ink px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50 ${finished ? 'bg-ink text-on-ink' : 'bg-surface'}`}>{tr('ফল', 'Result')}</button></li>
       </ol>
 
       {!finished ? (() => {
@@ -129,7 +129,7 @@ function Session({ problem, onExit }: { problem: GuidedProblem; onExit: () => vo
                   <h3 className="m-0 text-sm font-bold text-route-deep">Model answer</h3>
                   <p className="m-0 mt-1 leading-relaxed">{step.model}</p>
                 </div>
-                <button type="button" onClick={() => { setK(k + 1); setHint(false); }} className="btn-press min-h-12 cursor-pointer self-start rounded-2xl border-[3px] border-ink bg-ink px-6 font-bold text-white shadow-[0_4px_0_var(--color-parcel)]">
+                <button type="button" onClick={() => { setK(k + 1); setHint(false); }} className="btn-press min-h-12 cursor-pointer self-start rounded-2xl border-[3px] border-ink bg-ink px-6 font-bold text-on-ink shadow-[0_4px_0_var(--color-parcel)]">
                   {k + 1 < problem.steps.length ? tr('পরের ধাপ →', 'Next step →') : tr('ফল দেখুন →', 'See the result →')}
                 </button>
               </div>
@@ -156,7 +156,7 @@ function Session({ problem, onExit }: { problem: GuidedProblem; onExit: () => vo
             return weakest.pct < 1 && <p className="m-0 rounded-lg bg-parcel-soft px-3 py-2">{tr(`সবচেয়ে দুর্বল ধাপ: ${STEP_TITLES[weakest.s.id]}। পরের বার এখানে বেশি সময় দিন।`, `Weakest step: ${STEP_TITLES[weakest.s.id]}. Spend more time here next time.`)}</p>;
           })()}
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={finish} disabled={saved} className="btn-press min-h-12 cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-bold shadow-[0_4px_0_var(--color-shadow)] disabled:opacity-60">{saved ? tr('Save হয়েছে ✓', 'Saved ✓') : tr('ফল save করুন', 'Save the result')}</button>
+            <button type="button" onClick={finish} disabled={saved} className="btn-press min-h-12 cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel text-night px-6 font-bold shadow-[0_4px_0_var(--color-shadow)] disabled:opacity-60">{saved ? tr('Save হয়েছে ✓', 'Saved ✓') : tr('ফল save করুন', 'Save the result')}</button>
             <button type="button" onClick={onExit} className="min-h-12 cursor-pointer rounded-2xl border-2 border-ink bg-surface px-5 font-semibold">{tr('অন্য সমস্যা', 'Another problem')}</button>
           </div>
         </div>
