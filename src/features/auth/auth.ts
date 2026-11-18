@@ -13,16 +13,19 @@ type SyncState = 'off' | 'syncing' | 'saved' | 'error';
 
 interface AuthState {
   user: AuthUser | null;
-  /** 'idle' until Firebase has been asked; guests never load it. */
+  /** 'idle' until Firebase has been asked. */
   status: 'idle' | 'loading' | 'ready';
   sync: SyncState;
   lastSyncedAt: number | null;
+  /** The last sync failure. */
   error: string | null;
+  /** Why the last sign-in did not finish: a Firebase code such as 'auth/popup-blocked' (see signInProblem). */
+  signInError: string | null;
 }
 
-export const useAuth = create<AuthState>(() => ({ user: null, status: 'idle', sync: 'off', lastSyncedAt: null, error: null }));
+export const useAuth = create<AuthState>(() => ({ user: null, status: 'idle', sync: 'off', lastSyncedAt: null, error: null, signInError: null }));
 
-/** Remembered so a returning learner's session is restored without a click, and guests never download Firebase. */
+/** Remembered so a returning learner's session is restored without a click. */
 const FLAG = 'salg-auth';
 const OWNER = 'salg-owner';
 /** Which account the progress in this browser belongs to, so two people on one browser never mix. */
@@ -33,6 +36,8 @@ const flag = { get: () => { try { return localStorage.getItem(FLAG) === '1'; } c
 
 type Fb = Awaited<ReturnType<typeof loadFirebase>>;
 let fbPromise: Promise<Fb> | null = null;
+/** True once Firebase is downloaded and auth is set up, so a tap can open Google's window at once. */
+let fbReady = false;
 
 async function loadFirebase() {
   const [{ initializeApp }, authMod, store] = await Promise.all([
@@ -43,9 +48,19 @@ async function loadFirebase() {
   const app = initializeApp(firebaseConfig);
   const auth = authMod.getAuth(app);
   const db = store.getFirestore(app);
+  // on a phone this also loads Google's sign-in frame, which a popup needs before it can open
+  await auth.authStateReady().catch(() => undefined);
+  fbReady = true;
   return { auth, authMod, db, store };
 }
-const fb = () => (fbPromise ??= loadFirebase());
+const fb = () => (fbPromise ??= loadFirebase().catch((e) => { fbPromise = null; throw e; }));
+
+/**
+ * Gets sign-in ready while a sign-in button is on screen. A phone lets a tap open a window only for
+ * a moment; downloading Firebase and Google's frame after the tap takes longer on a phone network,
+ * so the browser blocked Google's window and sign-in silently failed.
+ */
+export function warmAuth() { void fb().catch(() => undefined); }
 
 const pick = (s: ProgressData): ProgressData => normalize(s);
 
@@ -214,7 +229,10 @@ export async function startAuth() {
   useAuth.setState({ status: 'loading' });
   try {
     const f = await fb();
-    await f.authMod.getRedirectResult(f.auth).catch(() => null);
+    const back = takeRedirectMark();
+    const result = await f.authMod.getRedirectResult(f.auth).catch((e) => { signInFailed(e); return null; });
+    // came back from Google's page without a user: browsers that keep sites' storage apart lose a redirect sign-in
+    if (back && !result && !f.auth.currentUser && !useAuth.getState().signInError) useAuth.setState({ signInError: 'redirect-lost' });
     f.authMod.onAuthStateChanged(f.auth, (u) => {
       if (!u) {
         unsubProgress?.(); unsubProgress = null;
@@ -243,33 +261,50 @@ export async function startAuth() {
   }
 }
 
-/** Restore a previous session on load, only if this browser signed in before. */
 /** True when this browser signed in before (the session may still be restoring). */
 export const hasSession = () => flag.get();
 
 export function resumeAuth() { if (flag.get()) void startAuth(); }
 
+const REDIRECT = 'salg-redirect';
+/** True once, right after coming back from Google's sign-in page. */
+function takeRedirectMark() {
+  try { const v = sessionStorage.getItem(REDIRECT); sessionStorage.removeItem(REDIRECT); return v === '1'; } catch { return false; }
+}
+const codeOf = (e: unknown) => (e as { code?: string })?.code || (e instanceof Error ? e.message : String(e));
+function signInFailed(e: unknown) {
+  const code = codeOf(e);
+  if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request' || code === 'auth/user-cancelled') return;
+  useAuth.setState({ signInError: code });
+}
+
 export async function signInWithGoogle() {
-  useAuth.setState({ error: null });
+  useAuth.setState({ signInError: null });
+  // whether everything was ready when the learner tapped (see warmAuth)
+  const warm = fbReady;
   try {
-    await startAuth();
     const f = await fb();
     const provider = new f.authMod.GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
+    // Google's window first, while the tap still counts; following the session can wait
+    const popup = f.authMod.signInWithPopup(f.auth, provider);
+    void startAuth();
     try {
-      await f.authMod.signInWithPopup(f.auth, provider);
+      await popup;
     } catch (e) {
-      const code = (e as { code?: string }).code ?? '';
+      const code = codeOf(e);
+      // the tap was spent waiting for downloads; everything is ready now, so the next tap opens Google at once
+      if (code === 'auth/popup-blocked' && !warm) { useAuth.setState({ signInError: code }); return; }
       if (code === 'auth/popup-blocked' || code === 'auth/operation-not-supported-in-this-environment') {
         flag.set(true);
+        try { sessionStorage.setItem(REDIRECT, '1'); } catch { /* storage blocked */ }
         await f.authMod.signInWithRedirect(f.auth, provider);
         return;
       }
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') return;
       throw e;
     }
   } catch (e) {
-    useAuth.setState({ error: e instanceof Error ? e.message : String(e) });
+    signInFailed(e);
   }
 }
 
