@@ -7,7 +7,9 @@ import { loadedLevels, register } from './registry';
 /*
  * Each chapter's lessons, missions and question bank is its own download, fetched the
  * first time a level of that chapter (or a review card from it) is opened. Only the
- * current language's lessons are fetched. Once visited, the offline cache keeps them.
+ * current language's lessons are fetched. The app opens without waiting for them; the
+ * offline cache (service worker) still fetches every chunk in the background afterwards,
+ * so the whole game keeps working offline.
  */
 
 type LevelModule = Record<string, unknown>;

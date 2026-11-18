@@ -69,3 +69,12 @@ test('builder, practice and profile screens open', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
   }
 });
+
+test('in English, a level loads the English lessons', async ({ page }) => {
+  await seed(page, {}, { 'salg-lang': 'en' });
+  await page.goto('./#/level/31');
+  await expect(page.getByText('How data sits on disk').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Start' }).click();
+  await answerAsGuess(page);
+  await expect(page.getByText(/Step 3 · Lesson/)).toBeVisible();
+});
