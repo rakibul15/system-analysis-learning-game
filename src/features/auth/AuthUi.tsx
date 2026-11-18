@@ -66,11 +66,11 @@ export function AccountCard() {
             <button type="button" disabled={busy} onClick={async () => { setBusy(true); await signOutUser(); setBusy(false); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('Logout', 'Sign out')}</button>
           </div>
           <p className="m-0 text-xs text-muted">{tr('Logout করলে progress এই browser থেকে সরে যায়, আপনার account-এ (cloud-এ) থেকে যায়। আবার login করলেই ফিরে আসবে।', 'Signing out removes the progress from this browser; it stays in your account in the cloud and comes back when you sign in.')}</p>
-          <p className="m-0 text-xs text-muted">{tr('প্রশ্নগুলো ভালো করতে কোন প্রশ্নে কোন উত্তর বাছলেন সেটা account-এর id দিয়ে পাঠানো হয়, নাম বা email ছাড়া।', 'To improve the questions, which option you pick on each question is sent with your account id, not your name or email.')}</p>
+          <p className="m-0 text-xs text-muted">{tr('ParcelGo-র admin আপনার নাম, email আর progress-এর সারাংশ (কয়টা level, শেষ কবে খেলেছেন) দেখতে পান, যোগাযোগ করতে আর হারানো progress খুঁজে দিতে। প্রশ্নগুলো ভালো করতে কোন প্রশ্নে কোন উত্তর বাছলেন সেটাও আপনার account-এর সাথে যায়। পুরো progress শুধু আপনিই দেখেন।', 'The ParcelGo admin can see your name, email and a progress summary (how many levels, when you last played), to contact you and to help find lost progress. Which option you pick on each question is also sent with your account, to improve the questions. Your full progress is visible only to you.')}</p>
         </>
       ) : (
         <>
-          <p className="m-0">{tr('Login ছাড়াও খেলা যায়, progress এই browser-এ থাকে। Google দিয়ে login করলে progress cloud-এ থাকবে আর ফোন, laptop সব জায়গায় একসাথে চলবে।', 'You can play without signing in; progress stays in this browser. Sign in with Google to keep it in the cloud and carry it across your phone and laptop.')}</p>
+          <p className="m-0">{tr('Login ছাড়াও খেলা যায়, progress এই browser-এ থাকে। Google দিয়ে login করলে progress cloud-এ থাকবে আর ফোন, laptop সব জায়গায় একসাথে চলবে। তখন আপনার নাম, email আর progress-এর সারাংশ admin দেখতে পান।', 'You can play without signing in; progress stays in this browser. Sign in with Google to keep it in the cloud and carry it across your phone and laptop. The admin can then see your name, email and a progress summary.')}</p>
           <div><AuthButton /></div>
           {error && <p role="alert" className="m-0 text-sm text-coral-deep">{error}</p>}
         </>

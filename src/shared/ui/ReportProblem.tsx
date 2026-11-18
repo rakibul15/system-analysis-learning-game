@@ -50,7 +50,7 @@ export function ReportProblem({ q, dark = false }: { q: Question; dark?: boolean
         <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={600} rows={3}
           className={`rounded-xl border-2 p-2.5 font-[inherit] text-base font-normal ${dark ? 'border-[#5B7280] bg-[#1D2E37] text-white' : 'border-ink bg-white text-ink'}`} />
       </label>
-      <p className={`m-0 text-xs ${muted}`}>{tr('প্রশ্ন আর অপশনগুলো, আপনার লেখা, আর account-এর id পাঠানো হবে; নাম বা email না।', 'The question and its options, your note and your account id are sent; not your name or email.')}</p>
+      <p className={`m-0 text-xs ${muted}`}>{tr('প্রশ্ন, অপশনগুলো আর আপনার লেখা আপনার account থেকে যাবে। Admin দেখতে পাবেন কে পাঠিয়েছে, দরকার হলে email-এ যোগাযোগ করবেন।', 'The question, its options and your note are sent from your account. The admin can see who sent it and may email you about it.')}</p>
       <div className="flex gap-2">
         <button type="submit" disabled={!kind} className="btn-press min-h-11 flex-1 cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 font-bold text-ink disabled:cursor-not-allowed disabled:opacity-50">{tr('পাঠান', 'Send')}</button>
         <button type="button" onClick={() => setOpen(false)} className={`min-h-11 cursor-pointer rounded-xl border-2 px-4 font-semibold ${dark ? 'border-[#5B7280] bg-transparent text-white' : 'border-ink bg-white text-ink'}`}>{tr('বাদ দিন', 'Cancel')}</button>

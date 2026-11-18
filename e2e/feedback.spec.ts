@@ -41,7 +41,24 @@ test('a question an admin turned off is skipped with full points', async ({ page
 });
 
 const report = (id: string, qid: string, kind: string, note: string, status = 'open') => ({
-  id, qid, levelId: 31, kind, note, status, lang: 'bn', t: 1, prompt: 'B-tree আর LSM-tree: লেখার চাপ বেশি হলে কোনটা?', options: ['LSM-tree', 'B-tree', 'Hash index'],
+  id, uid: 'u1', qid, levelId: 31, kind, note, status, lang: 'bn', t: 1, prompt: 'B-tree আর LSM-tree: লেখার চাপ বেশি হলে কোনটা?', options: ['LSM-tree', 'B-tree', 'Hash index'],
+});
+
+const learner = { uid: 'u1', name: 'Test Learner', email: 'learner@example.com', lang: 'bn', summary: { passed: 3, played: 4, cards: 12, days: 5, lastDay: '2026-11-17' }, lastSeenAt: { seconds: 1795000000 } };
+
+test('admin: the learner list shows who signed in, how far they got, and finds them by name or email', async ({ page }) => {
+  const other = { ...learner, uid: 'u2', name: 'Another One', email: 'another@example.com', summary: { passed: 0, played: 1, cards: 2, days: 1, lastDay: '2026-11-18' } };
+  const fixture = { reports: [report('r1', 'l31-b1', 'wrong', 'x')], batches: [{ uid: 'u1', lang: 'bn', items: [{ q: 'l31-b1', c: 1, s: 1, o: 'x', w: 'boss', t: 1 }] }], disabled: {}, learners: [learner, other] };
+  await seed(page, {}, { 'e2e-admin': JSON.stringify(fixture) });
+  await page.goto('./#/admin');
+  await page.getByRole('tab', { name: /Learner · ২/ }).click();
+  const row = page.getByRole('row', { name: /Test Learner/ });
+  await expect(row).toContainText('learner@example.com');
+  await expect(row).toContainText('৩/৪');
+  await expect(row).toContainText('১ · ১'); // one answer, one report
+  await page.getByRole('searchbox').fill('another@');
+  await expect(page.getByRole('row', { name: /Test Learner/ })).toHaveCount(0);
+  await expect(page.getByRole('row', { name: /Another One/ })).toBeVisible();
 });
 
 test('admin: triage a reported question, open an issue, turn it off', async ({ page }) => {
@@ -49,6 +66,7 @@ test('admin: triage a reported question, open an issue, turn it off', async ({ p
     reports: [report('r1', 'l31-b1', 'wrong', 'দুটোই ঠিক মনে হয়'), report('r2', 'l31-b1', 'unclear', ''), report('r3', 'l31-b2', 'typo', 'বানান', 'fixed')],
     batches: [{ lang: 'bn', items: Array.from({ length: 24 }, (_, i) => ({ q: 'l31-b1', c: i < 6 ? 1 : 0, s: 1, o: 'x', w: 'boss', t: i })) }],
     disabled: {},
+    learners: [learner],
   };
   await seed(page, {}, { 'e2e-admin': JSON.stringify(fixture) });
   await page.goto('./#/admin');
@@ -57,6 +75,7 @@ test('admin: triage a reported question, open an issue, turn it off', async ({ p
   const card = page.getByRole('article', { name: 'l31-b1' });
   await expect(card).toContainText('২টা report');
   await expect(card).toContainText('দুটোই ঠিক মনে হয়');
+  await expect(card.getByText('পাঠিয়েছেন: Test Learner').first()).toBeVisible();
   await expect(page.getByRole('article', { name: 'l31-b2' })).toHaveCount(0); // fixed ones are not in "open"
 
   const issue = card.getByRole('link', { name: /GitHub issue/ });

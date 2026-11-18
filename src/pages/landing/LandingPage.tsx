@@ -23,6 +23,7 @@ function SignInButton({ big = false }: { big?: boolean }) {
         <G /> {waiting ? tr('Google খুলছে…', 'Opening Google…') : tr('Google দিয়ে শুরু করুন', 'Start with Google')}
       </button>
       {big && error && <p role="alert" className="m-0 text-sm font-semibold text-coral-deep">{tr('Login হয়নি, আবার চেষ্টা করুন।', 'Sign-in failed, please try again.')}</p>}
+      {big && <p className="m-0 max-w-[46ch] text-xs text-muted">{tr('Login করলে আপনার নাম, email আর progress-এর সারাংশ ParcelGo-র admin দেখতে পান, যোগাযোগ আর হারানো progress খুঁজে দেওয়ার জন্য।', 'When you sign in, the ParcelGo admin can see your name, email and a progress summary, to contact you and help find lost progress.')}</p>}
     </div>
   );
 }

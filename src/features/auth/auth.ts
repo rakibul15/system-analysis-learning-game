@@ -5,6 +5,8 @@ import { firebaseConfig } from './firebaseConfig';
 import { newCache, syncParts, type CloudStore, type PartCache } from './cloud';
 import { setSender, type Sender } from '@/shared/lib/outbox';
 import { setDisabled } from '@/content/disabled';
+import { lang } from '@/shared/lib/i18n';
+import { summarize } from './profile';
 
 export interface AuthUser { uid: string; name: string; email: string; photo: string | null }
 type SyncState = 'off' | 'syncing' | 'saved' | 'error';
@@ -112,6 +114,18 @@ async function loadDisabled(f: Fb) {
   } catch { /* offline or rules not deployed: keep the copy in this browser */ }
 }
 
+/** profiles/{uid}: name, email and a progress summary for the admin view; written only when it changes. */
+let profileSent: string | null = null;
+async function saveProfile(f: Fb, user: AuthUser, p: ProgressData) {
+  const profile = { name: user.name.slice(0, 200), email: user.email.slice(0, 320), lang, summary: summarize(p) };
+  const key = JSON.stringify([user.uid, profile]);
+  if (key === profileSent) return;
+  try {
+    await f.store.setDoc(f.store.doc(f.db, 'profiles', user.uid), { ...profile, lastSeenAt: f.store.serverTimestamp() });
+    profileSent = key;
+  } catch { /* offline, or the rules for profiles are not deployed yet: try again next sync */ }
+}
+
 const denied = (e: unknown) => (e as { code?: string })?.code === 'permission-denied';
 let partsBlocked = false;
 let cache: { uid: string; parts: PartCache } | null = null;
@@ -161,6 +175,7 @@ async function syncOnce(overwrite: boolean) {
     if (!sameProgress(next, now)) { applying = true; useProgress.setState(next); applying = false; }
     if (!sameProgress(next, merged)) again = true;
     useAuth.setState({ sync: 'saved', lastSyncedAt: Date.now() });
+    void saveProfile(f, user, next);
   } catch (e) {
     useAuth.setState({ sync: 'error', error: e instanceof Error ? e.message : String(e) });
   }
