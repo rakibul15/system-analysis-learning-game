@@ -69,7 +69,7 @@ const studyPartRoute = createRoute({
 });
 const noteRoute = createRoute({
   getParentRoute: () => rootRoute, path: '/notes/$noteId',
-  loader: ({ params }) => loadNote(params.noteId),
+  loader: ({ params }) => Promise.all([loadNote(params.noteId), NotePage.preload?.()]).then(([note]) => note),
   component: function NoteView() { const note = noteRoute.useLoaderData(); return <NotePage key={note?.id} note={note} />; },
 });
 const deepRoute = createRoute({
@@ -84,7 +84,9 @@ const placementRoute = createRoute({ getParentRoute: () => rootRoute, path: '/pl
 const levelRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/level/$levelId',
-  loader: ({ params }) => loadLevel(Number(params.levelId)),
+  // the page's code comes with its content: the component below is only a wrapper, so preloading
+  // the route would otherwise fetch the chapter but not LevelPage itself
+  loader: ({ params }) => Promise.all([loadLevel(Number(params.levelId)), LevelPage.preload?.()]).then(([level]) => level),
   component: function LevelRouteView() {
     const level = levelRoute.useLoaderData();
     if (!level) return <NotFound />;
@@ -97,6 +99,10 @@ export const router = createRouter({
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,
+  // a link's page (and its content) starts loading when a finger or pointer lands on it, before the click
+  defaultPreload: 'intent',
+  // pages cross-fade, and a map stop grows into the level's badge (styles.css: view transitions)
+  defaultViewTransition: true,
   defaultPendingComponent: () => <PageLoading />,
   defaultPendingMs: 150,
   defaultErrorComponent: LoadError,
