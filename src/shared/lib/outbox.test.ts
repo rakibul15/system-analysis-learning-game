@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mem = new Map<string, string>();
 vi.stubGlobal('localStorage', { getItem: (k: string) => mem.get(k) ?? null, setItem: (k: string, v: string) => void mem.set(k, v), removeItem: (k: string) => void mem.delete(k) });
 
-const { addReport, flush, logAnswer, optionKey, pending, setSender, BATCH } = await import('./outbox');
+const { addCrash, addReport, flush, logAnswer, optionKey, pending, pendingCrashes, setSender, BATCH } = await import('./outbox');
 type Sender = Parameters<typeof setSender>[0] & object;
 
 const fake = () => {
@@ -42,6 +42,24 @@ describe('outbox', () => {
     await flush();
     expect(s.sendAnswers).toHaveBeenCalledTimes(1);
     expect(pending().answers).toBe(1);
+  });
+
+  it('sends crash reports too; a refusal for crashes keeps them but answers still go', async () => {
+    addCrash({ msg: 'TypeError: boom', stack: 'at x', where: 'render', route: '#/level/2', ver: 'abc1234', ua: 'test' });
+    logAnswer({ q: 'l1-b1', c: 1, s: 1, o: 'k', w: 'boss' });
+    const { s, sent } = fake();
+    s.sendCrash = vi.fn(async () => { throw Object.assign(new Error('no'), { code: 'permission-denied' }); });
+    setSender(s);
+    await flush();
+    expect(sent.answers).toEqual([1]);
+    expect(pendingCrashes()).toBe(1);
+
+    const crashes: string[] = [];
+    s.sendCrash = vi.fn(async (c) => { crashes.push(c.msg); });
+    setSender(s); // a new sign-in tries the crashes again
+    await flush();
+    expect(crashes).toEqual(['TypeError: boom']);
+    expect(pendingCrashes()).toBe(0);
   });
 
   it('option keys are short and stable', () => {

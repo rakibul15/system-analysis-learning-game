@@ -1,6 +1,6 @@
 import { setDisabled } from '@/content/disabled';
 import { firebase } from '@/features/auth/auth';
-import type { AnswerEvent, Report } from '@/shared/lib/outbox';
+import type { AnswerEvent, Crash, Report } from '@/shared/lib/outbox';
 import type { Profile } from '@/features/auth/profile';
 
 /* What the admin view reads and writes in Firestore (see firestore.rules). */
@@ -10,6 +10,8 @@ export const STATUSES: ReportStatus[] = ['open', 'working', 'fixed', 'wontfix'];
 export type StoredReport = Report & { id: string; uid?: string; status: ReportStatus; adminNote?: string; at?: { seconds: number } };
 export type Learner = Profile & { uid: string; lastSeenAt?: { seconds: number } };
 export type Batch = { uid?: string; lang: string; items: AnswerEvent[] };
+/** A crash report as stored (crash.ts, firestore.rules). */
+export type StoredCrash = Omit<Crash, 't'> & { id: string; uid?: string; at?: { seconds: number } };
 export interface Disabled { reason: string; /** When it was turned off (ms). */ at?: number }
 export interface AdminData {
   reports: StoredReport[];
@@ -19,6 +21,10 @@ export interface AdminData {
   learners: Learner[];
   /** Why the learner list could not be read (e.g. the rules for it are not deployed). */
   learnersError?: string;
+  /** What broke in the app, newest first. */
+  crashes: StoredCrash[];
+  /** Why the crash reports could not be read (e.g. the rules for them are not deployed). */
+  crashesError?: string;
 }
 
 /*
@@ -44,15 +50,16 @@ export async function isAdmin(uid: string): Promise<boolean> {
 
 export async function loadAdminData(): Promise<AdminData> {
   const fx = fixture();
-  if (fx) { setDisabled(Object.keys(fx.disabled)); return { ...fx, learners: fx.learners ?? [], reports: fx.reports.map((r) => ({ ...r, status: status(r.status) })) }; }
+  if (fx) { setDisabled(Object.keys(fx.disabled)); return { ...fx, learners: fx.learners ?? [], crashes: fx.crashes ?? [], reports: fx.reports.map((r) => ({ ...r, status: status(r.status) })) }; }
   const { store, db } = await firebase();
-  const [r, q, c, people] = await Promise.all([
+  const settle = <T,>(p: Promise<T>) => p.then((x) => ({ ok: true as const, x }), (e: unknown) => ({ ok: false as const, e: e instanceof Error ? e.message : String(e) }));
+  const [r, q, c, people, broke] = await Promise.all([
     store.getDocs(store.query(store.collection(db, 'reports'), store.orderBy('at', 'desc'), store.limit(300))),
     store.getDocs(store.query(store.collection(db, 'qlog'), store.orderBy('at', 'desc'), store.limit(2000))),
     store.getDoc(store.doc(db, 'config', 'questions')),
-    // the learner list must not take the rest of the page down with it
-    store.getDocs(store.query(store.collection(db, 'profiles'), store.orderBy('lastSeenAt', 'desc'), store.limit(1000)))
-      .then((x) => ({ ok: true as const, x }), (e: unknown) => ({ ok: false as const, e })),
+    // the learner list and the crash reports must not take the rest of the page down with them
+    settle(store.getDocs(store.query(store.collection(db, 'profiles'), store.orderBy('lastSeenAt', 'desc'), store.limit(1000)))),
+    settle(store.getDocs(store.query(store.collection(db, 'crashes'), store.orderBy('at', 'desc'), store.limit(300)))),
   ]);
   const disabled = ((c.data() as { disabled?: Record<string, Disabled> } | undefined)?.disabled) ?? {};
   setDisabled(Object.keys(disabled));
@@ -61,8 +68,22 @@ export async function loadAdminData(): Promise<AdminData> {
     batches: q.docs.map((d) => d.data() as Batch),
     disabled,
     learners: people.ok ? people.x.docs.map((d) => ({ ...(d.data() as Omit<Learner, 'uid'>), uid: d.id })) : [],
-    ...(people.ok ? {} : { learnersError: people.e instanceof Error ? people.e.message : String(people.e) }),
+    ...(people.ok ? {} : { learnersError: people.e }),
+    crashes: broke.ok ? broke.x.docs.map((d) => ({ ...(d.data() as Omit<StoredCrash, 'id'>), id: d.id })) : [],
+    ...(broke.ok ? {} : { crashesError: broke.e }),
   };
+}
+
+/** Clears crash reports (once the bug is fixed). */
+export async function deleteCrashes(ids: string[]) {
+  const fx = fixture();
+  if (fx) { saveFixture({ ...fx, crashes: (fx.crashes ?? []).filter((x) => !ids.includes(x.id)) }); return; }
+  const { store, db } = await firebase();
+  for (let i = 0; i < ids.length; i += 400) {
+    const batch = store.writeBatch(db);
+    for (const id of ids.slice(i, i + 400)) batch.delete(store.doc(db, 'crashes', id));
+    await batch.commit();
+  }
 }
 
 /** Sets the status (and the admin's own note) on every report of one question at once. */

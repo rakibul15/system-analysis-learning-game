@@ -20,10 +20,13 @@ test('the map shows without chapter content, then fetches only the selected leve
     if (release) void route.continue(); else held.push(route);
   });
   await seed(page);
+  // the prefetch waits for the browser to be idle, which can take a while on a slow machine
+  const prefetched = page.waitForRequest((r) => /\/assets\/ch1-[^/]*\.js$/.test(new URL(r.url()).pathname), { timeout: 15_000 });
   await page.goto('./');
   await expect(page.getByRole('button', { name: /^Level ১,/ })).toBeVisible();
   release = true;
   for (const r of held) await r.continue();
+  await prefetched;
   await page.waitForLoadState('networkidle');
   // a fresh learner starts at level 1, so chapter 1 (its lessons and questions) is fetched ahead, and nothing else
   expect(fetched.length).toBeGreaterThan(0);

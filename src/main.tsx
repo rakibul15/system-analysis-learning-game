@@ -6,6 +6,11 @@ import './app/styles.css';
 import { useProgress } from './entities/progress/store';
 import { setSoundEnabled } from './shared/lib/sound';
 import { resumeAuth } from './features/auth/auth';
+import { installCrashHandlers } from './shared/lib/crash';
+import { ErrorBoundary } from './shared/ui/ErrorBoundary';
+
+// anything that breaks is reported to the admin (crash.ts)
+installCrashHandlers();
 
 // keep the sound switch in step with saved settings on every screen
 setSoundEnabled(useProgress.getState().settings.sound ?? true);
@@ -16,6 +21,8 @@ resumeAuth();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
   </StrictMode>,
 );

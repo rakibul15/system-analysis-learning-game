@@ -6,6 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: './',
+  // crash reports say which build they came from
+  define: { __BUILD__: JSON.stringify(process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? new Date().toISOString().slice(0, 10)) },
   plugins: [
     react(),
     tailwindcss(),
