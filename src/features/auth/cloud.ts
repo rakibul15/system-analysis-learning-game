@@ -1,6 +1,6 @@
 import type { ProgressData } from '@/entities/progress/store';
 import { mergeProgress, normalize } from './merge';
-import { assembleProgress, emptyPart, splitProgress, type Parts } from './parts';
+import { allPartNames, assembleProgress, emptyPart, splitProgress, type Parts } from './parts';
 
 /** The few Firestore operations sync needs, so the algorithm can be tested without Firebase. */
 export interface CloudStore {
@@ -48,7 +48,14 @@ export async function syncParts(store: CloudStore, cache: PartCache, localIn: Pr
   }
 
   const inCloud = Object.keys(revs);
-  const fromParts = !overwrite && inCloud.length ? assembleProgress(Object.fromEntries(inCloud.map((k) => [k, cache.json[k] ?? 'null']))) : null;
+  let fromParts = !overwrite && inCloud.length ? assembleProgress(Object.fromEntries(inCloud.map((k) => [k, cache.json[k] ?? 'null']))) : null;
+  // An old app version replaced the summary (and its revs) with the whole progress. Parts written
+  // by other devices are still there, unlisted: read them all once so they are not overwritten unseen.
+  if (!overwrite && legacy && !inCloud.length) {
+    const got = await store.getParts(allPartNames());
+    const found = Object.fromEntries(Object.entries(got).filter((e): e is [string, string] => e[1] !== null));
+    if (Object.keys(found).length) { fromParts = assembleProgress(found); fetched = Object.keys(found); }
+  }
   const cloud = overwrite ? null : fromParts && legacy ? mergeProgress(fromParts, legacy) : (fromParts ?? legacy);
   const merged = cloud ? mergeProgress(local, cloud) : local;
 

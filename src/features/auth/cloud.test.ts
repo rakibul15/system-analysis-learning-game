@@ -107,6 +107,18 @@ describe('syncParts', () => {
     expect(cloud.summary?.data).toBeUndefined();
   });
 
+  it('parts written by another device survive an old app version replacing the summary', async () => {
+    const cloud = new FakeCloud();
+    // the laptop (new version) saves a level in parts
+    await syncParts(cloud, newCache(), prog({ levels: { 4: lvl(88) } }));
+    // a phone on the old version finds no blob and saves its own progress as one document
+    cloud.oldClientWrite(prog({ levels: { 2: lvl(66) } }));
+    // a fresh tablet on the new version syncs: it must not overwrite the laptop's level unseen
+    const r = await syncParts(cloud, newCache(), prog({ levels: { 1: lvl(50) } }));
+    expect(Object.keys(r.merged.levels).sort()).toEqual(['1', '2', '4']);
+    expect(assembleProgress(cloud.parts).levels[4]!.best).toBe(88);
+  });
+
   it('overwrite after a reset empties the cloud, including card parts no longer present', async () => {
     const cloud = new FakeCloud();
     const cache = newCache();

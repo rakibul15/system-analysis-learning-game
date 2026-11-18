@@ -1,4 +1,4 @@
-import { chapterOf } from '@/content/meta';
+import { chapterOf, chapters } from '@/content/meta';
 import type { ProgressData, ReviewCard } from '@/entities/progress/store';
 import { normalize } from './merge';
 
@@ -20,6 +20,8 @@ export const isCardPart = (k: string) => /^cards-\d+$/.test(k);
 /** What an absent part stands for. */
 export const emptyPart = (k: string) => (isCardPart(k) ? '{}' : null);
 export const PART_NAME = /^(levels|activity|practice|reading|settings|cards-\d{1,2})$/;
+/** Every part name there can be. */
+export const allPartNames = () => ['levels', 'activity', 'practice', 'reading', 'settings', ...Array.from({ length: chapters.length + 1 }, (_, i) => `cards-${i}`)];
 
 /** Progress → part name → JSON. Card parts only appear for chapters that have cards. */
 export function splitProgress(p: ProgressData): Parts {
