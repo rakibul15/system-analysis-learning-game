@@ -1,6 +1,7 @@
 import type { Level, Question } from '@/content/schema';
 import { banks, loadedLevels, questionsById } from '@/content/registry';
 import { conceptOf } from '@/content/meta';
+import { isDisabled } from '@/content/disabled';
 import type { BankItem, Generator, LevelBank } from './types';
 
 /*
@@ -44,7 +45,10 @@ export function drawBoss(level: Level, seen: Set<string>, rand: () => number = M
   const b = banks[level.id];
   if (!b) return level.boss;
   return b.concepts.map((_, i) => {
-    const cands = candidates(level, b, i);
+    // questions an admin turned off are left out, unless nothing else tests this concept
+    const all = candidates(level, b, i);
+    const live = all.filter((c) => !isDisabled(candId(c)));
+    const cands = live.length ? live : all;
     const fresh = cands.filter((c) => c.kind === 'gen' || !seen.has(candId(c)));
     return candQ(pickOne(fresh.length ? fresh : cands, rand), rand);
   });
@@ -59,7 +63,7 @@ export function reviewVariant(qid: string, fallback: Question | undefined, rand:
   const level = c && loadedLevels[c.levelId], b = c && banks[c.levelId];
   if (!c || !level || !b) return fallback;
   const cands = candidates(level, b, c.index);
-  const others = cands.filter((x) => candId(x) !== qid || x.kind === 'gen');
+  const others = cands.filter((x) => (candId(x) !== qid || x.kind === 'gen') && !isDisabled(candId(x)));
   return others.length ? candQ(pickOne(others, rand), rand) : fallback;
 }
 

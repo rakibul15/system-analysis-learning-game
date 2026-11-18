@@ -215,7 +215,7 @@ export function LevelPage({ level }: { level: Level }) {
             level={level}
             total={total}
             parts={parts}
-            answers={[...lesson, ...play.answers, ...boss].map(({ qid, correct, sure }) => ({ qid, correct, sure }))}
+            answers={[...lesson, ...play.answers, ...boss].filter((r) => !r.skipped).map(({ qid, correct, sure }) => ({ qid, correct, sure }))}
             nextId={nextLevel?.id}
             onRetry={restart}
           />

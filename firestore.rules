@@ -47,7 +47,20 @@ service cloud.firestore {
         && request.resource.data.options is list && request.resource.data.options.size() <= 8
         && request.resource.data.status == 'open';
       allow read: if isAdmin();
-      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+      // triage: the status and the admin's own note, nothing the learner wrote
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'adminNote', 'updatedAt'])
+        && request.resource.data.status in ['open', 'working', 'fixed', 'wontfix']
+        && (!('adminNote' in request.resource.data) || (request.resource.data.adminNote is string && request.resource.data.adminNote.size() <= 2000));
+    }
+
+    // Questions an admin turned off: every signed-in learner reads the list, only admins change it.
+    match /config/questions {
+      allow read: if signedIn();
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['disabled', 'updatedAt'])
+        && request.resource.data.disabled is map
+        && request.resource.data.disabled.size() <= 500;
     }
 
     match /admins/{uid} {

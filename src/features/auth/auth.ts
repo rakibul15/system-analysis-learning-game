@@ -4,6 +4,7 @@ import { mergeProgress, normalize, sameProgress } from './merge';
 import { firebaseConfig } from './firebaseConfig';
 import { newCache, syncParts, type CloudStore, type PartCache } from './cloud';
 import { setSender, type Sender } from '@/shared/lib/outbox';
+import { setDisabled } from '@/content/disabled';
 
 export interface AuthUser { uid: string; name: string; email: string; photo: string | null }
 type SyncState = 'off' | 'syncing' | 'saved' | 'error';
@@ -100,6 +101,15 @@ function feedbackSender(f: Fb, uid: string): Sender {
       });
     },
   };
+}
+
+/** Questions an admin turned off (config/questions), fetched once per sign-in. */
+async function loadDisabled(f: Fb) {
+  try {
+    const snap = await f.store.getDoc(f.store.doc(f.db, 'config', 'questions'));
+    const off = (snap.data() as { disabled?: Record<string, unknown> } | undefined)?.disabled;
+    setDisabled(off && typeof off === 'object' ? Object.keys(off) : []);
+  } catch { /* offline or rules not deployed: keep the copy in this browser */ }
 }
 
 const denied = (e: unknown) => (e as { code?: string })?.code === 'permission-denied';
@@ -204,6 +214,7 @@ export async function startAuth() {
       useAuth.setState({ user: { uid: u.uid, name: u.displayName ?? u.email ?? 'Learner', email: u.email ?? '', photo: u.photoURL }, status: 'ready' });
       watchProgress();
       setSender(feedbackSender(f, u.uid));
+      void loadDisabled(f);
       void syncNow();
     });
   } catch (e) {
