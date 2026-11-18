@@ -19,6 +19,14 @@ export interface GenLevel {
 }
 export interface GenNote { id: string; title: string; gist: string; levels: number[] }
 export interface GenTimeline { id: string; title: string; gist: string; levels: number[]; note?: string }
+/** Where our notes meet one DDIA chapter: which notes, which of its sections, and its figures to look at. */
+export interface GenDdiaChapter {
+  ch: number;
+  /** Notes that treat this chapter, with the sections of it they point to (no section = the chapter as a whole). */
+  notes: { id: string; sections: { s?: string; p?: [number, number] }[] }[];
+  /** Figures in the learner's own copy that a note points to: number, printed page, what to look for (our words). */
+  figs: { n: string; page: number; look: string; note: string }[];
+}
 
 /** One language's facts. */
 export interface LangFacts {
@@ -65,6 +73,45 @@ export function mergeLangs(bn: LangFacts[], en: LangFacts[]): GenLevel[] {
 }
 
 export const noteFacts = (notes: Note[]): GenNote[] => notes.map((n) => ({ id: n.id, title: n.title, gist: n.gist, levels: n.levels }));
+/** DDIA (2nd edition) chapter by chapter: what our notes already cover of it. */
+export function ddiaFacts(notes: Note[], chapterCount = 14): GenDdiaChapter[] {
+  const figNum = (n: string) => Number(n.split('-')[1] ?? 0);
+  return Array.from({ length: chapterCount }, (_, i) => i + 1).map((ch) => {
+    const byNote: GenDdiaChapter['notes'] = [];
+    const figs: GenDdiaChapter['figs'] = [];
+    for (const n of notes) {
+      const refs = [...n.chapters, ...n.refs, ...n.blocks.flatMap((b) => (b.kind === 'says' ? [b.ddia.ref] : []))]
+        .filter((r) => r.book === 'ddia2' && r.chapter === ch);
+      const sections = new Map<string, { s?: string; p?: [number, number] }>();
+      for (const r of refs) {
+        const key = r.section ?? '';
+        if (!sections.has(key)) sections.set(key, { ...(r.section ? { s: r.section } : {}), ...(r.pages ? { p: r.pages } : {}) });
+      }
+      for (const b of n.blocks) {
+        if (b.kind !== 'figs' || b.book !== 'ddia2' || b.chapter !== ch) continue;
+        for (const f of b.items) if (!figs.some((x) => x.n === f.n)) figs.push({ n: f.n, page: f.page, look: f.look, note: n.id });
+      }
+      const hasFigs = figs.some((f) => f.note === n.id);
+      if (!sections.size && !hasFigs) continue;
+      // the chapter as a whole first, then its sections in book order
+      const list = [...sections.values()].sort((a, b) => (a.s ? 1 : 0) - (b.s ? 1 : 0) || (a.p?.[0] ?? 0) - (b.p?.[0] ?? 0));
+      byNote.push({ id: n.id, sections: list });
+    }
+    figs.sort((a, b) => figNum(a.n) - figNum(b.n));
+    return { ch, notes: byNote, figs };
+  });
+}
+
+export function renderDdia(chapters: GenDdiaChapter[]): string {
+  return [
+    '// Generated from the notes by scripts/gen-meta.mjs. Do not edit: run `npm run gen:meta`.',
+    "import type { GenDdiaChapter } from '../meta.build';",
+    '',
+    `export const DDIA_CHAPTERS: GenDdiaChapter[] = [\n${chapters.map((c) => `  ${JSON.stringify(c)},`).join('\n')}\n];`,
+    '',
+  ].join('\n');
+}
+
 export const timelineFacts = (ts: Timeline[]): GenTimeline[] =>
   ts.map((t) => ({ id: t.id, title: t.title, gist: t.gist, levels: t.levels, ...(t.note ? { note: t.note } : {}) }));
 
