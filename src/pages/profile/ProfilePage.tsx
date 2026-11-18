@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { chapters, levelsById } from '@/content/levels';
-import { masteryOf, readiness, streak, totalXp } from '@/entities/progress/selectors';
+import { chapters, levelMeta } from '@/content/meta';
+import { masteryOf, streak, totalXp } from '@/entities/progress/selectors';
+import { readiness } from '@/entities/progress/readiness';
 import { exportProgress, useProgress } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { masteryLabel, type Mastery } from '@/shared/lib/scoring';
@@ -73,7 +74,7 @@ export function ProfilePage() {
 
         <section className="rounded-[24px] border-[3px] border-ink bg-white p-6">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="m-0 font-display text-xl font-bold">{tr(`${bn(Object.keys(levelsById).length)} level-এর দখল`, `Mastery of the ${Object.keys(levelsById).length} levels`)}</h2>
+            <h2 className="m-0 font-display text-xl font-bold">{tr(`${bn(Object.keys(levelMeta).length)} level-এর দখল`, `Mastery of the ${Object.keys(levelMeta).length} levels`)}</h2>
             <ul className="m-0 flex list-none flex-wrap gap-3 p-0 text-xs">
               {(Object.keys(MASTERY_COLOR) as Mastery[]).map((m) => <li key={m} className="flex items-center gap-1.5"><span className="h-3 w-3 rounded border border-ink" style={{ background: MASTERY_COLOR[m] }} />{masteryLabel[m]}</li>)}
             </ul>
@@ -86,7 +87,7 @@ export function ProfilePage() {
                   {c.levels.map((id) => {
                     const m = masteryOf(id, p);
                     return (
-                      <Link key={id} to="/level/$levelId" params={{ levelId: String(id) }} title={`${levelsById[id]!.title} · ${masteryLabel[m]}`}
+                      <Link key={id} to="/level/$levelId" params={{ levelId: String(id) }} title={`${levelMeta[id]!.title} · ${masteryLabel[m]}`}
                         className="flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-ink text-ink no-underline" style={{ background: MASTERY_COLOR[m], color: m === 'solid' ? '#FFFFFF' : '#16252D' }}>
                         <span className="font-display text-xl font-extrabold leading-none">{bn(id)}</span>
                         <span className="font-mono text-[11px]">{p.levels[id] ? bn(p.levels[id]!.best) : ''}</span>

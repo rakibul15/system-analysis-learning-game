@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProgress, type ProgressData } from '@/entities/progress/store';
-import { levelList } from '@/content/levels';
+import { levelMetaList as levelList } from '@/content/meta';
 import { DAY_MS, dayKey } from '@/shared/lib/scoring';
 import { planToday } from './plan';
 

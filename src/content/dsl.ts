@@ -1,5 +1,5 @@
 import type { DiagramNode, LessonStep, Level, Question, SimulatorId, TrafficPlay } from './schema';
-import { nodeKinds } from './schema';
+import type { nodeKinds } from './schema';
 
 /**
  * Compact authoring format for level content. Question ids are assigned here,

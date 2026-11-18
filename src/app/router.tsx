@@ -1,20 +1,35 @@
-import { createHashHistory, createRootRoute, createRoute, createRouter, Link, Outlet } from '@tanstack/react-router';
-import { levelsById } from '@/content/levels';
-import { LevelPage } from '@/pages/level/LevelPage';
+import { createHashHistory, createRootRoute, createRoute, createRouter, lazyRouteComponent, Link, Outlet, type ErrorComponentProps } from '@tanstack/react-router';
+import { loadLevel } from '@/content/load';
+import { loadNote } from '@/content/notes';
 import { MapPage } from '@/pages/map/MapPage';
-import { MockPage } from '@/pages/mock/MockPage';
-import { IncidentPage } from '@/pages/incident/IncidentPage';
-import { BuilderPage } from '@/pages/builder/BuilderPage';
-import { PARTS, StudyPage, StudyReader, type Part } from '@/pages/study/StudyPage';
-import { PracticePage } from '@/pages/practice/PracticePage';
-import { ProfilePage } from '@/pages/profile/ProfilePage';
-import { ReviewPage } from '@/pages/review/ReviewPage';
-import { ReadingPage } from '@/pages/reading/ReadingPage';
-import { NotePage } from '@/pages/notes/NotePage';
-import { DeepPage } from '@/pages/deep/DeepPage';
+import { PARTS, type Part } from '@/pages/study/parts';
 import { tr } from '@/shared/lib/i18n';
+import { LoadFailed, PageLoading } from '@/shared/ui/Loading';
 import { AuthGate } from './AuthGate';
 import { ReaderHost } from '@/features/books/ReaderHost';
+
+/*
+ * Only the map is in the first download. Every other screen, and each chapter's
+ * content, is fetched the first time it is opened (and kept offline after that).
+ */
+const LevelPage = lazyRouteComponent(() => import('@/pages/level/LevelPage'), 'LevelPage');
+const MockPage = lazyRouteComponent(() => import('@/pages/mock/MockPage'), 'MockPage');
+const IncidentPage = lazyRouteComponent(() => import('@/pages/incident/IncidentPage'), 'IncidentPage');
+const BuilderPage = lazyRouteComponent(() => import('@/pages/builder/BuilderPage'), 'BuilderPage');
+const StudyPage = lazyRouteComponent(() => import('@/pages/study/StudyPage'), 'StudyPage');
+const StudyReader = lazyRouteComponent(() => import('@/pages/study/StudyPage'), 'StudyReader');
+const PracticePage = lazyRouteComponent(() => import('@/pages/practice/PracticePage'), 'PracticePage');
+const ProfilePage = lazyRouteComponent(() => import('@/pages/profile/ProfilePage'), 'ProfilePage');
+const ReviewPage = lazyRouteComponent(() => import('@/pages/review/ReviewPage'), 'ReviewPage');
+const ReadingPage = lazyRouteComponent(() => import('@/pages/reading/ReadingPage'), 'ReadingPage');
+const NotePage = lazyRouteComponent(() => import('@/pages/notes/NotePage'), 'NotePage');
+const DeepPage = lazyRouteComponent(() => import('@/pages/deep/DeepPage'), 'DeepPage');
+const AdminPage = lazyRouteComponent(() => import('@/pages/admin/AdminPage'), 'AdminPage');
+
+
+function LoadError({ reset }: ErrorComponentProps) {
+  return <LoadFailed onRetry={() => { reset(); void router.invalidate(); }} />;
+}
 
 function NotFound() {
   return (
@@ -52,7 +67,8 @@ const studyPartRoute = createRoute({
 });
 const noteRoute = createRoute({
   getParentRoute: () => rootRoute, path: '/notes/$noteId',
-  component: function NoteView() { const { noteId } = noteRoute.useParams(); return <NotePage key={noteId} id={noteId} />; },
+  loader: ({ params }) => loadNote(params.noteId),
+  component: function NoteView() { const note = noteRoute.useLoaderData(); return <NotePage key={note?.id} note={note} />; },
 });
 const deepRoute = createRoute({
   getParentRoute: () => rootRoute, path: '/deep/$deepId',
@@ -60,23 +76,27 @@ const deepRoute = createRoute({
 });
 const readingRoute = createRoute({ getParentRoute: () => rootRoute, path: '/reading', component: ReadingPage });
 const profileRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profile', component: ProfilePage });
+const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: '/admin', component: AdminPage });
 
 const levelRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/level/$levelId',
+  loader: ({ params }) => loadLevel(Number(params.levelId)),
   component: function LevelRouteView() {
-    const { levelId } = levelRoute.useParams();
-    const level = levelsById[Number(levelId)];
+    const level = levelRoute.useLoaderData();
     if (!level) return <NotFound />;
     return <LevelPage key={level.id} level={level} />;
   },
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute]),
+  routeTree: rootRoute.addChildren([mapRoute, levelRoute, reviewRoute, practiceRoute, mockRoute, incidentRoute, builderRoute, studyRoute, studyPartRoute, readingRoute, noteRoute, deepRoute, profileRoute, adminRoute]),
   // hash URLs work on any static host (GitHub Pages) with no rewrite rules
   history: createHashHistory(),
   scrollRestoration: true,
+  defaultPendingComponent: () => <PageLoading />,
+  defaultPendingMs: 150,
+  defaultErrorComponent: LoadError,
 });
 
 declare module '@tanstack/react-router' {

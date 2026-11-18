@@ -1,16 +1,14 @@
 import type { Level, Question } from '@/content/schema';
-import { levelsById } from '@/content/levels';
-import { ch1Bank } from './ch1';
-import { ch2Bank } from './ch2';
-import { ch3Bank } from './ch3';
-import { ch4Bank } from './ch4';
-import { ch5Bank } from './ch5';
-import { ch6Bank } from './ch6';
-import { ch7Bank } from './ch7';
+import { banks, loadedLevels, questionsById } from '@/content/registry';
+import { conceptOf } from '@/content/meta';
 import type { BankItem, Generator, LevelBank } from './types';
 
-/** Question banks by level. Levels without a bank keep their fixed five boss questions. */
-export const banks: Record<number, LevelBank> = { ...ch1Bank, ...ch2Bank, ...ch3Bank, ...ch4Bank, ...ch5Bank, ...ch6Bank, ...ch7Bank };
+/*
+ * Drawing questions from a level's bank. The bank and level must be loaded (load.ts);
+ * which concept a question belongs to comes from meta.ts and is always known.
+ */
+export { banks };
+export { conceptOf, conceptLabel } from '@/content/meta';
 
 type Cand = { kind: 'fixed'; q: Question } | { kind: 'item'; item: BankItem } | { kind: 'gen'; gen: Generator };
 
@@ -52,32 +50,15 @@ export function drawBoss(level: Level, seen: Set<string>, rand: () => number = M
   });
 }
 
-/** Which level and concept a question id belongs to. */
-export function conceptOf(qid: string): { levelId: number; index: number } | null {
-  const levelId = Number(/^l(\d+)-/.exec(qid)?.[1]);
-  const b = banks[levelId], level = levelsById[levelId];
-  if (!b || !level) return null;
-  const boss = level.boss.findIndex((q) => q.id === qid);
-  if (boss >= 0) return { levelId, index: boss };
-  const concept = b.items.find((i) => i.id === qid)?.concept ?? b.gens.find((g) => g.id === qid)?.concept;
-  const index = b.concepts.findIndex((c) => c.id === concept);
-  return index >= 0 ? { levelId, index } : null;
-}
-
-export const conceptLabel = (qid: string) => {
-  const c = conceptOf(qid);
-  return c ? banks[c.levelId]!.concepts[c.index]!.label : null;
-};
-
 /**
  * For review: a different question on the same concept, so a remembered answer is not enough.
  * Falls back to the same question when the concept has nothing else.
  */
 export function reviewVariant(qid: string, fallback: Question | undefined, rand: () => number = Math.random): Question | undefined {
   const c = conceptOf(qid);
-  if (!c) return fallback;
-  const level = levelsById[c.levelId]!;
-  const cands = candidates(level, banks[c.levelId]!, c.index);
+  const level = c && loadedLevels[c.levelId], b = c && banks[c.levelId];
+  if (!c || !level || !b) return fallback;
+  const cands = candidates(level, b, c.index);
   const others = cands.filter((x) => candId(x) !== qid || x.kind === 'gen');
   return others.length ? candQ(pickOne(others, rand), rand) : fallback;
 }
@@ -91,4 +72,19 @@ export function bankQuestion(qid: string, rand: () => number = Math.random): Que
   if (item) return itemQ(item, rand);
   const gen = b.gens.find((g) => g.id === qid);
   return gen ? genQ(gen, rand) : undefined;
+}
+
+/**
+ * A question's text and every option it can show (right one first), for the statistics view.
+ * Generated questions change their numbers, so they come back as one example. Needs the chapter loaded.
+ */
+export function questionInfo(qid: string): { prompt: string; options: string[]; generated: boolean } | null {
+  const fixed = questionsById[qid]?.q;
+  if (fixed) return { prompt: fixed.prompt, options: fixed.options, generated: false };
+  const b = banks[Number(/^l(\d+)-/.exec(qid)?.[1])];
+  const item = b?.items.find((i) => i.id === qid);
+  if (item) return { prompt: item.prompt, options: [...item.options, ...(item.extra ?? [])], generated: false };
+  const gen = b?.gens.find((g) => g.id === qid);
+  if (gen) { const q = gen.make(() => 0.5); return { prompt: q.prompt, options: q.options, generated: true }; }
+  return null;
 }

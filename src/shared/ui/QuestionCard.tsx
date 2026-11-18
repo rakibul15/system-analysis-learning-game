@@ -4,6 +4,8 @@ import { play } from '@/shared/lib/sound';
 import type { Question } from '@/content/schema';
 import { bn } from '@/shared/lib/bn';
 import { confidenceFactor, shuffledOrder } from '@/shared/lib/scoring';
+import { logAnswer, optionKey, type Where } from '@/shared/lib/outbox';
+import { ReportProblem } from './ReportProblem';
 
 export interface AnswerResult { qid: string; correct: boolean; sure: boolean; earned: number }
 
@@ -19,6 +21,8 @@ interface Props {
   onDone: (r: AnswerResult) => void;
   continueLabel?: string;
   tone?: 'light' | 'boss';
+  /** Where the question was asked, for the per-question statistics. */
+  where?: Where;
 }
 
 const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math.round(n * 10) / 10), { grouping: false });
@@ -27,7 +31,7 @@ const fmt = (n: number) => (n > 0 ? '+' : n < 0 ? '−' : '') + bn(Math.abs(Math
  * One multiple-choice question with confidence marking.
  * Options are shuffled per question id (the content keeps the right one first).
  */
-export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light' }: Props) {
+export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, continueLabel = tr('পরের ধাপ', 'Next step'), tone = 'light', where = 'other' }: Props) {
   // a fresh order every time the question is shown, so positions cannot be memorised
   const [nonce] = useState(() => Math.random().toString(36).slice(2));
   const order = useMemo(() => shuffledOrder(`${q.id}:${nonce}`, q.options.length), [q.id, q.options.length, nonce]);
@@ -114,8 +118,12 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               type="button"
+              data-testid="q-answer"
               disabled={!ready}
-              onClick={() => setDone(true)}
+              onClick={() => {
+                setDone(true);
+                logAnswer({ q: q.id, c: correct ? 1 : 0, s: sure ? 1 : 0, o: optionKey(q.options[picked!] ?? ''), w: where });
+              }}
               className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
             >
               {tr('উত্তর দিন', 'Answer')}
@@ -146,6 +154,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           <button
             type="button"
             autoFocus
+            data-testid="q-continue"
             onClick={() => onDone({ qid: q.id, correct, sure: !!sure, earned })}
             className="btn-press mt-3 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-white font-display text-lg font-extrabold text-ink shadow-[0_4px_0_#16252D]"
           >
@@ -153,6 +162,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           </button>
         </div>
       )}
+      <ReportProblem key={q.id} q={q} dark={boss} />
     </div>
   );
 }

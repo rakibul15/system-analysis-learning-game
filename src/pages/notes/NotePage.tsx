@@ -1,13 +1,12 @@
 import { lazy, Suspense, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { notesById, type Note } from '@/content/notes';
+import type { Note } from '@/content/notes';
 import type { NoteBlock } from '@/content/notes/types';
 import { BookRefs } from '@/features/books/BookRefs';
 import { useReader } from '@/features/books/shelf';
 import { refLabel } from '@/features/books/catalog';
-import { levelsById } from '@/content/levels';
+import { levelMeta, timelinesForNote } from '@/content/meta';
 import { Flow } from '@/simulators/knob/anim';
-import { timelinesForNote } from '@/features/deep/timelines';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
 import { AppShell } from '@/shared/ui/AppShell';
@@ -15,8 +14,7 @@ import { AppShell } from '@/shared/ui/AppShell';
 const ChapterView = lazy(() => import('@/features/books/BookReader').then((m) => ({ default: m.ChapterView })));
 
 /** One of our combined study notes: both books' angles, our words, ParcelGo examples. */
-export function NotePage({ id }: { id: string }) {
-  const note = notesById[id];
+export function NotePage({ note }: { note: Note | undefined }) {
   if (!note) return <AppShell><main className="p-8 text-center font-bold">{tr('এই নোট নেই।', 'No such note.')}</main></AppShell>;
   return (
     <AppShell>
@@ -75,7 +73,7 @@ function Header({ note }: { note: Note }) {
         <div className="rounded-xl bg-[#EDE6F8] px-3 py-2 text-sm"><b>DDIA:</b> {note.angles.ddia}</div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
-        {note.levels.map((l) => <Link key={l} to="/level/$levelId" params={{ levelId: String(l) }} className="inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-white px-3 text-sm font-semibold text-ink no-underline">🎮 Level {bn(l)} · {levelsById[l]?.title}</Link>)}
+        {note.levels.map((l) => <Link key={l} to="/level/$levelId" params={{ levelId: String(l) }} className="inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-white px-3 text-sm font-semibold text-ink no-underline">🎮 Level {bn(l)} · {levelMeta[l]?.title}</Link>)}
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mulberry32 } from '@/simulators/traffic/engine';
-import { levelsById } from '@/content/levels';
+import { levelsById } from '@/content/levels/all';
 import { questionSchema } from '@/content/schema';
 import { banks, conceptOf, drawBoss, reviewVariant } from './index';
 

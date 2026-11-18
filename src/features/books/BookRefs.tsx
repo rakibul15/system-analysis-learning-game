@@ -4,8 +4,7 @@ import { tr } from '@/shared/lib/i18n';
 import { BOOKS, refLabel, withPages, type BookRef } from './catalog';
 import { bookFor, useReader, useShelf } from './shelf';
 import { Link } from '@tanstack/react-router';
-import { notesForLevel } from '@/content/notes';
-import { timelinesForLevel } from '@/features/deep/timelines';
+import { notesForLevel, timelinesForLevel } from '@/content/meta';
 
 /** "Read it in the book": each reference opens the learner's own copy at that place. */
 export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', 'Read it in the book'), className = '', level }: { refs: BookRef[] | undefined; title?: string; className?: string; level?: number }) {

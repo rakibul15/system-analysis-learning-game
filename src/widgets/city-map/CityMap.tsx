@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef } from 'react';
-import type { Chapter, Level } from '@/content/schema';
+import type { Chapter } from '@/content/schema';
+import type { LevelMeta } from '@/content/meta';
 import { bn, easeBack } from '@/shared/lib/bn';
 import { mulberry32 } from '@/simulators/traffic';
 import { tr } from '@/shared/lib/i18n';
@@ -7,7 +8,7 @@ import { tr } from '@/shared/lib/i18n';
 const INK = '#16252D';
 
 export interface MapStopView {
-  level: Level;
+  level: LevelMeta;
   state: 'done' | 'open' | 'locked';
   stars: number;
 }

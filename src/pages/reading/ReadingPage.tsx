@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { BOOK, chapters, PART_TITLES, TOTAL_WEEKS, type Chapter, type Practice } from '@/features/reading/ddia';
 import { incidents } from '@/features/incident/incidents';
-import { levelsById } from '@/content/levels';
+import { levelMeta } from '@/content/meta';
 import { useProgress, type ReadingRecord } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
@@ -16,7 +16,7 @@ const NOTE_HINT = tr('মূল ধারণা:\n\nকোথায় trade-off
 
 function PracticeLink({ p }: { p: Practice }) {
   const cls = 'inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-white px-3 text-sm font-semibold text-ink no-underline hover:bg-[#F0F2EC]';
-  if (p.kind === 'level') return <Link to="/level/$levelId" params={{ levelId: String(p.id) }} className={cls}>Level {bn(p.id)} · {levelsById[p.id]?.title}</Link>;
+  if (p.kind === 'level') return <Link to="/level/$levelId" params={{ levelId: String(p.id) }} className={cls}>Level {bn(p.id)} · {levelMeta[p.id]?.title}</Link>;
   if (p.kind === 'incident') return <Link to="/incident" className={cls}>Incident · {incidents.find((i) => i.id === p.id)?.title ?? p.id}</Link>;
   if (p.kind === 'builder') return <Link to="/builder" className={cls}>{tr('Builder · খরচ ও capacity', 'Builder · cost and capacity')}</Link>;
   if (p.kind === 'migrate') return <Link to="/builder" className={cls}>{tr('Builder · Migration', 'Builder · Migration')}</Link>;

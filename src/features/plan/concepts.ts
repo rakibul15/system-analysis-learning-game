@@ -1,14 +1,11 @@
-import { banks, conceptOf } from '@/content/bank';
-import { notesForLevel, type Note } from '@/content/notes';
-import { timelinesForLevel, type Timeline } from '@/features/deep/timelines';
-import { levelsById } from '@/content/levels';
+import { conceptOf, levelMeta, notesForLevel, timelinesForLevel, type NoteMeta, type TimelineMeta } from '@/content/meta';
 import type { ProgressData } from '@/entities/progress/store';
 
 export interface ConceptStat {
   key: string; levelId: number; index: number; label: string; levelTitle: string;
   /** Review cards (mistakes) on this concept, and how often they were missed again. */
   cards: number; lapses: number; weakness: number;
-  note?: Note; deep?: Timeline;
+  note?: NoteMeta; deep?: TimelineMeta;
 }
 
 /**
@@ -21,10 +18,10 @@ export function weakConcepts(p: Pick<ProgressData, 'cards'>, limit = 5): Concept
     const where = conceptOf(c.qid);
     if (!where) continue;
     const key = `${where.levelId}:${where.index}`;
-    const level = levelsById[where.levelId]!;
+    const level = levelMeta[where.levelId]!;
     const s = by.get(key) ?? {
       key, levelId: where.levelId, index: where.index, levelTitle: level.title,
-      label: banks[where.levelId]!.concepts[where.index]!.label,
+      label: level.concepts[where.index]?.label ?? '',
       cards: 0, lapses: 0, weakness: 0,
       note: notesForLevel(where.levelId)[0], deep: timelinesForLevel(where.levelId)[0],
     };

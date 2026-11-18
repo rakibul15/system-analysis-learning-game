@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { levelList } from '@/content/levels';
+import { levelList } from '@/content/levels/all';
 import { BOOKS, detectBook, levelRefs } from './catalog';
 
 describe('book catalog', () => {

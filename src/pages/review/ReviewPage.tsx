@@ -1,7 +1,10 @@
 import { useMemo, useState } from 'react';
 import { bankQuestion, conceptLabel, reviewVariant } from '@/content/bank';
 import { Link } from '@tanstack/react-router';
-import { levelsById, questionsById } from '@/content/levels';
+import { chapterOf, levelMeta } from '@/content/meta';
+import { questionsById } from '@/content/registry';
+import { useChapters } from '@/content/useChapters';
+import { LoadFailed, PageLoading } from '@/shared/ui/Loading';
 import { dueCards } from '@/entities/progress/selectors';
 import { useProgress, type ReviewCard } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
@@ -27,8 +30,11 @@ export function ReviewPage() {
   const byBox = REVIEW_DAYS.map((_, b) => all.filter((c) => c.box === b).length);
 
   const start = (cards: ReviewCard[]) => { setSession(cards.slice(0, SESSION)); setK(0); setRight(0); };
+  // a session's questions come from the chapters its cards belong to: fetch those first
+  const content = useChapters((session ?? []).flatMap((c) => chapterOf(c.levelId) ?? []));
 
   if (session && k < session.length) {
+    if (content.state !== 'ready') return <AppShell>{content.state === 'error' ? <LoadFailed onRetry={content.retry} /> : <PageLoading />}</AppShell>;
     const card = session[k]!;
     return <ReviewStep key={`${card.qid}-${k}`} card={card} k={k} total={session.length} session={session} onStop={() => setSession(null)} onAnswer={(r) => { answerReview(card.qid, r.correct, r.sure); if (r.correct) setRight((n) => n + 1); setK(k + 1); }} />;
   }
@@ -127,8 +133,9 @@ function ReviewStep({ card, k, total, session, onStop, onAnswer }: { card: Revie
         <div className="flex gap-1">{session.map((_, i) => <span key={i} className="h-2 flex-1 rounded-full" style={{ background: i < k ? '#0B8A7A' : i === k ? '#FFC02E' : '#D7DED1' }} />)}</div>
         {q ? (
           <QuestionCard
+            where="review"
             q={q}
-            label={`Level ${bn(levelId)} · ${levelsById[levelId]?.title ?? ''}${concept ? ` · ${concept}` : ''} · ${tr('ঘর', 'Box')} ${bn(card.box + 1)}`}
+            label={`Level ${bn(levelId)} · ${levelMeta[levelId]?.title ?? ''}${concept ? ` · ${concept}` : ''} · ${tr('ঘর', 'Box')} ${bn(card.box + 1)}`}
             continueLabel={k + 1 < total ? tr('পরের প্রশ্ন', 'Next question') : tr('শেষ', 'Finish')}
             onDone={(r) => onAnswer(r)}
           />

@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { useProgress, type ProgressData } from '@/entities/progress/store';
 import { mergeProgress, normalize, sameProgress } from './merge';
 import { firebaseConfig } from './firebaseConfig';
+import { newCache, syncParts, type CloudStore, type PartCache } from './cloud';
+import { setSender, type Sender } from '@/shared/lib/outbox';
 
 export interface AuthUser { uid: string; name: string; email: string; photo: string | null }
 type SyncState = 'off' | 'syncing' | 'saved' | 'error';
@@ -44,28 +46,110 @@ const fb = () => (fbPromise ??= loadFirebase());
 
 const pick = (s: ProgressData): ProgressData => normalize(s);
 
-async function readCloud(f: Fb, uid: string): Promise<ProgressData | null> {
-  const snap = await f.store.getDoc(f.store.doc(f.db, 'users', uid));
-  if (!snap.exists()) return null;
-  const raw = snap.data() as { data?: string };
-  try { return raw.data ? normalize(JSON.parse(raw.data)) : null; } catch { return null; }
-}
-async function writeCloud(f: Fb, uid: string, data: ProgressData) {
-  await f.store.setDoc(f.store.doc(f.db, 'users', uid), { data: JSON.stringify(data), v: 3, updatedAt: f.store.serverTimestamp() });
+/** Progress in parts (users/{uid} plus users/{uid}/progress/*), see parts.ts. */
+function partsStore(f: Fb, uid: string): CloudStore {
+  const { store, db } = f;
+  const user = store.doc(db, 'users', uid);
+  const part = (k: string) => store.doc(db, 'users', uid, 'progress', k);
+  return {
+    async getSummary() {
+      const snap = await store.getDoc(user);
+      return snap.exists() ? (snap.data() as { revs?: Record<string, string>; data?: unknown }) : null;
+    },
+    async getParts(names) {
+      const snaps = await Promise.all(names.map((k) => store.getDoc(part(k))));
+      return Object.fromEntries(names.map((k, i) => {
+        const d = snaps[i]!.data() as { data?: unknown } | undefined;
+        return [k, typeof d?.data === 'string' ? d.data : null];
+      }));
+    },
+    async commit(parts, revs, dropLegacy) {
+      const batch = store.writeBatch(db);
+      for (const [k, json] of Object.entries(parts)) batch.set(part(k), { data: json, updatedAt: store.serverTimestamp() });
+      batch.set(user, { v: 4, revs, updatedAt: store.serverTimestamp(), ...(dropLegacy ? { data: store.deleteField() } : {}) }, { merge: true });
+      await batch.commit();
+    },
+  };
 }
 
-/** Pull the cloud copy, merge it with this device, and save the result in both places. */
-async function syncNow(overwrite = false) {
+/** The one-document format, used only while the database rules do not yet allow the parts. */
+async function legacySync(f: Fb, uid: string, local: ProgressData, overwrite: boolean): Promise<ProgressData> {
+  const ref = f.store.doc(f.db, 'users', uid);
+  let cloud: ProgressData | null = null;
+  if (!overwrite) {
+    const snap = await f.store.getDoc(ref);
+    const raw = snap.exists() ? (snap.data() as { data?: string }) : {};
+    try { cloud = raw.data ? normalize(JSON.parse(raw.data)) : null; } catch { cloud = null; }
+  }
+  const merged = cloud ? mergeProgress(local, cloud) : local;
+  if (!cloud || !sameProgress(merged, cloud)) await f.store.setDoc(ref, { data: JSON.stringify(merged), v: 3, updatedAt: f.store.serverTimestamp() }, { merge: true });
+  return merged;
+}
+
+/** Answer batches go to qlog/, problem reports to reports/ (see firestore.rules). */
+function feedbackSender(f: Fb, uid: string): Sender {
+  const { store, db } = f;
+  return {
+    async sendAnswers(items, lang) {
+      await store.addDoc(store.collection(db, 'qlog'), { uid, at: store.serverTimestamp(), lang, items });
+    },
+    async sendReport(r) {
+      await store.addDoc(store.collection(db, 'reports'), {
+        uid, at: store.serverTimestamp(), lang: r.lang, qid: r.qid, levelId: r.levelId, kind: r.kind,
+        note: r.note, prompt: r.prompt, options: r.options, status: 'open',
+      });
+    },
+  };
+}
+
+const denied = (e: unknown) => (e as { code?: string })?.code === 'permission-denied';
+let partsBlocked = false;
+let cache: { uid: string; parts: PartCache } | null = null;
+const cacheFor = (uid: string) => (cache?.uid === uid ? cache.parts : (cache = { uid, parts: newCache() }).parts);
+let running: Promise<void> | null = null;
+let again = false;
+let wantOverwrite = false;
+
+/** Pull what changed in the cloud, merge it with this device, and save the result in both places. */
+function syncNow(overwrite = false): Promise<void> {
+  // a reset asked for during a sync must not be lost, or the old cloud copy would merge back
+  if (overwrite) wantOverwrite = true;
+  // one sync at a time; a request during a sync runs once more afterwards
+  if (running) { again = true; return running; }
+  running = (async () => {
+    do {
+      again = false;
+      const ow = wantOverwrite;
+      wantOverwrite = false;
+      await syncOnce(ow);
+    } while (again);
+  })().finally(() => { running = null; });
+  return running;
+}
+
+async function syncOnce(overwrite: boolean) {
   const user = useAuth.getState().user;
   if (!user) return;
   useAuth.setState({ sync: 'syncing', error: null });
   try {
     const f = await fb();
     const local = pick(useProgress.getState());
-    const cloud = overwrite ? null : await readCloud(f, user.uid);
-    const merged = cloud ? mergeProgress(local, cloud) : local;
-    if (!sameProgress(merged, local)) { applying = true; useProgress.setState(merged); applying = false; }
-    if (!cloud || !sameProgress(merged, cloud)) await writeCloud(f, user.uid, merged);
+    let merged: ProgressData;
+    if (partsBlocked) merged = await legacySync(f, user.uid, local, overwrite);
+    else {
+      try {
+        merged = (await syncParts(partsStore(f, user.uid), cacheFor(user.uid), local, overwrite)).merged;
+      } catch (e) {
+        if (!denied(e)) throw e;
+        partsBlocked = true;
+        merged = await legacySync(f, user.uid, local, overwrite);
+      }
+    }
+    // the learner may have played on while the sync ran: keep that too
+    const now = pick(useProgress.getState());
+    const next = sameProgress(now, local) ? merged : mergeProgress(now, merged);
+    if (!sameProgress(next, now)) { applying = true; useProgress.setState(next); applying = false; }
+    if (!sameProgress(next, merged)) again = true;
     useAuth.setState({ sync: 'saved', lastSyncedAt: Date.now() });
   } catch (e) {
     useAuth.setState({ sync: 'error', error: e instanceof Error ? e.message : String(e) });
@@ -81,7 +165,14 @@ function watchProgress() {
   unsubProgress = useProgress.subscribe(() => {
     if (applying || !useAuth.getState().user) return;
     clearTimeout(timer);
-    timer = setTimeout(() => void syncNow(), 2500);
+    timer = setTimeout(() => { timer = undefined; void syncNow(); }, 2500);
+  });
+}
+
+// leaving the app (switching tabs, locking the phone) saves a pending change right away
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && timer !== undefined) { clearTimeout(timer); timer = undefined; void syncNow(); }
   });
 }
 
@@ -97,6 +188,7 @@ export async function startAuth() {
     f.authMod.onAuthStateChanged(f.auth, (u) => {
       if (!u) {
         unsubProgress?.(); unsubProgress = null;
+        setSender(null);
         // progress is safe in the cloud; leave nothing behind for the next person on this browser
         if (owner.get()) { clearLocal(); owner.set(null); }
         useAuth.setState({ user: null, status: 'ready', sync: 'off' });
@@ -111,6 +203,7 @@ export async function startAuth() {
       owner.set(u.uid);
       useAuth.setState({ user: { uid: u.uid, name: u.displayName ?? u.email ?? 'Learner', email: u.email ?? '', photo: u.photoURL }, status: 'ready' });
       watchProgress();
+      setSender(feedbackSender(f, u.uid));
       void syncNow();
     });
   } catch (e) {
@@ -157,5 +250,7 @@ export async function signOutUser() {
 }
 
 export const syncProgressNow = () => syncNow();
+/** Firebase for screens that read other collections (the admin view); only after sign-in. */
+export const firebase = () => fb();
 /** After a deliberate reset, replace the cloud copy instead of merging the old progress back. */
 export const replaceCloudWithLocal = () => syncNow(true);

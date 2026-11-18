@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { chapters, levelsById } from '@/content/levels';
+import { chapters, levelMeta } from '@/content/meta';
 import type { Level } from '@/content/schema';
 import { masteryOf, lockReason } from '@/entities/progress/selectors';
 import { useProgress, type AnswerLog } from '@/entities/progress/store';
@@ -56,7 +56,7 @@ export function LevelPage({ level }: { level: Level }) {
   };
 
   const chapter = chapters.find((c) => c.id === level.chapter)!;
-  const nextLevel = levelsById[level.id + 1];
+  const nextLevel = levelMeta[level.id + 1];
 
   return (
     <div className="min-h-screen" ref={top}>
@@ -114,7 +114,7 @@ export function LevelPage({ level }: { level: Level }) {
         {step === 'predict' && (
           <>
             <Intro kicker={tr('ধাপ ২ · অনুমান', 'Step 2 · Predict')} title={tr('আগে একটা অনুমান', 'First, a guess')} body={tr('নম্বর নেই। শুধু নিজের ধারণাটা যাচাই করুন, তারপর lesson-এ দেখবেন কেন।', 'No points. Just test your intuition; the lesson shows why.')} />
-            <QuestionCard q={level.predict} label={tr('অনুমান · নম্বর নেই', 'Predict · no points')} continueLabel={tr('Lesson শুরু →', 'Start the lesson →')} onDone={() => setStep('lesson')} />
+            <QuestionCard where="predict" q={level.predict} label={tr('অনুমান · নম্বর নেই', 'Predict · no points')} continueLabel={tr('Lesson শুরু →', 'Start the lesson →')} onDone={() => setStep('lesson')} />
           </>
         )}
 
@@ -165,6 +165,7 @@ export function LevelPage({ level }: { level: Level }) {
             <Intro kicker={`${tr('ধাপ ৪', 'Step 4')} · Mission ${bn(mi + 1)}/${bn(3)}`} title="Mission" body={level.play.intro} />
             <MissionBar done={play.answers} total={3} />
             <QuestionCard
+              where="mission"
               key={level.play.missions[mi]!.id}
               q={level.play.missions[mi]!}
               label={`Mission ${bn(mi + 1)}/${bn(3)}`}
@@ -192,6 +193,7 @@ export function LevelPage({ level }: { level: Level }) {
               </div>
             </div>
             <QuestionCard
+              where="boss"
               key={`${bossSet[bi]!.id}-${bi}`}
               tone="boss"
               q={bossSet[bi]!}

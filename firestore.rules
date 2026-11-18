@@ -1,0 +1,57 @@
+rules_version = '2';
+
+// Deploy: firebase deploy --only firestore:rules   (or paste into Firebase console → Firestore → Rules)
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owner(uid) { return signedIn() && request.auth.uid == uid; }
+    // an admin is a signed-in user with a document at admins/{their uid} (created by hand in the console)
+    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); }
+
+    // Progress. users/{uid} is the summary (and, from older app versions, the whole progress as one JSON string).
+    match /users/{uid} {
+      allow read, write: if owner(uid);
+
+      // One part of the progress: levels, activity, practice, reading, settings, cards-<chapter>.
+      match /progress/{part} {
+        allow read: if owner(uid);
+        allow write: if owner(uid)
+          && part.matches('^(levels|activity|practice|reading|settings|cards-[0-9]{1,2})$')
+          && request.resource.data.keys().hasOnly(['data', 'updatedAt'])
+          && request.resource.data.data is string
+          && request.resource.data.data.size() < 800000;
+      }
+    }
+
+    // Answers to questions, sent in small batches, for per-question statistics. Write-once; only admins read.
+    match /qlog/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'at', 'lang', 'items'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.lang in ['bn', 'en']
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.items.size() <= 100;
+      allow read: if isAdmin();
+    }
+
+    // "Something is wrong with this question" reports. Learners create; admins read and mark them done.
+    match /reports/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'at', 'lang', 'qid', 'levelId', 'kind', 'note', 'prompt', 'options', 'status'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.kind in ['wrong', 'unclear', 'typo', 'other']
+        && request.resource.data.qid is string && request.resource.data.qid.size() <= 40
+        && request.resource.data.note is string && request.resource.data.note.size() <= 600
+        && request.resource.data.prompt is string && request.resource.data.prompt.size() <= 2000
+        && request.resource.data.options is list && request.resource.data.options.size() <= 8
+        && request.resource.data.status == 'open';
+      allow read: if isAdmin();
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+    }
+
+    match /admins/{uid} {
+      allow read: if owner(uid);
+    }
+  }
+}
