@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { allBanks, levelList } from './levels/all';
-import { levelFacts, noteFacts, timelineFacts, type GenLevel } from './meta.build';
+import { ddiaFacts, levelFacts, noteFacts, timelineFacts, type GenLevel } from './meta.build';
+import { DDIA_CHAPTERS } from './notes/ddia.gen';
 import { LEVELS, NOTES, TIMELINES } from './meta.gen';
 import { notes } from './notes/all';
 import { timelines } from '@/features/deep/timelines';
@@ -18,6 +19,9 @@ describe('generated content facts (meta.gen.ts)', () => {
   it('match the notes and timelines', () => {
     expect(NOTES, STALE).toEqual(noteFacts(notes));
     expect(TIMELINES, STALE).toEqual(timelineFacts(timelines));
+  });
+  it('match the notes, chapter by chapter of DDIA (notes/ddia.gen.ts)', () => {
+    expect(DDIA_CHAPTERS, 'src/content/notes/ddia.gen.ts is out of date: run `npm run gen:meta`').toEqual(ddiaFacts(notes));
   });
   it('every note can be loaded on its own', () => {
     expect([...noteIds].sort()).toEqual(notes.map((n) => n.id).sort());

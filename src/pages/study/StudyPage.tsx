@@ -24,7 +24,10 @@ export function StudyPage() {
           <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with diagrams and self-check questions. Works offline too.')}</p>
         </div>
         <section className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-5">
-          <h2 className="m-0 font-display text-xl font-bold">{tr('আমাদের নোট · দুই বই মিলিয়ে', 'Our notes · both books combined')}</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="m-0 font-display text-xl font-bold">{tr('আমাদের নোট · দুই বই মিলিয়ে', 'Our notes · both books combined')}</h2>
+            <Link to="/reading" className="text-sm font-bold text-route-deep">{tr('DDIA-র অধ্যায় ধরে দেখুন →', 'See them by DDIA chapter →')}</Link>
+          </div>
           <p className="m-0 text-sm text-ink-soft">{tr('প্রতিটা topic-এ Alex Xu আর DDIA দুই দিক, নিজের ভাষায় আর ParcelGo-র উদাহরণে। বইয়ের ছবি আর পুরো ব্যাখ্যা আপনার নিজের কপিতে এক click-এ।', 'Each topic from both Alex Xu and DDIA, in our words with ParcelGo examples. The book\'s figures and full story are one click away in your own copy.')}</p>
           <div className="grid gap-2 sm:grid-cols-2">{notes.map((n) => <Link key={n.id} to="/notes/$noteId" params={{ noteId: n.id }} className="btn-press flex flex-col rounded-xl border-2 border-ink bg-surface-sunk p-3 text-ink no-underline shadow-[0_3px_0_var(--color-shadow)]"><span className="font-display font-bold">{n.title}</span><span className="text-xs text-muted">{n.gist}</span></Link>)}</div>
         </section>

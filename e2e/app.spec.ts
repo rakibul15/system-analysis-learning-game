@@ -133,3 +133,24 @@ test('menu switches are instant; only going into a level animates', async ({ pag
   await expect(page.getByRole('button', { name: 'শুরু করুন' })).toBeVisible();
   expect(await transitions()).toBe(1);
 });
+
+test('DDIA by chapter: each chapter shows which of our notes treat it, and the figures to look at', async ({ page }) => {
+  await seed(page);
+  await page.goto('./#/reading');
+  const ch7 = page.getByRole('article').filter({ hasText: 'Sharding' }).first();
+  await expect(ch7).toContainText('আমাদের ১টা নোট');
+  await ch7.getByRole('button', { name: /Sharding/ }).click();
+  const note = ch7.getByRole('link', { name: /Sharding: data ভাগ করে/ });
+  await expect(note).toBeVisible();
+  await ch7.getByText(/figure দেখুন/).click();
+  await expect(ch7.getByRole('button', { name: /^Fig 7-2/ })).toBeVisible();
+  await note.click();
+  await expect(page).toHaveURL(/#\/notes\/sharding$/);
+
+  // a chapter none of our notes treats yet says so
+  await page.goto('./#/reading');
+  const ch1 = page.getByRole('article').filter({ hasText: 'Trade-Offs in Data Systems Architecture' });
+  const toggle = ch1.getByRole('button', { name: /Trade-Offs/ });
+  if (await toggle.getAttribute('aria-expanded') !== 'true') await toggle.click(); // the first unread chapter starts open
+  await expect(ch1).toContainText('এখনো লেখা হয়নি');
+});

@@ -9,6 +9,7 @@ import { createServer } from 'vite';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const lang = process.argv[2];
 const target = `${root}src/content/meta.gen.ts`;
+const ddiaTarget = `${root}src/content/notes/ddia.gen.ts`;
 // the content imports meta.ts, which imports this file: start from an empty one the first time
 if (!existsSync(target)) {
   writeFileSync(target, "import type { GenLevel, GenNote, GenTimeline } from './meta.build';\nexport const LEVELS: GenLevel[] = [];\nexport const NOTES: GenNote[] = [];\nexport const TIMELINES: GenTimeline[] = [];\n");
@@ -40,12 +41,16 @@ if (lang) {
     if (r.status !== 0) { process.stderr.write(r.stderr); process.exit(1); }
     facts[l] = JSON.parse(r.stdout);
   }
-  const text = await withContent(async (load) => {
+  const [text, ddia] = await withContent(async (load) => {
     const build = await load('/src/content/meta.build.ts');
     const notes = await load('/src/content/notes/all.ts');
     const deep = await load('/src/features/deep/timelines.ts');
-    return build.renderMeta(build.mergeLangs(facts.bn, facts.en), build.noteFacts(notes.notes), build.timelineFacts(deep.timelines));
+    return [
+      build.renderMeta(build.mergeLangs(facts.bn, facts.en), build.noteFacts(notes.notes), build.timelineFacts(deep.timelines)),
+      build.renderDdia(build.ddiaFacts(notes.notes)),
+    ];
   });
   writeFileSync(target, text);
-  console.log(`wrote src/content/meta.gen.ts (${(text.length / 1024).toFixed(1)} KB)`);
+  writeFileSync(ddiaTarget, ddia);
+  console.log(`wrote src/content/meta.gen.ts (${(text.length / 1024).toFixed(1)} KB) and src/content/notes/ddia.gen.ts (${(ddia.length / 1024).toFixed(1)} KB)`);
 }

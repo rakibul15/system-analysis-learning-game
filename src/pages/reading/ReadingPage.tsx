@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { BOOK, chapters, PART_TITLES, TOTAL_WEEKS, type Chapter, type Practice } from '@/features/reading/ddia';
 import { incidents } from '@/features/incident/incidents';
-import { levelMeta } from '@/content/meta';
+import { levelMeta, notesMetaById } from '@/content/meta';
+import { DDIA_CHAPTERS } from '@/content/notes/ddia.gen';
 import { useProgress, type ReadingRecord } from '@/entities/progress/store';
 import { bn } from '@/shared/lib/bn';
 import { tr } from '@/shared/lib/i18n';
@@ -82,7 +83,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
         <span className={`grid h-10 w-10 flex-none place-items-center rounded-full border-2 border-ink font-display text-lg font-extrabold ${status === 2 ? 'bg-route text-white' : 'bg-surface'}`}>{status === 2 ? '✓' : bn(c.n)}</span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-[17px] font-bold leading-snug">{c.title}</span>
-          <span className="block text-xs text-muted">{tr(`পাতা ${bn(c.pages[0])}–${bn(c.pages[1])} · ~${bn(c.weeks)} সপ্তাহ`, `Pages ${c.pages[0]}–${c.pages[1]} · ~${c.weeks} week${c.weeks > 1 ? 's' : ''}`)} · {STATUS[status]}{rec?.notes?.trim() ? tr(' · নোট আছে', ' · has notes') : ''}</span>
+          <span className="block text-xs text-muted">{tr(`পাতা ${bn(c.pages[0])}–${bn(c.pages[1])} · ~${bn(c.weeks)} সপ্তাহ`, `Pages ${c.pages[0]}–${c.pages[1]} · ~${c.weeks} week${c.weeks > 1 ? 's' : ''}`)} · {STATUS[status]}{ours(c.n) ? tr(` · আমাদের ${bn(ours(c.n))}টা নোট`, ` · ${ours(c.n)} of our notes`) : ''}{rec?.notes?.trim() ? tr(' · আপনার নোট আছে', ' · your notes') : ''}</span>
         </span>
         <span aria-hidden="true" className="text-xl">{open ? '−' : '+'}</span>
       </button>
@@ -95,6 +96,7 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
             ))}
           </div>
           <button type="button" onClick={() => { openBook(ddiaChapterRef(c.n, c.pages)); if (status === 0) setReading(c.id, { status: 1 }); }} className="btn-press flex min-h-12 w-fit cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-violet-soft px-4 font-bold shadow-[0_3px_0_var(--color-shadow)]">📖 {tr(`বইয়ে খুলুন · পাতা ${bn(c.pages[0], { grouping: false })}`, `Open in the book · page ${c.pages[0]}`)}</button>
+          <OurNotes c={c} />
           <div>
             <h3 className="m-0 text-sm font-bold">{tr('পড়ার সময় খুঁজুন', 'Look for while reading')}</h3>
             <ul className="m-0 mt-1 list-disc pl-5 text-[15px]">{c.look.map((q) => <li key={q}>{q}</li>)}</ul>
@@ -114,5 +116,59 @@ function ChapterCard({ c, rec, open, onToggle }: { c: Chapter; rec: ReadingRecor
         </div>
       )}
     </article>
+  );
+}
+
+/** How many of our notes treat a DDIA chapter. */
+const ours = (n: number) => DDIA_CHAPTERS.find((d) => d.ch === n)?.notes.length ?? 0;
+const pages = (p?: [number, number]) => (p ? tr(`পাতা ${bn(p[0], { grouping: false })}–${bn(p[1], { grouping: false })}`, `pages ${p[0]}–${p[1]}`) : '');
+
+/** This chapter in our notes: which notes treat it and which of its sections, and the figures they point to in your copy. */
+function OurNotes({ c }: { c: Chapter }) {
+  const openBook = useReader((s) => s.open);
+  const d = DDIA_CHAPTERS.find((x) => x.ch === c.n);
+  if (!d || (!d.notes.length && !d.figs.length)) {
+    return (
+      <p className="m-0 rounded-xl border-2 border-dashed border-line-strong px-3 py-2 text-sm text-muted">
+        {tr('এই অধ্যায়ের নোট এখনো লেখা হয়নি, আসছে। ততক্ষণ নিচের প্রশ্নগুলো ধরে পড়ুন।', 'Our notes on this chapter are not written yet; they are coming. Until then, read with the questions below.')}
+      </p>
+    );
+  }
+  return (
+    <div>
+      <h3 className="m-0 text-sm font-bold">{tr('আমাদের নোটে এই অধ্যায়', 'This chapter in our notes')}</h3>
+      <ul className="m-0 mt-1 flex list-none flex-col gap-2 p-0">
+        {d.notes.map((n) => (
+          <li key={n.id}>
+            <Link to="/notes/$noteId" params={{ noteId: n.id }} className="btn-press flex flex-col gap-1 rounded-xl border-2 border-ink bg-surface-sunk p-3 text-ink no-underline shadow-[0_3px_0_var(--color-shadow)]">
+              <span className="font-bold">📝 {notesMetaById[n.id]?.title ?? n.id}</span>
+              <span className="flex flex-wrap gap-1.5">
+                {n.sections.map((x) => (
+                  <span key={`${x.s ?? ''}${x.p?.[0] ?? ''}`} className="rounded-md bg-surface-2 px-2 py-0.5 text-xs text-ink-soft">
+                    {x.s ?? tr('পুরো অধ্যায়', 'The whole chapter')}{x.p ? ` · ${pages(x.p)}` : ''}
+                  </span>
+                ))}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {d.figs.length > 0 && (
+        <details className="mt-2">
+          <summary className="min-h-10 cursor-pointer py-2 text-sm font-bold">{tr(`এই অধ্যায়ের ${bn(d.figs.length)}টা figure দেখুন, নিজের বইয়ে`, `${d.figs.length} figures to look at in your copy`)}</summary>
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+            {d.figs.map((f) => (
+              <li key={f.n} className="flex items-start gap-2">
+                <button type="button" onClick={() => openBook({ book: 'ddia2', chapter: c.n, at: f.page, label: `Figure ${f.n}` })}
+                  className="min-h-9 flex-none cursor-pointer rounded-lg border-2 border-ink bg-violet-soft px-2 text-xs font-bold text-ink">
+                  Fig {f.n} · {tr(`পাতা ${bn(f.page, { grouping: false })}`, `p. ${f.page}`)}
+                </button>
+                <span className="pt-1.5 text-sm">{f.look}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
   );
 }
