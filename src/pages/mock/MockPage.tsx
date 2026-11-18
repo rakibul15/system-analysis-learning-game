@@ -47,19 +47,19 @@ export function MockPage() {
           </div>
           <ol className="m-0 grid list-none gap-2 p-0 sm:grid-cols-5">
             {mockPhases.map((p, i) => (
-              <li key={p.id} className="rounded-2xl border-2 border-ink bg-white p-3">
+              <li key={p.id} className="rounded-2xl border-2 border-ink bg-surface p-3">
                 <div className="text-xs font-bold text-muted">{tr('ধাপ', 'Step')} {bn(i + 1)}</div>
                 <div className="font-display font-bold">{p.title}</div>
                 <div className="font-mono text-sm">{bn(p.minutes)} {tr('মিনিট', 'min')}</div>
               </li>
             ))}
           </ol>
-          <button type="button" onClick={random} className="btn-press min-h-[58px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold shadow-[0_5px_0_#16252D]">{tr('অজানা প্রশ্ন দিয়ে শুরু করুন', 'Start with a surprise question')}</button>
-          <details className="rounded-2xl border-2 border-ink bg-white p-4">
+          <button type="button" onClick={random} className="btn-press min-h-[58px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-[22px] font-extrabold shadow-[0_5px_0_var(--color-shadow)]">{tr('অজানা প্রশ্ন দিয়ে শুরু করুন', 'Start with a surprise question')}</button>
+          <details className="rounded-2xl border-2 border-ink bg-surface p-4">
             <summary className="cursor-pointer font-bold">{tr('নিজে প্রশ্ন বাছবেন?', 'Pick the question yourself?')}</summary>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {designPrompts.map((p) => (
-                <button key={p.id} type="button" onClick={() => start(p)} className="cursor-pointer rounded-xl border-2 border-ink bg-white p-3 text-left font-[inherit]">
+                <button key={p.id} type="button" onClick={() => start(p)} className="cursor-pointer rounded-xl border-2 border-ink bg-surface p-3 text-left font-[inherit]">
                   <span className="block font-bold">{p.title}</span>
                   <span className="block text-sm text-muted">{p.prompt}</span>
                 </button>
@@ -67,7 +67,7 @@ export function MockPage() {
             </div>
           </details>
           {history.length > 0 && (
-            <section className="rounded-2xl border-2 border-ink bg-white p-4">
+            <section className="rounded-2xl border-2 border-ink bg-surface p-4">
               <h2 className="m-0 mb-2 font-display text-lg font-bold">{tr('আগের mock', 'Earlier mocks')}</h2>
               <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
                 {[...history].reverse().slice(0, 8).map((h, i) => (
@@ -96,7 +96,7 @@ export function MockPage() {
             <h1 className="m-0 font-display text-[28px] font-extrabold leading-tight">{prompt.title}</h1>
             <p className="m-0 mt-1 text-[17px]">{prompt.prompt}</p>
           </div>
-          <div className="rounded-2xl border-[3px] border-ink bg-white px-4 py-2 text-right">
+          <div className="rounded-2xl border-[3px] border-ink bg-surface px-4 py-2 text-right">
             <div className="text-xs font-semibold text-muted">{tr('মোট', 'Total')}</div>
             <div className="font-mono text-2xl font-bold">{mmss(elapsed)} / {bn(TOTAL_MIN)}:{bn('00')}</div>
           </div>
@@ -104,18 +104,18 @@ export function MockPage() {
 
         <ol className="m-0 flex list-none gap-1.5 p-0" aria-label={tr('ধাপ', 'Phases')}>
           {mockPhases.map((p, i) => (
-            <li key={p.id} className={`h-2.5 flex-1 rounded-full border-2 border-ink ${i < phase ? 'bg-route' : i === phase ? 'bg-parcel' : 'bg-white'}`} title={p.title} />
+            <li key={p.id} className={`h-2.5 flex-1 rounded-full border-2 border-ink ${i < phase ? 'bg-route' : i === phase ? 'bg-parcel' : 'bg-surface'}`} title={p.title} />
           ))}
         </ol>
 
         {!scoring ? (
-          <section key={ph.id} className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-[0_5px_0_#16252D]">
+          <section key={ph.id} className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="m-0 font-display text-2xl font-extrabold">{tr('ধাপ', 'Step')} {bn(phase + 1)} · {ph.title}</h2>
               <div role="timer" className={`rounded-xl border-[3px] border-ink px-3 py-1 font-mono text-2xl font-bold ${phaseLeft < 0 ? 'bg-coral text-white' : phaseLeft < 60 ? 'bg-parcel' : 'bg-parcel-soft'}`}>{phaseLeft < 0 ? '+' : ''}{mmss(phaseLeft)}</div>
             </div>
             <div className="rounded-2xl bg-ink p-4 text-white">
-              <div className="mb-2 text-xs font-bold uppercase tracking-wider text-[#C9D6DC]">Interviewer</div>
+              <div className="mb-2 text-xs font-bold uppercase tracking-wider text-on-night-soft">Interviewer</div>
               <ul className="m-0 flex flex-col gap-2 pl-5 text-[17px]">
                 {asks.map((a) => <li key={a}>{a}</li>)}
               </ul>
@@ -124,19 +124,19 @@ export function MockPage() {
               {tr('আপনার মূল কথা', 'Your key points')}
               <textarea value={notes[phase]} onChange={(e) => setNotes(notes.map((n, i) => (i === phase ? e.target.value : n)))} rows={7} className="rounded-xl border-2 border-ink p-3 font-[inherit] text-base font-normal" />
             </label>
-            <button type="button" onClick={next} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-xl font-extrabold shadow-[0_5px_0_#16252D]">
+            <button type="button" onClick={next} className="btn-press min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-xl font-extrabold shadow-[0_5px_0_var(--color-shadow)]">
               {phase < mockPhases.length - 1 ? `${tr('পরের ধাপ', 'Next')}: ${mockPhases[phase + 1]!.title} →` : tr('শেষ, নম্বর দিই →', 'Done, score it →')}
             </button>
           </section>
         ) : (
-          <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-[0_5px_0_#16252D]">
+          <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]">
             <h2 className="m-0 font-display text-2xl font-extrabold">{tr('নিজে নম্বর দিন', 'Score yourself')}</h2>
             <p className="m-0 text-ink-soft">{tr('মোট সময়', 'Total time')} {mmss(elapsed)}{tr('। সৎভাবে টিক দিন; এই নম্বর আপনার interview readiness-এ যাবে।', '. Tick honestly; this score feeds your interview readiness.')}</p>
             <ul className="m-0 flex list-none flex-col gap-2 p-0">
               {RUBRIC.map((r, i) => (
                 <li key={r}>
                   <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border-2 border-ink px-3">
-                    <input type="checkbox" checked={checks[i]} onChange={() => setChecks(checks.map((c, j) => (j === i ? !c : c)))} className="h-5 w-5 accent-[#0B8A7A]" />
+                    <input type="checkbox" checked={checks[i]} onChange={() => setChecks(checks.map((c, j) => (j === i ? !c : c)))} className="h-5 w-5 accent-route" />
                     {r}
                   </label>
                 </li>
@@ -148,10 +148,10 @@ export function MockPage() {
             </details>
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-mono text-2xl font-bold">{bn(score)}/{bn(RUBRIC.length)}</span>
-              <button type="button" disabled={saved} onClick={() => { record({ promptId: `mock:${prompt.id}`, score, max: RUBRIC.length, minutes: Math.round(elapsed / 60), notes: mockPhases.map((p, i) => `${p.title}: ${notes[i]}`).join('\n'), at: new Date().toISOString() }); setSaved(true); }} className="btn-press min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_4px_0_#16252D] disabled:opacity-50">
+              <button type="button" disabled={saved} onClick={() => { record({ promptId: `mock:${prompt.id}`, score, max: RUBRIC.length, minutes: Math.round(elapsed / 60), notes: mockPhases.map((p, i) => `${p.title}: ${notes[i]}`).join('\n'), at: new Date().toISOString() }); setSaved(true); }} className="btn-press min-h-[50px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_4px_0_var(--color-shadow)] disabled:opacity-50">
                 {saved ? tr('রাখা হয়েছে ✓', 'Saved ✓') : tr('রেখে দিন', 'Save')}
               </button>
-              <button type="button" onClick={() => setPrompt(null)} className="min-h-[50px] cursor-pointer rounded-2xl border-2 border-ink bg-white px-5 font-bold">{tr('আরেকটা mock', 'Another mock')}</button>
+              <button type="button" onClick={() => setPrompt(null)} className="min-h-[50px] cursor-pointer rounded-2xl border-2 border-ink bg-surface px-5 font-bold">{tr('আরেকটা mock', 'Another mock')}</button>
             </div>
           </section>
         )}

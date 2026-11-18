@@ -18,7 +18,7 @@ export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', '
         <Link key={n.id} to="/notes/$noteId" params={{ noteId: n.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-route-soft px-3 py-1.5 font-semibold text-ink no-underline">📝 {tr('আমাদের নোট:', 'Our notes:')} {n.title} →</Link>
       ))}
       {level !== undefined && timelinesForLevel(level).map((t) => (
-        <Link key={t.id} to="/deep/$deepId" params={{ deepId: t.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-[#EDE6F8] px-3 py-1.5 font-semibold text-ink no-underline">🔍 {tr('গভীরে, ধাপে ধাপে:', 'Deeper, step by step:')} {t.title} →</Link>
+        <Link key={t.id} to="/deep/$deepId" params={{ deepId: t.id }} className="mb-2 flex min-h-11 items-center gap-2 rounded-xl border-2 border-ink bg-violet-soft px-3 py-1.5 font-semibold text-ink no-underline">🔍 {tr('গভীরে, ধাপে ধাপে:', 'Deeper, step by step:')} {t.title} →</Link>
       ))}
       {title && <p className="m-0 text-sm font-bold text-route-deep">📖 {title}</p>}
       <ul className="m-0 mt-1.5 flex list-none flex-col gap-1.5 p-0">
@@ -29,8 +29,8 @@ export function BookRefs({ refs, title = tr('বইয়ে পড়ুন', '
           return (
             <li key={i}>
               <button type="button" onClick={() => open(r)} title={BOOKS[r.book].title}
-                className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border-2 border-ink bg-white px-3 py-1.5 text-left font-[inherit] hover:bg-[#F7F8F3]">
-                <span className={`flex-none rounded-md px-1.5 py-0.5 text-xs font-bold ${r.book === 'ddia2' ? 'bg-[#EDE6F8] text-[#4B2F7A]' : 'bg-parcel-soft text-[#7A4D00]'}`}>{book}</span>
+                className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-xl border-2 border-ink bg-surface px-3 py-1.5 text-left font-[inherit] hover:bg-surface-sunk">
+                <span className={`flex-none rounded-md px-1.5 py-0.5 text-xs font-bold ${r.book === 'ddia2' ? 'bg-violet-soft text-violet-deep' : 'bg-parcel-soft text-parcel-deep'}`}>{book}</span>
                 <span className="min-w-0 flex-1 text-sm font-semibold">{where}</span>
                 {r.pages && <span className="flex-none font-mono text-xs text-muted">{tr('পাতা', 'p.')} {bn(r.pages[0], { grouping: false })}{r.pages[1] !== r.pages[0] ? `–${bn(r.pages[1], { grouping: false })}` : ''}</span>}
                 <span aria-hidden="true" className="flex-none text-sm">{have ? '→' : '+'}</span>

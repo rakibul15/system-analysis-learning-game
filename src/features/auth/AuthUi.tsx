@@ -22,10 +22,10 @@ export function AuthButton() {
   const { user, status, sync } = useAuth();
   const [busy, setBusy] = useState(false);
   if (user) {
-    const dot = sync === 'error' ? '#E0483E' : sync === 'syncing' ? '#FFC02E' : '#0B8A7A';
+    const dot = sync === 'error' ? 'var(--color-coral)' : sync === 'syncing' ? 'var(--color-parcel)' : 'var(--color-route)';
     return (
       <Link to="/profile" title={`${user.name} · ${sync === 'error' ? tr('Sync হয়নি', 'Not synced') : sync === 'syncing' ? tr('Sync হচ্ছে…', 'Syncing…') : tr('Cloud-এ সংরক্ষিত', 'Saved to the cloud')}`}
-        className="relative flex h-10 items-center rounded-xl border-[2.5px] border-ink bg-white px-1.5 no-underline">
+        className="relative flex h-10 items-center rounded-xl border-[2.5px] border-ink bg-surface px-1.5 no-underline">
         <Avatar photo={user.photo} name={user.name} />
         <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white" style={{ background: dot }} aria-hidden="true" />
       </Link>
@@ -34,7 +34,7 @@ export function AuthButton() {
   return (
     <button type="button" disabled={busy || status === 'loading'}
       onClick={async () => { setBusy(true); await signInWithGoogle(); setBusy(false); }}
-      className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-white px-3 font-bold disabled:cursor-wait disabled:opacity-60">
+      className="flex h-10 cursor-pointer items-center gap-2 rounded-xl border-[2.5px] border-ink bg-surface px-3 font-bold disabled:cursor-wait disabled:opacity-60">
       <GoogleMark /> {busy || status === 'loading' ? tr('অপেক্ষা…', 'Wait…') : tr('Login', 'Sign in')}
     </button>
   );
@@ -45,7 +45,7 @@ export function AccountCard() {
   const { user, sync, lastSyncedAt, error } = useAuth();
   const [busy, setBusy] = useState(false);
   return (
-    <section className="flex flex-col gap-3 rounded-[24px] border-[3px] border-ink bg-white p-6">
+    <section className="flex flex-col gap-3 rounded-[24px] border-[3px] border-ink bg-surface p-6">
       <h2 className="m-0 font-display text-xl font-bold">{tr('Account', 'Account')}</h2>
       {user ? (
         <>
@@ -62,8 +62,8 @@ export function AccountCard() {
             {sync === 'error' && <span className="text-coral-deep">{tr('Sync হয়নি। Internet দেখে আবার চেষ্টা করুন।', 'Sync failed. Check the connection and try again.')}{error ? ` (${error})` : ''}</span>}
           </p>
           <div className="flex flex-wrap gap-3">
-            <button type="button" onClick={() => void syncProgressNow()} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('এখনই sync করুন', 'Sync now')}</button>
-            <button type="button" disabled={busy} onClick={async () => { setBusy(true); await signOutUser(); setBusy(false); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('Logout', 'Sign out')}</button>
+            <button type="button" onClick={() => void syncProgressNow()} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('এখনই sync করুন', 'Sync now')}</button>
+            <button type="button" disabled={busy} onClick={async () => { setBusy(true); await signOutUser(); setBusy(false); }} className="min-h-12 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('Logout', 'Sign out')}</button>
           </div>
           <p className="m-0 text-xs text-muted">{tr('Logout করলে progress এই browser থেকে সরে যায়, আপনার account-এ (cloud-এ) থেকে যায়। আবার login করলেই ফিরে আসবে।', 'Signing out removes the progress from this browser; it stays in your account in the cloud and comes back when you sign in.')}</p>
           <p className="m-0 text-xs text-muted">{tr('ParcelGo-র admin আপনার নাম, email আর progress-এর সারাংশ (কয়টা level, শেষ কবে খেলেছেন) দেখতে পান, যোগাযোগ করতে আর হারানো progress খুঁজে দিতে। প্রশ্নগুলো ভালো করতে কোন প্রশ্নে কোন উত্তর বাছলেন সেটাও আপনার account-এর সাথে যায়। পুরো progress শুধু আপনিই দেখেন।', 'The ParcelGo admin can see your name, email and a progress summary (how many levels, when you last played), to contact you and to help find lost progress. Which option you pick on each question is also sent with your account, to improve the questions. Your full progress is visible only to you.')}</p>

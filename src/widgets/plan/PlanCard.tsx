@@ -24,7 +24,7 @@ function taskText(t: PlanTask): { title: string; note: string } {
 }
 
 function TaskLink({ t, children }: { t: PlanTask; children: React.ReactNode }) {
-  const cls = 'flex min-h-14 flex-1 items-center gap-3 rounded-xl border-2 border-ink bg-white px-3 py-2 text-ink no-underline hover:bg-[#F7F8F3]';
+  const cls = 'flex min-h-14 flex-1 items-center gap-3 rounded-xl border-2 border-ink bg-surface px-3 py-2 text-ink no-underline hover:bg-surface-sunk';
   if (t.kind === 'level' || t.kind === 'weak') return <Link to="/level/$levelId" params={{ levelId: String(t.levelId) }} className={cls}>{children}</Link>;
   if (t.kind === 'concept') return t.concept!.note
     ? <Link to="/notes/$noteId" params={{ noteId: t.concept!.note }} className={cls}>{children}</Link>
@@ -53,15 +53,15 @@ export function PlanCard() {
   const editor = (
     <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); setPlan(date || null, minutes); setEditing(false); }}>
       <label className="flex flex-col gap-1 text-sm font-semibold">{tr('Interview-এর তারিখ', 'Interview date')}
-        <input type="date" value={date} min={dayKey()} onChange={(e) => setDate(e.target.value)} className="min-h-11 rounded-xl border-2 border-ink bg-white px-3 font-[inherit]" />
+        <input type="date" value={date} min={dayKey()} onChange={(e) => setDate(e.target.value)} className="min-h-11 rounded-xl border-2 border-ink bg-surface px-3 font-[inherit]" />
       </label>
       <label className="flex flex-col gap-1 text-sm font-semibold">{tr('প্রতিদিন কত সময়', 'Time per day')}
-        <select value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className="min-h-11 rounded-xl border-2 border-ink bg-white px-3 font-[inherit]">
+        <select value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} className="min-h-11 rounded-xl border-2 border-ink bg-surface px-3 font-[inherit]">
           {MINUTES.map((m) => <option key={m} value={m}>{tr(`${bn(m)} মিনিট`, `${m} minutes`)}</option>)}
         </select>
       </label>
-      <button type="submit" className="btn-press min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-parcel px-5 font-bold shadow-[0_3px_0_#16252D]">{tr('Plan বানান', 'Make the plan')}</button>
-      {hasDate && <button type="button" onClick={() => { setPlan(null, minutes); setDate(''); setEditing(false); }} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-semibold">{tr('তারিখ মুছুন', 'Clear date')}</button>}
+      <button type="submit" className="btn-press min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink bg-parcel px-5 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('Plan বানান', 'Make the plan')}</button>
+      {hasDate && <button type="button" onClick={() => { setPlan(null, minutes); setDate(''); setEditing(false); }} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-semibold">{tr('তারিখ মুছুন', 'Clear date')}</button>}
     </form>
   );
 
@@ -88,8 +88,8 @@ export function PlanCard() {
         </div>
         {!editing && (
           <div className="flex items-center gap-2">
-            {total > 0 && <span className="rounded-full border-2 border-ink bg-white px-3 py-1 font-mono text-sm font-bold">{bn(done)}/{bn(total)} · ~{bn(totalMin)} {tr('মি', 'min')}</span>}
-            <button type="button" onClick={() => setEditing(true)} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-white px-3 text-sm font-semibold">{hasDate ? tr('বদলান', 'Change') : tr('তারিখ দিন', 'Set date')}</button>
+            {total > 0 && <span className="rounded-full border-2 border-ink bg-surface px-3 py-1 font-mono text-sm font-bold">{bn(done)}/{bn(total)} · ~{bn(totalMin)} {tr('মি', 'min')}</span>}
+            <button type="button" onClick={() => setEditing(true)} className="min-h-10 cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 text-sm font-semibold">{hasDate ? tr('বদলান', 'Change') : tr('তারিখ দিন', 'Set date')}</button>
           </div>
         )}
       </div>
@@ -99,14 +99,14 @@ export function PlanCard() {
 
       {total > 0 && (
         <>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-white" aria-hidden="true"><div className="h-full rounded-full bg-route transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} /></div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface" aria-hidden="true"><div className="h-full rounded-full bg-route transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} /></div>
           <ul className="m-0 mt-3 grid list-none gap-2 p-0 md:grid-cols-2">
             {plan.tasks.map((t) => {
               const { title, note } = taskText(t);
               return (
                 <li key={t.id} className="flex min-w-0">
                   <TaskLink t={t}>
-                    <span aria-hidden="true" className={`grid h-7 w-7 flex-none place-items-center rounded-full border-2 border-ink text-sm font-bold ${t.done ? 'bg-route text-white' : 'bg-white'}`}>{t.done ? '✓' : ''}</span>
+                    <span aria-hidden="true" className={`grid h-7 w-7 flex-none place-items-center rounded-full border-2 border-ink text-sm font-bold ${t.done ? 'bg-route text-white' : 'bg-surface'}`}>{t.done ? '✓' : ''}</span>
                     <span className="min-w-0 flex-1">
                       <span className={`block truncate font-bold ${t.done ? 'text-muted line-through' : ''}`}>{title}</span>
                       <span className="block truncate text-xs text-muted">{note} · {bn(t.minutes)} {tr('মি', 'min')}</span>

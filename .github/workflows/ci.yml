@@ -23,6 +23,8 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - name: Screens use colour tokens, not raw colours
+        run: npm run check:colors
       - name: Generated content facts are up to date
         run: npm run gen:meta && git diff --exit-code src/content/meta.gen.ts
       - run: npm run build

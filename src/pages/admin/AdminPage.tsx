@@ -26,7 +26,7 @@ const FLAG: Record<Flag, [string, string]> = {
   easy: [tr('খুব সহজ', 'Too easy'), 'bg-route-soft text-route-deep'],
   hard: [tr('খুব কঠিন / উত্তর ভুল?', 'Too hard / wrong key?'), 'bg-coral-soft text-coral-deep'],
   'sure-wrong': [tr('নিশ্চিত হয়েও ভুল', 'Sure but wrong'), 'bg-coral-soft text-coral-deep'],
-  'one-trap': [tr('একটা ফাঁদেই সবাই', 'One trap takes all'), 'bg-parcel-soft text-[#7A4D00]'],
+  'one-trap': [tr('একটা ফাঁদেই সবাই', 'One trap takes all'), 'bg-parcel-soft text-parcel-deep'],
   'dead-option': [tr('কেউ বাছে না এমন অপশন', 'An option nobody picks'), 'bg-locked text-locked-ink'],
 };
 const KIND: Record<ReportKind, string> = {
@@ -34,7 +34,7 @@ const KIND: Record<ReportKind, string> = {
 };
 const STATUS: Record<ReportStatus, [string, string]> = {
   open: [tr('খোলা', 'Open'), 'bg-coral-soft text-coral-deep'],
-  working: [tr('দেখছি', 'Working on it'), 'bg-parcel-soft text-[#7A4D00]'],
+  working: [tr('দেখছি', 'Working on it'), 'bg-parcel-soft text-parcel-deep'],
   fixed: [tr('ঠিক হয়েছে', 'Fixed'), 'bg-route-soft text-route-deep'],
   wontfix: [tr('বাদ', "Won't fix"), 'bg-locked text-locked-ink'],
 };
@@ -72,7 +72,7 @@ export function AdminPage() {
           <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Report আর হিসাব দেখে প্রশ্ন ঠিক করার জায়গা। ভাঙা প্রশ্ন সাথে সাথে বন্ধ করুন, GitHub issue খুলুন, PR-এ ঠিক করুন, তারপর আবার চালু করুন।', 'Where questions get fixed. Turn a broken question off at once, open a GitHub issue, fix it in a PR, then turn it back on.')}</p>
         </header>
         {state.kind === 'loading' && <PageLoading />}
-        {state.kind === 'denied' && <p className="m-0 rounded-2xl border-2 border-dashed border-[#9AA69F] p-5 font-semibold text-muted">{state.why}</p>}
+        {state.kind === 'denied' && <p className="m-0 rounded-2xl border-2 border-dashed border-line-strong p-5 font-semibold text-muted">{state.why}</p>}
         {state.kind === 'error' && <p className="m-0 rounded-2xl border-2 border-coral bg-coral-soft p-5 font-semibold" role="alert">{state.message}</p>}
         {state.kind === 'ready' && (
           <>
@@ -84,7 +84,7 @@ export function AdminPage() {
                 ['crashes', `Crash · ${bn(new Set(state.data.crashes.map(crashKey)).size)}`],
               ] as const).map(([k, l]) => (
                 <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-                  className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-white'}`}>{l}</button>
+                  className={`min-h-11 cursor-pointer rounded-xl border-[2.5px] border-ink px-4 font-bold ${tab === k ? 'bg-ink text-white' : 'bg-surface'}`}>{l}</button>
               ))}
             </div>
             {tab === 'reports' && (
@@ -113,17 +113,17 @@ function OffSwitch({ qid, off, toggleOff }: { qid: string; off: Disabled | undef
     return (
       <span className="inline-flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-bold text-white">{tr('বন্ধ', 'Off')}{off.reason ? ` · ${off.reason}` : ''}</span>
-        <button type="button" disabled={busy} onClick={() => void run(false)} className={`${btn} bg-white`}>{tr('আবার চালু করুন', 'Turn back on')}</button>
+        <button type="button" disabled={busy} onClick={() => void run(false)} className={`${btn} bg-surface`}>{tr('আবার চালু করুন', 'Turn back on')}</button>
       </span>
     );
   }
-  if (!asking) return <button type="button" onClick={() => setAsking(true)} className={`${btn} bg-white`}>⏻ {tr('প্রশ্নটা বন্ধ করুন', 'Turn this question off')}</button>;
+  if (!asking) return <button type="button" onClick={() => setAsking(true)} className={`${btn} bg-surface`}>⏻ {tr('প্রশ্নটা বন্ধ করুন', 'Turn this question off')}</button>;
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
       <label className="sr-only" htmlFor={`off-${qid}`}>{tr('কেন বন্ধ', 'Why')}</label>
       <input id={`off-${qid}`} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder={tr('কেন বন্ধ (নিজের জন্য)', 'Why (for yourself)')} className="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-ink px-3 font-[inherit]" />
       <button type="button" disabled={busy} onClick={() => void run(true)} className={`${btn} bg-coral text-white`}>{tr('বন্ধ করুন', 'Turn off')}</button>
-      <button type="button" onClick={() => setAsking(false)} className={`${btn} bg-white`}>{tr('থাক', 'Cancel')}</button>
+      <button type="button" onClick={() => setAsking(false)} className={`${btn} bg-surface`}>{tr('থাক', 'Cancel')}</button>
     </span>
   );
 }
@@ -145,7 +145,7 @@ function Reports({ data, onUpdated, toggleOff }: { data: AdminData; onUpdated: (
   const stats = useMemo(() => new Map(aggregate(data.batches, lang).map((s) => [s.qid, s])), [data.batches]);
   const who = useMemo(() => new Map(data.learners.map((l) => [l.uid, l])), [data.learners]);
 
-  const select = 'min-h-11 rounded-xl border-2 border-ink bg-white px-2 font-[inherit]';
+  const select = 'min-h-11 rounded-xl border-2 border-ink bg-surface px-2 font-[inherit]';
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
@@ -193,7 +193,7 @@ function ReportGroup({ qid, reports, stat, off, who, onUpdated, toggleOff }: { q
   });
 
   return (
-    <article className="rounded-[18px] border-[2.5px] border-ink bg-white p-4" aria-label={`${qid}`}>
+    <article className="rounded-[18px] border-[2.5px] border-ink bg-surface p-4" aria-label={`${qid}`}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className={`rounded-full px-2.5 py-0.5 font-bold ${STATUS[current][1]}`}>{STATUS[current][0]}</span>
         <span className="font-mono">{qid}</span>
@@ -206,7 +206,7 @@ function ReportGroup({ qid, reports, stat, off, who, onUpdated, toggleOff }: { q
       {stat && <p className="m-0 mt-1 text-sm text-muted">{tr(`${bn(stat.n)}টা উত্তর · ঠিক ${bn(pct(stat.right, stat.n))}% · নিশ্চিত-ভুল ${bn(pct(stat.sureWrong, stat.n))}%`, `${stat.n} answers · right ${pct(stat.right, stat.n)}% · sure but wrong ${pct(stat.sureWrong, stat.n)}%`)}</p>}
       <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
         {reports.map((r) => (
-          <li key={r.id} className="rounded-xl bg-[#F7F8F3] px-3 py-2 text-sm">
+          <li key={r.id} className="rounded-xl bg-surface-sunk px-3 py-2 text-sm">
             <span className="font-bold">{KIND[r.kind] ?? r.kind}</span>
             <span className="text-muted"> · {r.lang}{r.at ? ` · ${new Date(r.at.seconds * 1000).toLocaleDateString()}` : ''}{r.status !== current ? ` · ${STATUS[r.status][0]}` : ''}</span>
             {r.note && <span className="block">“{r.note}”</span>}
@@ -219,9 +219,9 @@ function ReportGroup({ qid, reports, stat, off, who, onUpdated, toggleOff }: { q
       </label>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {STATUSES.filter((s) => s !== current).map((s) => (
-          <button key={s} type="button" disabled={!!saving} onClick={() => void save(s)} className={`${btn} ${s === 'fixed' ? 'bg-route text-white' : 'bg-white'}`}>{saving === s ? '…' : `→ ${STATUS[s][0]}`}</button>
+          <button key={s} type="button" disabled={!!saving} onClick={() => void save(s)} className={`${btn} ${s === 'fixed' ? 'bg-route text-white' : 'bg-surface'}`}>{saving === s ? '…' : `→ ${STATUS[s][0]}`}</button>
         ))}
-        {note.trim() !== (first.adminNote ?? '') && <button type="button" disabled={!!saving} onClick={() => void save(current)} className={`${btn} bg-white`}>{tr('Note রাখুন', 'Save note')}</button>}
+        {note.trim() !== (first.adminNote ?? '') && <button type="button" disabled={!!saving} onClick={() => void save(current)} className={`${btn} bg-surface`}>{tr('Note রাখুন', 'Save note')}</button>}
         <a href={url} target="_blank" rel="noreferrer" className={`${btn} bg-parcel text-ink`}>{tr('GitHub issue খুলুন ↗', 'Open a GitHub issue ↗')}</a>
         <OffSwitch qid={qid} off={off} toggleOff={toggleOff} />
       </div>
@@ -267,7 +267,7 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 font-semibold">{tr('সাজান', 'Sort')}
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-xl border-2 border-ink bg-white px-2 font-[inherit]">
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-xl border-2 border-ink bg-surface px-2 font-[inherit]">
             <option value="hard">{tr('কঠিন আগে', 'Hardest first')}</option>
             <option value="easy">{tr('সহজ আগে', 'Easiest first')}</option>
             <option value="sure-wrong">{tr('নিশ্চিত-ভুল বেশি আগে', 'Most sure-but-wrong')}</option>
@@ -275,7 +275,7 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
           </select>
         </label>
         <label className="flex items-center gap-2 font-semibold">{tr('দেখান', 'Show')}
-          <select value={show} onChange={(e) => setShow(e.target.value as typeof show)} className="min-h-11 rounded-xl border-2 border-ink bg-white px-2 font-[inherit]">
+          <select value={show} onChange={(e) => setShow(e.target.value as typeof show)} className="min-h-11 rounded-xl border-2 border-ink bg-surface px-2 font-[inherit]">
             <option value="flagged">{tr('চিহ্নিত আর বন্ধ', 'Flagged and off')}</option>
             <option value="off">{tr('শুধু বন্ধ', 'Turned off only')}</option>
             <option value="all">{tr('সব', 'All')}</option>
@@ -284,12 +284,12 @@ function Questions({ data, toggleOff }: { data: AdminData; toggleOff: ToggleOff 
         <span className="text-sm text-muted">{tr(`${bn(stats.length)}টা প্রশ্ন; ${bn(MIN_ANSWERS)}টার কম উত্তর থাকলে বিচার হয় না; প্রশ্নের লেখা বদলালে আগের উত্তর আলাদা গোনা হয়`, `${stats.length} questions; under ${MIN_ANSWERS} answers are not judged; answers to an earlier wording are counted apart`)}</span>
       </div>
       {shown.length === 0 && <p className="m-0 text-muted">{tr('দেখানোর মতো কিছু নেই।', 'Nothing to show.')}</p>}
-      <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-white">
+      <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-surface">
         <table className="w-full min-w-[680px] border-collapse text-left text-sm">
-          <thead className="bg-[#F0F2EC]"><tr>{[tr('প্রশ্ন', 'Question'), tr('উত্তর', 'Answers'), tr('ঠিক', 'Right'), tr('নিশ্চিত-ভুল', 'Sure-wrong'), tr('চিহ্ন', 'Flags')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
+          <thead className="bg-surface-2"><tr>{[tr('প্রশ্ন', 'Question'), tr('উত্তর', 'Answers'), tr('ঠিক', 'Right'), tr('নিশ্চিত-ভুল', 'Sure-wrong'), tr('চিহ্ন', 'Flags')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
           <tbody>
             {shown.map(({ s, info, keys, flags, off }) => (
-              <tr key={s.qid} className="border-t border-[#D7DED1] align-top">
+              <tr key={s.qid} className="border-t border-line align-top">
                 <td className="max-w-[480px] px-3 py-2">
                   <button type="button" onClick={() => setOpen(open === s.qid ? null : s.qid)} aria-expanded={open === s.qid} className="cursor-pointer border-0 bg-transparent p-0 text-left font-[inherit] text-ink">
                     <span className="font-mono text-xs text-muted">{s.qid} · {levelLabel(s.qid)}{conceptLabel(s.qid) ? ` · ${conceptLabel(s.qid)}` : ''}</span>
@@ -361,23 +361,23 @@ function Learners({ data }: { data: AdminData }) {
       {data.learnersError && <p className="m-0 rounded-2xl border-2 border-coral bg-coral-soft p-4 font-semibold" role="alert">{tr('Learner তালিকা পড়া গেল না:', 'Could not read the learner list:')} {data.learnersError}</p>}
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex min-w-0 flex-1 items-center gap-2 font-semibold">{tr('খুঁজুন', 'Search')}
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('নাম, email বা id', 'Name, email or id')} className="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-ink bg-white px-3 font-[inherit]" />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={tr('নাম, email বা id', 'Name, email or id')} className="min-h-11 min-w-0 flex-1 rounded-xl border-2 border-ink bg-surface px-3 font-[inherit]" />
         </label>
         <span className="text-sm text-muted">{tr('Login করার পরের প্রথম sync-এ profile তৈরি হয়; তার আগের learner এখানে নেই।', 'A profile is made on the first sync after sign-in; learners not seen since then are not listed.')}</span>
       </div>
       {shown.length === 0 && <p className="m-0 text-muted">{tr('কেউ নেই।', 'Nobody here.')}</p>}
       {shown.length > 0 && (
-        <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-white">
+        <div className="overflow-x-auto rounded-[18px] border-[2.5px] border-ink bg-surface">
           <table className="w-full min-w-[860px] border-collapse text-left text-sm">
-            <thead className="bg-[#F0F2EC]"><tr>{[tr('Learner', 'Learner'), tr('Level (পাস/খেলা)', 'Levels (passed/played)'), 'Placement', tr('Review card', 'Review cards'), tr('খেলার দিন', 'Days played'), tr('শেষ খেলা', 'Last played'), tr('শেষ দেখা', 'Last seen'), tr('উত্তর · report', 'Answers · reports')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
+            <thead className="bg-surface-2"><tr>{[tr('Learner', 'Learner'), tr('Level (পাস/খেলা)', 'Levels (passed/played)'), 'Placement', tr('Review card', 'Review cards'), tr('খেলার দিন', 'Days played'), tr('শেষ খেলা', 'Last played'), tr('শেষ দেখা', 'Last seen'), tr('উত্তর · report', 'Answers · reports')].map((h) => <th key={h} className="px-3 py-2 font-bold">{h}</th>)}</tr></thead>
             <tbody>
               {shown.map((l) => (
-                <tr key={l.uid} className="border-t border-[#D7DED1] align-top">
+                <tr key={l.uid} className="border-t border-line align-top">
                   <td className="px-3 py-2">
                     <span className="block font-semibold">{l.name}{l.lang === 'en' ? ' · EN' : ''}</span>
                     <span className="flex flex-wrap items-center gap-2">
                       <a href={`mailto:${l.email}`} className="break-all text-route-deep">{l.email}</a>
-                      <button type="button" onClick={() => void copy(l.email)} className="min-h-8 cursor-pointer rounded-lg border-2 border-ink bg-white px-2 text-xs font-semibold">{copied === l.email ? tr('কপি হয়েছে', 'Copied') : tr('কপি', 'Copy')}</button>
+                      <button type="button" onClick={() => void copy(l.email)} className="min-h-8 cursor-pointer rounded-lg border-2 border-ink bg-surface px-2 text-xs font-semibold">{copied === l.email ? tr('কপি হয়েছে', 'Copied') : tr('কপি', 'Copy')}</button>
                     </span>
                     <span className="font-mono text-xs text-muted">{l.uid}</span>
                   </td>
@@ -429,7 +429,7 @@ function Crashes({ data, onCleared }: { data: AdminData; onCleared: (ids: string
         const versions = [...new Set(list.map((x) => x.ver))].slice(0, 6);
         const routes = [...new Set(list.map((x) => x.route || '#/'))].slice(0, 6);
         return (
-          <article key={crashKey(c)} className="rounded-[18px] border-[2.5px] border-ink bg-white p-4">
+          <article key={crashKey(c)} className="rounded-[18px] border-[2.5px] border-ink bg-surface p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-[1_1_320px]">
                 <p className="m-0 break-words font-mono text-sm font-bold">{c.msg}</p>
@@ -441,13 +441,13 @@ function Crashes({ data, onCleared }: { data: AdminData; onCleared: (ids: string
                   {' · '}<span className="font-semibold">{tr('Build:', 'Build:')}</span> <span className="font-mono">{versions.join(', ')}</span>
                 </p>
               </div>
-              <button type="button" disabled={busy === crashKey(c)} onClick={() => void clear(list)} className={`${btn} bg-white disabled:opacity-60`}>
+              <button type="button" disabled={busy === crashKey(c)} onClick={() => void clear(list)} className={`${btn} bg-surface disabled:opacity-60`}>
                 {tr('ঠিক হয়েছে, মুছে দিন', 'Fixed: clear these')}
               </button>
             </div>
             <details className="mt-2">
               <summary className="cursor-pointer text-sm font-semibold text-route-deep">{tr('Stack আর browser', 'Stack and browser')}</summary>
-              <pre className="m-0 mt-2 max-h-72 overflow-auto rounded-xl bg-[#F0F2EC] p-3 text-xs leading-relaxed">{c.stack || tr('(stack নেই)', '(no stack)')}</pre>
+              <pre className="m-0 mt-2 max-h-72 overflow-auto rounded-xl bg-surface-2 p-3 text-xs leading-relaxed">{c.stack || tr('(stack নেই)', '(no stack)')}</pre>
               <p className="m-0 mt-1 break-words text-xs text-muted">{c.ua}</p>
             </details>
           </article>

@@ -31,9 +31,9 @@ export function IncidentPage() {
               {incidents.map((inc) => {
                 const b = best[inc.id];
                 return (
-                  <button key={inc.id} type="button" onClick={() => setOpen(inc)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+                  <button key={inc.id} type="button" onClick={() => setOpen(inc)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-[18px] border-[2.5px] border-ink bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
                     <span className="flex w-full items-center justify-between gap-2 text-xs font-bold">
-                      <span className={`rounded-md px-2 py-0.5 text-white ${inc.severity === 'SEV-1' ? 'bg-coral' : 'bg-[#B8730A]'}`}>{inc.severity}</span>
+                      <span className={`rounded-md px-2 py-0.5 text-white ${inc.severity === 'SEV-1' ? 'bg-coral' : 'bg-amber'}`}>{inc.severity}</span>
                       <span className="text-route-deep">{tr(`Level ${bn(inc.level)}-এর বিষয়`, `Topic of level ${inc.level}`)}</span>
                     </span>
                     <span className="font-display text-lg font-bold">{inc.title}</span>
@@ -55,10 +55,10 @@ function Spark({ s }: { s: Series }) {
   const pts = s.values.map((v, i) => `${(i / (s.values.length - 1)) * 100},${36 - ((v - min) / (max - min || 1)) * 32}`).join(' ');
   const last = s.values[s.values.length - 1]!;
   return (
-    <div className={`rounded-2xl border-[2.5px] border-ink p-3 ${s.bad ? 'bg-coral-soft' : 'bg-white'}`}>
+    <div className={`rounded-2xl border-[2.5px] border-ink p-3 ${s.bad ? 'bg-coral-soft' : 'bg-surface'}`}>
       <div className="flex items-baseline justify-between gap-2 text-xs font-semibold"><span>{s.label}</span><span className="font-mono text-sm font-bold">{bn(String(last), { grouping: false })}{s.unit}</span></div>
       <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="mt-1 block h-14 w-full" aria-label={`${s.label}: ${s.values.join(', ')}`} role="img">
-        <polyline points={pts} fill="none" stroke={s.bad ? '#E0483E' : '#0B8A7A'} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+        <polyline points={pts} fill="none" stroke={s.bad ? 'var(--color-coral)' : 'var(--color-route)'} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
       </svg>
       <div className="flex justify-between text-[10px] text-muted"><span>{tr('১ ঘণ্টা আগে', '1 hour ago')}</span><span>{tr('এখন', 'now')}</span></div>
     </div>
@@ -91,20 +91,20 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">{tr('← সব incident', '← All incidents')}</button>
-      <div className={`rounded-[20px] border-[3px] border-ink p-4 text-white shadow-[0_5px_0_#16252D] ${finished ? 'bg-route' : 'bg-coral'}`} role="alert">
+      <button type="button" onClick={onBack} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 py-2 font-bold">{tr('← সব incident', '← All incidents')}</button>
+      <div className={`rounded-[20px] border-[3px] border-ink p-4 text-white shadow-[0_5px_0_var(--color-shadow)] ${finished ? 'bg-route' : 'bg-coral'}`} role="alert">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-          {!finished && <span className="inline-block h-2.5 w-2.5 animate-ping rounded-full bg-white" />}
+          {!finished && <span className="inline-block h-2.5 w-2.5 animate-ping rounded-full bg-surface" />}
           {finished ? 'Resolved' : `${inc.severity} · alert`}
         </div>
         <div className="mt-1 font-display text-xl font-extrabold">{inc.title}</div>
         <p className="m-0">{inc.alert}</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">{inc.series.map((s) => <Spark key={s.label} s={s} />)}</div>
-      <pre className="m-0 overflow-x-auto rounded-2xl border-[2.5px] border-ink bg-ink p-3 font-mono text-xs leading-relaxed text-[#C9F5D9]">{inc.logs.join('\n')}</pre>
+      <pre className="m-0 overflow-x-auto rounded-2xl border-[2.5px] border-ink bg-ink p-3 font-mono text-xs leading-relaxed text-on-night-good">{inc.logs.join('\n')}</pre>
 
       {!finished ? (
-        <section className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-[0_5px_0_#16252D]" key={stage}>
+        <section className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]" key={stage}>
           <div className="text-sm font-bold text-route-deep">{tr('সিদ্ধান্ত', 'Decision')} {bn(stage + 1)}/{bn(3)} · {[tr('কোথায় তাকাবেন', 'Where to look'), tr('কারণ', 'Cause'), tr('সমাধান', 'Fix')][stage]}</div>
           <h2 className="m-0 font-display text-xl font-bold">{st.prompt}</h2>
           <div className="flex flex-col gap-2">
@@ -113,22 +113,22 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
               const right = tried && i === 0;
               return (
                 <button key={i} type="button" disabled={solved || tried || !!failedOut} onClick={() => pick(i)}
-                  className={`min-h-[52px] cursor-pointer rounded-xl border-2 px-4 py-2 text-left font-[inherit] text-[16px] disabled:cursor-default ${right ? 'border-route bg-route-soft font-semibold' : tried ? 'shake-x border-coral bg-coral-soft line-through' : failedOut && i === 0 ? 'border-route bg-route-soft' : 'border-ink bg-white'}`}>
+                  className={`min-h-[52px] cursor-pointer rounded-xl border-2 px-4 py-2 text-left font-[inherit] text-[16px] disabled:cursor-default ${right ? 'border-route bg-route-soft font-semibold' : tried ? 'shake-x border-coral bg-coral-soft line-through' : failedOut && i === 0 ? 'border-route bg-route-soft' : 'border-ink bg-surface'}`}>
                   {st.options[i]}
                 </button>
               );
             })}
           </div>
           {(solved || failedOut) && (
-            <div className="pop-in rounded-xl bg-[#F0F2EC] p-3">
+            <div className="pop-in rounded-xl bg-surface-2 p-3">
               <p className="m-0">{st.explain}</p>
-              <button type="button" onClick={advance} className="btn-press mt-3 min-h-[50px] w-full cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_#16252D]">{stage < 2 ? tr('পরের সিদ্ধান্ত →', 'Next decision →') : tr('Incident বন্ধ করুন', 'Close the incident')}</button>
+              <button type="button" onClick={advance} className="btn-press mt-3 min-h-[50px] w-full cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel font-display text-lg font-extrabold shadow-[0_4px_0_var(--color-shadow)]">{stage < 2 ? tr('পরের সিদ্ধান্ত →', 'Next decision →') : tr('Incident বন্ধ করুন', 'Close the incident')}</button>
             </div>
           )}
           {!solved && !failedOut && tries[stage]!.length === 1 && <p className="m-0 text-sm font-semibold text-coral-deep">{tr('হয়নি। আরেকবার চেষ্টা করুন (অর্ধেক নম্বর)।', 'Not quite. Try once more (half marks).')}</p>}
         </section>
       ) : (
-        <section className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5 shadow-[0_5px_0_#16252D]">
+        <section className="pop-in flex flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-[0_5px_0_var(--color-shadow)]">
           <h2 className="m-0 font-display text-2xl font-extrabold">Postmortem</h2>
           <ol className="m-0 flex flex-col gap-2 pl-5">
             {inc.stages.map((s, i) => <li key={i}><b>{s.options[0]}</b> <span className="font-mono text-sm">({bn(points[i]!, { grouping: false })}/{bn(1)})</span><br /><span className="text-sm text-ink-soft">{s.explain}</span></li>)}
@@ -137,7 +137,7 @@ function Run({ inc, onBack }: { inc: Incident; onBack: () => void }) {
           {inc.fix && <FixLab id={inc.fix} />}
           <BookRefs refs={incidentRefs[inc.id] ?? levelRefs[inc.level]} title={tr('এই দুর্ঘটনা বইয়ে', 'This failure in the book')} />
           <div className="flex flex-wrap gap-2">
-            <Link to="/level/$levelId" params={{ levelId: String(inc.level) }} className="rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold text-ink no-underline">{tr(`Level ${bn(inc.level)} আবার দেখুন`, `Revisit level ${inc.level}`)}</Link>
+            <Link to="/level/$levelId" params={{ levelId: String(inc.level) }} className="rounded-xl border-2 border-ink bg-surface px-4 py-2 font-bold text-ink no-underline">{tr(`Level ${bn(inc.level)} আবার দেখুন`, `Revisit level ${inc.level}`)}</Link>
             <button type="button" onClick={onBack} className="cursor-pointer rounded-xl border-2 border-ink bg-parcel px-4 py-2 font-bold">{tr('পরের incident', 'Next incident')}</button>
           </div>
         </section>
@@ -157,7 +157,7 @@ function FixLab({ id }: { id: SimulatorId }) {
         <p className="m-0 font-bold">{tr('এবার নিজে ঠিক করুন', 'Now fix it yourself')}</p>
         <p className="m-0 mt-1 text-sm text-ink-soft">{tr('একই সমস্যা simulator-এ: আগে ঝড় তুলুন, তারপর সমাধানগুলো চালু করে দেখুন সত্যিই থামে কি না।', 'The same problem in a simulator: cause the failure first, then switch the fixes on and see whether it really stops.')}</p>
         {result !== null && <p className="m-0 mt-1 text-sm font-semibold text-route-deep">{tr(`শেষবার ${bn(result)}/${bn(3)} mission`, `Last time: ${result}/3 missions`)}</p>}
-        <button type="button" onClick={() => setOpen(true)} className="btn-press mt-2 min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-white px-4 font-bold shadow-[0_3px_0_#16252D]">{tr('Simulator খুলুন', 'Open the simulator')}</button>
+        <button type="button" onClick={() => setOpen(true)} className="btn-press mt-2 min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 font-bold shadow-[0_3px_0_var(--color-shadow)]">{tr('Simulator খুলুন', 'Open the simulator')}</button>
       </div>
     );
   }

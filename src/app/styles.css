@@ -18,12 +18,48 @@
   --color-locked: #e3e6df;
   --color-locked-ink: #5d6b66;
 
+  /*
+   * Surfaces and lines. Components use these names, never a raw colour, so a theme can change them
+   * in one place. Game art (the city map, simulators, the traffic stage) keeps its own colours.
+   */
+  --color-surface: #ffffff;          /* cards, inputs, buttons */
+  --color-surface-2: #f0f2ec;        /* a quiet chip, a table header, a hover */
+  --color-surface-sunk: #f7f8f3;     /* an inset area inside a card */
+  --color-line: #d7ded1;             /* thin dividers */
+  --color-shadow: #16252d;           /* the chunky offset shadow under cards and buttons */
+  --color-line-strong: #9aa69f;      /* dashed "locked" outlines */
+  --color-on-ink: #ffffff;           /* text on an ink-coloured fill (a selected pill) */
+  --color-parcel-deep: #7a4d00;      /* text on parcel-soft */
+  --color-violet-soft: #ede6f8;      /* the DDIA bonus chapter */
+  --color-violet-deep: #4b2f7a;
+  --color-amber: #b8730a;            /* a warning, a "late" event */
+  --color-surface-off: #eef1ea;      /* a disabled button */
+  --color-line-soft: #c9cec4;        /* dashed lanes */
+  --color-track: #e3e8de;            /* the empty part of a ring or a star */
+  --color-idle: #c9d0c3;             /* an icon that is off (no streak yet) */
+  --color-parcel-pale: #ffe9c7;
+  --color-grass-deep: #3fb37a;
+
+  /* Night: the deliberately dark places (the boss arena, the review card, the interview room). */
+  --color-night: #16252d;
+  --color-night-raised: #1d2e37;
+  --color-night-chip: #2a3b44;
+  --color-night-chip-2: #2b3a41;
+  --color-night-well: #24363f;
+  --color-night-line: #3a4f5a;
+  --color-night-line-2: #5b7280;
+  --color-night-amber: #3a3420;
+  --color-on-night-soft: #c9d6dc;
+  --color-on-night-quiet: #9fb2bc;
+  --color-on-night-good: #c9f5d9;
+  --color-night-good: #3fd38a;       /* a right answer on night */
+
   --font-display: 'Baloo Da 2', 'Noto Sans Bengali', system-ui, sans-serif;
   --font-body: 'Noto Sans Bengali', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --shadow-block: 0 6px 0 var(--color-ink);
-  --shadow-press: 0 4px 0 var(--color-ink);
+  --shadow-block: 0 6px 0 var(--color-shadow);
+  --shadow-press: 0 4px 0 var(--color-shadow);
 }
 
 /*
@@ -54,7 +90,7 @@ a, button, [role='button'], [role='tab'], summary { -webkit-tap-highlight-color:
 /* chunky pressable button feel */
 .btn-press { transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast); }
 .btn-press:hover { transform: translateY(-2px); }
-.btn-press:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--color-ink) !important; }
+.btn-press:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--color-shadow) !important; }
 
 /* ambient world motion */
 .amb-drift { animation: amb-drift 50s linear infinite; }

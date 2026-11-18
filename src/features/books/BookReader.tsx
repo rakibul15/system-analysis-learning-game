@@ -73,7 +73,7 @@ export function ChapterView({ refs }: { refs: BookRef[] }) {
         <div role="tablist" aria-label={tr('কোন অধ্যায়', 'Which chapter')} className="flex flex-wrap gap-2">
           {refs.map((r, i) => (
             <button key={i} type="button" role="tab" aria-selected={pick === i} onClick={() => setPick(i)}
-              className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-3 text-sm font-bold ${pick === i ? 'bg-ink text-white' : 'bg-white'}`}>
+              className={`min-h-10 cursor-pointer rounded-full border-2 border-ink px-3 text-sm font-bold ${pick === i ? 'bg-ink text-white' : 'bg-surface'}`}>
               {BOOKS[r.book].short} · {tr('অধ্যায়', 'Ch.')} {bn(r.chapter)}
             </button>
           ))}
@@ -81,7 +81,7 @@ export function ChapterView({ refs }: { refs: BookRef[] }) {
       )}
       <p className="m-0 text-sm font-semibold">{BOOKS[ref.book].title} · {tr('অধ্যায়', 'Chapter')} {bn(ref.chapter)}: {BOOKS[ref.book].chapters[ref.chapter]}</p>
       {!loaded ? null : book ? <ChapterPages key={`${book.id}-${pick}`} bookKey={book.id} blob={book.blob} target={ref} />
-        : <div className="overflow-hidden rounded-[22px] bg-[#2B3A41]"><AddBook bookId={ref.book} untagged={books.filter((b) => !b.bookId)} onAdd={(f) => add(f, ref.book)} onTag={(id) => tag(id, ref.book)} /></div>}
+        : <div className="overflow-hidden rounded-[22px] bg-night-chip-2"><AddBook bookId={ref.book} untagged={books.filter((b) => !b.bookId)} onAdd={(f) => add(f, ref.book)} onTag={(id) => tag(id, ref.book)} /></div>}
     </div>
   );
 }
@@ -109,7 +109,7 @@ function ChapterPages({ bookKey, blob, target }: { bookKey: string; blob: Blob; 
   if (!doc || !range) return <p className="m-0 text-muted">{tr('অধ্যায় খোলা হচ্ছে…', 'Opening the chapter…')}</p>;
   const pages = Array.from({ length: range[1] - range[0] + 1 }, (_, i) => range[0] + i);
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[22px] bg-[#2B3A41] p-2 sm:p-4">
+    <div className="flex flex-col items-center gap-3 rounded-[22px] bg-night-chip-2 p-2 sm:p-4">
       <p className="m-0 text-xs font-semibold text-white/80">{tr(`আপনার কপি থেকে · ${bn(pages.length)} পাতা · পাতা ${bnLabel(labels?.[range[0]] ?? String(range[0] + 1))}–${bnLabel(labels?.[range[1]] ?? String(range[1] + 1))}`, `From your copy · ${pages.length} pages · pages ${labels?.[range[0]] ?? range[0] + 1}–${labels?.[range[1]] ?? range[1] + 1}`)}</p>
       {pages.map((i) => <LazyPage key={i} doc={doc} index={i} ratio={ratio} label={labels?.[i] ?? String(i + 1)} />)}
     </div>
@@ -148,7 +148,7 @@ function LazyPage({ doc, index, ratio, label }: { doc: PDFDocumentProxy; index: 
     return () => { alive = false; task.current?.cancel(); };
   }, [near, doc, index]);
   return (
-    <div ref={wrap} className="relative w-full max-w-[860px] overflow-hidden rounded bg-white shadow-lg" style={{ aspectRatio: `1 / ${ratio}` }}>
+    <div ref={wrap} className="relative w-full max-w-[860px] overflow-hidden rounded bg-surface shadow-lg" style={{ aspectRatio: `1 / ${ratio}` }}>
       <canvas ref={canvas} className="block h-full w-full" />
       <span className="absolute bottom-1 right-2 rounded bg-ink/70 px-1.5 text-[11px] font-bold text-white">{/^\d+$/.test(label) ? bn(Number(label), { grouping: false }) : label}</span>
     </div>
@@ -169,11 +169,11 @@ export default function BookReader() {
   const book = bookFor(books, ref.book);
   const { book: short, where } = refLabel(ref);
   return (
-    <div role="dialog" aria-modal="true" aria-label={`${short} · ${where}`} className="fixed inset-0 z-50 flex flex-col bg-[#2B3A41]">
-      <header className="flex items-center gap-2 border-b-[3px] border-ink bg-white px-3 py-2" style={{ paddingTop: 'max(8px, env(safe-area-inset-top))' }}>
-        <span className={`flex-none rounded-md px-1.5 py-0.5 text-xs font-bold ${ref.book === 'ddia2' ? 'bg-[#EDE6F8] text-[#4B2F7A]' : 'bg-parcel-soft text-[#7A4D00]'}`}>{short}</span>
+    <div role="dialog" aria-modal="true" aria-label={`${short} · ${where}`} className="fixed inset-0 z-50 flex flex-col bg-night-chip-2">
+      <header className="flex items-center gap-2 border-b-[3px] border-ink bg-surface px-3 py-2" style={{ paddingTop: 'max(8px, env(safe-area-inset-top))' }}>
+        <span className={`flex-none rounded-md px-1.5 py-0.5 text-xs font-bold ${ref.book === 'ddia2' ? 'bg-violet-soft text-violet-deep' : 'bg-parcel-soft text-parcel-deep'}`}>{short}</span>
         <span className="min-w-0 flex-1 truncate text-sm font-bold">{where}</span>
-        <button type="button" onClick={close} className="min-h-10 flex-none cursor-pointer rounded-xl border-2 border-ink bg-white px-3 font-bold">{tr('বন্ধ ✕', 'Close ✕')}</button>
+        <button type="button" onClick={close} className="min-h-10 flex-none cursor-pointer rounded-xl border-2 border-ink bg-surface px-3 font-bold">{tr('বন্ধ ✕', 'Close ✕')}</button>
       </header>
       {!loaded ? null : book ? <Pages key={book.id + JSON.stringify(ref)} bookKey={book.id} blob={book.blob} target={ref} /> : (
         <AddBook bookId={ref.book} untagged={books.filter((b) => !b.bookId)} onAdd={(f) => add(f, ref.book)} onTag={(id) => tag(id, ref.book)} />
@@ -188,7 +188,7 @@ export function AddBook({ bookId, untagged, onAdd, onTag }: { bookId: BookId; un
   const [warn, setWarn] = useState('');
   return (
     <div className="flex flex-1 items-start justify-center overflow-auto p-4">
-      <div className="flex w-full max-w-[520px] flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-white p-5">
+      <div className="flex w-full max-w-[520px] flex-col gap-3 rounded-[22px] border-[3px] border-ink bg-surface p-5">
         <h2 className="m-0 font-display text-xl font-extrabold">{info.title}</h2>
         <p className="m-0 text-ink-soft">{tr('এই বইয়ের PDF এখনো এই browser-এ নেই। একবার যোগ করলে প্রতিটা topic থেকে সোজা ঠিক পাতায় খুলবে। File শুধু এই browser-এ থাকে, কোথাও upload হয় না।', 'This book\'s PDF is not in this browser yet. Add it once and every topic opens it straight at the right page. The file stays in this browser only and is never uploaded.')}</p>
         <label className="btn-press inline-flex min-h-12 w-fit cursor-pointer items-center rounded-xl border-[2.5px] border-ink bg-parcel px-4 font-bold">
@@ -201,11 +201,11 @@ export function AddBook({ bookId, untagged, onAdd, onTag }: { bookId: BookId; un
             setBusy(true); try { await onAdd(f); } finally { setBusy(false); }
           }} />
         </label>
-        {warn && <p className="m-0 text-sm font-semibold text-[#7A4D00]">{warn}</p>}
+        {warn && <p className="m-0 text-sm font-semibold text-parcel-deep">{warn}</p>}
         {untagged.length > 0 && (
           <div>
             <p className="m-0 text-sm font-bold">{tr('আগে যোগ করা PDF-গুলোর একটা কি এই বই?', 'Is one of your earlier PDFs this book?')}</p>
-            <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0">{untagged.map((b) => <li key={b.id}><button type="button" onClick={() => void onTag(b.id)} className="w-full cursor-pointer truncate rounded-lg border-2 border-ink bg-white px-3 py-2 text-left font-semibold">{b.name}</button></li>)}</ul>
+            <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0">{untagged.map((b) => <li key={b.id}><button type="button" onClick={() => void onTag(b.id)} className="w-full cursor-pointer truncate rounded-lg border-2 border-ink bg-surface px-3 py-2 text-left font-semibold">{b.name}</button></li>)}</ul>
           </div>
         )}
         <p className="m-0 text-sm text-muted">{tr('বই নেই?', 'No copy yet?')} <a href={info.buyUrl} target="_blank" rel="noreferrer" className="font-semibold text-route-deep">{tr('কোথায় পাবেন ↗', 'Where to get it ↗')}</a></p>
@@ -276,21 +276,21 @@ function Pages({ bookKey, blob, target }: { bookKey: string; blob: Blob; target:
   const inRange = tp && Number.isFinite(printed) ? printed >= tp[0] && printed <= tp[1] : null;
   const past = tp && Number.isFinite(printed) && printed > tp[1];
 
-  if (error) return <p className="m-auto rounded-xl bg-white p-4 font-semibold text-coral-deep">{error}</p>;
+  if (error) return <p className="m-auto rounded-xl bg-surface p-4 font-semibold text-coral-deep">{error}</p>;
   return (
     <>
       <div ref={box} className="flex flex-1 justify-center overflow-auto p-2">
-        {page === null ? <p className="m-auto font-semibold text-white">{tr('পাতা খোঁজা হচ্ছে…', 'Finding the page…')}</p> : <canvas ref={canvas} className="h-fit rounded bg-white shadow-lg" />}
+        {page === null ? <p className="m-auto font-semibold text-white">{tr('পাতা খোঁজা হচ্ছে…', 'Finding the page…')}</p> : <canvas ref={canvas} className="h-fit rounded bg-surface shadow-lg" />}
       </div>
-      <footer className="flex flex-wrap items-center justify-center gap-2 border-t-[3px] border-ink bg-white px-3 py-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
-        <button type="button" aria-label={tr('আগের পাতা', 'Previous page')} disabled={!page} onClick={() => setPage((x) => Math.max(0, (x ?? 0) - 1))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white text-lg font-bold disabled:opacity-40">◀</button>
+      <footer className="flex flex-wrap items-center justify-center gap-2 border-t-[3px] border-ink bg-surface px-3 py-2" style={{ paddingBottom: 'max(8px, env(safe-area-inset-bottom))' }}>
+        <button type="button" aria-label={tr('আগের পাতা', 'Previous page')} disabled={!page} onClick={() => setPage((x) => Math.max(0, (x ?? 0) - 1))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-surface text-lg font-bold disabled:opacity-40">◀</button>
         <span className="min-w-[110px] text-center font-mono text-sm font-bold">{tr('পাতা', 'Page')} {/^\d+$/.test(label) ? bn(Number(label), { grouping: false }) : label}{doc ? ` · ${bn(page! + 1, { grouping: false })}/${bn(doc.numPages, { grouping: false })}` : ''}</span>
-        <button type="button" aria-label={tr('পরের পাতা', 'Next page')} disabled={!doc || page === null || page >= doc.numPages - 1} onClick={() => setPage((x) => Math.min((doc?.numPages ?? 1) - 1, (x ?? 0) + 1))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white text-lg font-bold disabled:opacity-40">▶</button>
+        <button type="button" aria-label={tr('পরের পাতা', 'Next page')} disabled={!doc || page === null || page >= doc.numPages - 1} onClick={() => setPage((x) => Math.min((doc?.numPages ?? 1) - 1, (x ?? 0) + 1))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-surface text-lg font-bold disabled:opacity-40">▶</button>
         <span className="mx-1 h-6 w-px bg-ink/30" aria-hidden="true" />
-        <button type="button" aria-label={tr('ছোট করুন', 'Zoom out')} onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white font-bold">−</button>
-        <button type="button" aria-label={tr('বড় করুন', 'Zoom in')} onClick={() => setZoom((z) => Math.min(2.6, +(z + 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-white font-bold">+</button>
+        <button type="button" aria-label={tr('ছোট করুন', 'Zoom out')} onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-surface font-bold">−</button>
+        <button type="button" aria-label={tr('বড় করুন', 'Zoom in')} onClick={() => setZoom((z) => Math.min(2.6, +(z + 0.2).toFixed(1)))} className="h-11 w-11 cursor-pointer rounded-xl border-2 border-ink bg-surface font-bold">+</button>
         {page !== start && <button type="button" onClick={() => setPage(start)} className="min-h-11 cursor-pointer rounded-xl border-2 border-ink bg-parcel-soft px-3 text-sm font-bold">{tr('Section-এর শুরু', 'Section start')}</button>}
-        {tp && <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${inRange ? 'bg-route-soft text-route-deep' : past ? 'bg-parcel-soft text-[#7A4D00]' : 'bg-[#F0F2EC] text-muted'}`}>{inRange ? tr(`এই অংশ: পাতা ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `This part: pages ${tp[0]}–${tp[1]}`) : past ? tr('এই অংশ শেষ ✓', 'This part is done ✓') : tr(`পড়ার অংশ: ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `To read: ${tp[0]}–${tp[1]}`)}</span>}
+        {tp && <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${inRange ? 'bg-route-soft text-route-deep' : past ? 'bg-parcel-soft text-parcel-deep' : 'bg-surface-2 text-muted'}`}>{inRange ? tr(`এই অংশ: পাতা ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `This part: pages ${tp[0]}–${tp[1]}`) : past ? tr('এই অংশ শেষ ✓', 'This part is done ✓') : tr(`পড়ার অংশ: ${bn(tp[0], { grouping: false })}–${bn(tp[1], { grouping: false })}`, `To read: ${tp[0]}–${tp[1]}`)}</span>}
       </footer>
     </>
   );

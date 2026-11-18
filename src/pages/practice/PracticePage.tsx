@@ -35,9 +35,9 @@ export function PracticePage() {
         <div role="tablist" aria-label={tr('Practice-এর ধরন', 'Practice type')} className="flex flex-wrap gap-2">
           {TABS.map((t) => (
             <button key={t.id} role="tab" type="button" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-              className={`flex min-h-[64px] flex-[1_1_200px] cursor-pointer flex-col items-start justify-center rounded-2xl border-[2.5px] border-ink px-4 text-left font-[inherit] ${tab === t.id ? 'bg-ink text-white shadow-[0_4px_0_#FFC02E]' : 'bg-white text-ink'}`}>
+              className={`flex min-h-[64px] flex-[1_1_200px] cursor-pointer flex-col items-start justify-center rounded-2xl border-[2.5px] border-ink px-4 text-left font-[inherit] ${tab === t.id ? 'bg-ink text-white shadow-[0_4px_0_var(--color-parcel)]' : 'bg-surface text-ink'}`}>
               <span className="font-display text-lg font-bold">{t.label}</span>
-              <span className={`text-sm ${tab === t.id ? 'text-[#C9D6DC]' : 'text-muted'}`}>{t.note}</span>
+              <span className={`text-sm ${tab === t.id ? 'text-on-night-soft' : 'text-muted'}`}>{t.note}</span>
             </button>
           ))}
         </div>
@@ -82,11 +82,11 @@ function EstimationDrill() {
 
   if (!round || k >= round.length) {
     return (
-      <section className="pop-in rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+      <section className="pop-in rounded-[22px] border-[3px] border-ink bg-surface p-6 shadow-block">
         {round && <h2 className="m-0 mb-1 font-display text-2xl font-extrabold">{tr('এই round:', 'This round:')} {bn(score)}/{bn(round.length)}</h2>}
         <p className="m-0 text-ink-soft">{tr('উত্তরগুলো একে অন্যের ১০ গুণ দূরে, তাই আসল দক্ষতা মাত্রা (order of magnitude) ঠিক রাখা। দিনে ~১ লাখ সেকেন্ড, peak ≈ ২×।', 'The answers are 10× apart, so the real skill is getting the order of magnitude right. A day is ~100,000 seconds, peak ≈ 2×.')}</p>
         <p className="m-0 mt-2 text-sm text-muted">{tr(`মোট ${bn(stats.attempts)}টা প্রশ্নে ${bn(stats.correct)}টা ঠিক · সেরা round ${bn(stats.bestRound)}/১০`, `${stats.correct} right out of ${stats.attempts} · best round ${stats.bestRound}/10`)}</p>
-        <button type="button" onClick={start} className="btn-press mt-4 min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-xl font-extrabold shadow-[0_5px_0_#16252D]">{round ? tr('আরেক round', 'Another round') : tr('শুরু করুন', 'Start')}</button>
+        <button type="button" onClick={start} className="btn-press mt-4 min-h-[54px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-8 font-display text-xl font-extrabold shadow-[0_5px_0_var(--color-shadow)]">{round ? tr('আরেক round', 'Another round') : tr('শুরু করুন', 'Start')}</button>
       </section>
     );
   }
@@ -94,19 +94,19 @@ function EstimationDrill() {
   const q = round[k]!;
   const done = picked !== null;
   return (
-    <section key={k} className="pop-in rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+    <section key={k} className="pop-in rounded-[22px] border-[3px] border-ink bg-surface p-6 shadow-block">
       <div className="mb-3 flex items-center justify-between gap-3 text-sm font-bold">
         <span className="text-route-deep">{tr('প্রশ্ন', 'Question')} {bn(k + 1)}/{bn(round.length)} · {tr('ঠিক', 'right')} {bn(score)}</span>
         <span className="font-mono">{bn(Math.max(0, left))} {tr('সে.', 's')}</span>
       </div>
-      <div className="mb-4 h-2.5 overflow-hidden rounded-full bg-locked"><div className="h-full transition-[width] duration-1000 ease-linear" style={{ width: `${(left / PER_Q) * 100}%`, background: left < 8 ? '#E0483E' : '#0B8A7A' }} /></div>
+      <div className="mb-4 h-2.5 overflow-hidden rounded-full bg-locked"><div className="h-full transition-[width] duration-1000 ease-linear" style={{ width: `${(left / PER_Q) * 100}%`, background: left < 8 ? 'var(--color-coral)' : 'var(--color-route)' }} /></div>
       <h2 className="m-0 mb-4 font-display text-[22px] font-bold leading-snug">{q.prompt}</h2>
       <div className="grid grid-cols-2 gap-2.5">
         {q.options.map((o, i) => {
           const right = done && i === q.answer, wrong = done && i === picked && i !== q.answer;
           return (
             <button key={i} type="button" disabled={done} onClick={() => setPicked(i)}
-              className={`min-h-[60px] cursor-pointer rounded-[14px] border-2 font-mono text-lg font-bold ${right ? 'border-route bg-route-soft' : wrong ? 'border-coral bg-coral-soft' : 'border-ink bg-white'} disabled:cursor-default`}>
+              className={`min-h-[60px] cursor-pointer rounded-[14px] border-2 font-mono text-lg font-bold ${right ? 'border-route bg-route-soft' : wrong ? 'border-coral bg-coral-soft' : 'border-ink bg-surface'} disabled:cursor-default`}>
               {o}
             </button>
           );
@@ -116,7 +116,7 @@ function EstimationDrill() {
         <div className={`pop-in mt-4 rounded-[14px] border-2 p-4 ${picked === q.answer ? 'border-route bg-route-soft' : 'border-coral bg-coral-soft'}`}>
           <strong className="font-display text-lg">{picked === q.answer ? tr('ঠিক!', 'Right!') : picked === -1 ? tr('সময় শেষ', 'Time\'s up') : tr('হয়নি', 'Not quite')}</strong>
           <p className="m-0 mt-1">{q.explain}</p>
-          <button type="button" autoFocus onClick={next} className="btn-press mt-3 min-h-12 w-full cursor-pointer rounded-xl border-[3px] border-ink bg-white font-bold shadow-[0_4px_0_#16252D]">{k + 1 < round.length ? tr('পরেরটা', 'Next') : tr('ফল দেখুন', 'See results')}</button>
+          <button type="button" autoFocus onClick={next} className="btn-press mt-3 min-h-12 w-full cursor-pointer rounded-xl border-[3px] border-ink bg-surface font-bold shadow-[0_4px_0_var(--color-shadow)]">{k + 1 < round.length ? tr('পরেরটা', 'Next') : tr('ফল দেখুন', 'See results')}</button>
         </div>
       )}
     </section>
@@ -153,16 +153,16 @@ function DesignChallenge() {
   if (!prompt) {
     return (
       <section className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink bg-white p-3">
+        <div className="flex flex-wrap items-center gap-2 rounded-2xl border-2 border-ink bg-surface p-3">
           <span className="font-semibold">{tr('সময়:', 'Time:')}</span>
           {[15, 30, 45].map((m) => (
-            <button key={m} type="button" aria-pressed={minutes === m} onClick={() => setMinutes(m)} className={`min-h-11 cursor-pointer rounded-xl border-2 border-ink px-4 font-bold ${minutes === m ? 'bg-ink text-white' : 'bg-white'}`}>{bn(m)} {tr('মিনিট', 'min')}</button>
+            <button key={m} type="button" aria-pressed={minutes === m} onClick={() => setMinutes(m)} className={`min-h-11 cursor-pointer rounded-xl border-2 border-ink px-4 font-bold ${minutes === m ? 'bg-ink text-white' : 'bg-surface'}`}>{bn(m)} {tr('মিনিট', 'min')}</button>
           ))}
           <span className="text-sm text-muted">{tr('কাগজে আঁকুন, নোট এখানে লিখুন, শেষে rubric-এ নিজে নম্বর দিন।', 'Draw on paper, take notes here, then score yourself on the rubric.')}</span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {designPrompts.map((p) => (
-            <button key={p.id} type="button" onClick={() => begin(p)} className="btn-press flex cursor-pointer flex-col items-start rounded-[18px] border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+            <button key={p.id} type="button" onClick={() => begin(p)} className="btn-press flex cursor-pointer flex-col items-start rounded-[18px] border-[2.5px] border-ink bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
               <span className="text-xs font-bold text-route-deep">{tr(`Level ${bn(p.level)}-এর বিষয়`, `Topic of level ${p.level}`)}</span>
               <span className="font-display text-lg font-bold">{p.title}</span>
               <span className="mt-1 text-sm text-ink-soft">{p.prompt}</span>
@@ -170,7 +170,7 @@ function DesignChallenge() {
           ))}
         </div>
         {history.length > 0 && (
-          <div className="rounded-2xl border-2 border-ink bg-white p-4">
+          <div className="rounded-2xl border-2 border-ink bg-surface p-4">
             <h3 className="m-0 mb-2 font-display text-lg font-bold">{tr('আগের চেষ্টা', 'Earlier attempts')}</h3>
             <ul className="m-0 flex list-none flex-col gap-1 p-0 text-sm">
               {[...history].reverse().slice(0, 8).map((h, i) => (
@@ -185,7 +185,7 @@ function DesignChallenge() {
 
   const score = checks.filter(Boolean).length;
   return (
-    <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+    <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-6 shadow-block">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="m-0 text-xs font-bold text-route-deep">Design challenge · Level {bn(prompt.level)}</p>
@@ -213,12 +213,12 @@ function DesignChallenge() {
         <button type="button" disabled={saved} onClick={() => {
           record({ promptId: prompt.id, score, max: designRubric.length, minutes: Math.round((minutes * 60 - left) / 60), notes, at: new Date().toISOString() });
           setSaved(true); setRunning(null);
-        }} className="btn-press min-h-[52px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_5px_0_#16252D] disabled:opacity-50">
+        }} className="btn-press min-h-[52px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_5px_0_var(--color-shadow)] disabled:opacity-50">
           {saved ? tr('রাখা হয়েছে', 'Saved') : tr('শেষ, নম্বর রাখুন', 'Done, save the score')}
         </button>
         <a href={prompt.ref.url} target="_blank" rel="noreferrer" className="inline-flex min-h-[52px] items-center rounded-2xl border-[2.5px] border-ink px-5 font-semibold text-ink no-underline">{tr('বইয়ের design দেখুন ↗', 'See the book\'s design ↗')}</a>
         <Link to="/level/$levelId" params={{ levelId: String(prompt.level) }} className="inline-flex min-h-[52px] items-center rounded-2xl border-[2.5px] border-ink px-5 font-semibold text-ink no-underline">Level {bn(prompt.level)}</Link>
-        <button type="button" onClick={() => { setPrompt(null); setRunning(null); }} className="min-h-[52px] cursor-pointer rounded-2xl border-2 border-ink bg-white px-5 font-semibold">{tr('অন্য প্রশ্ন', 'Another question')}</button>
+        <button type="button" onClick={() => { setPrompt(null); setRunning(null); }} className="min-h-[52px] cursor-pointer rounded-2xl border-2 border-ink bg-surface px-5 font-semibold">{tr('অন্য প্রশ্ন', 'Another question')}</button>
       </div>
     </section>
   );
@@ -237,14 +237,14 @@ function SpeakAloud() {
   const another = () => { setP(speakPrompts[(speakPrompts.indexOf(p) + 1 + Math.floor(Math.random() * (speakPrompts.length - 1))) % speakPrompts.length]!); setRunning(null); setChecks(speakRubric.map(() => false)); setSaved(false); };
 
   return (
-    <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-white p-6 shadow-block">
+    <section className="pop-in flex flex-col gap-4 rounded-[22px] border-[3px] border-ink bg-surface p-6 shadow-block">
       <p className="m-0 text-xs font-bold text-route-deep">{tr('মুখে বলা', 'Speak aloud')} · Level {bn(p.level)} · {tr(`এ পর্যন্ত ${bn(done)}বার`, `${done} times so far`)}</p>
       <h2 className="m-0 font-display text-[26px] font-extrabold leading-snug">{p.prompt}</h2>
       <p className="m-0 text-ink-soft">{tr('Interviewer-কে বোঝাচ্ছেন এমনভাবে জোরে বলুন। ফোনে record করে পরে শুনলে আরও ভালো।', 'Say it out loud as if explaining to an interviewer. Recording it on your phone and listening back is even better.')}</p>
       <div className="flex flex-wrap items-center gap-3">
         <div className={`rounded-2xl border-[3px] border-ink px-4 py-2 font-mono text-3xl font-bold ${running !== null && left === 0 ? 'bg-coral text-white' : 'bg-parcel-soft'}`} role="timer">{mmss(running === null ? 120 : left)}</div>
-        <button type="button" onClick={() => setRunning(120)} className="btn-press min-h-[52px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_5px_0_#16252D]">{running === null ? tr('শুরু (২ মিনিট)', 'Start (2 minutes)') : tr('আবার শুরু', 'Restart')}</button>
-        <button type="button" onClick={another} className="min-h-[52px] cursor-pointer rounded-2xl border-2 border-ink bg-white px-5 font-semibold">{tr('অন্য প্রশ্ন', 'Another question')}</button>
+        <button type="button" onClick={() => setRunning(120)} className="btn-press min-h-[52px] cursor-pointer rounded-2xl border-[3px] border-ink bg-parcel px-6 font-display text-lg font-extrabold shadow-[0_5px_0_var(--color-shadow)]">{running === null ? tr('শুরু (২ মিনিট)', 'Start (2 minutes)') : tr('আবার শুরু', 'Restart')}</button>
+        <button type="button" onClick={another} className="min-h-[52px] cursor-pointer rounded-2xl border-2 border-ink bg-surface px-5 font-semibold">{tr('অন্য প্রশ্ন', 'Another question')}</button>
       </div>
       <fieldset className="m-0 rounded-xl border-2 border-ink p-4">
         <legend className="px-1 font-semibold">{tr('বলার পর নিজেকে নম্বর দিন', 'After speaking, score yourself')}</legend>
@@ -255,7 +255,7 @@ function SpeakAloud() {
           </label>
         ))}
       </fieldset>
-      <button type="button" disabled={saved} onClick={() => { record({ promptId: p.id, score: checks.filter(Boolean).length, max: speakRubric.length, at: new Date().toISOString() }); setSaved(true); }} className="btn-press min-h-[52px] cursor-pointer self-start rounded-2xl border-[3px] border-ink bg-white px-6 font-bold shadow-[0_5px_0_#16252D] disabled:opacity-50">
+      <button type="button" disabled={saved} onClick={() => { record({ promptId: p.id, score: checks.filter(Boolean).length, max: speakRubric.length, at: new Date().toISOString() }); setSaved(true); }} className="btn-press min-h-[52px] cursor-pointer self-start rounded-2xl border-[3px] border-ink bg-surface px-6 font-bold shadow-[0_5px_0_var(--color-shadow)] disabled:opacity-50">
         {saved ? tr('রাখা হয়েছে', 'Saved') : `${tr('রাখুন', 'Save')} · ${bn(checks.filter(Boolean).length)}/${bn(speakRubric.length)}`}
       </button>
     </section>
@@ -276,7 +276,7 @@ function SimulatorLab() {
     const Sim = simulators[open];
     return (
       <div className="flex flex-col gap-3">
-        <button type="button" onClick={() => setOpen(null)} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-white px-4 py-2 font-bold">{tr('← সব simulator', '← All simulators')}</button>
+        <button type="button" onClick={() => setOpen(null)} className="self-start cursor-pointer rounded-xl border-2 border-ink bg-surface px-4 py-2 font-bold">{tr('← সব simulator', '← All simulators')}</button>
         <Suspense fallback={<p className="text-muted">{tr('Simulator আসছে…', 'Loading the simulator…')}</p>}>
           <StandaloneSim.Provider value={true}><Sim onFinish={(n) => { setLast(tr(`শেষবার ${bn(n)}/৩ mission`, `Last time: ${n}/3 missions`)); setOpen(null); }} /></StandaloneSim.Provider>
         </Suspense>
@@ -288,14 +288,14 @@ function SimulatorLab() {
       {last && <p className="m-0 rounded-xl bg-route-soft px-4 py-2 font-semibold">{last}</p>}
       <div className="grid gap-3 sm:grid-cols-2">
         {EXTRA_SIMS.map((x) => (
-          <button key={x.id} type="button" onClick={() => setOpen(x.id)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-coral bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+          <button key={x.id} type="button" onClick={() => setOpen(x.id)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-coral bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
             <span className="text-sm font-bold text-coral-deep">{tr('বড় দুর্ঘটনা', 'Big failures')}</span>
             <span className="font-display text-lg font-extrabold">{x.title}</span>
             <span className="text-sm text-muted">{x.concept}</span>
           </button>
         ))}
         {withSim.map((l) => (
-          <button key={l.id} type="button" onClick={() => setOpen(l.simulator!)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-ink bg-white p-4 text-left font-[inherit] shadow-[0_4px_0_#16252D]">
+          <button key={l.id} type="button" onClick={() => setOpen(l.simulator!)} className="btn-press flex cursor-pointer flex-col items-start gap-1 rounded-2xl border-[2.5px] border-ink bg-surface p-4 text-left font-[inherit] shadow-[0_4px_0_var(--color-shadow)]">
             <span className="text-sm font-bold text-route-deep">Level {bn(l.id)}</span>
             <span className="font-display text-lg font-extrabold">{l.title}</span>
             <span className="text-sm text-muted">{l.concept}</span>

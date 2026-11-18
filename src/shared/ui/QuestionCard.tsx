@@ -69,16 +69,16 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   if (off) {
     // turned off by an admin: the learner is not asked it, and loses nothing
     return (
-      <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-[#1D2E37] text-white shadow-[0_6px_0_#E0483E]' : 'border-ink bg-white shadow-block'}`} data-testid="q-skipped">
+      <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-night-raised text-white shadow-[0_6px_0_var(--color-coral)]' : 'border-ink bg-surface shadow-block'}`} data-testid="q-skipped">
         <p className={`m-0 text-[13px] font-bold ${boss ? 'text-parcel' : 'text-route-deep'}`}>{label}</p>
         <p className="m-0 mt-2 font-display text-xl font-bold">{tr('এই প্রশ্নটা এখন ঠিক করা হচ্ছে', 'This question is being fixed')}</p>
-        <p className={`m-0 mt-1 ${boss ? 'text-[#C9D6DC]' : 'text-ink-soft'}`}>{tr('এতে একটা সমস্যা পাওয়া গেছে, তাই আপাতত বাদ। এর পুরো নম্বর পাবেন।', 'A problem was found in it, so it is left out for now. You get its full points.')}</p>
+        <p className={`m-0 mt-1 ${boss ? 'text-on-night-soft' : 'text-ink-soft'}`}>{tr('এতে একটা সমস্যা পাওয়া গেছে, তাই আপাতত বাদ। এর পুরো নম্বর পাবেন।', 'A problem was found in it, so it is left out for now. You get its full points.')}</p>
         <button
           type="button"
           autoFocus
           data-testid="q-continue"
           onClick={() => onDone({ qid: q.id, correct: true, sure: true, earned: points, skipped: true })}
-          className="btn-press mt-4 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-white font-display text-lg font-extrabold text-ink shadow-[0_4px_0_#16252D]"
+          className="btn-press mt-4 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-surface font-display text-lg font-extrabold text-ink shadow-[0_4px_0_var(--color-shadow)]"
         >
           {continueLabel}
         </button>
@@ -87,10 +87,10 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
   }
 
   return (
-    <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-[#1D2E37] text-white shadow-[0_6px_0_#E0483E]' : 'border-ink bg-white shadow-block'}`}>
+    <div className={`pop-in rounded-[22px] border-[3px] p-5 sm:p-6 ${boss ? 'border-ink bg-night-raised text-white shadow-[0_6px_0_var(--color-coral)]' : 'border-ink bg-surface shadow-block'}`}>
       <div className="mb-2 flex items-center justify-between gap-3 text-[13px] font-bold">
         <span className={boss ? 'text-parcel' : 'text-route-deep'}>{label}</span>
-        {points > 0 && <span className={boss ? 'text-[#C9D6DC]' : 'text-muted'}>{tr('মান', 'Worth')} {bn(Math.round(points * 10) / 10, { grouping: false })} {tr('নম্বর', 'points')}</span>}
+        {points > 0 && <span className={boss ? 'text-on-night-soft' : 'text-muted'}>{tr('মান', 'Worth')} {bn(Math.round(points * 10) / 10, { grouping: false })} {tr('নম্বর', 'points')}</span>}
       </div>
       <h3 className="m-0 mb-4 font-display text-[22px] font-bold leading-snug" style={{ textWrap: 'balance' }}>{q.prompt}</h3>
 
@@ -99,8 +99,8 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
           const isPicked = picked === oi;
           const showRight = done && oi === 0;
           const showWrong = done && isPicked && oi !== 0;
-          let cls = boss ? 'border-[#3A4F5A] bg-[#24363F] text-white' : 'border-ink bg-white text-ink';
-          if (isPicked && !done) cls = boss ? 'border-parcel bg-[#3A3420] text-white' : 'border-ink bg-parcel-soft text-ink shadow-[0_3px_0_#16252D]';
+          let cls = boss ? 'border-night-line bg-night-well text-white' : 'border-ink bg-surface text-ink';
+          if (isPicked && !done) cls = boss ? 'border-parcel bg-night-amber text-white' : 'border-ink bg-parcel-soft text-ink shadow-[0_3px_0_var(--color-shadow)]';
           if (showRight) cls = 'border-route bg-route-soft text-ink';
           if (showWrong) cls = 'border-coral bg-coral-soft text-ink';
           return (
@@ -115,7 +115,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               onClick={() => setPicked(oi)}
               className={`flex min-h-[52px] w-full items-start gap-3 rounded-[14px] border-2 px-3.5 py-3 text-left font-[inherit] text-[16px] transition-colors enabled:cursor-pointer ${cls}`}
             >
-              <span className={`grid h-7 w-7 flex-none place-items-center rounded-lg border-2 text-sm font-bold ${boss && !showRight && !showWrong ? 'border-[#5B7280]' : 'border-ink'}`}>{letters[pos]}</span>
+              <span className={`grid h-7 w-7 flex-none place-items-center rounded-lg border-2 text-sm font-bold ${boss && !showRight && !showWrong ? 'border-night-line-2' : 'border-ink'}`}>{letters[pos]}</span>
               <span className="min-w-0 flex-1">{q.options[oi]}</span>
               {showRight && <span className="font-bold text-route-deep">✓</span>}
               {showWrong && <span className="font-bold text-coral-deep">✕</span>}
@@ -134,13 +134,13 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
                 type="button"
                 aria-pressed={sure === c.v}
                 onClick={() => setSure(c.v)}
-                className={`min-h-[46px] flex-1 cursor-pointer rounded-xl border-2 font-[inherit] font-semibold ${sure === c.v ? (boss ? 'border-parcel bg-parcel text-ink' : 'border-ink bg-ink text-white') : boss ? 'border-[#3A4F5A] bg-transparent text-white' : 'border-ink bg-white text-ink'}`}
+                className={`min-h-[46px] flex-1 cursor-pointer rounded-xl border-2 font-[inherit] font-semibold ${sure === c.v ? (boss ? 'border-parcel bg-parcel text-ink' : 'border-ink bg-ink text-white') : boss ? 'border-night-line bg-transparent text-white' : 'border-ink bg-surface text-ink'}`}
               >
                 {c.l}
               </button>
             ))}
           </div>
-          {points > 0 && <p className={`mb-0 mt-2 text-[13px] ${boss ? 'text-[#C9D6DC]' : 'text-muted'}`}>{tr('নিশ্চিত ও ঠিক: পুরো · আন্দাজে ঠিক: ৬০% · নিশ্চিত ও ভুল: −২৫%', 'Sure and right: full · right on a guess: 60% · sure and wrong: −25%')}</p>}
+          {points > 0 && <p className={`mb-0 mt-2 text-[13px] ${boss ? 'text-on-night-soft' : 'text-muted'}`}>{tr('নিশ্চিত ও ঠিক: পুরো · আন্দাজে ঠিক: ৬০% · নিশ্চিত ও ভুল: −২৫%', 'Sure and right: full · right on a guess: 60% · sure and wrong: −25%')}</p>}
           <div className="mt-4 flex flex-wrap gap-2.5">
             <button
               type="button"
@@ -151,7 +151,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
                 if (instant) onDone({ qid: q.id, correct, sure: !!sure, earned });
                 else setDone(true);
               }}
-              className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_#16252D]' : 'cursor-not-allowed border-[#9AA69F] bg-[#EEF1EA] text-locked-ink'}`}
+              className={`min-h-[52px] flex-1 rounded-[14px] border-[3px] font-display text-[19px] font-extrabold ${ready ? 'btn-press cursor-pointer border-ink bg-parcel text-ink shadow-[0_4px_0_var(--color-shadow)]' : 'cursor-not-allowed border-line-strong bg-surface-off text-locked-ink'}`}
             >
               {instant ? continueLabel : tr('উত্তর দিন', 'Answer')}
             </button>
@@ -159,13 +159,13 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
               <button
                 type="button"
                 onClick={() => { setShowHint(true); if (!hintUsed) onHint(); }}
-                className={`min-h-[52px] cursor-pointer rounded-[14px] border-2 px-4 font-[inherit] font-semibold ${boss ? 'border-[#5B7280] bg-transparent text-white' : 'border-ink bg-white'}`}
+                className={`min-h-[52px] cursor-pointer rounded-[14px] border-2 px-4 font-[inherit] font-semibold ${boss ? 'border-night-line-2 bg-transparent text-white' : 'border-ink bg-surface'}`}
               >
                 Hint
               </button>
             )}
           </div>
-          {showHint && q.hint && <p className={`mb-0 mt-3 rounded-xl px-3 py-2 text-sm ${boss ? 'bg-[#24363F] text-parcel' : 'bg-parcel-soft'}`}>Hint: {q.hint}{hintUsed ? '' : ''}</p>}
+          {showHint && q.hint && <p className={`mb-0 mt-3 rounded-xl px-3 py-2 text-sm ${boss ? 'bg-night-well text-parcel' : 'bg-parcel-soft'}`}>Hint: {q.hint}{hintUsed ? '' : ''}</p>}
         </>
       )}
 
@@ -183,7 +183,7 @@ export function QuestionCard({ q, label, points = 0, onHint, hintUsed, onDone, c
             autoFocus
             data-testid="q-continue"
             onClick={() => onDone({ qid: q.id, correct, sure: !!sure, earned })}
-            className="btn-press mt-3 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-white font-display text-lg font-extrabold text-ink shadow-[0_4px_0_#16252D]"
+            className="btn-press mt-3 min-h-[48px] w-full cursor-pointer rounded-[14px] border-[3px] border-ink bg-surface font-display text-lg font-extrabold text-ink shadow-[0_4px_0_var(--color-shadow)]"
           >
             {continueLabel}
           </button>

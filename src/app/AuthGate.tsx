@@ -25,7 +25,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
     return (
       <main className="grid min-h-screen place-items-center" aria-busy="true">
         <div className="flex flex-col items-center gap-3">
-          <svg width="56" height="56" viewBox="0 0 34 34" className="animate-bounce" aria-hidden="true"><rect x="3" y="7" width="28" height="22" rx="4" fill="#FFC02E" stroke="#16252D" strokeWidth="2.5" /><path d="M3 14h28M17 7v7" stroke="#16252D" strokeWidth="2.5" /></svg>
+          <svg width="56" height="56" viewBox="0 0 34 34" className="animate-bounce" aria-hidden="true"><rect x="3" y="7" width="28" height="22" rx="4" fill="var(--color-parcel)" stroke="var(--color-night)" strokeWidth="2.5" /><path d="M3 14h28M17 7v7" stroke="var(--color-night)" strokeWidth="2.5" /></svg>
           <p className="m-0 font-bold">{tr('আপনার progress আনা হচ্ছে…', 'Loading your progress…')}</p>
         </div>
       </main>
