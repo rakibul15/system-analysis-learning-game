@@ -47,6 +47,7 @@ describe('Alex Xu chapter notes', () => {
   });
 
   it('pictures only point at things that exist', () => {
+    const crowded: string[] = [];
     for (const n of xuNotes) for (const b of n.blocks) {
       if (b.kind === 'seq') for (const s of b.steps) expect(s.from < b.actors.length && s.to < b.actors.length, `${n.id} ${s.msg}`).toBe(true);
       const pics = b.kind === 'stages' ? b.stages : b.kind === 'flow' ? [b] : [];
@@ -55,8 +56,19 @@ describe('Alex Xu chapter notes', () => {
         expect(ids.size, `${n.id} duplicate node`).toBe(p.nodes.length);
         for (const l of p.links) expect(ids.has(l.from) && ids.has(l.to), `${n.id} ${l.from}→${l.to}`).toBe(true);
         for (const x of p.nodes) expect(x.x >= 0 && x.x <= 100 && x.y >= 0 && x.y <= ('h' in p && p.h ? p.h : 34), `${n.id} ${x.id} off the picture`).toBe(true);
+        // a box is centred on x and 17 wide unless it says otherwise: it must fit inside the picture and not sit on its neighbour
+        const span = (x: { x: number; w?: number }) => [x.x - (x.w ?? 17) / 2, x.x + (x.w ?? 17) / 2] as const;
+        const bad: string[] = [];
+        for (const x of p.nodes) { const [l, r] = span(x); if (l < -1 || r > 101) bad.push(`${x.id} cut off (${l}..${r})`); }
+        for (const a of p.nodes) for (const b of p.nodes) {
+          if (a.id >= b.id || Math.abs(a.y - b.y) >= 9) continue;
+          const [al, ar] = span(a), [bl, br] = span(b);
+          if (!(ar <= bl + 0.5 || br <= al + 0.5)) bad.push(`${a.id}/${b.id} overlap`);
+        }
+        for (const m of bad) crowded.push(`${n.id} "${'label' in p ? p.label.slice(0, 30) : 'title' in p ? p.title : ''}": ${m}`);
       }
     }
+    expect(crowded).toEqual([]);
   });
 
   it('calculators give finite numbers at both ends of every slider', () => {
