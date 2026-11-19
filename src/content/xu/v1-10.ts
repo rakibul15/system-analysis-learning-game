@@ -24,8 +24,8 @@ export const note: XuNote = {
 
     { kind: 'h', text: 'প্রথম নকশা ও তার ফাঁক' },
     { kind: 'flow', label: 'সরল নকশা: সবাই এক server-এ, সেখান থেকে সরাসরি প্রতিটা পথে। এক পথ বসলে সব আটকে', nodes: [
-      { id: 'sv', label: 'Order, Rider service', x: 14, y: 17, w: 24 },
-      { id: 'n', label: 'Notification server', sub: 'একটাই', x: 50, y: 17, w: 22, tone: 'hot' },
+      { id: 'sv', label: 'Service', sub: 'order, rider', x: 13, y: 17, w: 20 },
+      { id: 'n', label: 'Notifier', sub: 'একটাই server', x: 48, y: 17, w: 22, tone: 'hot' },
       { id: 'a', label: 'APNs / FCM', x: 88, y: 5, w: 18 },
       { id: 's', label: 'SMS গেটওয়ে', sub: 'ধীর', x: 88, y: 17, w: 18, tone: 'down' },
       { id: 'e', label: 'Email সেবা', x: 88, y: 29, w: 18 },
@@ -45,14 +45,14 @@ export const note: XuNote = {
     { kind: 'h', text: 'ভাগ করুন: queue আর worker' },
     { kind: 'p', text: 'সমাধান আগের অধ্যায়গুলোর চেনা কৌশল: ঘটকগুলোকে আলাদা করুন, মাঝে queue বসান। প্রতিটা পথের নিজের queue আর নিজের worker। এখন SMS গেটওয়ে ধীর হলে শুধু SMS queue বাড়ে; push আর email যেমন চলছিল তেমনই চলে।' },
     { kind: 'flow', label: 'ভাগ করা নকশা: প্রতি পথের আলাদা queue। SMS ধীর হলেও push আর email আটকায় না', nodes: [
-      { id: 'sv', label: 'Order, Rider service', x: 10, y: 17, w: 22 },
-      { id: 'n', label: 'Notification server', x: 36, y: 17, w: 22 },
+      { id: 'sv', label: 'Service', sub: 'order, rider', x: 11, y: 17, w: 20 },
+      { id: 'n', label: 'Notifier', x: 36, y: 17, w: 18 },
       { id: 'qa', label: 'Push queue', x: 62, y: 5, w: 16 },
       { id: 'qs', label: 'SMS queue', sub: 'জমছে', x: 62, y: 17, w: 16, tone: 'hot' },
-      { id: 'qe', label: 'Email queue', x: 62, y: 29, w: 16 },
+      { id: 'qe', label: 'Email queue', x: 62, y: 29, w: 18 },
       { id: 'a', label: 'APNs / FCM', x: 90, y: 5, w: 16 },
-      { id: 's', label: 'SMS গেটওয়ে', sub: 'ধীর', x: 90, y: 17, w: 16, tone: 'down' },
-      { id: 'e', label: 'Email সেবা', x: 90, y: 29, w: 16 },
+      { id: 's', label: 'SMS gateway', sub: 'ধীর', x: 89, y: 17, w: 20, tone: 'down' },
+      { id: 'e', label: 'Email', x: 90, y: 29, w: 16 },
     ], links: [
       { from: 'sv', to: 'n', rate: 5 },
       { from: 'n', to: 'qa', rate: 1.8 }, { from: 'n', to: 'qs', rate: 1.8 }, { from: 'n', to: 'qe', rate: 1.8 },

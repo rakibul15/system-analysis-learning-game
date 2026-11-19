@@ -84,12 +84,12 @@ export const note: XuNote = {
 
     { kind: 'h', text: 'নকশা' },
     { kind: 'flow', label: 'ভেতরে আসা চিঠি: ছাঁকনি → inbox, আর সাথে index আর push', nodes: [
-      { id: 'in', label: 'বাইরের server', x: 8, y: 17, w: 18 },
-      { id: 'sm', label: 'SMTP server', x: 30, y: 17, w: 16 },
+      { id: 'in', label: 'বাইরের server', x: 11, y: 17, w: 20 },
+      { id: 'sm', label: 'SMTP', x: 33, y: 17, w: 14 },
       { id: 'fl', label: 'ছাঁকনি', sub: 'spam, ভাইরাস', x: 54, y: 17, w: 16 },
       { id: 'st', label: 'Mail storage', sub: 'metadata+বডি', x: 80, y: 6, w: 20 },
-      { id: 'ob', label: 'Attachment store', x: 80, y: 28, w: 22 },
-      { id: 'ix', label: 'Search index', x: 92, y: 17, w: 16 },
+      { id: 'ob', label: 'Attachment', sub: 'object store', x: 78, y: 29, w: 22 },
+      { id: 'ix', label: 'Search', sub: 'index', x: 91, y: 17, w: 16 },
     ], links: [
       { from: 'in', to: 'sm', rate: 3 }, { from: 'sm', to: 'fl', rate: 3 }, { from: 'fl', to: 'st', rate: 2.2, drop: 0.25 }, { from: 'fl', to: 'ob', rate: 1 }, { from: 'st', to: 'ix', rate: 1.6 },
     ], h: 36 },

@@ -37,11 +37,11 @@ export const note: XuNote = {
 
     { kind: 'h', text: 'পাইপলাইন' },
     { kind: 'flow', label: 'Click → queue → মিনিটের হিসাব → queue → জমা। কাঁচা event-ও আলাদা জমে', nodes: [
-      { id: 'lg', label: 'Log watcher', sub: 'click event', x: 8, y: 17, w: 18 },
-      { id: 'q1', label: 'Queue ১', sub: 'কাঁচা', x: 30, y: 17, w: 14 },
-      { id: 'ag', label: 'Aggregator', sub: 'মিনিটে গোনা', x: 54, y: 17, w: 18 },
-      { id: 'q2', label: 'Queue ২', sub: 'যোগফল', x: 76, y: 17, w: 14 },
-      { id: 'db', label: 'Aggregation DB', x: 92, y: 6, w: 18 },
+      { id: 'lg', label: 'Log watcher', sub: 'click event', x: 11, y: 17, w: 20 },
+      { id: 'q1', label: 'Queue ১', sub: 'কাঁচা', x: 34, y: 17, w: 14 },
+      { id: 'ag', label: 'Aggregator', sub: 'মিনিটে গোনা', x: 57, y: 17, w: 20 },
+      { id: 'q2', label: 'Queue ২', sub: 'যোগফল', x: 80, y: 17, w: 14 },
+      { id: 'db', label: 'Result DB', x: 88, y: 6, w: 18 },
       { id: 'raw', label: 'কাঁচা event store', x: 54, y: 30, w: 22 },
     ], links: [
       { from: 'lg', to: 'q1', rate: 4 }, { from: 'q1', to: 'ag', rate: 4 }, { from: 'ag', to: 'q2', rate: 1.5 }, { from: 'q2', to: 'db', rate: 1.5 }, { from: 'q1', to: 'raw', rate: 2, color: '#2f7de1' },
