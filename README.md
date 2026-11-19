@@ -2,6 +2,10 @@
 
 ParcelGo: delivery city-তে খেলে system design শেখা (Alex Xu-র *System Design Interview* Vol 1 ও 2 অবলম্বনে)।
 
+**▶ খেলুন: [parcelgo-system-design.vercel.app](https://parcelgo-system-design.vercel.app)**
+
+> Google login শুধু এই ঠিকানায় চলে। পুরোনো ঠিকানা (`system-analysis-learning-game.vercel.app`) খুললে app নিজেই এখানে নিয়ে আসে।
+
 ছয় অধ্যায়ে ৩০টা level। প্রতিটা level-এ ছয় ধাপ: ব্রিফিং → অনুমান → animated lesson (দুটো checkpoint) → simulator (প্রতিটা level-এর নিজের, ৩টা mission) → boss (৫ প্রশ্ন) → ফল। নম্বর confidence marking-এ (নিশ্চিত/আন্দাজ)।
 
 Screen:
