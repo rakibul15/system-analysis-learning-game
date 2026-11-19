@@ -26,6 +26,7 @@ export function StudyPage() {
           <p className="m-0 mt-1 max-w-[65ch] text-ink-soft">{tr('Alex Xu-র দুই খণ্ডের প্রতিটা chapter-এর নোট, চলন্ত ছবি আর "নিজেকে যাচাই" প্রশ্নসহ। Offline-এও খোলে।', 'Notes on every chapter of Alex Xu\'s two volumes, with moving pictures and self-check questions. Works offline too.')}</p>
         </div>
         <XuChapters />
+        <DdiaChapters />
         <section className="flex flex-col gap-2 rounded-[20px] border-[3px] border-ink bg-surface p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="m-0 font-display text-xl font-bold">{tr('আমাদের নোট · দুই বই মিলিয়ে', 'Our notes · both books combined')}</h2>
@@ -116,12 +117,13 @@ function MyBooks() {
 
 /** Alex Xu's two volumes, chapter by chapter: our new notes, and the older pages for chapters not rewritten yet. */
 function XuChapters() {
-  const done = xuChapters.filter((c) => c.load).length;
+  const xuOnly = xuChapters.filter((c) => c.book !== 'ddia2');
+  const done = xuOnly.filter((c) => c.load).length;
   return (
     <section aria-labelledby="xu-chapters" className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="xu-chapters" className="m-0 font-display text-xl font-bold">{tr('Alex Xu-র দুই খণ্ড, অধ্যায় ধরে', 'Alex Xu\'s two volumes, chapter by chapter')}</h2>
-        <span className="text-sm font-semibold text-muted">{tr(`নতুন নোট ${bn(done)}/${bn(xuChapters.length)}`, `New notes ${done}/${xuChapters.length}`)}</span>
+        <span className="text-sm font-semibold text-muted">{tr(`নতুন নোট ${bn(done)}/${bn(xuOnly.length)}`, `New notes ${done}/${xuOnly.length}`)}</span>
       </div>
       <p className="m-0 text-sm text-ink-soft">{tr('নতুন নোটে চলন্ত ছবি: request কোন পথে যায়, design কীভাবে বড় হয়, আর নিজে চালিয়ে দেখার মতো ছোট খেলা। বাকি অধ্যায়গুলো এখনো পুরোনো পাতায়, একে একে নতুন হচ্ছে।', 'The new notes have moving pictures: where a request goes, how a design grows, and small things to try yourself. The other chapters are still on the older pages, and are being rewritten one by one.')}</p>
       {(['xu1', 'xu2'] as const).map((book) => (
@@ -130,6 +132,19 @@ function XuChapters() {
           <div className="grid gap-2 sm:grid-cols-2">{xuChapters.filter((c) => c.book === book).map((c) => <ChapterLink key={c.id} c={c} />)}</div>
         </div>
       ))}
+    </section>
+  );
+}
+
+/** DDIA (2nd edition), chapter by chapter, in the same note style. */
+function DdiaChapters() {
+  const list = xuChapters.filter((c) => c.book === 'ddia2');
+  if (!list.length) return null;
+  return (
+    <section aria-labelledby="ddia-chapters" className="flex flex-col gap-3 rounded-[20px] border-[3px] border-ink bg-surface p-5">
+      <h2 id="ddia-chapters" className="m-0 font-display text-xl font-bold">{tr('Designing Data-Intensive Applications, অধ্যায় ধরে', 'Designing Data-Intensive Applications, chapter by chapter')}</h2>
+      <p className="m-0 text-sm text-ink-soft">{tr('২য় edition-এর ১৪টা অধ্যায়ের নোট: নিজের ভাষায়, চলন্ত ছবি আর "নিজেকে যাচাই" প্রশ্নসহ।', 'Notes on the 14 chapters of the 2nd edition, in our own words, with moving pictures and self-check questions.')}</p>
+      <div className="grid gap-2 sm:grid-cols-2">{list.map((c) => <ChapterLink key={c.id} c={c} />)}</div>
     </section>
   );
 }

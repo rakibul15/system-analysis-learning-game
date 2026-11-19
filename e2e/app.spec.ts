@@ -67,7 +67,7 @@ test('an unknown level shows the not-found page', async ({ page }) => {
 test('study: a note and a step-by-step timeline open', async ({ page }) => {
   await seed(page);
   await page.goto('./#/study');
-  await page.getByRole('link', { name: /Sharding/ }).first().click();
+  await page.locator('a[href$="#/notes/sharding"]').first().click();
   await expect(page).toHaveURL(/#\/notes\/sharding$/);
   await expect(page.getByRole('heading', { name: /hash % N-এর ফাঁদ/ })).toBeVisible();
   await page.goto('./#/study');

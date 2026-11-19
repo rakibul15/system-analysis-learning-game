@@ -26,7 +26,21 @@ import { note as v2_10 } from './v2-10';
 import { note as v2_11 } from './v2-11';
 import { note as v2_12 } from './v2-12';
 import { note as v2_13 } from './v2-13';
+import { note as d_1 } from './d-1';
+import { note as d_2 } from './d-2';
+import { note as d_3 } from './d-3';
+import { note as d_4 } from './d-4';
+import { note as d_5 } from './d-5';
+import { note as d_6 } from './d-6';
+import { note as d_7 } from './d-7';
+import { note as d_8 } from './d-8';
+import { note as d_9 } from './d-9';
+import { note as d_10 } from './d-10';
+import { note as d_11 } from './d-11';
+import { note as d_12 } from './d-12';
+import { note as d_13 } from './d-13';
+import { note as d_14 } from './d-14';
 import type { XuNote } from './types';
 
 /** Every written chapter note at once. For tests only; the app loads one when it opens (index.ts). */
-export const xuNotes: XuNote[] = [v1_1, v1_2, v1_3, v1_4, v1_5, v1_6, v1_7, v1_8, v1_9, v1_10, v1_11, v1_12, v1_13, v1_14, v1_15, v2_1, v2_2, v2_3, v2_4, v2_5, v2_6, v2_7, v2_8, v2_9, v2_10, v2_11, v2_12, v2_13];
+export const xuNotes: XuNote[] = [v1_1, v1_2, v1_3, v1_4, v1_5, v1_6, v1_7, v1_8, v1_9, v1_10, v1_11, v1_12, v1_13, v1_14, v1_15, v2_1, v2_2, v2_3, v2_4, v2_5, v2_6, v2_7, v2_8, v2_9, v2_10, v2_11, v2_12, v2_13, d_1, d_2, d_3, d_4, d_5, d_6, d_7, d_8, d_9, d_10, d_11, d_12, d_13, d_14];

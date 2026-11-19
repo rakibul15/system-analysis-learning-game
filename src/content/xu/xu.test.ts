@@ -32,6 +32,12 @@ describe('Alex Xu chapter notes', () => {
     for (const c of xuChapters) expect(BOOKS[c.book].chapters[c.chapter], c.id).toBeTruthy();
   });
 
+  it('DDIA 2nd edition: all 14 chapters have a note, numbered as in the book', () => {
+    const d = xuChapters.filter((c) => c.book === 'ddia2');
+    expect(d.map((c) => c.chapter)).toEqual(Array.from({ length: 14 }, (_, i) => i + 1));
+    for (const c of d) { expect(c.id).toBe(`d-${c.chapter}`); expect(c.load, c.id).toBeTruthy(); expect(BOOKS.ddia2.chapters[c.chapter], c.id).toBeTruthy(); }
+  });
+
   it('every written note is listed, and every listed loader has a note', () => {
     expect(xuNotes.map((n) => n.id).sort()).toEqual(xuChapters.filter((c) => c.load).map((c) => c.id).sort());
     for (const n of xuNotes) expect(xuById[n.id], n.id).toBeTruthy();

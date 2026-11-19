@@ -26,7 +26,7 @@ export function XuPage({ meta, note }: { meta: XuMeta; note: XuNote }) {
       <main className="mx-auto box-border flex max-w-[820px] flex-col gap-5 px-4 pb-14 pt-6 sm:px-8">
         <Link to="/study" className="self-start font-semibold text-route-deep">{tr('← পড়া', '← Study')}</Link>
         <section className="rounded-[22px] border-[3px] border-ink bg-surface p-5 shadow-block">
-          <p className="m-0 text-sm font-bold text-route-deep">Alex Xu · {vol(meta)} · {tr(`অধ্যায় ${bn(meta.chapter)}`, `Chapter ${meta.chapter}`)} <span className="font-normal text-muted">({BOOKS[meta.book].chapters[meta.chapter]})</span></p>
+          <p className="m-0 text-sm font-bold text-route-deep">{meta.book === 'ddia2' ? 'DDIA' : `Alex Xu · ${vol(meta)}`} · {tr(`অধ্যায় ${bn(meta.chapter)}`, `Chapter ${meta.chapter}`)} <span className="font-normal text-muted">({BOOKS[meta.book].chapters[meta.chapter]})</span></p>
           <h1 className="m-0 font-display text-[30px] font-extrabold leading-tight [text-wrap:balance]">{meta.title}</h1>
           <p className="m-0 mt-2 text-[17px] text-ink-soft">{meta.gist}</p>
           <div className="mt-3 rounded-xl bg-route-soft px-3 py-2">
