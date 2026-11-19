@@ -3,12 +3,12 @@ import { seed } from './helpers';
 
 /* Our notes on Alex Xu's chapters: the list, the moving pictures, and the things to try. */
 
-test('study lists both volumes by chapter: new notes open in the app, the rest on the older pages', async ({ page }) => {
+test('study lists both volumes by chapter, and every chapter opens its note in the app', async ({ page }) => {
   await seed(page);
   await page.goto('./#/study');
   const list = page.getByRole('region', { name: /Alex Xu-র দুই খণ্ড/ });
   await expect(list.getByRole('link')).toHaveCount(28);
-  await expect(list.getByRole('link', { name: /Consistent hashing/ })).toHaveAttribute('href', /#\/study\/p2$/);
+  await expect(list.getByRole('link', { name: /Consistent hashing/ })).toHaveAttribute('href', /#\/xu\/v1-5$/);
   await list.getByRole('link', { name: /Rate limiter/ }).click();
   await expect(page).toHaveURL(/#\/xu\/v1-4$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Rate limiter' })).toBeVisible();
@@ -55,4 +55,19 @@ test('chapter 4: the token bucket lets a burst through then says 429, and a fixe
   await expect(calc).toContainText('আটকাও: 429');
   await calc.getByRole('slider', { name: /এই মিনিটের কতটা গেছে/ }).fill('60');
   await expect(calc).toContainText('যেতে দাও');
+});
+
+test('all 28 chapters open: a title, pictures, a self-check, and nothing logged as an error', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
+  await seed(page);
+  const ids = [...Array.from({ length: 15 }, (_, i) => `v1-${i + 1}`), ...Array.from({ length: 13 }, (_, i) => `v2-${i + 1}`)];
+  for (const id of ids) {
+    await page.goto(`./#/xu/${id}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.getByRole('figure').first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'নিজেকে যাচাই' })).toBeVisible();
+  }
+  expect(errors).toEqual([]);
 });
