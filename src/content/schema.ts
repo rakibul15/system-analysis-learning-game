@@ -102,7 +102,7 @@ export type SimulatorId = (typeof SIMULATOR_IDS)[number];
 
 export const levelSchema = z
   .object({
-    id: z.number().int().min(1).max(34),
+    id: z.number().int().min(1).max(41),
     chapter: z.number().int().min(1).max(7),
     title: z.string().min(1),
     concept: z.string().min(1),

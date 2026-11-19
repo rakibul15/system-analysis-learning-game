@@ -27,7 +27,7 @@ const bank: Record<number, () => Promise<Record<number, LevelBank>>> = {
   1: () => import('./bank/ch1').then((m) => m.ch1Bank), 2: () => import('./bank/ch2').then((m) => m.ch2Bank),
   3: () => import('./bank/ch3').then((m) => m.ch3Bank), 4: () => import('./bank/ch4').then((m) => m.ch4Bank),
   5: () => import('./bank/ch5').then((m) => m.ch5Bank), 6: () => import('./bank/ch6').then((m) => m.ch6Bank),
-  7: () => import('./bank/ch7').then((m) => m.ch7Bank),
+  7: () => Promise.all([import('./bank/ch7'), import('./bank/ch7ddia')]).then(([a, b]) => ({ ...a.ch7Bank, ...b.ch7ddiaBank })),
 };
 
 const isLevel = (v: unknown): v is Level => typeof v === 'object' && v !== null && 'steps' in v && 'boss' in v;

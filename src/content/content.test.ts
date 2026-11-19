@@ -3,8 +3,8 @@ import { bnLevels, chapters, enLevels, levelList, questionsById } from './levels
 import { levelSchema, type Level } from './schema';
 
 describe('level content', () => {
-  it('has all 34 levels (30 + the bonus DDIA chapter), numbered in order', () => {
-    expect(levelList.map((l) => l.id)).toEqual(Array.from({ length: 34 }, (_, i) => i + 1));
+  it('has all 41 levels (30 + the bonus DDIA chapter), numbered in order', () => {
+    expect(levelList.map((l) => l.id)).toEqual(Array.from({ length: 41 }, (_, i) => i + 1));
   });
 
   it('every level passes the schema', () => {
