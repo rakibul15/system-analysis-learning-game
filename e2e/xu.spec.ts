@@ -15,6 +15,16 @@ test('study lists both volumes by chapter, and every chapter opens its note in t
   await expect(page.getByRole('link', { name: /খেলে দেখুন: Bot-এর বন্যা/ })).toBeVisible();
 });
 
+test('study lists the 14 DDIA chapters, and one opens its note', async ({ page }) => {
+  await seed(page);
+  await page.goto('./#/study');
+  const list = page.getByRole('region', { name: /Designing Data-Intensive Applications, অধ্যায় ধরে/ });
+  await expect(list.getByRole('link')).toHaveCount(14);
+  await list.getByRole('link', { name: /Replication/ }).click();
+  await expect(page).toHaveURL(/#\/xu\/d-6$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Replication' })).toBeVisible();
+});
+
 test('chapter 1: a request\'s journey plays step by step, and the design grows stage by stage', async ({ page }) => {
   await seed(page);
   await page.goto('./#/xu/v1-1');
@@ -57,12 +67,12 @@ test('chapter 4: the token bucket lets a burst through then says 429, and a fixe
   await expect(calc).toContainText('যেতে দাও');
 });
 
-test('all 28 chapters open: a title, pictures, a self-check, and nothing logged as an error', async ({ page }) => {
+test('all 42 chapters (Xu and DDIA) open: a title, pictures, a self-check, and nothing logged as an error', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
   await seed(page);
-  const ids = [...Array.from({ length: 15 }, (_, i) => `v1-${i + 1}`), ...Array.from({ length: 13 }, (_, i) => `v2-${i + 1}`)];
+  const ids = [...Array.from({ length: 15 }, (_, i) => `v1-${i + 1}`), ...Array.from({ length: 13 }, (_, i) => `v2-${i + 1}`), ...Array.from({ length: 14 }, (_, i) => `d-${i + 1}`)];
   for (const id of ids) {
     await page.goto(`./#/xu/${id}`);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
