@@ -110,6 +110,13 @@ export const levelRefs: Record<number, BookRef[]> = {
   32: [D(4, 'Data Storage for Analytics', 134, 144), D(4, 'Column-Oriented Storage', 136, 141), D(3, 'Stars and Snowflakes: Schemas for Analytics', 77, 79), D(12, 'Change Data Capture', 503, 507)],
   33: [D(5, 'Formats for Encoding Data', 163, 177), D(5, 'Modes of Dataflow', 178, 190), DC(5, 161, 196)],
   34: [D(10, 'Linearizability', 402, 416), D(10, 'Consensus', 425, 439), D(9, 'Distributed Locks and Leases', 373, 376), X2(12)],
+  35: [D(3, 'Graph-Like Data Models', 84, 100), D(3, 'Stars and Snowflakes: Schemas for Analytics', 77, 79), D(3, 'Event Sourcing and CQRS', 101, 104)],
+  36: [D(6, 'Single-Leader Replication', 198, 208), D(6, 'Problems with Replication Lag', 209, 214), D(6, 'Dealing with Conflicting Writes', 222, 228), D(6, 'Leaderless Replication', 229, 242)],
+  37: [D(7, 'Sharding by Key Range', 256, 257), D(7, 'Sharding by Hash of Key', 258, 262), D(7, 'Skewed Workloads and Relieving Hot Spots', 263, 263), D(7, 'Request Routing', 265, 267)],
+  38: [D(8, 'The Meaning of ACID', 279, 283), D(8, 'Preventing Lost Updates', 299, 302), D(8, 'Serializability', 308, 322), D(8, 'Distributed Transactions', 323, 334)],
+  39: [D(9, 'Faults and Partial Failures', 346, 346), D(9, 'Timeouts and Unbounded Delays', 352, 354), D(9, 'Unreliable Clocks', 358, 370), D(9, 'Distributed Locks and Leases', 373, 376)],
+  40: [D(11, 'Batch Processing in Distributed Systems', 457, 465), D(11, 'Batch Use Cases', 476, 480), D(11, 'Object Stores', 460, 460)],
+  41: [D(12, 'Change Data Capture', 503, 507), D(12, 'Log-Based Message Brokers', 495, 499), D(12, 'Reasoning About Time', 518, 522), D(12, 'Fault Tolerance', 526, 528)],
 };
 
 /** Incidents point at the section about their failure; otherwise they fall back to their level's refs. */
