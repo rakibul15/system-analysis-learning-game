@@ -36,9 +36,12 @@ test('chapter 4: the token bucket lets a burst through then says 429, and a fixe
   await seed(page);
   await page.goto('./#/xu/v1-4');
   const bucket = page.getByRole('figure').filter({ hasText: 'token bucket' });
-  for (let i = 0; i < 7; i++) await bucket.getByRole('button', { name: 'Request পাঠান' }).click();
-  await expect(bucket).toContainText(/পাস [৪৫]/);
-  await expect(bucket).toContainText(/আটকানো \(429\) [১-৩]/);
+  // the smallest bucket and the slowest refill, so even a slow machine's clicks outrun it
+  await bucket.getByRole('slider', { name: /Bucket-এর আকার/ }).fill('1');
+  await bucket.getByRole('slider', { name: /ভরার হার/ }).fill('0.5');
+  for (let i = 0; i < 5; i++) await bucket.getByRole('button', { name: 'Request পাঠান' }).click();
+  await expect(bucket).toContainText(/পাস [১-৪] · /);
+  await expect(bucket).toContainText(/আটকানো \(429\) [১-৪]/);
 
   const edge = page.getByRole('figure').filter({ hasText: 'ঘড়ির মিনিট ধরে গুনলে' });
   await edge.getByRole('button', { name: /সময় চালাও/ }).click();

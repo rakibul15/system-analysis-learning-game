@@ -2,6 +2,12 @@
 <html lang="bn">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // One address for the app. Google sign-in is allowed only on the address set up in Firebase, and
+      // progress and the offline copy are kept per address; the second Vercel project's address (the
+      // link on GitHub) sends everyone to the main one, keeping the screen they asked for.
+      if (location.hostname === 'system-analysis-learning-game.vercel.app') location.replace('https://parcelgo-system-design.vercel.app/' + location.hash);
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="icon" type="image/png" href="./icon-192.png" />
